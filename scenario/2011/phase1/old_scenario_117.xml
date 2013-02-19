@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+  
+  This file is part of tATAmI-PC.
+  
+  tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+  
+  tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<scen:scenario xmlns:kb="http://www.example.org/kbSchema" xmlns:scen="http://www.example.org/scenarioSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.example.org/scenarioSchema ../../config/scenarioSchema.xsd ">
+	<scen:initial>
+		<scen:container main="true" name="Administration">
+			<scen:agent name="University" type="Organization.UniversityAgent"></scen:agent>
+			<scen:agent name="Scheduler" type="Service.SchedulerAgent" parent="University"></scen:agent>
+			<scen:agent name="Course" type="Activity.CourseAgent" parent="University">
+				<scen:knowledge>
+					<kb:relation relationType="managesCourse">
+						<kb:node>Course</kb:node>
+						<kb:node>CSCourse</kb:node>
+					</kb:relation>
+					<kb:relation relationType="hasUser">
+						<kb:node>Course</kb:node>
+						<kb:node>AliceA</kb:node>
+					</kb:relation></scen:knowledge></scen:agent>
+			<scen:agent name="Feedback" type="Service.FeedbackAgent" parent="Course"></scen:agent>
+		</scen:container>
+		<scen:container main="false" name="Room">
+			<scen:agent name="Room" type="Place.RoomAgent" parent="University">
+				<scen:knowledge>
+					<kb:relation relationType="managesRoom">
+						<kb:node>Room</kb:node>
+						<kb:node>Room4</kb:node>
+					</kb:relation></scen:knowledge></scen:agent></scen:container>
+		<scen:container main="false" name="AlicePDA">
+			<scen:agent name="Alice" type="User.PDAAgent" parent="University">
+				<scen:knowledge>
+					<kb:relation relationType="assistsUser">
+						<kb:node>Alice</kb:node>
+						<kb:node>AliceA</kb:node>
+					</kb:relation></scen:knowledge></scen:agent></scen:container>
+	</scen:initial>
+	<scen:timeline>
+		<scen:event>
+			<scen:sendMessage>
+				<scen:to>Scheduler</scen:to>
+				<scen:message>newSchedule</scen:message>
+				<scen:content>
+					<kb:relation relationType="scheduledTo">
+						<kb:node>CSCourse</kb:node>
+						<kb:node>Room4</kb:node>
+					</kb:relation>
+					<kb:relation>
+						<kb:node>Schedule</kb:node>
+						<kb:node>CSCourse</kb:node>
+					</kb:relation>
+				</scen:content>
+			</scen:sendMessage></scen:event>
+	</scen:timeline>
+</scen:scenario>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scen:scenario xmlns:pr="http://www.example.org/parameterSchema" xmlns:kb="http://www.example.org/kbSchema" xmlns:scen="http://www.example.org/scenarioSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="scenarioSchema.xsd ">
+	<scen:jadeConfig isMain="true" mainContainerName="World"  />
+	<scen:adfPath>src/testing/eric/scenario/goal/agents_definition</scen:adfPath>
+	<scen:environment environmentPath="src/testing/eric/scenario/goal/environment.txt" operatorsPath="src/testing/eric/scenario/goal/operators.txt" />
+	<scen:initial>
+		<scen:container name="World">
+			<scen:CLAIMAgent name="BlocksAgent" type="BlocksAgent">
+				<scen:parameter>
+					<pr:param  name="goaldriven" value="true" />
+				</scen:parameter>
+			</scen:CLAIMAgent>
+		</scen:container>
+	</scen:initial>
+</scen:scenario>

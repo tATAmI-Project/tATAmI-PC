@@ -1,0 +1,85 @@
+(agent EmissaryAgent ?parent ?name
+	(behavior
+			
+		//start initial sequence number for opinion counter
+		//send message to PDA to register as his emissary
+		//save PDA in his knowledge base
+		(initial startclock
+			(addK (struct knowledge sequence 1))
+			(initOp ?initialOpPro)
+			(initOp ?initialOpcon)
+			(addK (struct knowledge allOpinionsPro ?initialOpPro))
+			(addK (struct knowledge allOpinionsCon ?initialOpcon))
+			(send ?parent (struct message register ?name))
+			(addK (struct knowledge masterPDAAgent ?parent)))
+	
+		//received from PDA, became child of a groupCoordonatorAgent,
+		//register as his child and send him all his opinions
+		(reactive joinGroup
+			(receive join ?groupCoordonatorAgent)
+			(in ?groupCoordonatorAgent)
+			(send ?parent (struct message register ?name)))
+		
+		//received from PDA, send to Group Coordonator to unregister
+		(reactive leaveGroup
+			(receive leaveGroup)
+			(send ?parent (struct message unregister ?name)))
+		
+		//received a new opinion from PDA, add a sequnce number to the opinion,
+		//save it to his knowledge base and send it to the Group Coordonator
+		(reactive addOpinion
+			(receive add ?opinionTag ?newOpinion)
+			(removeK (struct knowledge sequence ?opinionId))
+			(assembleOutput ?name ?opinionId ?newOpinion ?newCompleteOpinion)
+			
+//			(if (equalString ?opinionTag pro)
+//				then (removeK (struct knowledge allOpinionsPro ?allOpPro))
+//					(appendOp ?allOpPro ?newCompleteOpinion)
+//					(addK (struct knowledge allOpinionsPro ?allOpPro)))
+//			(if (equalString ?opinionTag con)
+//				then (removeK (struct knowledge allOpinionsCon ?allOpCon))
+//					(appendOp ?allOpCon ?newCompleteOpinion)
+//					(addK (struct knowledge allOpinionsCon ?allOpCon)))
+			(increment ?opinionId ?newOpinionId)
+			(addK (struct knowledge sequence ?newOpinionId))
+			(send ?parent (struct message opinion ?opinionTag ?newCompleteOpinion))
+		)
+		
+		//received from PDA, remove the opinion from his knowledge base
+		//send Group Coordonator message to clear the display and recollect all the opinions
+		(reactive deleteOpinion
+			(receive delete ?opinionId)
+		 	(removeK (struct knowledge allOpinionsPro ?allOpPro))
+		 	(removeK (struct knowledge allOpinionsCon ?allOpCon))
+			(deleteOpinionFunction ?allOpPro ?opinionId)
+			(deleteOpinionFunction ?allOpCon ?opinionId)
+			(addK (struct knowledge allOpinionsPro ?allOpPro))
+			(addK (struct knowledge allOpinionsCon ?allOpCon))
+			(send ?parent (struct message refresh)))
+		
+		//received from himself or from Group Coordonator
+		//send all the opinions to the Group Coordonator
+		(reactive sendAllOpinions
+			(receive sendAllOpinions)
+			(readK (struct knowledge allOpinionsPro ?allOpPro))
+			(readK (struct knowledge allOpinionsCon ?allOpCon))
+			(send ?parent (struct message opinion con ?allOpCon))
+			(send ?parent (struct message opinion pro ?allOpPro)))
+		
+		//received from Group Coordonator, send to PDA
+		(reactive refresh
+			(receive refresh)
+			(readK (struct knowledge masterPDAAgent ?masterPDAAgent))
+			(send ?masterPDAAgent (struct message clear)))
+		
+		//received a new opinion from Group Coordonator, send it to PDA
+		(reactive displayOpinion
+			(receive displayOpinion ?opinion ?opinionTag)
+			(readK (struct knowledge masterPDAAgent ?masterPDAAgent))
+			(send ?masterPDAAgent (struct message displayOpinion ?opinion ?opinionTag)))
+			
+		(reactive doneclear
+			(receive doneClear)
+			(send ?parent (struct message doneClear)))
+	)
+)

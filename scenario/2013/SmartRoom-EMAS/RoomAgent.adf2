@@ -1,0 +1,7 @@
+(agent Room ?roomName
+	(behavior
+		(initial register
+			(send parent (struct message managesRoom this ?roomName))
+		)
+	)
+)

@@ -1,0 +1,8 @@
+(agent World
+	(behavior
+		(reactive registerAgent
+			(receive hello_from ?newAgent)
+			(addK (struct knowledge say_hello_to ?newAgent this))
+		)
+	)
+)

@@ -1,0 +1,19 @@
+(agent Feedback ?parent
+	(behavior
+		(initial register
+			(send ?parent (struct message feedbackAgent this))
+		)
+		
+		(reactive collectFeedback
+			(receive collectFeedback ?userAgentName)
+			(in ?userAgentName)
+		)
+		
+		(reactive collection
+			(receive doCollecting)
+			(input text ?feedback)
+			(addK feedback ?feedback)	// feedback is anonymous
+			(in ?parent)// go back
+		)
+	)
+)

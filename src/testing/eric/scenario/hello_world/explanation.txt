@@ -1,0 +1,1 @@
+This scenario simulates a world with an hello agent that say hello to the world when it move in the world.

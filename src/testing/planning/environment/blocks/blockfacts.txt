@@ -1,0 +1,7 @@
+objects:
+Block (b1);
+Block (b2);
+Block (b3);
+Block (Table);
+
+init: ON (b1, Table) & ON (b2, Table) & ON (b3, Table) & Clear (b1) & Clear (b2) & Clear(b3) Clear (Table)

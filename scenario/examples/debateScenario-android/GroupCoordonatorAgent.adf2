@@ -1,0 +1,40 @@
+(agent GroupCoordonatorAgent
+	(behavior
+		
+		//received from Emissary
+		(reactive register
+			(receive register ?child)
+			(addK (struct knowledge children ?child))
+			(send this (struct message refresh)))
+		
+		//received from Emissary
+		(reactive unregister
+			(receive unregister ?child)
+			(removeK (struct knowledge children ?child))
+			(send this (struct message refresh)))
+	
+		//received from himself or from Emissary, 
+		//clear the display and recollect all the opinions
+		//send message to all the Emissarys 
+		(reactive refreshOpinions
+			(receive refresh)
+			(output clear)
+			(forAllK (struct knowledge children ?child)
+				(send ?child (struct message refresh))))
+		
+		//receive from one Emissary, display the opinion and send it to all the Emissarys
+		(reactive receiveOpinion
+			(receive opinion ?opinionTag ?output)
+			(if (equalString ?opinionTag pro)
+				then (output proOpinion ?output))
+			(if (equalString ?opinionTag con)
+				then (output conOpinion ?output))
+			(forAllK (struct knowledge children ?child)
+				(send ?child (struct message displayOpinion ?output ?opinionTag))))
+				
+		(reactive doneclear
+			(receive doneClear)
+			(forAllK (struct knowledge children ?child)
+				(send ?child (struct message sendAllOpinions))))
+	)
+)

@@ -1,0 +1,24 @@
+(agent Screen ?parent ?screenName ?isMainScreen
+	(behavior
+		(initial register
+			(send ?parent (struct message associatedWithScreen this ?screenName ?isMainScreen))
+		)
+		
+		(reactive showSlide
+			(receive show ?slide) //the slide could be an array of bytes corresponding to a picture, that will be shown on the screen
+			
+			(output slideName ?slide)
+		)
+		
+		//////////////// student activity
+		(reactive removeUser
+			(receive removeUser ?userAgentName)
+			(output opinionOutput ?userAgentName remove)
+		)
+		
+		(reactive showOpinion
+			(receive opinionList ?type ?userAgentName ?userOpinion)
+			(output opinionOutput ?userAgentName ?type ?userOpinion)
+		)
+	)
+)

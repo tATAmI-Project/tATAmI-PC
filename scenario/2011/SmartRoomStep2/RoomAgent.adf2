@@ -1,0 +1,25 @@
+(agent Room
+	(behavior
+			(initial StartWSN
+					(makeXACRequest ?request init)
+					(send null ?request http://localhost:8090)
+					(send this (struct message checkUsers))
+			)
+			
+			(reactive checkUsers
+					(receive checkUsers)
+					(wait 1000)
+					(makeXACRequest ?request check)
+					(send null ?request http://localhost:8090 ?response)
+					(processUserList ?response ?userList)
+					(count ?userList ?count)
+					(if (gteq ?count 1)
+					then
+						(makeRoomRequest ?request2 lecture)
+						(send null ?request2 http://localhost:8090)
+					else
+						(send this (struct message checkUsers))
+					)
+			)
+	)
+)

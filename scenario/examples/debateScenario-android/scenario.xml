@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+  
+  This file is part of tATAmI-PC.
+  
+  tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+  
+  tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<scen:scenario 
+    xmlns:pr="http://www.example.org/parameterSchema"
+	xmlns:kb="http://www.example.org/kbSchema" 
+	xmlns:scen="http://www.example.org/scenarioSchema"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.example.org/scenarioSchema ../../../config/scenarioSchema2.xsd ">
+	
+	<scen:jadeConfig isMain="true" />
+	<scen:adfPath>scenario/examples/debateScenario-android</scen:adfPath>
+	<scen:agentPackage>agent_packages.example.debate</scen:agentPackage>
+
+	<scen:initial>
+		<scen:container name="DebateGroup1Container">
+			<scen:agent>
+			    <scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="GroupCoordonatorAgent" />
+				<scen:parameter name="name" value="GroupCoordonator1" />
+				<scen:parameter name="java-code" value="DebateFunctions" />
+				<scen:parameter name="GUI" value="GroupCoordonatorAgentGui" />
+			</scen:agent>
+		</scen:container>
+		
+<!--  	<scen:container name="DebateGroup2Container" create="false">
+			<scen:agent>
+			    <scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="GroupCoordonatorAgent" />
+				<scen:parameter name="name" value="GroupCoordonator2" />
+				<scen:parameter name="java-code" value="DebateFunctions" />
+				<scen:parameter name="GUI" value="GroupCoordonatorAgentGui" />
+			</scen:agent>
+		</scen:container>
+-->  	
+		<scen:container name="PDAContainer-PC">
+			<scen:agent>
+			    <scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="PDAAgent" />
+				<scen:parameter name="name" value="PDA-PC" />
+				<scen:parameter name="java-code" value="DebateFunctions" />
+				<scen:parameter name="GUI" value="PDAAgentGui" />
+			</scen:agent>
+			<scen:agent>
+			    <scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="EmissaryAgent" />
+				<scen:parameter name="name" value="Emissary-PC" />
+				<scen:parameter name="parent" value="PDA-PC" />
+				<scen:parameter name="java-code" value="DebateFunctions" />
+				<scen:parameter name="GUI" value="EmissaryAgentGui" />
+			</scen:agent>
+		</scen:container>
+		
+		
+		<scen:container name="PDAContainer" create="false">
+			<scen:agent>
+			    <scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="PDAAgent" />
+				<scen:parameter name="name" value="PDA" />
+				<scen:parameter name="java-code" value="DebateFunctions" />
+			</scen:agent>
+			<scen:agent>
+			    <scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="EmissaryAgent" />
+				<scen:parameter name="name" value="Emissary" />
+				<scen:parameter name="parent" value="PDA" />
+				<scen:parameter name="java-code" value="DebateFunctions" />
+				<scen:parameter name="GUI" value="EmissaryAgentGui" />
+			</scen:agent>
+		</scen:container>
+<!--  		
+		<scen:container name="PDAContainer-1" create="false">
+			<scen:agent>
+			    <scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="PDAAgent" />
+				<scen:parameter name="name" value="PDA1" />
+				<scen:parameter name="java-code" value="DebateFunctions" />
+			</scen:agent>
+			<scen:agent>
+			    <scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="EmissaryAgent" />
+				<scen:parameter name="name" value="Emissary1" />
+				<scen:parameter name="parent" value="PDA1" />
+				<scen:parameter name="java-code" value="DebateFunctions" />
+				<scen:parameter name="GUI" value="EmissaryAgentGui" />
+			</scen:agent>
+		</scen:container>
+  	
+		<scen:container name="PDAContainer-2" create="false">
+			<scen:agent>
+			    <scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="PDAAgent" />
+				<scen:parameter name="name" value="PDA2" />
+				<scen:parameter name="java-code" value="DebateFunctions" />
+			</scen:agent>
+			<scen:agent>
+			    <scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="EmissaryAgent" />
+				<scen:parameter name="name" value="Emissary2" />
+				<scen:parameter name="parent" value="PDA2" />
+				<scen:parameter name="java-code" value="DebateFunctions" />
+				<scen:parameter name="GUI" value="EmissaryAgentGui" />
+			</scen:agent>
+		</scen:container>
+		
+		<scen:container name="PDAContainer-3" create="false">
+			<scen:agent>
+			    <scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="PDAAgent" />
+				<scen:parameter name="name" value="PDA3" />
+				<scen:parameter name="java-code" value="DebateFunctions" />
+			</scen:agent>
+			<scen:agent>
+			    <scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="EmissaryAgent" />
+				<scen:parameter name="name" value="Emissary3" />
+				<scen:parameter name="parent" value="PDA3" />
+				<scen:parameter name="java-code" value="DebateFunctions" />
+				<scen:parameter name="GUI" value="EmissaryAgentGui" />
+			</scen:agent>
+		</scen:container>
+-->		
+	</scen:initial>
+</scen:scenario>

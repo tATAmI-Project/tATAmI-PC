@@ -1,0 +1,7 @@
+(agent PDA ?userName ?parent
+	(behavior
+		(initial register
+			(send ?parent (struct message assistsUser this ?userName))
+		)
+	)
+)

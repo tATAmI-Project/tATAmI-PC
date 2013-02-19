@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="testing/tudor/|simulation/oldBoot.java|agent_packages/phase1/" kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="libs/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="libs/wsdc.jar"/>
+	<classpathentry kind="lib" path="libs/wsdl4j-1.5.1.jar"/>
+	<classpathentry kind="lib" path="libs/wsig.jar"/>
+	<classpathentry kind="lib" path="libs/jade.jar" sourcepath="libs/JADE-src-4.2.0.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/JADE-doc-4.2.0.zip!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -1,0 +1,34 @@
+#-------------------------------------------------------------------------------
+# Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+# 
+# This file is part of tATAmI-PC.
+# 
+# tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+# 
+# tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+Alice is a student in Computer Science. In the afternoon, she has a lecture on project
+management. Usually it is held in a classical amphitheater, but today she receives a message on her
+PDA that it will be held in a new laboratory in her university, called the SmartRoom. The message
+also contains indications on how to get there.
+
+She is a bit late and she is the last one of the 15 students to arrive. When all students are in the
+room, all lights go down automatically, the presentation screen turns on showing the first slide of
+today's lecture, and the teacher starts the presentation. There are microphones for each student in the
+room, as well as for the teacher, but only the teacher's microphone is on for the time of the
+presentation. Later, during the time for questions, the students' microphones get activated as well.
+
+Students are divided into a pros-group and a cons-group of a subject. For each group, pros/cons
+members do brainstorming about reasons why they agree or disagree with the subject. Students
+write opinions down on their PDAs. The opinion is tied to user information of person who wrote it.
+Then, a discussion will follow. During the discussion, opinions that people around the  table wrote 
+appear on the table display, to support  discussion. Finally, each group draws a conclusion, and
+presents it by using main display.
+
+At the end of the activities, the teacher passes by each group of students and evaluates their
+work, using an application on his PDA. After evaluation and comments, the students' work is saved, 
+and as they go back to their seats the screens turn off automatically. Before leaving, a message on 
+the students' PDAs asks them to give anonymous feedback on the lecture. After everybody leaves the 
+room, the lights go out all by themselves.

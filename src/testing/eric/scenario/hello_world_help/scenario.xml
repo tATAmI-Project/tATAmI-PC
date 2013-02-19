@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scen:scenario xmlns:pr="http://www.example.org/parameterSchema" xmlns:kb="http://www.example.org/kbSchema" xmlns:scen="http://www.example.org/scenarioSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.example.org/scenarioSchema ../../config/scenarioSchema.xsd ">
+	<scen:jadeConfig isMain="true" mainContainerName="Root" />
+	<scen:adfPath>src/testing/eric/scenario/hello_world_help/agents_definition</scen:adfPath>
+	<scen:agentPackage>testing.eric.scenario.hello_world_help.agent_package</scen:agentPackage>
+	<scen:initial>
+		<scen:container name="Root">
+			<scen:CLAIMAgent name="World" type="WorldAgent">
+				<scen:knowledge>
+					<kb:relation relationType="value_of">
+						<kb:node>pi</kb:node>
+						<kb:node>3.14</kb:node>
+					</kb:relation>
+				</scen:knowledge>
+				<scen:java-code>BooleanFunctions</scen:java-code>
+			</scen:CLAIMAgent>
+			<scen:CLAIMAgent name="HelloWorld" type="HelloWorldAgent">
+				<scen:parameter>
+					<pr:param name="parent" value="World" />
+				</scen:parameter>
+				<scen:java-code>BooleanFunctions</scen:java-code>
+				<scen:java-code>IOFunctions</scen:java-code>
+			</scen:CLAIMAgent>
+		</scen:container>
+	</scen:initial>
+	<scen:timeline>
+		<scen:event time="2000" >
+			<scen:CLAIMMessage>
+				<scen:to>HelloWorld</scen:to>
+				<scen:protocol>ask_parent_value_of</scen:protocol>
+				<scen:content>( struct message ask_parent_value_of pi )</scen:content>
+			</scen:CLAIMMessage>
+		</scen:event>
+	</scen:timeline>
+</scen:scenario>

@@ -1,0 +1,102 @@
+#-------------------------------------------------------------------------------
+# Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+# 
+# This file is part of tATAmI-PC.
+# 
+# tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+# 
+# tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+''This file should be in mediawiki syntax [[https://www.mediawiki.org/wiki/Help:Formatting]]''
+''Use <s> strikethroughs </s> for solved items
+
+In this file:
+* always number in order, keep the numbers of items (do not number automatically);
+* move solved issues, comments and bugs to the solved section, keeping the same number
+
+=============================================================================================================================================
+
+== Bugs - things that are expected to work and don't work as expected ==
+
+03. At the end of the simulation there are one or multiple logs remaining. someone does not close the log. it's either a parser or the windowlayout
+
+04. In the console the adf parsing result is shown multiple times. Why is that?
+
+05. Some agents connot move to Android containers; apparently a serialization error.
+
+06. The (in ) primitive does not seem to work in the Pro-Con scenario, when joining the second group.
+
+07. The GUI for the chat agents doesn't work as expected. It worked a few times OK, then it started to miss parts, like the send button.
+
+08. Some messages are in romanian
+
+09. When an agent moves to another container, an error of the form: [util.windowLayout.WindowLayout]:	 window not found [agent:CourseCSAgent] is received.
+
+10. When a CLAIMMessage event is generated, a message of the form "===== E R R O R !!! =======\\Missing support for Base64 conversions\\Please refer to the documentation for details."
+is received on my machine. Tudor
+
+=== solved ===
+
+01. <s>In scenario/phase2, in the distributed variant, Room should move to the RoomContainer (on the other machine) and doesn't.</s>
+
+02. <s>Boot only creates visualizer and Simulation if there is a mainContainerName in the scenario. If just isMain is set to true, its not enough because the two agents cannot be added to the main container, because the name is not known.</s>
+
+11. <s>Agents do not move ok between containers; the window title is wrong and sometimes the window is not created.</s>
+
+12. <s>An error is received in examples/simpleScenarioE that shouldn't be, related to re-affecting variable ?message.</s>
+
+
+=============================================================================================================================================
+
+== Issues - things that work as expected, but should work in a different way / be implemented differently ==
+
+01. Upon receipt, a message is only checked for matching protocol (first element in the message); should check for number of parameters and pattern matching
+
+02. Place the window of the Jade GUI to a location obtained through WindowLayout.
+
+03. CPU gets high up during the execution of a scenario (e.g. simpleScenarioE). Why?
+
+05. loader is not a default parameter of the agent. Nor this.
+
+06. A good way to specify the position of a certain error or warning by the parser.
+
+
+07. Think of a better way to signal the errors (for the moment, only a message that could be lost between tens others is shown, then the program continues the execution. For the parser a System.exit is used, but there may be a method to be used for all errors - if not, this one could be adopted for all kind of errors).
+
+08. The parsing of the agent class definition file is done each time for every agent of that class. It would be enough to do it once for each class. 
+
+09. The packages should all be children of something like com.tATAmI.
+
+10. Change messages relative to 'reaffectable' variables to 'reassignable' variables
+
+=== solved ===
+
+04. <s> Gui class does not get reset when an agent with the default gui moves between machines / platforms </s>
+
+
+=============================================================================================================================================
+
+== Comments - general comments and questions ==
+
+03. Maybe Boot's main() should be split in multiple functions.
+
+04. The symbol table of the agent should not be in the agent definition.
+
+05. The symbol table of the behavior should not be in the behavior definition.
+
+07. Is ok an agent to have null gui?(esp. if it is going to reside mainly on another platform / machine)
+
+09. For the moment "wait" was implemented to work as expected only at the end of one behavior. It should be modified in the future, in order to work for the other positions in the behavior too.
+
+
+=== solved ===
+
+01. <s>the Strings representing the names of the various agent parameters should really be put somewhere centralized.</s>
+
+02. <s>ClaimBehavior should be cleaned, made nicer, more readable, split on functions, solve warnings, etc.</s>
+
+06. <s>Decide whether variables can be re-bound or not.</s>
+
+08. <s>As S-CLAIM is based on ambient calculus and as ambient calculus support agent hierarchies, it would be a good idea to have a permanent agent variable (like "this") named "parent", set by default to null and not specified in the adf2 file, so that we could allow this variable to be changed, for example, when an agent uses the primitive "in".</s>

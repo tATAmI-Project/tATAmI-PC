@@ -1,0 +1,30 @@
+(agent University
+	(behavior
+		(reactive newScheduling
+			(receive (message scheduling ?courseName ?roomName))
+			(readK (struct knowledge courseAgent ?courseName ?agentName))
+			(send ?agentName (struct message scheduling ?courseName ?roomName))
+		)
+		
+		(reactive registerCourse
+			(receive (message managesCourse ?agentName ?courseName))
+			(addK (struct knowledge courseAgent ?courseName ?agentName))
+		)
+		
+		(reactive registerRoom
+			(receive (message managesRoom ?agentName ?roomName))
+			(addK (struct knowledge roomAgent ?roomName ?agentName))
+		)
+		
+		(reactive registerUser
+			(receive (message assistsUser ?agentName ?userName))
+			(addK (struct knowledge userAgent ?userName ?agentName))		
+		)
+		
+		(reactive answerRoomQuery
+			(receive (message whoManagesRoom ?replyTo ?roomName))
+			(readK (struct knowledge roomAgent ?roomName ?roomAgentName))
+			(send ?replyTo (struct message managesRoom ?roomAgentName ?roomName))
+		)
+	)
+)

@@ -1,0 +1,34 @@
+(agent UnitaryAgent ?name
+
+(behavior
+///////////////// code for the root agent
+	(reactive gather-root
+		(receive (message go-gather-root ?roamingAgent))
+		(condition (equalString ?name root))
+		(send ?roamingAgent (struct message go-gather-roaming))
+	)
+	
+	
+///////////////// code for roaming agent
+	(reactive gather-roaming-1
+		(receive (message go-gather-roaming))
+		(condition (equalString ?name roaming))
+		(send slave (struct message go-gather-slave))
+	)
+	
+	(reactive gather-roaming-2
+		(receive (message go-gather-roaming2 ?master))
+		(condition (equalString ?name roaming))
+		(in ?master)
+	)
+
+///////////////// code for slave agent
+	(reactive gather-slave
+		(receive (message go-gather-slave))
+		(condition (equalString ?name slave))
+		(readK (struct knowledge is masterAgent ?master))
+		(send parent (struct message go-gather-roaming2 ?master))
+	)
+
+)
+)

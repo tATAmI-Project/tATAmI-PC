@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+  
+  This file is part of tATAmI-PC.
+  
+  tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+  
+  tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<scen:scenario xmlns:pr="http://www.example.org/parameterSchema" xmlns:kb="http://www.example.org/kbSchema" xmlns:scen="http://www.example.org/scenarioSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.example.org/scenarioSchema ../../config/scenarioSchema.xsd ">
+	<scen:jadeConfig mainContainerName="Administration" IPaddress="127.0.0.1" port="1099" platformID="1" />
+	<scen:adfPath>scenario/phase2WS</scen:adfPath>
+	<scen:initial>
+		<scen:container name="Administration">
+			<scen:CLAIMAgent name="UniversityUPMCAgent" type="UniversityAgent"></scen:CLAIMAgent>
+			<scen:CLAIMAgent name="SchedulerUPMCAgent" type="SchedulerAgent">
+				<scen:parameter>
+					<pr:param name="parent" value="UniversityUPMCAgent" />
+				</scen:parameter>
+			</scen:CLAIMAgent>
+			
+			<scen:CLAIMAgent name="CourseCSAgent" type="_CourseAgent">
+				<scen:parameter>
+					<pr:param name="parent" value="UniversityUPMCAgent" />
+					<pr:param name="courseName" value="CSCourse" />
+				</scen:parameter>
+				<scen:knowledge>
+					<kb:relation relationType="managesCourse">
+						<kb:node>CourseCSAgent</kb:node>
+						<kb:node>CSCourse</kb:node>
+					</kb:relation>
+					<kb:relation relationType="hasUser">
+						<kb:node>CSCourse</kb:node>
+						<kb:node>Alice</kb:node>
+					</kb:relation></scen:knowledge>
+			</scen:CLAIMAgent>
+		</scen:container>
+
+		<scen:container name="RoomContainer">
+			<scen:CLAIMAgent name="Room04Agent" type="_RoomAgent">
+				<scen:parameter>
+					<pr:param name="parent" value="UniversityUPMCAgent" />
+					<pr:param name="roomName" value="Room04" />
+				</scen:parameter>
+			</scen:CLAIMAgent>
+		</scen:container>
+		<scen:container name="AliceContainer">
+			<scen:CLAIMAgent name="AliceAgent" type="PDAAgent">
+				<scen:parameter>
+					<pr:param name="parent" value="CourseCSAgent" />
+					<pr:param name="userName" value="Alice" />
+				</scen:parameter>
+				<scen:knowledge>
+					<kb:relation relationType="assistsUser">
+						<kb:node>AliceAgent</kb:node>
+						<kb:node>Alice</kb:node>
+					</kb:relation></scen:knowledge>
+			</scen:CLAIMAgent>
+		</scen:container>
+	</scen:initial>
+	<scen:timeline>
+		<scen:event time="2000" >
+			<scen:CLAIMMessage>
+				<scen:to>SchedulerUPMCAgent</scen:to>
+				<scen:protocol>newSchedule</scen:protocol>
+				<scen:content>( struct message newSchedule ( struct knowledge scheduledTo CSCourse Room04 ) )</scen:content>
+			</scen:CLAIMMessage></scen:event>
+	</scen:timeline>
+</scen:scenario>

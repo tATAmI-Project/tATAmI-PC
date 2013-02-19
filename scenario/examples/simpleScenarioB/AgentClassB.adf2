@@ -1,0 +1,8 @@
+(agent AgetnClassB ?myparameter
+	(behavior
+		(reactive echo
+			(receive (struct message echo ?message))
+			(send AgentA (struct message echoBack ?message ?myparameter))
+		)
+	)
+)

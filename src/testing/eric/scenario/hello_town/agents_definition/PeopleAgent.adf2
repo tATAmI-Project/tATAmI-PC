@@ -1,0 +1,11 @@
+(agent PeopleAgent ?parent
+	(behavior
+		(initial registerSelf
+			(send ?parent (struct message i_am_new_in_town this))
+		)
+		(reactive sayHello
+			(receive new_people_in_town ?agent)
+			(send ?agent (struct message hello_from this))
+		)
+	)
+)

@@ -1,0 +1,8 @@
+(agent HelloAgent ?parent
+	(behavior
+		(initial sayHello
+			(send ?parent (struct message hello_from this))
+			(out ?parent)
+		)
+	)
+)

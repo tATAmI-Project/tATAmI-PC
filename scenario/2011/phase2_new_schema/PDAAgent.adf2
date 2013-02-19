@@ -1,0 +1,27 @@
+(agent PDA ?userName
+	(behavior
+		(initial register
+			(send parent (struct message assistsUser ?userName))
+		)
+		
+		(reactive empty
+			(receive (message scheduling ?courseName ?roomAgentName))
+			(addK (struct knowledge roomAgent ?roomName ?roomAgentName))
+		)
+
+		(cyclic send_message_to_itself
+			(send this (struct message before_wait))
+			(wait 60000)
+			(send this (struct message after_wait "after \" wait
+			content"))
+		)
+		
+		(reactive empty1
+			(receive (message before_wait))
+		)
+
+		(reactive empty2
+			(receive (message after_wait ?afterWaitContent))
+		)
+	)
+)

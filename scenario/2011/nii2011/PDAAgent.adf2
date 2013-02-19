@@ -1,0 +1,62 @@
+(agent PDA ?userName ?parent
+	(behavior
+		/////////////////// initial
+		(initial register
+			(send ?parent (struct message assistsUser this ?userName))
+		)
+		
+		/////////////////// scheduling
+		(reactive roomChanged
+			(receive scheduling ?courseName ?roomName ?roomAgentName)
+			(addK (struct knowledge scheduling ?courseName ?roomName))
+			(send ?roomAgentName (struct message whatLocationHasTheRoom this))
+		)
+		
+		(reactive locationNewRoom
+			(receive hasLocation ?roomName ?campusName ?roomLocation)
+			(addK (struct knowledge isInCampus ?roomName ?campusName))
+			(addK (struct knowledge hasLocation ?roomName ?roomLocation))
+			(output outputField ?campusName)
+			(output outputField2 ?roomLocation)
+		)
+		
+		////////////////// student activity
+		(reactive assignActivity
+			(receive studentSide ?type)
+			(addK (struct knowledge opinionType ?type))
+		)
+		
+		(reactive writeOpinion
+			(input inputTextArea text ?opinion)
+			(addK (struct knowledge opinion ?opinion))
+			(readK (struct knowledge useScreen ?screenAgentName))
+			(readK (struct knowledge opinionType ?type))
+			(send ?screenAgentName (struct message opinionList ?type ?userName ?opinion))
+		)
+		
+		(reactive assignScreen	// will be periodically called by room via course
+			(receive screenAssigned ?screenAgentName)
+			(if (readK (struct knowledge useScreen ?oldscreenAgentName))
+			then
+				(if (isDifferent ?oldscreenAgentName ?screenAgentName) 
+				then
+					// get data off the old screen
+					(send ?oldscreenAgentName (struct message removeUser ?userName))
+					(removeK (struct knowledge useScreen ?oldScreenAgentName))
+					(in ?screenAgentName)
+					(addK (struct knowledge useScreen ?screenAgentName))
+					(readK (struct knowledge opinionType ?type))
+					(forAllK (struct knowledge opinion ?opinion)
+						(send ?screenAgentName (struct message opinionList ?type ?userName ?opinion))
+					)
+				)
+			else
+				(addK (struct knowledge useScreen ?screenAgentName))
+				(readK (struct knowledge opinionType ?type))
+				(forAllK (struct knowledge opinion ?opinion)
+					(send ?screenAgentName (struct message opinionList ?type ?userName ?opinion))
+				)
+			)
+		)
+	)
+)

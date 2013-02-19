@@ -1,0 +1,1 @@
+This scenario simulates a town with a mayor where people arrive. When a new person arrives in town, the mayor registers the person and notifies everybody else that a new person arrived. Then everybody say hello to the new person. 

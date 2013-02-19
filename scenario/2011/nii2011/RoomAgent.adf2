@@ -1,0 +1,122 @@
+(agent Room ?roomName ?parent
+	(behavior
+		
+		////////////////////////// initial	
+		(initial register
+			(send ?parent (struct message managesRoom this ?roomName))
+		)
+
+		(initial askForLocation
+			(send ?parent (struct message queryCampusName ?roomName this))
+			(send ?parent (struct message queryLocation ?roomName this))
+		)
+		
+		(reactive registerScreen
+			(receive associatedWithScreen ?agentName ?screenName ?isMainScreen)
+			(addK (struct knowledge screenAgent ?screenName ?agentName))
+			(send ?agentName (struct message show nothing))
+			(if (mainScreen ?isMainScreen)
+			then
+				(addK (struct knowledge mainScreen ?screenName))
+			)
+		)
+
+		////////////////////////// scheduling
+		(reactive scheduledCourseInform
+			(receive scheduledCourse ?courseName ?courseAgentName)
+			(addK (struct knowledge scheduledCourse ?courseName))
+			(if (not (readK (struct knowledge courseAgent ?courseName ?agentName)))
+			then
+				(addK (struct knowledge courseAgent ?courseName ?courseAgentName))
+			)
+		)
+		
+		(reactive getLocation
+			(receive yourLocation ?location)
+			(addK (struct knowledge myLocation ?location))
+		)
+		
+		(reactive getCampusName
+			(receive campusName ?campusName)
+			(addK (struct knowledge myCampus ?campusName))
+		)
+		
+		(reactive answerLocationQuery
+			(receive whatLocationHasTheRoom ?replyTo)
+			(readK (struct knowledge myCampus ?campusName))
+			(readK (struct knowledge myLocation ?roomLocation))
+			(send ?replyTo (struct message hasLocation ?roomName ?campusName ?roomLocation))
+		)
+		
+		(reactive courseStarts
+			(receive startCourse ?professorAgentName)
+			//Getting the agent associated with the main screen:
+			(readK (struct knowledge mainScreen ?screenName))
+			(readK (struct knowledge screenAgent ?screenName ?screenAgentName))
+			
+			//Inform professor about the screen:
+			(send ?professorAgentName (struct message permissionToUse ?screenAgentName))
+			
+			(makeRoomRequest ?request lecture)
+			(send null ?request http://localhost:8090)	// configure room
+		)
+
+		
+		//////////////////////// activate course start
+		
+		(initial StartWSN
+			(makeXACRequest ?request init)
+			(send null ?request http://localhost:8090)
+			(send this (struct message checkUsers))
+		)
+		
+		(reactive checkUsers
+			(receive checkUsers)
+			(wait 3000)
+			(makeXACRequest ?request check)
+			(send null ?request http://localhost:8090 ?response)
+			(processUserList ?response ?userList)
+			(if (readK (struct knowledge scheduledCourse ?courseName))
+			then
+				(readK (struct knowledge courseAgent ?courseName ?courseAgentName))
+				(send ?courseAgentName (struct message usersInRoom ?userList))
+			else
+				(send this (struct message checkUsers))
+			)
+		)
+		
+		///////////////// student activity
+		
+		(reactive studentActivityStart
+			(receive startStudentActivity)
+			
+			(makeRoomRequest ?request activities)
+			(send null ?request http://localhost:8090)	// configure room
+			
+			(send this (struct message checkUserLocations))
+		)
+		
+		(reactive checkUserLocations
+			(receive checkUserLocations)
+			(makeXACRequest ?request checkLocations)	// FIXME unimplemented; Andrei will implement this
+			(send null ?request http://localhost:8090 ?response)
+			
+			(processStudentsInLocations ?response ?output)// to define exact names
+			
+			(readK (struct knowledge scheduledCourse ?courseName))
+			(readK (struct knowledge courseAgent ?courseName ?courseAgentName))
+			(send ?courseAgentName (struct message studentLocations ?output))
+			
+			(wait 5000)
+			(send this (struct message checkUserLocations))
+		)
+
+		////////////// course ending
+		(reactive courseEnds
+			(receive theCourseIsOver)
+			
+			(makeRoomRequest ?request shutdown)
+			(send null ?request http://localhost:8090)	// configure room
+		)
+	)
+)

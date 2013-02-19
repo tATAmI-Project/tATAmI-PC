@@ -1,0 +1,76 @@
+#-------------------------------------------------------------------------------
+# Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+# 
+# This file is part of tATAmI-PC.
+# 
+# tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+# 
+# tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+=== 1. FIRST RULE === 
+
+Use comments. All comments, strings, and identifiers should be written in English (United States). Spellcheck your comments and strings (Eclipse Preferences -> General -> Editors -> Spelling). 
+
+===  2. NAMING AND DOCUMENTING === 
+
+For classes and class members (functions or objects) use JavaDoc [1]. A quick tutorial here [2] or just search Google.
+
+Also, respect the the Java Naming Conventions [5]: lower case package names, upper CamelCase class/interface names, lower CamelCase method/field names, upper case constant names. 
+ 
+=== 3. FORMATTING === 
+
+Learn to use the automatic formatter in Eclipse so that you can quickly reformat the source according to your preferences.
+
+Don't mind if other people's sources are formatted differently, just reformat it as you want. 
+
+Conversely, write only code that can be autoformatted by Eclipse. Don't manually remove whitespace or blank lines. 
+
+=== 4. COMMITS === 
+
+Always comment when committing. Just say what small or big changes you have done. Spellcheck your comments.
+
+Add the comments to the [[changelog-PC]], and to the commit message.
+
+It would be best if one commit should correspond to one bug / one issue / one thing to do. Commit often.  
+
+=== 5. LIBRARIES === 
+
+Do place all necessary libraries in the repository, in the /lib folder, so that in Eclipse's build path editor they are added with 'Add JAR' (not with 'Add External JAR').
+
+The rule of thumb is no external JARs. 
+
+=== 6. UPDATE BEFORE COMMIT === 
+
+Always update/pull before commit/push. 
+
+=== 7. CONSTANTS === 
+
+If you define a constant (anything that is a fixed string, number, etc) define it in a single place across all sources, as high (i.e. towards the beginning of the file) in the code as possible in the context where you define it (e.g. just after the class definition).
+
+Final constants are best constants. 
+
+=== 8. USE ENUMS === 
+
+Whenever you need to define types for something, use enums (see [3]). Not number constants, not string constants. 
+
+=== 9. WARNINGS AND TAGS === 
+
+Do resolve all warnings in your code. Warnings are just like errors, but they don't stop you from executing. They still must be solved.
+
+Learn to use // TODO: and // FIXME: They also appear in the Tasks view and in the scrollbar. Also, remove auto-completed TODOs once they are no more needed.
+
+In Eclipse, activate ALL warnings, except for "Unqualified access", "Non-externalized strings", "missing default case", and check all boxes, except for "Signal even if default case exists", "Include constructor and setter method parameters" and the last three.  
+
+=== 10. ACCESS QUALIFIERS ===
+
+Make appropriate use of public, protected and private (see [4]) - not all members should be public. Don't make member objects public. Also be careful with static and final. 
+
+
+
+[1] http://en.wikipedia.org/wiki/Javadoc<br/>
+[2] http://research.cs.queensu.ca/home/cisc124/2001f/Javadoc.html<br/>
+[3] http://download.oracle.com/javase/tutorial/java/javaOO/enum.html<br/>
+[4] http://download.oracle.com/javase/tutorial/java/javaOO/accesscontrol.html<br/>
+[5] http://java.about.com/od/javasyntax/a/nameconventions.htm<br/>

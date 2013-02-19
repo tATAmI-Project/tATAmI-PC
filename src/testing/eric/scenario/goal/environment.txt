@@ -1,0 +1,8 @@
+objects:
+Block (b1);
+Block (b2);
+Block (Table);
+
+init: ON(b2,Table) & ON(b1,Table) & Clear(b2) & Clear (b1) & Clear (Table)
+
+goal: ON(b2,b1)

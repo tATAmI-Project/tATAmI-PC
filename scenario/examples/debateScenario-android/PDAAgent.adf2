@@ -1,0 +1,45 @@
+(agent PDAAgent
+	(behavior
+	
+		//received from his child
+		(reactive register
+			(receive register ?emissary)
+			(addK (struct knowledge emissary ?emissary)))
+			
+		//received from GUI, send his emissary to register to a group (PC),
+		//the emissary will no longer be his child 
+		(reactive joinGroup
+			(input join tip ?groupCoordonatorAgent)
+			(readK (struct knowledge emissary ?emissary))
+			(send ?emissary (struct message leaveGroup))
+			(send ?emissary (struct message join ?groupCoordonatorAgent)))
+				
+		//received from GUI, send opinion to his emissary (who is bound to a discussion group)
+		(reactive addOpinion
+			(input add tip ?tag ?opinion)
+			(readK (struct knowledge emissary ?emissary))
+			(send ?emissary (struct message add ?tag ?opinion)))
+		
+		//received from GUI, send instruction to his emissary
+		(reactive deleteOpinion
+			(input delete tip ?id)
+			(readK (struct knowledge emissary ?emissary))
+			(send ?emissary (struct message delete ?id)))
+		
+		//received from his emissary, send instruction to GUI, to clear the two screens
+		(reactive clearOutput
+			(receive clear)
+			(output clear)
+			(readK (struct knowledge emissary ?emissary))
+			(send ?emissary (struct message doneClear)))
+		
+		//received from his emissary, 
+		//send instruction to GUI, to display the opinion on one of the screens
+		(reactive displayOpinion
+			(receive displayOpinion ?opinion ?opinionTag)
+			(if (equalString ?opinionTag pro)
+				then (output proOpinion ?opinion))
+			(if (equalString ?opinionTag con)
+				then (output conOpinion ?opinion)))
+	)
+)

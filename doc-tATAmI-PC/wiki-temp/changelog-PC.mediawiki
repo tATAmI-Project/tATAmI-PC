@@ -1,0 +1,384 @@
+#-------------------------------------------------------------------------------
+# Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+# 
+# This file is part of tATAmI-PC.
+# 
+# tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+# 
+# tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+= The changelog =
+
+''This file should be in mediawiki syntax [[https://www.mediawiki.org/wiki/Help:Formatting]]''<br/>
+
+''there are templates for new commits at the end of the file''
+
+
+==== 17.01.2013 Merge & repair (andreiolaru & Tudor Benea) ====
+* Merged repair_android into master
+* Fixed a bug with knowledge management; removed System.out calls from Log.
+
+
+==== 15.12.2012-16.01.2013/repair-android - (andreiolaru & Tudor Benea) ====
+* completed repairing Android part
+** Some minor modifications of the test scenario
+** Introduced a wrapper for the Java Logger.
+** Added a distributed version of simpleScenarioE.
+** The GUI is now created for the agents using ClassLoader directly (similar for PC and Android).
+** AgentGuiConfig was repaired in order to use good paths for the GUIs on Android too.
+** fixed simpleScenarioE (by cherry picking commit c68d6bf)
+** simpleScenarioE was implemented, adapted and finished to work on both Android and PC.
+** Added some UML diagrams of agent layers (built using the ObjectAid plugin).
+
+==== 13.12.2012 Fixed javadoc generator (andreiolaru) ====
+* Fixed the javadoc generator so that all packages in core, simulation and util are considered.
+
+==== 13.12.2012 fix-knowledge-representation/fixing simpleScenarioE (andreiolaru) ====
+* small modifications in ClaimBehavior regarding transformation of variables into values (see readValues and flattenContructs).
+* (initially thought there is a problem with Java code calling and forAllK, related to simpleScenarioE)
+* fixed simpleScenarioE
+* will merge the branch into master after some more testing. 
+
+==== 06.12.2012 fix-knowledge-representation/Abstracting the knowledge base (andreiolaru) ====
+* abstracted the knowledge base (see core.interfaces and core.kb)
+* excluded agent_packages.phase1 from the build path as they were not compatible with the new knowledge management mechanism and they were obsolete anyway.
+* simpleScenarioE breaks because of forAllK; will check.
+
+==== 06.12.2012/repair-android Finished restructuring PC project (andreiolaru) ====
+* finished fixes and restructuring of classes for a good import on Android;
+* on PC: tested local example scenarios (except D); they work well (except for bugs 11 and 12)
+* on Android: there are no errors after import;
+* notable changes:
+** Log loads the corresponding Logger implementation dynamically
+** WSAgent's implementation is loaded dynamically (currently it is never loaded)
+* to remain consistent with the Android classes, the project is to be compiled with Java 1.6.
+
+==== 05.12.2012 Partially abstracting the knowledge base (andreiolaru) ====
+* partially abstracted the knowledge base using interface core.interfaces.KnowledgeBase, implemented by core.kb.simple.SimpleKB
+* it is not yet correctly implemented with respect to the calls in BaseAgent and ClaimBehavior 
+
+==== 05.12.2012/repair-android Restructuring and checking PC project (andreiolaru) ====
+* cherry picked commit [09e683c] to fix scenarios.
+* some more restructuring (esp visualization classes)
+* fixes
+* tested local example scenarios (except D); they work well (except for bugs 11 and 12)
+
+==== 04.12.2012 Fixed example scenarios (andreiolaru) ====
+* fixed the older example scenarios and added some bugs that need to be solved
+** replaced the old receive statement with the new one using (struct message
+** introduced reassignable variables
+
+==== 04.12.2012/fixPC-import Restructured PC project (andreiolaru) ====
+* restructured packages and fixed inherent errors; not yet tested
+
+==== 29.11.2012/fix-PC-import Some renames and reorganization (andreiolaru) ====
+* small fixes in various classes
+
+==== 29.11.2012 Some renames and reorganization (andreiolaru) ====
+* reorganized Ant XMLs in output/
+* enabled javadoc warnings
+* added some information to the project
+
+==== 23.11.2012 Various organizational project changes (andreiolaru) ====
+* changes to the last changelog
+** wrapped the lines in the changelog for easier reading in Eclipse.
+** corrected dokuwiki syntax according to the header of this file
+** corrected un/affectable to un/assignable
+* fixed gitignore file.
+* created exporter and importer Ant XMLs.
+* removed old build.xml and externalToolBuilders files
+
+
+==== 11.22.2012 (New version of the project) (Tudor Benea) ====
+* New version of the project, obtained by merging the old versions separately developed at LIP6 and at UPB. The changes made at LIP6 (after 20.06.2012) that are included, in addition to the changes previously specified in this changelog, are (in chronological order):
+** The project from UPB, in its version of June 20 2012, was modified to include the changes made at LIP6 in 2012, before that date.
+** Feature to automatically create, using ant, a jar of the project (including the libraries used by it), in order to easily integrate the changes in other projects;
+** Implemented new (although it's in beta, for the moment - it works for some particular cases); Later, after this implementation, new was modified not always to take as argument "core.claim.ClaimAgent". However, it still needs further implementation - it will need a way to parse an adf file in order to obtain a CAD that will permit the newly created agent to have the desired S-CLAIM agent class
+** Integrated the modifications done by Alex & Gerard to the parser in the input files for jflex and byacc/j, in order to be able to generate again the parser while keeping the changes;
+** Introduced while, of the form:
+<code>
+ (while "Java function" or "readK primitive"    	-- the Java functions should be able to return an adequate
+                                                  boolean value. The loop will stop when "false" is returned
+ 		list of statements
+ )
+</code>
+later, it was modified so in order to accept as condition only Java functions. The support for readK was removed, as this could be done more simple by forAllK;
+** Introduced the concept of multi-line string literals, as a second version of S-CLAIM constants, of the form:
+<code>
+     "this \" is a string literal"
+		or of the form: "this is \
+						another string \" literal"
+</code>
+** The "Proposition" construct used by the proactive behaviors, which was a particular case of string literals, was removed; 
+** The goal primitives were modified in order to work with the new version of string literals;
+** A new type of behavior was implemented, named Cyclic. It is similar to the Initial behavior, with the difference that it loops infinitely.
+** A new version of Wait was implemented. It was better than the previous one, because it blocked only the given behavior, not the whole agent. It could be used with the Cyclic behavior defined above in order to create a behavior similar to JADE's ticker behavior, if put at the end. For that moment it was the only rational position to put it, because when waking up, behaviors executed again, from the beginning. A better version, that considers the left statements was later implemented and is specified below.
+** Introduced the concept of assignable variables. They have the form ??variable. The other variables, of the form ?variable, are not assignable, so, if they were bound once, their value can't change - a error will be returned and the value will remain unchanged. Initially ??variable and ?variable were seen as different variables, so someone should have referred each one with the appropriate number of question marks. Later, this way in which the assignable / unassignable variables were managed was changed. In the current version, it isn't possible to have two such variables, one for each kind, that have the same name, as opposed to the original design. An error will be returned by the parser, before execution, if there are variables, in the same scope, with the same name and different marks.
+** Modified versions of send and receive so that they could accept message structures of both the (struct message field_list) and (message field_list) forms. The intermediate representation of both these structures is the same as for a normal structure and they have the first field set to "message";
+** The message structure of "receive" got a similar form as in the case of send and it could have as first argument, which is optional, a variable where the name of the sender is stored; Obs: The modifications for the WebServices functionality of S-CLAIM, from the point of view of the forms of send and receive are to be done!
+** Created a test scenario for the new scenario schema, adapted the chat scenario to the modifications of S-CLAIM;
+** forAllK was adapted to be able to modify only the values of the assignable variables;
+** The parent keyword was added, to denote the variable with the same name. It is not mandatory to declare this variable in the agent parameter list anymore (actually, declaring it will do nothing, because the variable exists always as a parameter of the agent). When a value is not declared in the scenario XML file, it will be set to null, so the respective agent is the agent in the top of an hierarchy (the root). Also, it is always an assignable variable. So each appearance of it of the form ?parent will return an error. The forms "??parent" and "parent" are equivalent. A similar fact is valid for "this". It is never assignable. The forms "this" and "?this" are equivalent;
+** Modified "in" that also changes the value of the agent parameter "parent", made mandatory previously;
+** The way in which the behaviors run was modified, in order for them to be able to be stopped during the execution, if a certain primitive like wait or acid is found. The statements of a behavior are not treated anymore as batches, in one single call of Jade's action() method for behaviors, but each handle of one statement corresponds to one separate call to action().
+** A basic version of acid was implemented - though, it needs further implementation;
+** A basic version of open was implemented - though, it needs further implementation;
+** An observation made in the comment of the commit made in this period was that the version available at that moment was stabilized and tested as followed:
+*** the assignable variables management module was fixed and made available to all primitives
+*** the cyclic behaviors worked as expected
+*** the wait primitive worked as expected, even if only at the end of the behavior, at that moment
+*** the string multiple-lines string literals worked as expected
+*** while worked as expected
+*** the send-like receive worked as expected. Also, the optional "sender" arguments worked
+** Wait was made able to continue from the next top level statement of the behavior that it stops. It will, however, finish all the statements after it that are sub-statements of the same top level statement as it/the call to wait;
+** Integrated the newest version of JADE in the project (JADE 4.2, released on June 26, 2012);
+** Repaired Boot so that it manages correctly the parameters used to start Jade;
+** The project was modified to function with the new feature of S-CLAIM Android that allows to specify a particular activity for each agent, in the scenario. There should be one class with the specified name on each platform used by the system, in a folder suggestive to the platform name at the resources path of the application (i.e. PC for Java running computers and ANDROID for mobile devices). An example to show how this feature works was created. See: scenario/2011/phase2-android/scenario_new_schema.xml;
+*** Additionally, during this period, some other minor bugs were fixed in order to make the platform more stable, some new issues, that need future attention, were highlighted, some changes were made in the structure of the project, or some other test cases were built.
+* The repository was reorganized in order to make the new version of the project available for the other members of the team to use it and to modify it and also to keep track of all the efforts made for this project before.
+
+''All the following logs concern the version made at UPB of tATAmI for PC''
+
+==== 15.09.2012 (andreiolaru) ====
+
+* pushed some issues and bugs.
+
+
+==== 07.07.2012 (log resetting) (andreiolaru) ====
+
+* added the resetLogging() function in Log.java.
+* should be used with caution!
+
+
+==== 04.07.2012 (add a new scenario) (Miruna Popescu) ====
+
+* add a new scenario in scenario/example/debateScenario-android
+* the scenario uses 3 agents PDAAgent stays on Android platform, Emissary moves from smartphone to PC, GroupCoordonator stays on PC
+* add GroupCoordonatorAgent and PDAAgent specific gui  
+
+==== 06.27.2012 (parent variable changes when changing parent) (andreiolaru) ====
+
+* small adjustment in ClaimBehavior to modify the ?parent variable (if any) when the agent executes an (in )
+* checked it on simpleScenarioC, by uncommenting the log.trace at the end of ClaimBehavior.handleIn()
+
+==== 06.27.2012 ( Android doOutput, receiveInput) (Moscalenco Iulia) ====
+
+* Messages are received in both directions.(Android <-> PC)
+** ClaimAgent, resetVisualization
+** AgentGuiActivity, small changes
+
+
+==== 06.18.2012 ( Android doOutput, ConnectInput) (Moscalenco Iulia) ====
+
+* updated ClaimBehavior, all gui classes are casted to AgentGui
+* AgentGui for Android Class were renamed in AgentGuiActivity, small changes in Gui representation(added a new Text area for log)
+* Android gui opens before agent starts 
+* DoOutput works
+  
+==== 09.06.2012 simpleScenarioE complete (andreiolaru) ====
+
+* completed scenario E, it works.
+* more fixes in ClaimBehavior
+* updated BootSettings with settings appropriate for scenarioE
+
+
+==== 06.09.2012 ( Android participants menu ) (Moscalenco Iulia) ====
+
+* Each agent contains a menu that will display participants
+* Added new menu for ChatActivity
+* TODO get list of agents from container
+	
+
+==== 06.09.2012 ( Android GUI ) (Moscalenco Iulia) ====
+
+* New Gui for ManagerActivity,( using previous settings menu)
+* rearranged code in AgentGui, PlatformUtils, VisualizableAgent
+
+
+==== 08.06.2012 ScenarioE partial (andreiolaru) =====
+
+* Fixed most comments and some other issues (in ClaimBehavior).
+  
+* preparing some changes in symbol table management
+* implemented the input part of the ScenarioE (simple chat)
+* input works ok
+* if any errors appear, let me know.
+
+
+==== 08.06.2012 Claim Behavior rewrite (WORK IN PROGRESS) (andreiolaru) ====
+
+* WORK STILL IN PROGRESS
+  
+* Rewritten ClaimBehavior in a great measure, making code clearer and easier to use
+* Duplicate code in ClaimBehavior mostly eliminated
+* Code not yet commented and comments are incoherent with the code
+* in principle there are no errors (on scenarios A-D), but that's left to further check
+ 
+* ScenarioE written, but not yet tested
+* Modified classpath to link the JADE sources and doc (already in the project)
+* Improved the .gitignore files.
+
+
+==== 03.06.2012 ( Android ) (Moscalenco Iulia) ====
+
+* Small changes in AgentGui and PlatformUtils
+* Added new Classes :
+** AndroidJadeInterface implements JadeInterface. This class is responsible for ConectToPlatform, CreateAgent, StartPlatform in Android.
+** ChatActivity extends Activity implements AgentGui =>  All agents that run on Android will have this gui class.<br/>
+=> AgentGui.java will inspect platform and returns the org.gui.ChatActivity for Android Platform. TODO: default_package and defacult_gui_class
+** At this moment an agent that moves from PC to Android platform will get ChatActivity as gui class. I'm trying to instantiate this Activity.(TODO)
+ 
+
+===== 29.05.2012 agentGui, input and output (andreiolaru) =====
+
+* adapted AgentGui
+* the getComponent() function was left only in PCDefaultAgentGui, and deprecated
+* added the InputListener interface (in AgentGui)
+* eliminated errors in various agent classes using the getComponent() function, but they are not yet adapted to use AgentGui in a proper manner 
+* decoupled the Log from the TextArea, by means of the DisplayEntity interface (in Log)
+* created the Log2AgentGui class, that should interface between the log and the agent gui
+* created the TextAreaLogDisplay, that implements DisplayEntity, in order to eliminate errors in test classes. Should not be used in the main classes of the project!
+* adapted VisualizableAgent to use Log2AgentGui, implemented the appropriate code in PCDefaultAgentGui.doOutput()
+
+
+==== 27.05.2012 (PlatformUtils, logWrapper for Android, Android GUI) (Moscalenco Iulia) ====
+
+* Changed package name and main class name in tATAmI-Android
+* added new Activities:
+** SettingsActivity : input for host and port
+** ChatActivity : must be a agent interface //TODO
+* util.platformUtils.PlatformUtils  detects platform in  tATAmI-PC
+* Implemented a log wrapper for Android -> util.logging.JadeLogWrapper => must be tested if it gets class name
+* PlatformUtils returns org.gui.ChatActivity for Android jadeInterfaceClass //TODO 
+* Steps to run application : 
+** run tATAmI-PC
+** run tATAmI-Android
+** press menu , add port and host, press use
+** add a name, press send
+  
+
+==== 09.05.2012 running previous example on emulator (Moscalenco Iulia) ====
+
+* Requirements : 
+** Android sdk 2.3.3 
+** adb in Path
+** Computer -> right click Properties -> Advanced system settings -> Advanced -> Environment Variables ->add in Path where adb.exe is located (example: C:\Program Files\Android\android-sdk\platform-tools)
+	
+* After emulator is started :
+** run run.bat in the project and type emulator's port
+** If project is running on phone not necessary to forward port/run run.bat
+** IP configuration : res->values->strings.xml->main_ip
+** Linked tATAmI-PC project to tATAmI-Android 
+** Changed tATAmI-PC lib folder in libs
+
+
+==== 03.05.2012 replacing the split container creation with a full container (mirunapopescu89) ====
+
+* ExempluAcivity creates now a full container on Android device instead of a slip one
+* this version supports only running the application on a real device
+* running on emulator doesn't work because of the -local-host parameter
+* separated the configuration parameters to be easily modified => res/strings.xml
+
+
+===== 02.05.2012 small fixes (andreiolaru) ===== 
+
+* fixed small error in SimulationAgent;
+* refactored GuiPlatform to Platform;
+
+
+===== 30.04-02.05.2012 android project (iulia, miruna) =====
+
+(in romanian; chronological:)
+
+* Am adaugat exemplul de jade pe Android al Mirunei pentru a face un fisier de configurare care sa porneasca si serverul si clientul. Inca nu am daugat Serverul.
+* Am adaugat libraria Android3.2 astfel incat sa se pastreze in proiect
+* resolving compiling errors
+* added simple scenario
+* link-ing tatami-pc project 
+* Versiunea de dsk  de la 3.2 si >> accepta fisierele .jar sa fie intr-un folder libs (De 2 zile nu reuseam sa rulez aplicatia, pana nu am redenumit folderul)
+
+
+===== 29.04.2012 package reorganizing and component isolation (andreiolaru) =====
+
+* promoted visualization to the status of core package, as it contains an essential part of the system, as well as the VisualizableAgent layer
+* promoted the webServices package to core, for the same reasons
+* added an argument to the primary form of log.getLogger()
+* wrapped the log4j logger; there is still need to check if the wrapping has been correctly and completely done
+* wrapped the agent GUIs:
+** all GUIs implement AgentGui;
+** for each platform there is a XXXDefaultAgentGui, replace XXX with the platform (see AgentGui.GuiType); placed in core.visualization
+** specific agent GUIs extend the default and are placed in package agentPackagesPackage.gui.XXX, replace XXX with platform name (lower case)
+* created the BaseAgent class as a layer below VisualizableAgent; it will manage agent parameters and knowledge base;
+* all agent parameter names are now registered in ParametrizedAgent;
+* input and output constructs probably don't work any more;
+* AbstractHierarchicalAgent is not abstract anymore, name changed;
+
+  * also fixed multiple warnings in files modified by the Logger wrapping.
+  * removed BootTestWithAndroid and MobileAgent as they were neither useful nor used.
+  * removed Tudor's testing package as it had many errors due to recent changes.
+  
+  * only checked this commit against simpleScenarioC. There may be many more bugs. Please signal them.
+  * also verified the simpleScenarioC in a distributed context (files not kept) and issue #1 is resolved.
+
+
+
+
+===== 18.04.2012 (fixes to previous commit) (andreiolaru) =====
+
+
+fixes:
+* initialization of SimulationAgent using the new parameter organization (AgentParameters)
+* enabled the extraction of the protocol for simulation claim messages from the content (in SimulationAgent, class SimulationTimerTask)
+* moved the parsing of Claim files and locating the adfs and java attachments into a static function in ClaimAgent, it will be called at system start (instead of after Create Agents)
+* added graph to knowledge in AbstractHierarchicalAgent
+* small fix in TextGraphRepresentation.readRepresentation()
+* small fix in ClaimBehavior for knowledge reading
+  
+other:
+* added simpleScenarioB, see its information.txt for details.
+* added simpleScenarioC, see its information.txt for details.
+
+
+===== 17.04.2012 (boot and params) (andreiolaru) =====
+
+Trying to fix bug #1; issue probably fixed, didn't check yet.
+
+Why it happens: people who worked on goal-driven agents add parameters to the parameter array of the agent, therefore the location that the agent should move to gets to be parameter 6 instead of 4.
+
+Underlying problem: the parameter mechanism is crappy, there are both name->value parameters and the array items, and nobody knows which layer of the stack (Visualizable/Hierarchical/etc) uses which parameters.
+
+Fix principle: all parameters have a name (String) and a value (String). Then each layer does whatever it wants with them.
+To help with knowing which layer uses which parameters, the layers offer a function saying what parameters they need.
+Since I am fixing this, I'm also eliminating differences between different types of agents (non-CLAIM, CLAIM, goal-driven CLAIM, etc) in the processing in Boot.  
+
+significant changes:
+* changed the parameters mechanism for sending the creation parameters to the agent. on the simple schenario it appears to work, however it is not fully verified and I don't think all the solutions were good. It might still be slightly adjusted, but the general idea is there.
+* scenario (the new scenario schema is scnanrioSchema2.xml):
+** in the scenario there is only one type of element for an agent: the "agent" element
+** an agent only contains "parameter" elements
+** a parameter contains two Strings: a name and a value
+** the scenario, parameter and kb schemas will not be needed any more, they are kept only for backwards compatibility
+* the old Boot becomes oldBoot, for backwards compatibility 
+* restructured the scenario folder a bit, put pahse1 package in agent_packages.
+
+smaller fixes:
+* clear and comment simulation/Boot.java
+* changed the logging tag in Boot to "boot" => it will now show up in the log as "[boot]".
+* added simulation/BootSettings.java which contains all custom settings you might want. Use comments to hide other people's settings.
+
+===== 17.04.2012 (graph representation) (andreiolaru) =====
+
+* moved all graph representation-related classes to the representation package
+* slight modifications in loggin.Unit and related changes in other files (graphical, testing, and graph packages)
+* warning fixes throughout the graph package
+  
+* added reading feature to the text graph representation, so it can read graphs from a linear representation\\ (the reverse of representing the graph)
+ 
+
+  
+==== ..2013 - (Tudor Benea) ====
+==== ..2013 - (andreiolaru) ====
+* template
+** subitem

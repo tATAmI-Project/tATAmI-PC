@@ -1,0 +1,13 @@
+(agent Student ?userName
+	(behavior
+		(initial register
+			(send parent (struct message assistsUser ?userName))
+		)
+		
+		(reactive courseScheduling
+			(receive (message scheduling ?courseName ?roomName ?roomAgentName))
+			(addK (struct knowledge scheduling ?courseName ?roomName))
+			(addK (struct knowledge roomAgent ?roomName ?roomAgentName))
+		)
+	)
+)

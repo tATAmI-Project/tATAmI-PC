@@ -1,0 +1,22 @@
+#-------------------------------------------------------------------------------
+# Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+# 
+# This file is part of tATAmI-PC.
+# 
+# tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+# 
+# tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+operator: Move (Block ?obj, Block ?from, Block ?to)
+?obj != ?from & ?obj != ?to & ?from != ?to & ?to != @Table
+[ON (?obj, ?from) & Clear (?obj) & Clear (?to)]
+[ON (?obj, ?to) & Clear (?from)]
+[ON (?obj, ?from) & Clear (?to)]
+
+operator: MoveToTable (Block ?obj, Block ?from)
+?obj != ?from & ?obj != @Table & ?from != @Table
+[Clear (?obj) & ON (?obj, ?from)]
+[ON (?obj, @Table) & Clear (?from)]
+[ON (?obj, ?from)]

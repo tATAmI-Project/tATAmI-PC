@@ -1,0 +1,18 @@
+(agent World
+	(behavior
+		(reactive hello_from
+			(receive hello_from ?child_agent)
+			(addK (struct knowledge is_child this ?child_agent))
+		)
+		(reactive ask_value_of
+			(receive ask_value_of ?key ?sender)
+			(condition (readK (struct knowledge value_of ?key_name ?value)))
+			(forAllK (struct knowledge value_of ?key_name ?value)
+				(if (not (isDifferent ?key ?key_name))
+				then
+					(send ?sender (struct message answer_value_of ?key ?value))
+				)
+			)
+		)
+	)
+)

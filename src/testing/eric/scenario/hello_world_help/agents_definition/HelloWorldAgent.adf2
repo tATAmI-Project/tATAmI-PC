@@ -1,0 +1,20 @@
+(agent HelloWorld ?parent
+	(behavior
+		(initial register_parent
+			(addK (struct knowledge is_parent ?parent this))
+			(send ?parent (struct message hello_from this))
+		)
+		(reactive ask_parent_value_of
+			(receive ask_parent_value_of ?key)
+			(condition (readK (struct knowledge is_parent ?parent_name ?agent_name)))
+			(forAllK (struct knowledge is_parent ?parent_name ?agent_name)
+				(send ?parent_name (struct message ask_value_of ?key this))
+			)
+		)
+		(reactive answer_value_of
+			(receive answer_value_of ?key ?value)
+			(addK (struct knowledge value_of ?key ?value))
+			(echo value_of ?key is ?value)
+		)
+	)
+)

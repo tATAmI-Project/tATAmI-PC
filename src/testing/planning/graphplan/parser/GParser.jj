@@ -1,0 +1,288 @@
+
+// My First attempt to write a parser 
+// for GraphPlan algorithm
+// Date: 03/16/2004
+
+/*
+options {
+  // MULTI=true; used with JJTree
+
+  // LOOKAHEAD = 2;
+}
+*/
+
+PARSER_BEGIN(GParser)
+
+package parser;
+
+import graphplan.*;
+import java.util.*;
+
+public class GParser {
+
+  public static void main(String args[]) throws ParseException {
+    GParser parser = null ;
+    if (args.length == 0) {
+      System.out.println("GParser Version 0.1:  Reading from standard input . . .");
+      parser = new GParser(System.in);
+    } else {
+      System.out.println("GParser Version 0.1:  Reading from file " + args[0] + " . . .");
+      try {
+        parser = new GParser(new java.io.FileInputStream(args[0]));
+      } catch (java.io.FileNotFoundException e) {
+        System.out.println("GParser Version 0.1:  File " + args[0] + " not found.");
+        return;
+      }
+    } 
+
+     // start the parser
+	    
+     parser.OpFile();
+     System.out.println("GParser Version 0.1: Ops File Parsed Successfuly");
+
+     // parse the facts file
+     try {
+        parser.ReInit(new java.io.FileInputStream(args[1]));
+      } catch (java.io.FileNotFoundException e) {
+        System.out.println("GParser Version 0.1:  File " + args[1] + " not found.");
+        return;
+      }
+	parser.FactFile();
+      System.out.println("GParser Version 0.1: Facts File Parsed Successfuly");
+
+  }
+
+}
+
+PARSER_END(GParser)
+
+SKIP :
+{
+  " "
+| "\t"
+|"\n" 
+| "\r" 
+| "\r\n"
+}
+
+TOKEN :
+{
+  <DIGIT: ["0"-"9"]>
+| <NUMBER: (["0"-"9"])+>			//TODO: update this token 
+| <LETTER: ["A"-"Z"] | ["a"-"z"]>
+| <ROP: "==" | "!=">
+| <AND: "&">
+| <TRUE: "true">
+| <LITERAL: <LETTER> (<LETTER> | <DIGIT>)* >
+| <VARIABLE: ("?" | "@") <LITERAL> >
+}
+
+String Term():
+{}
+{
+ <VARIABLE>  { return getToken(0).image; } 
+ | <NUMBER>  { return getToken(0).image; }
+}
+
+Expression Expr():
+{String left;	
+ String right;
+ Token op;
+ Expression e;
+}
+{
+  left = Term() op= <ROP> right = Term()  {return new Expression (left, op.image, right);}
+| <TRUE> { return null; }
+}
+
+TParaList ParaList():
+{
+ Vector types = new Vector();
+ Vector vars = new Vector();
+ Token t;
+}
+{
+ t = <LITERAL> {types.addElement(t.image);}
+ t = <VARIABLE> {vars.addElement(t.image);}
+ (","  t = <LITERAL> {types.addElement(t.image);} t = <VARIABLE> {vars.addElement(t.image);})* 
+ { return new TParaList (types, vars); }
+}
+
+Vector ParaCond(): 
+{Vector cond = new Vector();
+ Expression e;
+}
+{
+ e = Expr() 
+{ if (e != null)
+	cond.addElement(e);
+  else
+	return null;	// null vector means "true"
+}
+ (<AND> e = Expr() {cond.addElement(e);} )* 
+ {return cond;}
+}
+
+String VarList():
+{
+ Token t;
+ String vl = new String();
+}
+{
+ t = <VARIABLE>  {vl += t.image; }
+("," <VARIABLE> { vl += "," + getToken(0).image; })*
+ { return vl; }
+}
+
+String Proposition():
+{
+ Token t;
+ String pro = new String();
+ String temp = new String();
+}
+{
+ t = <LITERAL>   { pro += t.image + "("; }
+"(" (temp = VarList())? ")" 
+ { return (pro + temp + ")" ); }
+}
+
+Vector Conjunction():		// vector of propositions
+{
+ String cnj = new String();
+ String temp = new String();
+ Vector v = new Vector();
+}
+{
+ "[" cnj = Proposition() {v.addElement(cnj);}
+  (<AND> cnj = Proposition() {v.addElement(cnj);})* "]" { return v;}
+ | <TRUE>  { return null;}
+}
+
+TOpHead OpHead():
+{ 
+ Token t;
+ String name;
+ TParaList pl = null;
+}
+{
+ t= <LITERAL> {name = t.image;} "(" (pl = ParaList())? ")" 
+ {return new TOpHead(name, pl);}
+}
+
+TOperator Operator():
+{
+ TOpHead head;
+ Vector cond;	
+ Vector pre;
+ Vector add;
+ Vector del;
+}
+{
+ "operator:" 
+ head = OpHead()  
+ cond = ParaCond() 
+ pre = Conjunction() 
+ add = Conjunction() 
+ del = Conjunction()  
+{ return new TOperator (head, cond, pre, add, del);}
+}
+
+TOperatorSet OpFile ():
+{
+ TOperator op;
+ TOperatorSet ops = new TOperatorSet();
+}
+{
+ ( op = Operator() {ops.addOperator(op);})+
+ { return ops;}
+}
+
+////////////////////  Parsing the Facts File //////////////////////////////
+
+ObjectSet Objects():
+{
+ ObjectSet os;
+}
+{
+ "objects:" 
+ os = ObjList() 
+ {return os;}
+}
+
+ObjectSet ObjList():
+{
+ ObjectSet os = new ObjectSet();
+ Token type;
+ Token name;
+}
+{
+ ( type = <LITERAL> 
+   "(" 
+   name = <LITERAL> 
+   ")" ";" 
+   {os.addObject(new Pair(type.image, name.image));} )+  //TODO: the parser didn't see "A" as a LITERAL
+ {return os;}
+}
+
+Conjunction InitState():
+{
+ Conjunction cnj = new Conjunction();
+}
+{
+ "init:" 
+ cnj = IConjunction()
+ {return cnj;}
+}
+
+Conjunction IConjunction():
+{
+ Conjunction cnj = new Conjunction();
+ String temp;
+ 
+}
+{
+ temp = IProposition() {cnj.addLiteral(temp);}
+(<AND> temp = IProposition() {cnj.addLiteral (temp);})*
+{return cnj;}
+}
+
+String IProposition():
+{
+ Token t;
+ String s;
+ String temp = new String();
+}
+{
+ t = <LITERAL> {s = t.image + "("; } 
+ "(" 
+(temp = DList())? 
+ ")"
+ {s += temp + ")"; return s; }
+}
+
+String DList():
+{
+ Token t;
+ String s;
+}
+{
+ t = <LITERAL>  { s = t.image; }
+ ("," t = <LITERAL> {{ s += "," + t.image; }})*
+ {return s;}
+}
+
+Conjunction Goal():
+{
+ Conjunction cnj = new Conjunction();
+}
+{
+ "goal:" 
+ cnj = IConjunction()
+ {return cnj;}
+}
+
+void FactFile():
+{}
+{
+ Objects() InitState() Goal()
+}

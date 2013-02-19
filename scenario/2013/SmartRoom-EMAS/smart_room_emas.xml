@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+  
+  This file is part of tATAmI-PC.
+  
+  tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+  
+  tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<scen:scenario xmlns:pr="http://www.example.org/parameterSchema" xmlns:kb="http://www.example.org/kbSchema" xmlns:scen="http://www.example.org/scenarioSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.example.org/scenarioSchema ../../config/scenarioSchema.xsd ">
+	
+	<scen:jadeConfig mainContainerName="Administration" platformID="SmartRoom" />
+	<scen:adfPath>scenario/2013/SmartRoom-EMAS</scen:adfPath>
+	<scen:agentPackage>agent_packages.example.smartRoom</scen:agentPackage>
+		
+	<scen:initial>
+		<scen:container name="Administration">
+			<scen:agent>
+				<scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="UniversityAgent" />
+				<scen:parameter name="name" value="UniversityUPMCAgent" />
+			</scen:agent>
+			<scen:agent>
+				<scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="SchedulerAgent" />
+				<scen:parameter name="name" value="SchedulerUPMCAgent" />
+				<scen:parameter name="parent" value="UniversityUPMCAgent" />
+			</scen:agent>
+			<scen:agent>
+				<scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="CourseAgent" />
+				<scen:parameter name="name" value="MASCourseAgent" />
+				<scen:parameter name="parent" value="UniversityUPMCAgent" />
+				<scen:parameter name="courseName" value="CSCourse" />
+			</scen:agent>
+		</scen:container>
+
+		<scen:container name="RoomContainer">
+			<scen:agent>
+				<scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="RoomAgent" />
+				<scen:parameter name="name" value="Room04Agent" />
+				<scen:parameter name="parent" value="UniversityUPMCAgent" />
+				<scen:parameter name="roomName" value="Room04" />
+			</scen:agent>
+		</scen:container>
+		<scen:container name="AliceContainer" create="false">
+			<scen:agent>
+				<scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="StudentAgent" />
+				<scen:parameter name="name" value="AliceAgent" />
+				<scen:parameter name="parent" value="MASCourseAgent" />
+				<scen:parameter name="userName" value="Alice" />
+				<scen:parameter name="fixed" value="true" />
+				<scen:parameter name="GUI" value="UserAgentGUI" />
+			</scen:agent>
+		</scen:container>
+		<scen:container name="CarolContainer" create="false">
+			<scen:agent>
+				<scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="StudentAgent" />
+				<scen:parameter name="name" value="CarolAgent" />
+				<scen:parameter name="parent" value="MASCourseAgent" />
+				<scen:parameter name="userName" value="Carol" />
+				<scen:parameter name="GUI" value="UserAgentGUI" />
+			</scen:agent>
+		</scen:container>
+				<scen:container name="BobContainer">
+			<scen:agent>
+				<scen:parameter name="loader" value="adf2" />
+				<scen:parameter name="class" value="StudentAgent" />
+				<scen:parameter name="name" value="BobAgent" />
+				<scen:parameter name="parent" value="MASCourseAgent" />
+				<scen:parameter name="userName" value="Bob" />
+				<scen:parameter name="GUI" value="UserAgentGUI" />
+			</scen:agent>
+		</scen:container>
+	</scen:initial>
+	<scen:timeline>
+		<scen:event time="2000" >
+			<scen:CLAIMMessage>
+				<scen:to>SchedulerUPMCAgent</scen:to>
+				<scen:protocol>newSchedule</scen:protocol>
+				<scen:content>
+				    ( struct message newSchedule ( struct knowledge scheduledTo CSCourse Room04 ) )
+				</scen:content>
+			</scen:CLAIMMessage></scen:event>
+	</scen:timeline>
+</scen:scenario>

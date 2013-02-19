@@ -1,0 +1,20 @@
+(agent ChildAgent ?parent
+	(behavior
+		(initial linkparent 
+			(in ?parent)
+			(send ?parent (struct message Register this))
+		)
+		
+		(reactive moveToNeighbor
+			(receive moveToNeighbor (struct knowledge Neighbor ?name) )
+			(in ?name)
+			(out ?parent)
+		)
+		
+		(reactive register
+			(receive Register ?name)
+			(addK (struct knowledge parent ?name) )
+			(send ?parent (struct message Register ?this) )
+		)
+	)
+)

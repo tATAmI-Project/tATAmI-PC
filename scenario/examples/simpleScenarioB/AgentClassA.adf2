@@ -1,0 +1,12 @@
+(agent AgentClassA
+	(behavior
+		(reactive activate
+			(receive (struct message activationMessage ?message))
+			(send AgentB (struct message echo ?message))
+		)
+		
+		(reactive rcv
+			(receive (struct message echoBack ?oldMessage ?parameter))
+		)
+	)
+)

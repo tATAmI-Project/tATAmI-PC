@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scen:scenario xmlns:pr="http://www.example.org/parameterSchema" xmlns:kb="http://www.example.org/kbSchema" xmlns:scen="http://www.example.org/scenarioSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.example.org/scenarioSchema ../../config/scenarioSchema.xsd ">
+	<scen:jadeConfig isMain="true" mainContainerName="Town" />
+	<scen:adfPath>src/testing/eric/scenario/hello_town/agents_definition</scen:adfPath>
+	<scen:initial>
+		<scen:container name="Town">
+			<scen:CLAIMAgent name="John" type="MayorAgent"></scen:CLAIMAgent>
+			<scen:CLAIMAgent name="William" type="PeopleAgent">
+				<scen:parameter>
+					<pr:param name="parent" value="John" />
+				</scen:parameter>
+			</scen:CLAIMAgent>
+			<scen:CLAIMAgent name="Annie" type="PeopleAgent">
+				<scen:parameter>
+					<pr:param name="parent" value="John" />
+				</scen:parameter>
+			</scen:CLAIMAgent>
+			<scen:CLAIMAgent name="Françis" type="PeopleAgent">
+				<scen:parameter>
+					<pr:param name="parent" value="John" />
+				</scen:parameter>
+			</scen:CLAIMAgent>
+			<scen:CLAIMAgent name="Stephany" type="PeopleAgent">
+				<scen:parameter>
+					<pr:param name="parent" value="John" />
+				</scen:parameter>
+			</scen:CLAIMAgent>
+		</scen:container>
+	</scen:initial>
+</scen:scenario>

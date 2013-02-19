@@ -1,0 +1,8 @@
+(agent BlocksAgent ?courseName ?parent
+	(behavior
+		(proactive goalBase
+			(aGoal name 1 achieve "ON(b2,b1)" "ON(b3,b2)")
+			(mGoal name 3 maintain "ON(b3,Table)") 
+		)
+	)
+)

@@ -1,0 +1,23 @@
+#-------------------------------------------------------------------------------
+# Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+# 
+# This file is part of tATAmI-PC.
+# 
+# tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+# 
+# tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+digraph G {
+	"Alice" -> "Train #1691" [label="is-in"];
+	"CS Course Attendance" -> "Schedule" [label="part-of"];
+	"CS Course Attendance" -> "Campus" [label="is-in"];
+	"Alice" -> "CS Course Attendance" [label="part-of"];
+	"Train Ride" -> "Campus" [label="to"];
+	"CS Course Attendance" -> "14 16" [label="within"];
+	"Train Ride" -> "Schedule" [label="part-of"];
+	"Train Ride" -> "Train #1691" [label="on"];
+	"14 16" -> "Time Interval" [label="isa"];
+	"Schedule" -> "Alice" [label="of"];
+}

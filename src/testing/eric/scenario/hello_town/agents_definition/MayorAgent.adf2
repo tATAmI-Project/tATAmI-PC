@@ -1,0 +1,11 @@
+(agent Mayor
+	(behavior
+		(reactive registerAgent
+			(receive i_am_new_in_town ?newAgent)
+			(forAllK (struct knowledge new_people_in_town ?parent ?agent)
+				(send ?agent (struct message new_people_in_town ?newAgent))
+			)
+			(addK (struct knowledge new_people_in_town this ?newAgent))
+		)
+	)
+)

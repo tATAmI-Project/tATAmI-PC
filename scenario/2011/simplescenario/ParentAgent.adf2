@@ -1,0 +1,8 @@
+(agent ParentAgent
+	(behavior
+		(reactive register
+			(receive Register ?name)
+			(addK (struct knowledge child ?name) )
+		)
+	)
+)

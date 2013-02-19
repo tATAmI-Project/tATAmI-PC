@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+  
+  This file is part of tATAmI-PC.
+  
+  tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+  
+  tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<project name="tATAmI-PC-core" default="core-export" basedir="../">
+<!-- This file is supposed to build a jar that works on the Android platform -->
+	
+	<property name="packages" value="core,simulation,util" />
+	<property name="project-name" value="${ant.project.name}" />
+	<property name="doc-access-level" value="private" />
+	<property name="java-version" value="1.7" />
+
+
+	<import file="javadoc.xml" />
+
+	<target name="pack-core">
+		<jar destfile="output/${project-name}.jar">
+			<fileset dir="bin" includes="core/,util/" />
+			<fileset dir="."
+			         includes="src/,doc-${project-name}/,info-${project-name}/"
+			/>
+			<zipgroupfileset dir="." includes="lib/" />
+		</jar>
+	</target>
+
+	<target name="core-export" depends="javadoc,pack-core" />
+
+</project>

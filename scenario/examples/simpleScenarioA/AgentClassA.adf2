@@ -1,0 +1,11 @@
+(agent AgentClassA
+	(behavior
+		(initial register
+			(send AgentB (struct message echo))
+		)
+		
+		(reactive rcv
+			(receive (struct message echoBack))
+		)
+	)
+)

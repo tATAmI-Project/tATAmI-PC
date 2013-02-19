@@ -1,0 +1,19 @@
+(agent Room ?roomName ?parent
+	(behavior
+		(initial register
+			(send ?parent (struct message managesRoom this ?roomName))
+		)
+		
+		// testing correct selection of WS-accessed behavior
+		(reactive someOtherService
+			(receive someOtherService information)
+			(wait 1)
+		)
+		
+		// testing web services
+		(reactive displayService
+			(receive displayService ?echo)
+			(send (struct message displaying ?echo))
+		)
+	)
+)

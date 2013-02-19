@@ -1,0 +1,11 @@
+operator: Move (Block ?obj, Block ?from, Block ?to)
+?obj != ?from & ?obj != ?to & ?from != ?to & ?to != @Table
+[ON (?obj, ?from) & Clear (?obj) & Clear (?to)]
+[ON (?obj, ?to) & Clear (?from)]
+[ON (?obj, ?from) & Clear (?to)]
+
+operator: MoveToTable (Block ?obj, Block ?from)
+?obj != ?from & ?obj != @Table & ?from != @Table
+[Clear (?obj) & ON (?obj, ?from)]
+[ON (?obj, @Table) & Clear (?from)]
+[ON (?obj, ?from)]

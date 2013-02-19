@@ -1,0 +1,178 @@
+#-------------------------------------------------------------------------------
+# Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+# 
+# This file is part of tATAmI-PC.
+# 
+# tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+# 
+# tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
+<!-- READ THIS: in order to work with this file better you should probably install the Mylyn Eclipse plugin (which includes WikiText). -->
+
+
+This file lists things that need to be done in the project, in the future.
+
+In this file:
+* Structure all comments based on the ProjectStructure diagram (except for elements related to project structure, which should be in the appropriate section in [[#Maintainance]].
+* Mark all solved items like <s>this</s>
+
+
+<hr/>
+
+
+
+= Core / agent =
+
+* exlopre the idea to break the agent into components, so that the various components don't depend that much on one another (i.e. don't use class inheritance)
+
+
+== Cognitive agent ==
+
+* isolate this component (make it separate from BaseAgent)
+* implement graph knowledge base, work with graph patterns
+
+
+== CLAIM agent ==
+
+* move the S-CLAIM parser out of src-core
+* redesign the symbol table and agent/behavior definitions so that agents can use the same definition but will not whare the same symbol table
+* break ClaimBehavior into multiple classes
+
+* create an Eclipse plugin to help with .adf editing
+
+
+
+== Web Services agent ==
+
+* test and repair the functionality of WSAgent
+* make work invokation of web services on the Android platform
+* design a mechanism for easy deployment of agents as web services (+ documentation)
+
+
+
+== Hierarchical agent ==
+
+* completely review the behaviors related to hierarchical movement
+* implement advanced hierarchical relations (multiple parents, etc)
+
+
+== Visualizable agent ==
+
+* design and implement automatic GUI generation
+* support no GUI
+* rework Log, include net.xqhs.util.Logging
+
+<hr/>
+
+
+
+= Simulation =
+
+* Split Boot.main() into multiple functions?
+
+
+<hr/>
+
+
+
+= Visualization =
+
+
+== Window Layout ==
+
+* solve window layout errors
+* improve window layout to be more flexible automatically
+* include window layout information in scenarios
+* include the JADE window in the window layout
+
+
+== Visualization agent ==
+
+* improve display of agent hierarchies
+
+
+<hr/>
+
+
+= Maintainance =
+
+
+== Project strucure ==
+
+* restrucure:
+** put scenarios, adf files and agent_packages in a new source directory (e.g. src-scenarios), if possible (this way java functions are in the same place with adf code
+** put all components that are ignored when copying src-core to other platforms outside of src-core
+** use help from UML diagrams to structure classes as to minimise dependencies among them
+
+
+== Issue / Bug tracking ==
+
+* put all issues and bugs (from issues-bugs-comments) in the the issue tracker, when the issue tracker will exist
+* put all comments (from issues-bugs-comments) in this file 
+
+
+== Testing ==
+
+* build 'unit test' scenarios (much like simpleScenarioX), that test individual features completely
+
+
+<hr/>
+
+
+= Documentation =
+
+
+== Javadoc ==
+
+* JavaDoc all classes, members, and everything that gives a javadoc warning
+
+
+== Diagrams ==
+
+* keep ProjectsStructure up to date
+* UML class diagrams
+** agent components (all and individual)
+** cross-platform workings
+** Log, GUI, Windows
+* Project / source structure
+* Repository structure, documentation structure
+
+== Examples ==
+
+* Review, document and improve examples in scenario/examples
+
+
+<hr/>
+
+
+= Visibility =
+
+== License ==
+
+* LGPLv3
+* ?: Authors / code owners
+* Find: Eclipse plugin to put license text in files
+
+
+== Packaging ==
+
+* script to make a jar for the project (+ sources and docs)
+* interfaces for outside applications calling tATAmI
+
+== Repository ==
+
+* ? Github
+* create author / repository
+* push
+** accessibility of history
+* design structure for Github repository(ies) + wiki + javadoc + -Android project
+* create github home page on Github Pages
+* connect mylyn issues to github issues
+* connect project JavaDoc to Github Pages 
+* connect project wiki - editable in Eclipse - to github wiki
+** links to javadoc in wiki
+
+
+

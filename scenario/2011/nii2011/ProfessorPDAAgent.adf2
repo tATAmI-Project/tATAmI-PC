@@ -1,0 +1,44 @@
+(agent ProfessorPDA ?userName ?parent
+	(behavior
+		////////////////// initial
+		(initial register
+			(send ?parent (struct message assistsProfessor this ?userName))
+		)
+		
+		//////////////// scheduling
+		(reactive roomChanged
+			(receive scheduling ?courseName ?roomName ?roomAgentName)
+			(addK (struct knowledge scheduling ?courseName ?roomName))
+			(send ?roomAgentName (struct message whatLoactionHasTheRoom this))
+		)
+		
+		(reactive locationNewRoom
+			(receive hasLocation ?roomName ?campusName ?roomLocation)
+			(addK (struct knowledge isInCampus ?roomName ?campusName))
+			(addK (struct knowledge hasLocation ?roomName ?roomLocation))
+		)
+		
+		/////////////// course start
+		(reactive runPresentation
+			(receive permissionToUse ?screenAgentName)
+//			(runSlideShow ?screenAgentName) //based on input from the professor
+			(addK (struct knowledge usingScreen ?screenAgentName))
+			(send ?screenAgentName (struct message show firstSlide))
+		)
+		
+		(reactive endPresentation
+			(input lastSlideButton button)
+		
+			//Inform the screen agent that the presentation ended
+			(readK (struct knowledge usingScreen ?screenAgentName))
+			(send ?screenAgentName (struct message show lastSlide))
+			
+			//Send the subject for the pros-cons discussion
+			(send ?parent (struct message startStudentActivity))
+		)
+	
+		(reactive endCourse
+			(input endCourseButton button)
+		)
+	)
+)

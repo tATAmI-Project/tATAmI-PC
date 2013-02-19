@@ -1,0 +1,45 @@
+// to have parentheses highlighting on this file, register this type (*adf2) in Preferences>General>Editors>File Associations to be opened with the Standalone Structured Text Editor
+
+
+(agent Course ?courseName ?parent
+	(behavior
+		(initial register
+			(send ?parent (struct message managesCourse this ?courseName))
+		)
+
+		(reactive registerUser
+			(receive assistsUser ?agentName ?userName)
+			(addK (struct knowledge userAgent ?userName ?agentName))		
+		)
+		
+		(reactive changeRoom
+			(receive scheduling ?courseName ?roomName)	// the ?courseName variable is already bound, it is a parameter of the agent; here it will be used for pattern-matching
+			(addK (struct knowledge scheduling ?courseName ?roomName))
+			(if (readK (struct knowledge roomAgent ?roomName ?roomAgentName))
+			then
+				(forAllK (struct knowledge userAgent ?userName ?userAgentName)
+						(send ?userAgentName (struct message scheduling ?courseName ?roomAgentName))
+				)
+				(in ?roomAgentName)
+			else
+				(send ?parent (struct message whoManagesRoom this ?roomName))
+			)
+		)
+		
+		(reactive changeRoomA
+			(receive managesRoom ?roomAgentName ?roomName)
+			(condition (readK (struct knowledge scheduling ?courseName ?roomName)))
+			(addK (struct knowledge roomAgent ?roomName ?roomAgentName))
+			(forAllK (struct knowledge userAgent ?userName ?userAgentName)
+					(send ?userAgentName (struct message scheduling ?courseName ?roomAgentName))
+			)
+			
+			// test WS
+			(send ?roomAgentName (struct message displayService helloWorld) http://localhost:8080/wsig/ws/ (struct message displaying ?echo))
+			(addK (struct knowledge wsresponse room ?echo))
+			// end test WS
+			
+			(in ?roomAgentName)
+		)
+	)
+)

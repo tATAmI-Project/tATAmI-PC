@@ -1,0 +1,8 @@
+(agent Scheduler ?parent
+	(behavior			
+		(reactive newSchedule
+			(receive newSchedule (struct knowledge scheduledTo ?courseName ?roomName))
+			(send ?parent (struct message scheduling ?courseName ?roomName))
+		)
+	)
+)
