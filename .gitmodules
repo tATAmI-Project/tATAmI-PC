@@ -1,0 +1,6 @@
+[submodule "doc-tATAmI-PC/pages"]
+	path = doc-tATAmI-PC/pages
+	url = git@github.com:tATAmI-Project/tATAmI-PC.git
+[submodule "doc-tATAmI-PC/wiki"]
+	path = doc-tATAmI-PC/wiki
+	url = git@github.com:tATAmI-Project/tATAmI-PC.wiki.git
