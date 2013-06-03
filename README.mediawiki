@@ -10,6 +10,6 @@
  You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
 ------------------------------------------------------------------------------- -->
 
-'''[[Home.mediawiki | Project Wiki]]'''
+'''[https://github.com/tATAmI-Project/tATAmI-PC/wiki Project Wiki]'''
 
 '''[http://tatami-project.github.com/tATAmI-PC Project site, with javadoc]''' 
