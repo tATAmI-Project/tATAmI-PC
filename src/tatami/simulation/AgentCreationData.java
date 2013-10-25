@@ -11,8 +11,7 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import tatami.core.interfaces.ParametrizedAgent;
-import tatami.core.interfaces.ParametrizedAgent.AgentParameters;
+import tatami.core.interfaces.AgentParameters;
 
 /**
  * Class containing the data for the creation of an agent.
@@ -25,10 +24,10 @@ public class AgentCreationData
 	boolean			isRemote;
 	String			agentName;
 	String			classpath;
-	ParametrizedAgent.AgentParameters	parameters;
+	AgentParameters	parameters;
 	String			destinationContainer;
 	
-	public AgentCreationData(String name, String path, ParametrizedAgent.AgentParameters agentParameters, String destination, boolean remote)
+	public AgentCreationData(String name, String path, AgentParameters agentParameters, String destination, boolean remote)
 	{
 		agentName = name;
 		classpath = path;

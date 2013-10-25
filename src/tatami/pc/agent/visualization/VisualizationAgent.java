@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import tatami.core.agent.visualization.VisualizableAgent;
+import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.visualization.VisualizationOntology;
 import tatami.core.agent.visualization.VisualizationOntology.Vocabulary;
 import tatami.core.interfaces.Logger.Level;
@@ -42,7 +42,7 @@ import tatami.pc.agent.visualization.PCVisualizationGui.VisualizationComponent;
  * @author Andrei Olaru
  * 
  */
-public class VisualizationAgent extends VisualizableAgent
+public class VisualizationAgent extends VisualizableComponent
 {
 	private static final long serialVersionUID = 5153833693845730328L;
 	

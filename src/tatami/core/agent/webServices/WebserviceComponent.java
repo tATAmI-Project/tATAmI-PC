@@ -13,7 +13,8 @@ package tatami.core.agent.webServices;
 
 import java.lang.reflect.Constructor;
 
-import tatami.core.agent.visualization.VisualizableAgent;
+import tatami.core.interfaces.AgentComponent;
+import tatami.core.interfaces.AgentParameterName;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
@@ -22,7 +23,7 @@ import tatami.core.util.platformUtils.PlatformUtils;
  * @author Andrei Olaru
  * 
  */
-public class WSAgent extends VisualizableAgent
+public class WebserviceComponent extends AgentComponent
 {
 	@SuppressWarnings("javadoc")
 	private static final long		serialVersionUID		= 5210112206747363495L;
@@ -56,7 +57,7 @@ public class WSAgent extends VisualizableAgent
 			try
 			{
 				Constructor<?> cons = cl.loadClass(WS_IMPLEMENTATION_CLASS).getConstructor();
-				implementation = (WSAgentImplementationInterface) cons.newInstance();
+				implementation = (WSAgentImplementationInterface)cons.newInstance();
 			} catch(Exception e)
 			{
 				log.error("constructing a WS implementation failed: ", e);
@@ -74,7 +75,8 @@ public class WSAgent extends VisualizableAgent
 		
 		if(!serviceRegistered)
 		{
-			if(implementation.registerService(this, getAgentName(), parVal(AgentParameterName.AGENT_CLASS)))
+			if(implementation.registerService(this, getAgentName(),
+					parVal(AgentParameterName.AGENT_CLASS)))
 			{
 				log.info(getAgentName() + " has registered service " + getAgentName());
 				serviceRegistered = true;

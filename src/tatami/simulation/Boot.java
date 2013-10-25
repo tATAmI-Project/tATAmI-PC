@@ -20,13 +20,13 @@ import java.util.Map;
 import java.util.Set;
 
 
-import tatami.core.agent.claim.ClaimAgent;
+import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.claim.parser.ClaimAgentDefinition;
+import tatami.core.interfaces.AgentParameterName;
+import tatami.core.interfaces.AgentParameters;
 import tatami.core.interfaces.JadeInterface;
 import tatami.core.interfaces.Logger;
-import tatami.core.interfaces.ParametrizedAgent;
 import tatami.core.interfaces.JadeInterface.JadeConfig;
-import tatami.core.interfaces.ParametrizedAgent.AgentParameterName;
 import tatami.core.util.logging.Log;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.pc.agent.visualization.VisualizationAgent;
@@ -264,7 +264,7 @@ public class Boot
 				}
 				
 				// get parameters and put them into a neat HashMap
-				ParametrizedAgent.AgentParameters parameters = new ParametrizedAgent.AgentParameters();
+				AgentParameters parameters = new AgentParameters();
 				for(Iterator<XMLNode> paramIt = agentConfig.getNodeIterator("parameter"); paramIt.hasNext();)
 				{
 					XMLNode param = paramIt.next();
@@ -290,7 +290,7 @@ public class Boot
 					ClaimAgentDefinition cad = ClaimUtils.fillCAD(parameters.get(AgentParameterName.AGENT_CLASS.toString()), parameters.getValues(AgentParameterName.JAVA_CODE.toString()), adfPaths, agentPackages, log);
 					parameters.addObject(AgentParameterName.AGENT_DEFINITION, cad);
 					// register agent
-					allAgents.put(agentName, new AgentCreationData(agentName, ClaimAgent.class.getCanonicalName(), parameters, containerName, !doCreateContainer));
+					allAgents.put(agentName, new AgentCreationData(agentName, ClaimComponent.class.getCanonicalName(), parameters, containerName, !doCreateContainer));
 					log.info("configured [" + agentLoader + "] agent [" + agentName + "] in container [" + containerName + "]");
 					break;
 				}
@@ -309,7 +309,7 @@ public class Boot
 			if(scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).hasNext())
 				timeline = scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).next();
 			
-			ParametrizedAgent.AgentParameters parameters = new ParametrizedAgent.AgentParameters();
+			AgentParameters parameters = new AgentParameters();
 			parameters.addObject(AgentParameterName.JADE_INTERFACE, jade);
 			parameters.addObject(AgentParameterName.AGENTS, allAgents.values());
 			if(timeline != null)

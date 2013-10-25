@@ -40,7 +40,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Vector;
 
-import tatami.core.agent.BaseAgent;
 import tatami.core.agent.claim.behavior.AskForBeingChildBehaviour;
 import tatami.core.agent.claim.behavior.AskForLocation;
 import tatami.core.agent.claim.parser.ClaimBehaviorDefinition;
@@ -56,8 +55,9 @@ import tatami.core.agent.claim.parser.ClaimValue;
 import tatami.core.agent.claim.parser.ClaimVariable;
 import tatami.core.agent.claim.parser.ClaimWhile;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
-import tatami.core.agent.visualization.VisualizableAgent;
-import tatami.core.agent.webServices.WSAgent;
+import tatami.core.agent.parametric.ParametricComponent;
+import tatami.core.agent.visualization.VisualizableComponent;
+import tatami.core.agent.webServices.WebserviceComponent;
 import tatami.core.agent.webServices.WebServiceOntology;
 import tatami.core.agent.webServices.WebServiceOntology.ReceiveOperation;
 import tatami.core.interfaces.AgentGui;
@@ -69,7 +69,7 @@ import tatami.core.util.jade.JadeUtil;
 
 /**
  * 
- * There is one {@link ClaimBehavior} instance for each behavior in a {@link ClaimAgent}.
+ * There is one {@link ClaimBehavior} instance for each behavior in a {@link ClaimComponent}.
  * 
  * @author Nguyen Thi Thuy Nga
  * @author Andrei Olaru
@@ -98,7 +98,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 		private static final long	serialVersionUID	= -5996155613563560744L;
 		private static final long	findLocTime			= 3000;
 		
-		public MoveToDest(ClaimAgent agent)
+		public MoveToDest(ClaimComponent agent)
 		{
 			super(agent, findLocTime);
 		}
@@ -108,8 +108,8 @@ public class ClaimBehavior extends Behaviour implements InputListener
 		{
 			Location loc = (Location) getDataStore().get(ClaimOntology.LOC_RTN);
 			
-			((VisualizableAgent) this.myAgent).getLog().info("Move to " + loc);
-			((ClaimAgent) this.myAgent).doMove(loc);
+			((VisualizableComponent) this.myAgent).getLog().info("Move to " + loc);
+			((ClaimComponent) this.myAgent).doMove(loc);
 		}
 	}
 	
@@ -146,7 +146,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 	@Override
 	public void action()
 	{
-		log = ((VisualizableAgent) myAgent).getLog();
+		log = ((VisualizableComponent) myAgent).getLog();
 		
 		// if we have an active wait, we will put the behavior to sleep again
 		if(wakeUpAtTime != -1)
@@ -213,13 +213,13 @@ public class ClaimBehavior extends Behaviour implements InputListener
 	}
 	
 	/**
-	 * Gets a reference to the knowledge base of the agent from the containing {@link ClaimAgent} instance.
+	 * Gets a reference to the knowledge base of the agent from the containing {@link ClaimComponent} instance.
 	 * 
 	 * @return the knowledge base.
 	 */
 	public KnowledgeBase getKBase()
 	{
-		return ((ClaimAgent) this.myAgent).getKBase();
+		return ((ClaimComponent) this.myAgent).getKBase();
 	}
 	
 	/**
@@ -252,7 +252,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 			boolean condition = handleCall(((ClaimIf) statement).getCondition());
 			if(condition)
 			{
-				((ClaimAgent) this.myAgent).getLog().trace("if condition satisfied");
+				((ClaimComponent) this.myAgent).getLog().trace("if condition satisfied");
 				// after "then" there's a true branch and a false branch
 				Vector<ClaimConstruct> trueBranch = ((ClaimIf) statement).getTrueBranch();
 				for(ClaimConstruct trueBranchStatement : trueBranch)
@@ -260,7 +260,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 			}
 			else
 			{
-				((ClaimAgent) this.myAgent).getLog().trace("if condition not satisfied");
+				((ClaimComponent) this.myAgent).getLog().trace("if condition not satisfied");
 				Vector<ClaimConstruct> falseBranch = ((ClaimIf) statement).getFalseBranch();
 				if(falseBranch != null)
 					for(ClaimConstruct falseBranchStatement : falseBranch)
@@ -345,7 +345,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 		
 		try
 		{
-			((BaseAgent) this.myAgent).getContainerController().createNewAgent((String) agentName.getValue(),
+			((ParametricComponent) this.myAgent).getContainerController().createNewAgent((String) agentName.getValue(),
 					"core.claim.ClaimAgent", args.subList(1, args.size()).toArray());
 		} catch(StaleProxyException e)
 		{
@@ -366,7 +366,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 	private boolean handleAcid()
 	{
 		log.trace("Acid command received. I will delete myself!");
-		((BaseAgent) this.myAgent).doDelete();
+		((ParametricComponent) this.myAgent).doDelete();
 		this.finished = true;
 		
 		return true;
@@ -387,7 +387,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 		
 		try
 		{
-			((BaseAgent) this.myAgent).getContainerController().getAgent((String) agentName.getValue()).kill();
+			((ParametricComponent) this.myAgent).getContainerController().getAgent((String) agentName.getValue()).kill();
 		} catch(StaleProxyException e)
 		{
 			// TODO Auto-generated catch block
@@ -462,7 +462,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 			break;
 		}
 		
-		if((args.size() > 2) && (myAgent instanceof WSAgent))
+		if((args.size() > 2) && (myAgent instanceof WebserviceComponent))
 		{
 			webServiceInvocationMode = true;
 			if(receiver.equals("null"))// FIXME null value should be handled specially
@@ -496,7 +496,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 				{
 					String serviceAddress = (String) ((ClaimValue) args.get(2)).getValue();
 					log.info("accessing service at [" + serviceAddress + "]...");
-					String result = ((WSAgent) this.myAgent).doSimpleAccess(serviceAddress, simpleMessage);
+					String result = ((WebserviceComponent) this.myAgent).doSimpleAccess(serviceAddress, simpleMessage);
 					
 					if(expectServiceReturn) // expect a result from the web service
 					{ // integrate result
@@ -513,7 +513,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 					log.info("accessing service [" + serviceName + "] at [" + serviceAddress + "]...");
 					@SuppressWarnings("null")
 					// it should be ok according to the logic above
-					String result = ((WSAgent) this.myAgent).doAccess(serviceAddress, serviceName, message.toString());
+					String result = ((WebserviceComponent) this.myAgent).doAccess(serviceAddress, serviceName, message.toString());
 					ClaimStructure received = ClaimStructure.parseString(result, log);
 					log.trace("received result " + received);
 					
@@ -725,7 +725,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 	 */
 	protected boolean handleInput(Vector<ClaimConstruct> args)
 	{
-		AgentGui gui = ((VisualizableAgent) myAgent).getGUI();
+		AgentGui gui = ((VisualizableComponent) myAgent).getGUI();
 		
 		// FIXME: variables should be supported
 		String inputComponent = ((ClaimValue) args.get(0)).toString();
@@ -772,7 +772,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 				outputV.add(this.cbd.getSymbolTable().get((ClaimVariable) arg));
 		}
 		
-		AgentGui myAgentGUI = ((VisualizableAgent) myAgent).getGUI();
+		AgentGui myAgentGUI = ((VisualizableComponent) myAgent).getGUI();
 		Vector<Object> outV = new Vector<Object>();
 		for(ClaimValue output : outputV)
 			outV.add(output.getValue());
@@ -814,18 +814,18 @@ public class ClaimBehavior extends Behaviour implements InputListener
 			String destination = (String) value.getValue();
 			// find Container of destination
 			SequentialBehaviour sb = new SequentialBehaviour();
-			Behaviour b = new AskForLocation((ClaimAgent) this.myAgent, destination);
+			Behaviour b = new AskForLocation((ClaimComponent) this.myAgent, destination);
 			b.setDataStore(sb.getDataStore());
 			sb.addSubBehaviour(b);
 			
-			b = new AskForBeingChildBehaviour((ClaimAgent) this.myAgent, destination);
+			b = new AskForBeingChildBehaviour((ClaimComponent) this.myAgent, destination);
 			sb.addSubBehaviour(b);
 			
-			b = new MoveToDest((ClaimAgent) this.myAgent);
+			b = new MoveToDest((ClaimComponent) this.myAgent);
 			b.setDataStore(sb.getDataStore());
 			sb.addSubBehaviour(b);
 			
-			((ClaimAgent) this.myAgent).addBehaviour(sb);
+			((ClaimComponent) this.myAgent).addBehaviour(sb);
 		}
 		return true;
 	}

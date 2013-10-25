@@ -1,147 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <class-diagram version="1.0.11" icons="true" automaticImage="PNG" always-add-relationships="true" generalizations="true" 
   realizations="true" associations="true" dependencies="true" nesting-relationships="true">  
-  <class id="1" corner="BOTTOM_RIGHT" language="java" name="tatami.core.agent.visualization.VisualizableAgent" 
-    project="tATAmI-PC" file="/tATAmI-PC/src/tatami/core/agent/visualization/VisualizableAgent.java" binary="false">    
+  <class id="1" language="java" name="tatami.core.agent.visualization.VisualizableComponent" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/agent/visualization/VisualizableComponent.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="132" y="969"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="2" corner="BOTTOM_RIGHT" language="java" name="tatami.core.agent.claim.ClaimAgent" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/agent/claim/ClaimAgent.java" binary="false">    
+  <class id="2" language="java" name="tatami.core.agent.claim.ClaimComponent" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/agent/claim/ClaimComponent.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="147" y="2258"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="3" corner="BOTTOM_RIGHT" language="java" name="tatami.core.agent.webServices.WSAgent" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/agent/webServices/WSAgent.java" binary="false">    
+  <class id="3" language="java" name="tatami.core.agent.webServices.WebserviceComponent" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/agent/webServices/WebserviceComponent.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="176" y="1692"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <interface id="4" corner="BOTTOM_RIGHT" language="java" name="tatami.core.interfaces.ParametrizedAgent" 
-    project="tATAmI-PC" file="/tATAmI-PC/src/tatami/core/interfaces/ParametrizedAgent.java" binary="false">    
+  <interface id="4" language="java" name="tatami.core.interfaces.ParametrizedAgent" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/interfaces/ParametrizedAgent.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="526" y="109"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <class id="5" corner="BOTTOM_RIGHT" language="java" name="tatami.core.agent.hierarchical.HierarchicalAgent" 
-    project="tATAmI-PC" file="/tATAmI-PC/src/tatami/core/agent/hierarchical/HierarchicalAgent.java" binary="false">    
+  <class id="5" language="java" name="tatami.core.agent.hierarchical.HierarchicalComponent" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/agent/hierarchical/HierarchicalComponent.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="149" y="1990"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="6" corner="BOTTOM_RIGHT" language="java" name="tatami.core.agent.BaseAgent" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/agent/BaseAgent.java" binary="false">    
+  <class id="6" language="java" name="tatami.core.agent.parametric.ParametricComponent" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/agent/parametric/ParametricComponent.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="162" y="197"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="7" corner="BOTTOM_RIGHT" language="java" name="tatami.core.agent.visualization.Log2AgentGui" 
-    project="tATAmI-PC" file="/tATAmI-PC/src/tatami/core/agent/visualization/Log2AgentGui.java" binary="false">    
+  <class id="7" language="java" name="tatami.core.agent.visualization.Log2AgentGui" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/agent/visualization/Log2AgentGui.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="988" y="624"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="8" corner="BOTTOM_RIGHT" language="java" name="tatami.core.util.logging.Unit.UnitLinkData" 
-    project="tATAmI-PC" file="/tATAmI-PC/src/tatami/core/util/logging/Unit.java" binary="false">    
+  <class id="8" language="java" name="tatami.core.util.logging.Unit.UnitLinkData" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/util/logging/Unit.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="1020" y="1156"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="9" corner="BOTTOM_RIGHT" language="java" name="tatami.core.util.logging.Unit.UnitConfigData" 
-    project="tATAmI-PC" file="/tATAmI-PC/src/tatami/core/util/logging/Unit.java" binary="false">    
+  <class id="9" language="java" name="tatami.core.util.logging.Unit.UnitConfigData" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/util/logging/Unit.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="734" y="893"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="10" corner="BOTTOM_RIGHT" language="java" name="tatami.core.util.logging.Unit" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/util/logging/Unit.java" binary="false">    
+  <class id="10" language="java" name="tatami.core.util.logging.Unit" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/util/logging/Unit.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="456" y="916"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <interface id="11" corner="BOTTOM_RIGHT" language="java" name="tatami.core.util.logging.Log.DisplayEntity" 
-    project="tATAmI-PC" file="/tATAmI-PC/src/tatami/core/util/logging/Log.java" binary="false">    
+  <interface id="11" language="java" name="tatami.core.util.logging.Log.DisplayEntity" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/util/logging/Log.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="780" y="1320"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <interface id="12" corner="BOTTOM_RIGHT" language="java" name="tatami.core.util.logging.Log.ReportingEntity" 
-    project="tATAmI-PC" file="/tATAmI-PC/src/tatami/core/util/logging/Log.java" binary="false">    
+  <interface id="12" language="java" name="tatami.core.util.logging.Log.ReportingEntity" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/util/logging/Log.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="936" y="1312"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <class id="13" corner="BOTTOM_RIGHT" language="java" name="tatami.core.util.logging.Log" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/util/logging/Log.java" binary="false">    
+  <class id="13" language="java" name="tatami.core.util.logging.Log" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/util/logging/Log.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="1113" y="1823"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="14" corner="BOTTOM_RIGHT" language="java" name="tatami.core.interfaces.Logger" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/interfaces/Logger.java" binary="false">    
+  <class id="14" language="java" name="tatami.core.interfaces.Logger" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/interfaces/Logger.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="515" y="1690"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <enumeration id="15" corner="BOTTOM_RIGHT" language="java" name="tatami.core.interfaces.Logger.Level" 
-    project="tATAmI-PC" file="/tATAmI-PC/src/tatami/core/interfaces/Logger.java" binary="false">    
+  <enumeration id="15" language="java" name="tatami.core.interfaces.Logger.Level" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/interfaces/Logger.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="439" y="1385"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </enumeration>  
-  <enumeration id="16" corner="BOTTOM_RIGHT" language="java" name="tatami.core.interfaces.Logger.LoggerType" 
-    project="tATAmI-PC" file="/tATAmI-PC/src/tatami/core/interfaces/Logger.java" binary="false">    
+  <enumeration id="16" language="java" name="tatami.core.interfaces.Logger.LoggerType" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/interfaces/Logger.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="586" y="1361"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </enumeration>  
-  <class id="17" corner="BOTTOM_RIGHT" language="java" name="tatami.core.agent.claim.ClaimBehavior" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/agent/claim/ClaimBehavior.java" binary="false">    
+  <class id="17" language="java" name="tatami.core.agent.claim.ClaimBehavior" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/agent/claim/ClaimBehavior.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="661" y="2652"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <interface id="18" corner="BOTTOM_RIGHT" language="java" name="tatami.core.interfaces.AgentGui" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/interfaces/AgentGui.java" binary="false">    
+  <interface id="18" language="java" name="tatami.core.interfaces.AgentGui" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/interfaces/AgentGui.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="1235" y="691"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true"/>      
-      <operations public="true" package="true" protected="true" private="true"/>    
+    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
+      <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
   <association id="19">    
@@ -445,9 +465,9 @@
     <end type="TARGET" refId="14"/>  
   </dependency>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
-    visibility="true">    
-    <attributes public="true" package="true" protected="true" private="true"/>    
-    <operations public="true" package="true" protected="true" private="true"/>  
+    accessors="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true" static="true"/>    
+    <operations public="true" package="true" protected="true" private="true" static="true"/>  
   </classifier-display>  
   <association-display labels="true" multiplicity="true"/>
 </class-diagram>

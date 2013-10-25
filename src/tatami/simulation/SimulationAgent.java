@@ -46,9 +46,10 @@ import tatami.core.agent.claim.ClaimMessage;
 import tatami.core.agent.claim.parser.ClaimConstruct;
 import tatami.core.agent.claim.parser.ClaimStructure;
 import tatami.core.agent.claim.parser.ClaimValue;
-import tatami.core.agent.visualization.VisualizableAgent;
+import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.visualization.VisualizationOntology;
 import tatami.core.agent.visualization.VisualizationOntology.Vocabulary;
+import tatami.core.interfaces.AgentParameterName;
 import tatami.pc.agent.visualization.PCDefaultAgentGui;
 import tatami.pc.agent.visualization.PCSimulationGui.SimulationComponent;
 import tatami.pc.util.XML.XMLTree.XMLNode;
@@ -69,7 +70,7 @@ import tatami.pc.util.jade.PCJadeInterface;
  * @author Nguyen Thi Thuy Nga
  * 
  */
-public class SimulationAgent extends VisualizableAgent {
+public class SimulationAgent extends VisualizableComponent {
 	private static final long serialVersionUID = 5153833693845730328L;
 
 	List<XMLNode> events = new LinkedList<XMLNode>();

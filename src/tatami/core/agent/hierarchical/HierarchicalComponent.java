@@ -22,9 +22,10 @@ import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
 import jade.wrapper.ControllerException;
 import tatami.core.agent.hierarchical.HierarchyOntology.Vocabulary;
-import tatami.core.agent.visualization.VisualizableAgent;
-import tatami.core.agent.webServices.WSAgent;
-import tatami.core.interfaces.ParametrizedAgent.AgentParameterName;
+import tatami.core.agent.visualization.VisualizableComponent;
+import tatami.core.agent.webServices.WebserviceComponent;
+import tatami.core.interfaces.AgentComponent;
+import tatami.core.interfaces.AgentParameterName;
 
 /**
  * Abstract class that extends class GuiAgent. Agent has a hierarchical relationship and a structure of knowledge
@@ -33,7 +34,7 @@ import tatami.core.interfaces.ParametrizedAgent.AgentParameterName;
  * @author Andrei Olaru
  * 
  */
-public class HierarchicalAgent extends WSAgent
+public class HierarchicalComponent extends AgentComponent
 {
 	private static final long		serialVersionUID	= -7984498848330956862L;
 	
@@ -90,7 +91,7 @@ public class HierarchicalAgent extends WSAgent
 				@Override
 				public void onWake()
 				{
-					((VisualizableAgent) myAgent).getLog()
+					((VisualizableComponent) myAgent).getLog()
 							.info("moving to destination container [" + destination + "]");
 					doMove(destination);
 				}
@@ -132,7 +133,7 @@ public class HierarchicalAgent extends WSAgent
 					String newChild = msg.getSender().getLocalName();
 					hierRelation.addChild(newChild);
 					// FIXME add log entry
-					((HierarchicalAgent) this.myAgent).getLog().info(
+					((HierarchicalComponent) this.myAgent).getLog().info(
 							this.myAgent.getLocalName() + " has new child " + newChild);
 				}
 				else
@@ -181,7 +182,7 @@ public class HierarchicalAgent extends WSAgent
 					msgAnswer.addReceiver(msg.getSender());
 					myAgent.send(msgAnswer);
 					// add agent into its children list
-					((HierarchicalAgent) myAgent).getHierRelation().getChildren().add(msg.getSender().getLocalName());
+					((HierarchicalComponent) myAgent).getHierRelation().getChildren().add(msg.getSender().getLocalName());
 				}
 				else
 				{

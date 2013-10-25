@@ -19,10 +19,11 @@ import tatami.core.agent.claim.parser.ClaimBehaviorDefinition;
 import tatami.core.agent.claim.parser.ClaimBehaviorType;
 import tatami.core.agent.claim.parser.ClaimValue;
 import tatami.core.agent.claim.parser.ClaimVariable;
-import tatami.core.agent.hierarchical.HierarchicalAgent;
+import tatami.core.interfaces.AgentComponent;
+import tatami.core.interfaces.AgentParameterName;
 import tatami.core.interfaces.KnowledgeBase;
 
-public class ClaimAgent extends HierarchicalAgent
+public class ClaimComponent extends AgentComponent
 {
 	@SuppressWarnings("javadoc")
 	private static final long		serialVersionUID	= 3562319445295180030L;
@@ -45,7 +46,7 @@ public class ClaimAgent extends HierarchicalAgent
 		
 		behaviors = new Vector<ClaimBehavior>();
 		
-		cad = (ClaimAgentDefinition) parObj(AgentParameterName.AGENT_DEFINITION);
+		cad = (ClaimAgentDefinition)parObj(AgentParameterName.AGENT_DEFINITION);
 		if(cad == null)
 		{
 			log.error("agent definition not found");
@@ -60,11 +61,13 @@ public class ClaimAgent extends HierarchicalAgent
 			Map<String, Object> claimParams = getUnregisteredParameters();
 			for(ClaimVariable agentParam : cad.getParameters())
 			{
-				AgentParameterName registeredParam = AgentParameterName.getName(agentParam.getName());
+				AgentParameterName registeredParam = AgentParameterName.getName(agentParam
+						.getName());
 				if(registeredParam != null)
 				{
 					if(hasPar(registeredParam))
-						this.cad.getSymbolTable().put(agentParam, new ClaimValue(parObj(registeredParam)));
+						this.cad.getSymbolTable().put(agentParam,
+								new ClaimValue(parObj(registeredParam)));
 					else
 					{
 						if(agentParam.getName().equals("parent"))
@@ -76,8 +79,8 @@ public class ClaimAgent extends HierarchicalAgent
 				else
 				{
 					if(claimParams.containsKey(agentParam.getName()))
-						this.cad.getSymbolTable()
-								.put(agentParam, new ClaimValue(claimParams.get(agentParam.getName())));
+						this.cad.getSymbolTable().put(agentParam,
+								new ClaimValue(claimParams.get(agentParam.getName())));
 					else if(!agentParam.getName().equals("this"))
 						log.error("agent parameter [" + agentParam + "] not found");
 				}
@@ -85,7 +88,8 @@ public class ClaimAgent extends HierarchicalAgent
 		}
 		
 		// bind value for "this" parameter (agent's local name)
-		this.cad.getSymbolTable().put(new ClaimVariable("this"), new ClaimValue(this.getLocalName()));
+		this.cad.getSymbolTable().put(new ClaimVariable("this"),
+				new ClaimValue(this.getLocalName()));
 		
 		try
 		{
@@ -106,7 +110,8 @@ public class ClaimAgent extends HierarchicalAgent
 				// register wb service
 				registerWSBehavior();
 			
-			// else if((this instanceof GoalAgent) && cbd.getBehaviorType().equals(ClaimBehaviorType.PROACTIVE))
+			// else if((this instanceof GoalAgent) &&
+			// cbd.getBehaviorType().equals(ClaimBehaviorType.PROACTIVE))
 			// {
 			// // Some kind of Goal driven behavior here?
 			//
@@ -116,7 +121,8 @@ public class ClaimAgent extends HierarchicalAgent
 	}
 	
 	/**
-	 * Allows access to the agent's knowledge base from this package (e.g. for {@link ClaimBehavior}).
+	 * Allows access to the agent's knowledge base from this package (e.g. for {@link ClaimBehavior}
+	 * ).
 	 * 
 	 * @return the knowledge base.
 	 */
@@ -134,7 +140,7 @@ public class ClaimAgent extends HierarchicalAgent
 		if(behaviors != null)
 			for(Object cb : behaviors.toArray())
 			{
-				((ClaimBehavior) cb).resetGui();
+				((ClaimBehavior)cb).resetGui();
 			}
 		
 	}

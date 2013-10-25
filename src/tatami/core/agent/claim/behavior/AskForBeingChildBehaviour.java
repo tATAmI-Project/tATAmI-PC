@@ -12,10 +12,10 @@
 package tatami.core.agent.claim.behavior;
 
 import tatami.core.agent.claim.ClaimMessage;
-import tatami.core.agent.hierarchical.HierarchicalAgent;
+import tatami.core.agent.hierarchical.HierarchicalComponent;
 import tatami.core.agent.hierarchical.HierarchyOntology;
 import tatami.core.agent.hierarchical.HierarchyOntology.Vocabulary;
-import tatami.core.agent.visualization.VisualizableAgent;
+import tatami.core.agent.visualization.VisualizableComponent;
 import jade.core.AID;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -32,7 +32,7 @@ public class AskForBeingChildBehaviour extends SimpleBehaviour{
 	
 	private String parent = null;
 	
-	public AskForBeingChildBehaviour(HierarchicalAgent agent, String parent){
+	public AskForBeingChildBehaviour(HierarchicalComponent agent, String parent){
 		super(agent);
 		this.parent = parent;
 	}
@@ -43,28 +43,28 @@ public class AskForBeingChildBehaviour extends SimpleBehaviour{
 		
 		msg.addReceiver(new AID(this.parent, AID.ISLOCALNAME));
 		myAgent.send(msg);
-		((VisualizableAgent)myAgent).getLog().info(myAgent.getLocalName() + " demands " + this.parent + " to be its parent");
+		((VisualizableComponent)myAgent).getLog().info(myAgent.getLocalName() + " demands " + this.parent + " to be its parent");
 		
 		//waits for parent's answer
 		ACLMessage msgAnswer = myAgent.receive(HierarchyOntology.template(Vocabulary.AGREEPARENT));
 		if(msgAnswer != null){
 			//parent agree
 			if(msgAnswer.getPerformative() == ACLMessage.AGREE){
-				((VisualizableAgent)myAgent).getLog().info(this.parent + " agrees to be parent of " + myAgent.getLocalName());
+				((VisualizableComponent)myAgent).getLog().info(this.parent + " agrees to be parent of " + myAgent.getLocalName());
 				//demands old parent to remove it from the list of children
-				((VisualizableAgent)myAgent).reportAddParent(this.parent);
-				String oldParent = ((HierarchicalAgent)myAgent).getHierRelation().getParent();
+				((VisualizableComponent)myAgent).reportAddParent(this.parent);
+				String oldParent = ((HierarchicalComponent)myAgent).getHierRelation().getParent();
 				
 				if(oldParent != null){
 					ACLMessage msgRemoveMe = HierarchyOntology.setupMessage(Vocabulary.REMOVEME);
 					msgRemoveMe.addReceiver(new AID(oldParent, AID.ISLOCALNAME));
 					myAgent.send(msgRemoveMe);
-					((VisualizableAgent)myAgent).getLog().info(ClaimMessage.printMessage(msgRemoveMe));
-					((VisualizableAgent)myAgent).reportRemoveParent(oldParent);
+					((VisualizableComponent)myAgent).getLog().info(ClaimMessage.printMessage(msgRemoveMe));
+					((VisualizableComponent)myAgent).reportRemoveParent(oldParent);
 				}
 				
 				//changes knowledge about hierarchical relation
-				((HierarchicalAgent)myAgent).getHierRelation().setParent(parent);
+				((HierarchicalComponent)myAgent).getHierRelation().setParent(parent);
 			}
 			finish = true;
 		}

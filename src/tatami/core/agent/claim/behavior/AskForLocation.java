@@ -12,8 +12,8 @@
 package tatami.core.agent.claim.behavior;
 
 import tatami.core.agent.claim.ClaimOntology;
-import tatami.core.agent.hierarchical.HierarchicalAgent;
-import tatami.core.agent.visualization.VisualizableAgent;
+import tatami.core.agent.hierarchical.HierarchicalComponent;
+import tatami.core.agent.visualization.VisualizableComponent;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.basic.Action;
 import jade.content.onto.basic.Result;
@@ -36,7 +36,7 @@ public class AskForLocation extends SimpleBehaviour
 	private final String		  agentName;
 	private boolean			   finished = false;
 	
-	public AskForLocation(HierarchicalAgent a, String agentName)
+	public AskForLocation(HierarchicalComponent a, String agentName)
 	{
 		super(a);
 		this.agentName = agentName;
@@ -77,7 +77,7 @@ public class AskForLocation extends SimpleBehaviour
 				{
 					Result result = (Result) myAgent.getContentManager().extractContent(msg);
 					getDataStore().put(ClaimOntology.LOC_RTN, result.getValue());
-					((VisualizableAgent) myAgent).getLog().info(
+					((VisualizableComponent) myAgent).getLog().info(
 							"container found " + ((Location) result.getValue()).getName());
 					finished = true;
 				} catch(Exception e)
