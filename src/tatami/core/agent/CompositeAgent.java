@@ -7,6 +7,7 @@ import tatami.core.agent.jade.JadeComponent;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.interfaces.AgentComponent;
 import tatami.core.interfaces.AgentComponent.AgentComponentName;
+import tatami.core.interfaces.AgentEventHandler.AgentEventType;
 import tatami.core.interfaces.AgentParameterName;
 
 public class CompositeAgent
@@ -27,6 +28,12 @@ public class CompositeAgent
 	{
 		// TODO
 		return null;
+	}
+	
+	public void postAgentEvent(AgentEventType event)
+	{
+		// TODO
+		// QUEST: synchronous or asynchronous handling of events?
 	}
 	
 	/**

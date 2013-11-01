@@ -36,5 +36,5 @@ public interface AgentEventHandler
 		}
 	}
 	
-	public void handleEvent();
+	public void handleEvent(AgentEventType eventType, Object eventData);
 }

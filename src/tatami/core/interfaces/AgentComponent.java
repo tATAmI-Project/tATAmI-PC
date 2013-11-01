@@ -11,19 +11,23 @@ public abstract class AgentComponent implements Serializable
 {
 	
 	public static enum AgentComponentName {
-		JADE_COMPONENT,
-		
-		CLAIM_COMPONENT,
-		
-		COGNITIVE_COMPONENT,
-		
-		HIERARCHICAL_COMPONENT,
-		
-		WEBSERVICE_COMPONENT,
+		PARAMETRIC_COMPONENT,
 		
 		VISUALIZABLE_COMPONENT,
 		
-		PARAMETRIC_COMPONENT,
+		COGNITIVE_COMPONENT,
+		
+		MESSAGING_COMPONENT,
+		
+		MOVEMENT_COMPONENT,
+		
+		WEBSERVICE_COMPONENT,
+		
+		HIERARCHICAL_COMPONENT,
+		
+		S_CLAIM_COMPONENT,
+		
+		JADE_COMPONENT,
 		
 		;
 		
@@ -60,10 +64,9 @@ public abstract class AgentComponent implements Serializable
 		componentName = name;
 	}
 	
-	protected AgentComponent registerComponent(AgentEventType event, AgentEventHandler handler)
+	protected void registerHandler(AgentEventType event, AgentEventHandler handler)
 	{
 		// TODO: do checks
 		eventHandlers.put(event, handler);
-		return this;
 	}
 }

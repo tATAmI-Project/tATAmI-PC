@@ -11,20 +11,15 @@
  ******************************************************************************/
 package tatami.core.agent.visualization;
 
-import jade.core.AID;
-import jade.core.Location;
-import jade.core.behaviours.CyclicBehaviour;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
-import jade.wrapper.ControllerException;
-
 import java.lang.reflect.Constructor;
 
 import tatami.core.agent.CompositeAgent;
-import tatami.core.agent.jade.JadeComponent;
+import tatami.core.agent.messaging.MessagingComponent;
+import tatami.core.agent.movement.MovementComponent;
 import tatami.core.agent.parametric.ParametricComponent;
-import tatami.core.agent.visualization.VisualizationOntology.Vocabulary;
 import tatami.core.interfaces.AgentComponent;
+import tatami.core.interfaces.AgentEventHandler;
+import tatami.core.interfaces.AgentEventHandler.AgentEventType;
 import tatami.core.interfaces.AgentGui;
 import tatami.core.interfaces.AgentGui.AgentGuiConfig;
 import tatami.core.interfaces.AgentGui.DefaultComponent;
@@ -32,7 +27,6 @@ import tatami.core.interfaces.AgentParameterName;
 import tatami.core.interfaces.Logger;
 import tatami.core.interfaces.Logger.Level;
 import tatami.core.util.Config;
-import tatami.core.util.jade.JadeUtil;
 import tatami.core.util.logging.Log.ReportingEntity;
 import tatami.core.util.logging.Unit;
 import tatami.core.util.logging.Unit.UnitConfigData;
@@ -40,6 +34,48 @@ import tatami.core.util.platformUtils.PlatformUtils;
 
 public class VisualizableComponent extends AgentComponent implements ReportingEntity
 {
+	public static enum Vocabulary {
+		/**
+		 * The name of the component.
+		 */
+		VISUALIZATION,
+		
+		/**
+		 * Content is an update to the logging info of the reporting agent.
+		 */
+		LOGGING_UPDATE,
+		
+		/**
+		 * Content is the name of the agent that is now a parent of the reporting agent.
+		 */
+		ADD_PARENT,
+		
+		/**
+		 * Content is the name of the agent that is not anymore a parent of the reporting agent.
+		 */
+		REMOVE_PARENT,
+		
+		/**
+		 * Content is the name of the container now containing the reporting agent.
+		 */
+		MOVE,
+		
+		/**
+		 * Content is the name of the agent that will be monitoring the activity of the receiver.
+		 */
+		VISUALIZATION_MONITOR,
+		
+		/**
+		 * Sent by Simulator to the Visualizer, to instruct all visualized agents to exit, following
+		 * user request to end simulation.
+		 */
+		PREPARE_EXIT,
+		
+		/**
+		 * Instructs immediate exit, indicating the end of the simulation.
+		 */
+		DO_EXIT,
+	}
 	
 	// logging
 	/**
@@ -57,7 +93,8 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	 */
 	protected AgentGuiConfig		guiConfig			= new AgentGuiConfig();
 	protected transient AgentGui	gui					= null;
-	private AID						visualizationParent	= null;
+	private String					visualizationParent	= null;
+	private String					currentContainer	= null;
 	
 	/**
 	 * windowType should be set before if a special value is needed
@@ -78,44 +115,66 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		// behaviors
 		
 		// receive the visualization root
-		final JadeComponent jade = (JadeComponent)parentAgent
-				.getComponent(AgentComponentName.JADE_COMPONENT);
-		if(jade != null)
-			jade.addBehaviour(new CyclicBehaviour() {
-				private static final long	serialVersionUID	= 1L;
-				
-				@SuppressWarnings({ "synthetic-access", "incomplete-switch" })
+		final MessagingComponent msgr = (MessagingComponent)parentAgent
+				.getComponent(AgentComponentName.MESSAGING_COMPONENT);
+		if(msgr != null)
+		{
+			msgr.registerMessageReceiver(msgr.makePath(Vocabulary.VISUALIZATION.toString(),
+					Vocabulary.VISUALIZATION_MONITOR.toString()), new AgentEventHandler() {
 				@Override
-				public void action()
+				public void handleEvent(AgentEventType eventType, Object eventData)
 				{
-					ACLMessage msg = myAgent.receive(JadeUtil.templateAssemble(
-							VisualizationOntology.template(), MessageTemplate.or(MessageTemplate
-									.MatchProtocol(Vocabulary.VISUALIZATION_MONITOR.toString()),
-									MessageTemplate.MatchProtocol(Vocabulary.DO_EXIT.toString()))));
-					if(msg != null)
-					{
-						switch(VisualizationOntology.Vocabulary.valueOf(msg.getProtocol()))
-						{
-						case VISUALIZATION_MONITOR:
-							visualizationParent = new AID(msg.getContent(), AID.ISLOCALNAME);
-							getLog().info(
-									"visualization root received: [" + visualizationParent + "]");
-							break;
-						case DO_EXIT:
-							// TODO: should check if the message comes from the
-							// Simulator to Visualizer, or from the Visualizer to
-							// any other agent
-							getLog().info("exiting...");
-							jade.doDelete();
-							break;
-						}
-					}
-					else
-					{
-						block();
-					}
+					visualizationParent = msgr.extractContent(eventData);
+					getLog().info("visualization root received: [" + visualizationParent + "]");
 				}
 			});
+			msgr.registerMessageReceiver(
+					msgr.makePath(Vocabulary.VISUALIZATION.toString(),
+							Vocabulary.DO_EXIT.toString()), new AgentEventHandler() {
+						@SuppressWarnings("synthetic-access")
+						@Override
+						public void handleEvent(AgentEventType eventType, Object eventData)
+						{
+							getLog().info("exiting...");
+							parentAgent.postAgentEvent(AgentEventType.AGENT_EXIT);
+						}
+					});
+		}
+		
+		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEventType eventType, Object eventData)
+			{
+				MovementComponent mvmt = (MovementComponent)parentAgent
+						.getComponent(AgentComponentName.MOVEMENT_COMPONENT);
+				if(mvmt != null)
+				{
+					String destination = mvmt.extractDestination(eventData);
+					if(!destination.equals(currentContainer))
+					{
+						getLog().info("moving to [" + destination.toString() + "]");
+						removeVisualization();
+					}
+				}
+			}
+		});
+		
+		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEventType eventType, Object eventData)
+			{
+				resetVisualization();
+				log.info(parentAgent.getAgentName() + ": arrived after move");
+			}
+		});
+		
+		registerHandler(AgentEventType.AGENT_EXIT, new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEventType eventType, Object eventData)
+			{
+				removeVisualization();
+			}
+		});
 	}
 	
 	/**
@@ -181,68 +240,35 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	}
 	
 	@Override
-	public void doMove(Location destination)
-	{
-		try
-		{
-			if(!destination.getName().equals(this.getContainerController().getContainerName()))
-			{
-				getLog().info("moving to [" + destination.toString() + "]");
-				removeVisualization();
-			}
-		} catch(ControllerException e)
-		{
-			e.printStackTrace();
-		}
-		super.doMove(destination);
-	}
-	
-	@Override
-	protected void afterMove()
-	{
-		super.afterMove();
-		resetVisualization();
-		log.info(getLocalName() + ": arrived after move");
-		
-	}
-	
-	@Override
-	protected void takeDown()
-	{
-		super.takeDown();
-		removeVisualization();
-	}
-	
-	@Override
 	public boolean report(String content)
 	{
-		if(visualizationParent != null)
-		{
-			ACLMessage msg = VisualizationOntology.setupMessage(Vocabulary.LOGGING_UPDATE);
-			msg.setContent(content);
-			msg.addReceiver(visualizationParent);
-			send(msg);
-			return true;
-			// if(log != null)
-			// log.trace("logging info reported to visualization root");
-		}
-		return false;
+		return report(Vocabulary.LOGGING_UPDATE, content);
 	}
 	
 	public void reportAddParent(String parent)
 	{
-		ACLMessage msg = VisualizationOntology.setupMessage(Vocabulary.ADD_PARENT);
-		msg.setContent(parent);
-		msg.addReceiver(visualizationParent);
-		send(msg);
+		report(Vocabulary.ADD_PARENT, parent);
 	}
 	
 	public void reportRemoveParent(String parent)
 	{
-		ACLMessage msg = VisualizationOntology.setupMessage(Vocabulary.REMOVE_PARENT);
-		msg.setContent(parent);
-		msg.addReceiver(visualizationParent);
-		send(msg);
+		report(Vocabulary.REMOVE_PARENT, parent);
+	}
+	
+	protected boolean report(Vocabulary reportType, String content)
+	{
+		// FIXME: check correct type
+		if(visualizationParent != null)
+		{
+			final MessagingComponent msgr = (MessagingComponent)parentAgent
+					.getComponent(AgentComponentName.MESSAGING_COMPONENT);
+			if(msgr != null)
+			{
+				msgr.sendMessage(visualizationParent, msgr.makePath(reportType.toString()), content);
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public Logger getLog()
