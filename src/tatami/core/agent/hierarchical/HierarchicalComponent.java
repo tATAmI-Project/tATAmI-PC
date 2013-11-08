@@ -21,11 +21,11 @@ import jade.domain.mobility.MobilityOntology;
 import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
 import jade.wrapper.ControllerException;
+import tatami.core.agent.AgentComponent;
 import tatami.core.agent.hierarchical.HierarchyOntology.Vocabulary;
+import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.webServices.WebserviceComponent;
-import tatami.core.interfaces.AgentComponent;
-import tatami.core.interfaces.AgentParameterName;
 
 /**
  * Abstract class that extends class GuiAgent. Agent has a hierarchical relationship and a structure of knowledge

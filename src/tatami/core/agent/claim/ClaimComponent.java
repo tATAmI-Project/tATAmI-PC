@@ -14,14 +14,14 @@ package tatami.core.agent.claim;
 import java.util.Map;
 import java.util.Vector;
 
+import tatami.core.agent.AgentComponent;
 import tatami.core.agent.claim.parser.ClaimAgentDefinition;
 import tatami.core.agent.claim.parser.ClaimBehaviorDefinition;
 import tatami.core.agent.claim.parser.ClaimBehaviorType;
 import tatami.core.agent.claim.parser.ClaimValue;
 import tatami.core.agent.claim.parser.ClaimVariable;
-import tatami.core.interfaces.AgentComponent;
-import tatami.core.interfaces.AgentParameterName;
-import tatami.core.interfaces.KnowledgeBase;
+import tatami.core.agent.kb.KnowledgeBase;
+import tatami.core.agent.parametric.AgentParameterName;
 
 public class ClaimComponent extends AgentComponent
 {

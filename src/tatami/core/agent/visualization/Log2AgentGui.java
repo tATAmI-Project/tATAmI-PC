@@ -14,7 +14,6 @@ package tatami.core.agent.visualization;
 import java.util.Vector;
 
 
-import tatami.core.interfaces.AgentGui;
 import tatami.core.util.logging.Log.DisplayEntity;
 
 public class Log2AgentGui implements DisplayEntity

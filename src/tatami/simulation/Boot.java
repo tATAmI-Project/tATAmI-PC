@@ -22,11 +22,11 @@ import java.util.Set;
 
 import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.claim.parser.ClaimAgentDefinition;
-import tatami.core.interfaces.AgentParameterName;
-import tatami.core.interfaces.AgentParameters;
-import tatami.core.interfaces.JadeInterface;
-import tatami.core.interfaces.Logger;
-import tatami.core.interfaces.JadeInterface.JadeConfig;
+import tatami.core.agent.jade.JadeInterface;
+import tatami.core.agent.jade.JadeInterface.JadeConfig;
+import tatami.core.agent.parametric.AgentParameterName;
+import tatami.core.agent.parametric.AgentParameters;
+import tatami.core.agent.visualization.Logger;
 import tatami.core.util.logging.Log;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.pc.agent.visualization.VisualizationAgent;

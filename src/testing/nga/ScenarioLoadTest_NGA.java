@@ -36,7 +36,7 @@ import tatami.core.agent.claim.parser.ClaimAgentDefinition;
 import tatami.core.agent.claim.parser.Parser;
 import tatami.core.agent.kb.Knowledge;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
-import tatami.core.interfaces.Logger;
+import tatami.core.agent.visualization.Logger;
 import tatami.core.util.logging.Log;
 import tatami.pc.agent.visualization.VisualizationAgent;
 import tatami.pc.util.XML.XMLParser;

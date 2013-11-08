@@ -13,8 +13,8 @@ package tatami.core.agent.webServices;
 
 import java.lang.reflect.Constructor;
 
-import tatami.core.interfaces.AgentComponent;
-import tatami.core.interfaces.AgentParameterName;
+import tatami.core.agent.AgentComponent;
+import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**

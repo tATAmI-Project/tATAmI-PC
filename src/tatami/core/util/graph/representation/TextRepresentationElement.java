@@ -16,7 +16,7 @@ import java.util.List;
 
 
 
-import tatami.core.interfaces.Logger;
+import tatami.core.agent.visualization.Logger;
 import tatami.core.util.ContentHolder;
 import tatami.core.util.graph.Edge;
 import tatami.core.util.graph.GraphComponent;

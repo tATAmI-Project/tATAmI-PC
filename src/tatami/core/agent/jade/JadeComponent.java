@@ -2,8 +2,8 @@ package tatami.core.agent.jade;
 
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
+import tatami.core.agent.AgentComponent;
 import tatami.core.agent.CompositeAgent;
-import tatami.core.interfaces.AgentComponent;
 
 public class JadeComponent extends AgentComponent
 {

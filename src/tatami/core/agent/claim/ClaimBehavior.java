@@ -54,17 +54,17 @@ import tatami.core.agent.claim.parser.ClaimStructure;
 import tatami.core.agent.claim.parser.ClaimValue;
 import tatami.core.agent.claim.parser.ClaimVariable;
 import tatami.core.agent.claim.parser.ClaimWhile;
+import tatami.core.agent.kb.KnowledgeBase;
+import tatami.core.agent.kb.KnowledgeBase.KnowledgeDescription;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
 import tatami.core.agent.parametric.ParametricComponent;
+import tatami.core.agent.visualization.AgentGui;
+import tatami.core.agent.visualization.Logger;
 import tatami.core.agent.visualization.VisualizableComponent;
+import tatami.core.agent.visualization.AgentGui.InputListener;
 import tatami.core.agent.webServices.WebserviceComponent;
 import tatami.core.agent.webServices.WebServiceOntology;
 import tatami.core.agent.webServices.WebServiceOntology.ReceiveOperation;
-import tatami.core.interfaces.AgentGui;
-import tatami.core.interfaces.AgentGui.InputListener;
-import tatami.core.interfaces.KnowledgeBase;
-import tatami.core.interfaces.KnowledgeBase.KnowledgeDescription;
-import tatami.core.interfaces.Logger;
 import tatami.core.util.jade.JadeUtil;
 
 /**

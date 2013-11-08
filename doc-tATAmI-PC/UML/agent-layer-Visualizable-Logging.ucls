@@ -119,8 +119,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="14" language="java" name="tatami.core.interfaces.Logger" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/interfaces/Logger.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="14" language="java" name="tatami.core.agent.visualization.Logger" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/agent/visualization/Logger.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="515" y="1690"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      
@@ -128,8 +128,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <enumeration id="15" language="java" name="tatami.core.interfaces.Logger.Level" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/interfaces/Logger.java" binary="false" corner="BOTTOM_RIGHT">    
+  <enumeration id="15" language="java" name="tatami.core.agent.visualization.Logger.Level" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/agent/visualization/Logger.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="439" y="1385"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      
@@ -137,8 +137,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </enumeration>  
-  <enumeration id="16" language="java" name="tatami.core.interfaces.Logger.LoggerType" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/interfaces/Logger.java" binary="false" corner="BOTTOM_RIGHT">    
+  <enumeration id="16" language="java" name="tatami.core.agent.visualization.Logger.LoggerType" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/agent/visualization/Logger.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="586" y="1361"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      
@@ -155,8 +155,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <interface id="18" language="java" name="tatami.core.interfaces.AgentGui" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/interfaces/AgentGui.java" binary="false" corner="BOTTOM_RIGHT">    
+  <interface id="18" language="java" name="tatami.core.agent.visualization.AgentGui" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/agent/visualization/AgentGui.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="1235" y="691"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      

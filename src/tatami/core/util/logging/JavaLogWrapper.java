@@ -19,7 +19,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
-import tatami.core.interfaces.Logger;
+import tatami.core.agent.visualization.Logger;
 
 /**
  * A {@link Logger}-implementing wrapper of the Java {@link java.util.logging.Logger}.

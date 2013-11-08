@@ -13,7 +13,7 @@ package agent_packages.example.debate.PC;
 
 import java.util.Vector;
 
-import tatami.core.interfaces.AgentGui.InputListener;
+import tatami.core.agent.visualization.AgentGui.InputListener;
 
 import agent_packages.example.debate.PC.PDAAgentGui.PDAComponents;
 

@@ -40,7 +40,7 @@ import javax.swing.event.MouseInputListener;
 
 
 
-import tatami.core.interfaces.Logger;
+import tatami.core.agent.visualization.Logger;
 import tatami.core.util.logging.Log;
 
 public class GCanvas extends JPanel implements MouseInputListener, MouseWheelListener

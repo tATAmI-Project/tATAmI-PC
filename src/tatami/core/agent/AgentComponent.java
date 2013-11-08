@@ -1,11 +1,10 @@
-package tatami.core.interfaces;
+package tatami.core.agent;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import tatami.core.agent.CompositeAgent;
-import tatami.core.interfaces.AgentEventHandler.AgentEventType;
+import tatami.core.agent.AgentEventHandler.AgentEventType;
 
 public abstract class AgentComponent implements Serializable
 {

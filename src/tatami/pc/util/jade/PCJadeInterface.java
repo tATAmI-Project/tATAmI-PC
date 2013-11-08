@@ -26,8 +26,8 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 
-import tatami.core.interfaces.JadeInterface;
-import tatami.core.interfaces.Logger;
+import tatami.core.agent.jade.JadeInterface;
+import tatami.core.agent.visualization.Logger;
 import tatami.core.util.logging.Unit;
 import tatami.core.util.logging.Unit.UnitConfigData;
 

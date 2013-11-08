@@ -1,4 +1,4 @@
-package tatami.core.interfaces;
+package tatami.core.agent.parametric;
 
 import jade.core.Location;
 
@@ -7,7 +7,6 @@ import java.util.Collection;
 import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.claim.parser.ClaimAgentDefinition;
 import tatami.core.agent.hierarchical.HierarchicalComponent;
-import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.VisualizableComponent;
 
 /**

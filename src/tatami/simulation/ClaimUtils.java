@@ -19,7 +19,7 @@ import java.util.Map;
 
 import tatami.core.agent.claim.parser.ClaimAgentDefinition;
 import tatami.core.agent.claim.parser.Parser;
-import tatami.core.interfaces.Logger;
+import tatami.core.agent.visualization.Logger;
 
 /**
  * The purpose of this class is to hold functions that are necessary for the simulation, but are related to CLAIM

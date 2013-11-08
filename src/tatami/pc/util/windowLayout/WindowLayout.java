@@ -16,7 +16,7 @@ import java.util.Map;
 
 
 
-import tatami.core.interfaces.Logger;
+import tatami.core.agent.visualization.Logger;
 import tatami.core.util.logging.Log;
 import tatami.pc.util.windowLayout.LayoutIndications.Bar;
 import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;

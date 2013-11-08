@@ -19,7 +19,7 @@ import javax.swing.JFrame;
 
 
 
-import tatami.core.interfaces.Logger;
+import tatami.core.agent.visualization.Logger;
 import tatami.core.util.logging.Log;
 import tatami.pc.util.graphical.GCanvas;
 import tatami.pc.util.logging.TextAreaLogDisplay;

@@ -16,10 +16,8 @@ import jade.gui.GuiAgent;
 import java.util.Collection;
 import java.util.Map;
 
+import tatami.core.agent.AgentComponent;
 import tatami.core.agent.CompositeAgent;
-import tatami.core.interfaces.AgentComponent;
-import tatami.core.interfaces.AgentParameterName;
-import tatami.core.interfaces.AgentParameters;
 
 /**
  * The base layer of the agent. It handles the interface with Jade, agent parameters, and knowledge.

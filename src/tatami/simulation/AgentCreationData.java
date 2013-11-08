@@ -11,7 +11,7 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import tatami.core.interfaces.AgentParameters;
+import tatami.core.agent.parametric.AgentParameters;
 
 /**
  * Class containing the data for the creation of an agent.

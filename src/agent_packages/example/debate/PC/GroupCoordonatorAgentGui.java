@@ -19,7 +19,7 @@ import java.util.Vector;
 import javax.swing.JTextArea;
 
 
-import tatami.core.interfaces.AgentGui;
+import tatami.core.agent.visualization.AgentGui;
 import tatami.pc.util.windowLayout.WindowLayout;
 import tatami.pc.util.windowLayout.WindowParameters;
 

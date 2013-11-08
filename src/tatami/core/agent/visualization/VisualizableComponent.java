@@ -13,19 +13,17 @@ package tatami.core.agent.visualization;
 
 import java.lang.reflect.Constructor;
 
+import tatami.core.agent.AgentComponent;
+import tatami.core.agent.AgentEventHandler;
 import tatami.core.agent.CompositeAgent;
+import tatami.core.agent.AgentEventHandler.AgentEventType;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.movement.MovementComponent;
+import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
-import tatami.core.interfaces.AgentComponent;
-import tatami.core.interfaces.AgentEventHandler;
-import tatami.core.interfaces.AgentEventHandler.AgentEventType;
-import tatami.core.interfaces.AgentGui;
-import tatami.core.interfaces.AgentGui.AgentGuiConfig;
-import tatami.core.interfaces.AgentGui.DefaultComponent;
-import tatami.core.interfaces.AgentParameterName;
-import tatami.core.interfaces.Logger;
-import tatami.core.interfaces.Logger.Level;
+import tatami.core.agent.visualization.AgentGui.AgentGuiConfig;
+import tatami.core.agent.visualization.AgentGui.DefaultComponent;
+import tatami.core.agent.visualization.Logger.Level;
 import tatami.core.util.Config;
 import tatami.core.util.logging.Log.ReportingEntity;
 import tatami.core.util.logging.Unit;

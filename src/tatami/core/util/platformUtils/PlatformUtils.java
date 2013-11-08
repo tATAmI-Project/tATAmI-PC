@@ -11,7 +11,7 @@
  ******************************************************************************/
 package tatami.core.util.platformUtils;
 
-import tatami.core.interfaces.Logger.LoggerType;
+import tatami.core.agent.visualization.Logger.LoggerType;
 
 /**
  * Platform-related functionality. All functions should be static.

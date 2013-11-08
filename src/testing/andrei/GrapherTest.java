@@ -14,8 +14,8 @@ package testing.andrei;
 import java.util.Random;
 
 
-import tatami.core.interfaces.Logger;
-import tatami.core.interfaces.Logger.Level;
+import tatami.core.agent.visualization.Logger;
+import tatami.core.agent.visualization.Logger.Level;
 import tatami.core.util.graph.Edge;
 import tatami.core.util.graph.Graph;
 import tatami.core.util.graph.Node;

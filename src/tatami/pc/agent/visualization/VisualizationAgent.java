@@ -27,8 +27,8 @@ import java.util.TimerTask;
 
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.visualization.VisualizationOntology;
+import tatami.core.agent.visualization.Logger.Level;
 import tatami.core.agent.visualization.VisualizationOntology.Vocabulary;
-import tatami.core.interfaces.Logger.Level;
 import tatami.core.util.graph.Edge;
 import tatami.core.util.graph.Graph;
 import tatami.core.util.graph.Node;

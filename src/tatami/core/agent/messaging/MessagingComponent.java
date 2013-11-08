@@ -3,9 +3,9 @@ package tatami.core.agent.messaging;
 import java.util.HashMap;
 import java.util.Map;
 
+import tatami.core.agent.AgentComponent;
+import tatami.core.agent.AgentEventHandler;
 import tatami.core.agent.CompositeAgent;
-import tatami.core.interfaces.AgentComponent;
-import tatami.core.interfaces.AgentEventHandler;
 
 public class MessagingComponent extends AgentComponent
 {

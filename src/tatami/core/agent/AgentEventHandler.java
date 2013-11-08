@@ -1,4 +1,4 @@
-package tatami.core.interfaces;
+package tatami.core.agent;
 
 public interface AgentEventHandler
 {

@@ -25,7 +25,7 @@ import java.util.Vector;
 
 
 
-import tatami.core.interfaces.Logger.Level;
+import tatami.core.agent.visualization.Logger.Level;
 import tatami.core.util.graph.GraphPattern.EdgeP;
 import tatami.core.util.graph.GraphPattern.NodeP;
 import tatami.core.util.graph.representation.TextGraphRepresentation;

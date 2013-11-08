@@ -1,12 +1,11 @@
 package tatami.core.agent.kb;
 
+import tatami.core.agent.AgentComponent;
 import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.kb.simple.SimpleKB;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
+import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
-import tatami.core.interfaces.AgentComponent;
-import tatami.core.interfaces.AgentParameterName;
-import tatami.core.interfaces.KnowledgeBase;
 import tatami.core.util.graph.Edge;
 import tatami.core.util.graph.Graph;
 import tatami.core.util.graph.representation.TextGraphRepresentation;

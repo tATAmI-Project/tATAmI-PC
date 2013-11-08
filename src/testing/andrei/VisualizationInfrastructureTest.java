@@ -13,9 +13,9 @@ package testing.andrei;
 
 
 
+import tatami.core.agent.jade.JadeInterface.JadeConfig;
+import tatami.core.agent.visualization.Logger;
 import tatami.core.agent.visualization.VisualizableComponent;
-import tatami.core.interfaces.Logger;
-import tatami.core.interfaces.JadeInterface.JadeConfig;
 import tatami.core.util.logging.Log;
 import tatami.pc.agent.visualization.VisualizationAgent;
 import tatami.pc.util.jade.PCJadeInterface;

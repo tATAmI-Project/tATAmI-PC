@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package tatami.core.interfaces;
+package tatami.core.agent.visualization;
 
 import java.io.Serializable;
 import java.util.Collection;

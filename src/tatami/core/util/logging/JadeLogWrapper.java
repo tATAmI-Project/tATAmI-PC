@@ -13,7 +13,7 @@ package tatami.core.util.logging;
 
 import java.io.OutputStream;
 
-import tatami.core.interfaces.Logger;
+import tatami.core.agent.visualization.Logger;
 
 /**
  * INCOMPLETE

@@ -93,8 +93,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <interface id="11" language="java" name="tatami.core.interfaces.AgentGui.InputListener" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/interfaces/AgentGui.java" binary="false" corner="BOTTOM_RIGHT">    
+  <interface id="11" language="java" name="tatami.core.agent.visualization.AgentGui.InputListener" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/agent/visualization/AgentGui.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="841" y="614"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      
@@ -102,8 +102,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <interface id="12" language="java" name="tatami.core.interfaces.AgentGui" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/interfaces/AgentGui.java" binary="false" corner="BOTTOM_RIGHT">    
+  <interface id="12" language="java" name="tatami.core.agent.visualization.AgentGui" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/core/agent/visualization/AgentGui.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="611" y="463"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      

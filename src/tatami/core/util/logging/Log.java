@@ -22,9 +22,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-import tatami.core.interfaces.Logger;
-import tatami.core.interfaces.Logger.Level;
-import tatami.core.interfaces.Logger.LoggerType;
+import tatami.core.agent.visualization.Logger;
+import tatami.core.agent.visualization.Logger.Level;
+import tatami.core.agent.visualization.Logger.LoggerType;
 
 /**
  * Implements a log, based on a log4j log. The idea is to have a standard log4j {@link Logger}, but with some additional

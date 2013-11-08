@@ -15,8 +15,8 @@ import java.io.ByteArrayInputStream;
 
 
 
-import tatami.core.interfaces.Logger;
-import tatami.core.interfaces.Logger.Level;
+import tatami.core.agent.visualization.Logger;
+import tatami.core.agent.visualization.Logger.Level;
 import tatami.core.util.graph.Graph;
 import tatami.core.util.graph.GraphMatcher;
 import tatami.core.util.graph.GraphPattern;

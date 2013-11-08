@@ -16,7 +16,7 @@ import java.io.OutputStream;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.WriterAppender;
 
-import tatami.core.interfaces.Logger;
+import tatami.core.agent.visualization.Logger;
 
 /**
  * A {@link Logger}-implementing wrapper of the Log4J {@link org.apache.log4j.Logger}.

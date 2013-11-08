@@ -1,7 +1,7 @@
 package tatami.core.agent.movement;
 
+import tatami.core.agent.AgentComponent;
 import tatami.core.agent.CompositeAgent;
-import tatami.core.interfaces.AgentComponent;
 
 public class MovementComponent extends AgentComponent
 {

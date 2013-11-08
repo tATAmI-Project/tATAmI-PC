@@ -26,7 +26,7 @@ import java.util.Set;
 
 
 
-import tatami.core.interfaces.Logger;
+import tatami.core.agent.visualization.Logger;
 import tatami.core.util.graph.GraphPattern.NodeP;
 import tatami.core.util.graph.representation.LinearGraphRepresentation;
 import tatami.core.util.logging.Unit;

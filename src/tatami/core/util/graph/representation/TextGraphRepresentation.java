@@ -20,7 +20,7 @@ import java.util.Stack;
 
 
 
-import tatami.core.interfaces.Logger;
+import tatami.core.agent.visualization.Logger;
 import tatami.core.util.ContentHolder;
 import tatami.core.util.graph.Edge;
 import tatami.core.util.graph.Graph;

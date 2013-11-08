@@ -11,9 +11,9 @@
  ******************************************************************************/
 package tatami.core.util.logging;
 
-import tatami.core.interfaces.Logger;
-import tatami.core.interfaces.Logger.Level;
-import tatami.core.interfaces.Logger.LoggerType;
+import tatami.core.agent.visualization.Logger;
+import tatami.core.agent.visualization.Logger.Level;
+import tatami.core.agent.visualization.Logger.LoggerType;
 import tatami.core.util.Config;
 import tatami.core.util.logging.Log.DisplayEntity;
 import tatami.core.util.logging.Log.ReportingEntity;
