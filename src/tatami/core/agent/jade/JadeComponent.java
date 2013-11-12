@@ -24,4 +24,10 @@ public class JadeComponent extends AgentComponent
 		jadeAgent.doDelete();
 	}
 	
+	public String getLocalName()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 }
