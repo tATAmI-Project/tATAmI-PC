@@ -11,61 +11,104 @@
  ******************************************************************************/
 package tatami.core.agent.parametric;
 
-import jade.gui.GuiAgent;
-
 import java.util.Collection;
 import java.util.Map;
 
 import tatami.core.agent.AgentComponent;
-import tatami.core.agent.CompositeAgent;
 
 /**
- * The base layer of the agent. It handles the interface with Jade, agent parameters, and knowledge.
+ * This basic component of the agent handles agent parameters.
  * <p>
- * It is extended on top of and works directly with Jade's {@link GuiAgent}.
+ * It contains the list of agent's parameters and implements methods for retrieving parameters.
  * <p>
- * It implements {@link ParametrizedAgent}, contains the list of agent's parameters and implements
- * methods for working with parameters.
+ * The class is underpinned by an {@link AgentParameters} instance.
+ * <p>
+ * Access to 'registered' parameters (specified in {@link AgentParameterName}) can be only be done per-name.
+ * 'Unregistered' parameters can also be retrieved in bulk.
  * 
  * @author Andrei Olaru
  */
 public class ParametricComponent extends AgentComponent
 {
 	/**
-	 * The agent's parameters.
-	 * <p>
-	 * They can only be accessed by this level of the agent, which serves them to the layers above
-	 * through specialized functions.
+	 * Class UID
 	 */
-	private AgentParameters	parameters	= null;
+	private static final long	serialVersionUID	= -409355822786197494L;
 	
-	public ParametricComponent(CompositeAgent parent, AgentParameters agentParameters)
+	/**
+	 * The agent's parameters. They are served to other components by means of specialized methods.
+	 */
+	private AgentParameters		parameters			= null;
+	
+	/**
+	 * Constructs a new instance of parametric component.
+	 * 
+	 * @param agentParameters
+	 *            - the initial parameters of the agent.
+	 */
+	public ParametricComponent(AgentParameters agentParameters)
 	{
-		super(parent, AgentComponentName.PARAMETRIC_COMPONENT);
+		super(AgentComponentName.PARAMETRIC_COMPONENT);
 		
 		parameters = agentParameters;
 	}
 	
+	/**
+	 * Retrieves a value associated with the name (it may not be the only one). An exception may be thrown if the first
+	 * found value is not a {@link String} instance.
+	 * 
+	 * @param name
+	 *            - the name of the searched entry.
+	 * @return the first found value associated with the name.
+	 */
 	public final String parVal(AgentParameterName name)
 	{
 		return parameters.getValue(name.toString());
 	}
 	
+	/**
+	 * Retrieves all value associated with the name. An exception may be thrown if any value is not a {@link String}
+	 * instance.
+	 * 
+	 * @param name
+	 *            - the name of the searched entry(ies).
+	 * @return a {@link Collection} of values associated with the name.
+	 */
 	public final Collection<String> parVals(AgentParameterName name)
 	{
 		return parameters.getValues(name.toString());
 	}
 	
+	/**
+	 * Retrieves a value associated with the name (it may not be the only one).
+	 * 
+	 * @param name
+	 *            - the name of the searched entry.
+	 * @return the first found value associated with the name, as an {@link Object} instance.
+	 */
 	public final Object parObj(AgentParameterName name)
 	{
 		return parameters.getObject(name.toString());
 	}
 	
+	/**
+	 * Indicates whether a parameter with the specified name has been set.
+	 * 
+	 * @param name
+	 *            - the name of the searched entry.
+	 * @return <code>true</code> if any entry exists with the specified name.
+	 */
 	public final boolean hasPar(AgentParameterName name)
 	{
 		return parameters.isSet(name.toString());
 	}
 	
+	/**
+	 * Retrieves a {@link Map} with the 'unregistered' parameters - those parameters whose name does not correspond to a
+	 * {@link AgentParameterName} instance.
+	 * 
+	 * @return the map of entries. Multiple entries with the same name will be ignored.
+	 */
 	public Map<String, Object> getUnregisteredParameters()
 	{
 		return parameters.getUnregisteredParameters();

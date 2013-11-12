@@ -4,21 +4,16 @@ import jade.core.Location;
 
 import java.util.Collection;
 
-import tatami.core.agent.claim.ClaimComponent;
-import tatami.core.agent.claim.parser.ClaimAgentDefinition;
-import tatami.core.agent.hierarchical.HierarchicalComponent;
-import tatami.core.agent.visualization.VisualizableComponent;
-
 /**
- * Here be all names of parameters used by any layer of the agent.
+ * Here be all names of 'registered' parameters (see {@link AgentParameters}) used by any component of the agent.
  * <p>
- * Each parameter has an internal name - the constant in the enum - and the name in the scenario
- * - given in the constructor of the enum constant.
+ * Each parameter has an internal name - the constant in the enum - and the name in the scenario file - given in the
+ * constructor of the enum constant.
  * <p>
  * It would be advised that these values be used when reading from the XML file.
  * <p>
- * Note about the javadoc: some links were not included in order to avoid imports outside of the
- * <code>core</code> package.
+ * Note about the javadoc: some links were not included in order to avoid imports outside of the <code>core</code>
+ * package.
  * 
  * @author Andrei Olaru
  * 
@@ -27,18 +22,17 @@ public enum AgentParameterName {
 	
 	// ///////// Simulation/Boot
 	/**
-	 * The class (for non-CLAIM agents) or the type (adf definition) (for CLAIM agents) of the
-	 * agent.
+	 * The class (for non-CLAIM agents) or the type (adf definition) (for CLAIM agents) of the agent.
 	 * 
-	 * Used by <code>simulation.Boot</code> (to load the agent) and <code>WSAgent</code> (to
-	 * register the service under this type).
+	 * Used by <code>simulation.Boot</code> (to load the agent) and <code>WSAgent</code> (to register the service under
+	 * this type).
 	 */
 	AGENT_CLASS("class"),
 	
 	/**
 	 * Specifies the classes with java code to attach to the agent definition.
 	 * 
-	 * Used by <code>simulation.Boot</code> / {@link ClaimAgent}.
+	 * Used by <code>simulation.Boot</code> / <code>claim.ClaimComponent</code>.
 	 */
 	JAVA_CODE("java-code"),
 	
@@ -75,15 +69,13 @@ public enum AgentParameterName {
 	/**
 	 * Agent packages with classes that are relevant to this agent (GUIs, java functions, etc).
 	 * 
-	 * Used by {@link VisualizableAgent} (for the GUI) and {@link ClaimAgent} (for java function
-	 * classes).
+	 * Used by {@link VisualizableAgent} (for the GUI) and {@link ClaimAgent} (for java function classes).
 	 */
 	AGENT_PACKAGE("agentPackage"),
 	
 	// ///////// HierarchicalAgent
 	/**
-	 * Equals <code>"true"</code> if the agent should not leave its container when the parent
-	 * moves.
+	 * Equals <code>"true"</code> if the agent should not leave its container when the parent moves.
 	 * 
 	 * Used by {@link HierarchicalAgent}.
 	 */
@@ -97,8 +89,7 @@ public enum AgentParameterName {
 	HIERARCHICAL_PARENT("parent"),
 	
 	/**
-	 * The initial location of the agent (where the agent should move to immediately after
-	 * creation).
+	 * The initial location of the agent (where the agent should move to immediately after creation).
 	 * 
 	 * Is a {@link Location}.
 	 * 
@@ -143,6 +134,10 @@ public enum AgentParameterName {
 	
 	String	name	= null;
 	
+	/**
+	 * @param parName
+	 *            - the name of the parameter as will appear in the scenario file.
+	 */
 	private AgentParameterName(String parName)
 	{
 		name = parName;
@@ -154,6 +149,12 @@ public enum AgentParameterName {
 		return name;
 	}
 	
+	/**
+	 * Retrieves the {@link AgentParameterName} instance that corresponds to the specified name.
+	 * 
+	 * @param name - the name to search for (the name with which the instance was created).
+	 * @return - the corresponding {@link AgentParameterName} instance.
+	 */
 	public static AgentParameterName getName(String name)
 	{
 		for(AgentParameterName parName : AgentParameterName.values())
