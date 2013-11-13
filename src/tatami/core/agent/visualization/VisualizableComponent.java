@@ -235,11 +235,20 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		
 		// configure log / logging Unit
 		
+<<<<<<< HEAD
 		loggingUnit = (UnitComponentExt) new UnitComponentExt().setUnitName(getAgentName()).setLogEnsureNew()
 				.setLogReporter(this).setLogType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL);
+=======
+		loggingUnit = new UnitComponentExt().setName(getAgentName()).ensureNew().setReporter(this)
+				.setType(PlatformUtils.platformLogType()).setLevel(Level.ALL);
+>>>>>>> refs/remotes/github/tATAmI-3A/andrei
 		if(gui != null)
 			// unitConfig.setTextArea((TextArea)((PCDefaultAgentGui)gui).getComponent(DefaultComponent.AGENT_LOG.toString()));
+<<<<<<< HEAD
 			loggingUnit.setLogDisplay(new Log2AgentGui(gui, DefaultComponent.AGENT_LOG.toString()));
+=======
+			loggingUnit.setDisplay(new Log2AgentGui(gui, DefaultComponent.AGENT_LOG.toString()));
+>>>>>>> refs/remotes/github/tATAmI-3A/andrei
 		
 		getLog().trace("visualization on platform " + PlatformUtils.getPlatform());
 	}
