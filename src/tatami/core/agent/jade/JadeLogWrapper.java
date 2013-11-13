@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package tatami.core.util.logging;
+package tatami.core.agent.jade;
 
 import java.io.OutputStream;
 
