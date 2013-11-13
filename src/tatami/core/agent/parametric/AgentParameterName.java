@@ -1,7 +1,5 @@
 package tatami.core.agent.parametric;
 
-import jade.core.Location;
-
 import java.util.Collection;
 
 /**

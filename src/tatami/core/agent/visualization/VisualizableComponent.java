@@ -13,9 +13,14 @@ package tatami.core.agent.visualization;
 
 import java.lang.reflect.Constructor;
 
+import net.xqhs.util.config.Config;
+import net.xqhs.util.logging.Logger;
+import net.xqhs.util.logging.Logger.Level;
+import net.xqhs.util.logging.Logging.ReportingEntity;
+import net.xqhs.util.logging.Unit;
+import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEventHandler;
-import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.AgentEventHandler.AgentEventType;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.movement.MovementComponent;
@@ -23,18 +28,34 @@ import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.AgentGui.AgentGuiConfig;
 import tatami.core.agent.visualization.AgentGui.DefaultComponent;
-import tatami.core.agent.visualization.Logger.Level;
-import tatami.core.util.Config;
-import tatami.core.util.logging.Log.ReportingEntity;
-import tatami.core.util.logging.Unit;
-import tatami.core.util.logging.Unit.UnitConfigData;
 import tatami.core.util.platformUtils.PlatformUtils;
 
+/**
+ * This component manages all things related to the visualization and remote control of the agent. Namely:
+ * <ul>
+ * <li>the agent's log
+ * <li>reporting the agent's log to the VisualizationAngent (if any)
+ * <li>reporting information related to the hierarchical structure of agents
+ * <li>handling of orderly exit of agents
+ * </ul>
+ * 
+ * @author Andrei Olaru
+ */
 public class VisualizableComponent extends AgentComponent implements ReportingEntity
 {
+	/**
+	 * Class UID.
+	 */
+	private static final long	serialVersionUID	= -5680276720645213673L;
+	
+	/**
+	 * The vocabulary of message types related to visualization.
+	 * 
+	 * @author Andrei Olaru
+	 */
 	public static enum Vocabulary {
 		/**
-		 * The name of the component.
+		 * The name of this component.
 		 */
 		VISUALIZATION,
 		
@@ -64,8 +85,8 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		VISUALIZATION_MONITOR,
 		
 		/**
-		 * Sent by Simulator to the Visualizer, to instruct all visualized agents to exit, following
-		 * user request to end simulation.
+		 * Sent by Simulator to the Visualizer, to instruct all visualized agents to exit, following user request to end
+		 * simulation.
 		 */
 		PREPARE_EXIT,
 		
@@ -75,36 +96,38 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		DO_EXIT,
 	}
 	
-	// logging
 	/**
-	 * the logging {@link Unit}.
+	 * The logging {@link Unit}.
 	 */
-	protected transient Unit		loggingUnit			= null;
+	protected transient UnitComponentExt	loggingUnit			= null;
 	/**
-	 * provides easier access to the log. Should always be equal to
-	 * <code>loggingUnit.getLog()</code>. Also provided by <code>getLog()</code> .
+	 * The {@link Config} for the GUI. Should remain the same object throughout the agent's lifecycle, although it may
+	 * be changed, and the agent's gui will be recreated.
 	 */
-	protected transient Logger		log					= null;
+	protected AgentGuiConfig				guiConfig			= new AgentGuiConfig();
 	/**
-	 * The {@link Config} fort the GUI. Should remain the same object throughout the agent's
-	 * lifecycle, although it may be changed, and the agent's gui will be recreated.
+	 * The GUI implementation. Depends on platform, but implements {@link AgentGui}.
 	 */
-	protected AgentGuiConfig		guiConfig			= new AgentGuiConfig();
-	protected transient AgentGui	gui					= null;
-	private String					visualizationParent	= null;
-	private String					currentContainer	= null;
+	protected transient AgentGui			gui					= null;
+	/**
+	 * The name of the entity to which the agent has to report.
+	 */
+	private String							visualizationParent	= null;
+	/**
+	 * The name of the entity which serves as the current container for the agent.
+	 */
+	private String							currentContainer	= null;
 	
 	/**
 	 * windowType should be set before if a special value is needed
 	 */
-	public VisualizableComponent(CompositeAgent parent)
+	public VisualizableComponent()
 	{
-		super(parent, AgentComponentName.VISUALIZABLE_COMPONENT);
-		ParametricComponent parametric = (ParametricComponent)parentAgent
-				.getComponent(AgentComponentName.PARAMETRIC_COMPONENT);
+		super(AgentComponentName.VISUALIZABLE_COMPONENT);
 		
-		// set gui
-		guiConfig.setWindowName(parent.getAgentName());
+		// set GUI
+		guiConfig.setWindowName(getAgentName());
+		ParametricComponent parametric = getParametric();
 		if((parametric != null) && parametric.hasPar(AgentParameterName.WINDOW_TYPE))
 			guiConfig.setWindowType(parametric.parVal(AgentParameterName.WINDOW_TYPE));
 		
@@ -113,28 +136,29 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		// behaviors
 		
 		// receive the visualization root
-		final MessagingComponent msgr = (MessagingComponent)parentAgent
-				.getComponent(AgentComponentName.MESSAGING_COMPONENT);
+		final MessagingComponent msgr = getMessaging();
 		if(msgr != null)
 		{
-			msgr.registerMessageReceiver(msgr.makePath(Vocabulary.VISUALIZATION.toString(),
-					Vocabulary.VISUALIZATION_MONITOR.toString()), new AgentEventHandler() {
-				@Override
-				public void handleEvent(AgentEventType eventType, Object eventData)
-				{
-					visualizationParent = msgr.extractContent(eventData);
-					getLog().info("visualization root received: [" + visualizationParent + "]");
-				}
-			});
 			msgr.registerMessageReceiver(
-					msgr.makePath(Vocabulary.VISUALIZATION.toString(),
-							Vocabulary.DO_EXIT.toString()), new AgentEventHandler() {
+					msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.VISUALIZATION_MONITOR.toString()),
+					new AgentEventHandler() {
+						@Override
+						public void handleEvent(AgentEventType eventType, Object eventData)
+						{
+							String parent = msgr.extractContent(eventData);
+							setVisualizationParent(parent);
+							getLog().info("visualization root received: [" + parent + "]");
+						}
+					});
+			msgr.registerMessageReceiver(
+					msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.DO_EXIT.toString()),
+					new AgentEventHandler() {
 						@SuppressWarnings("synthetic-access")
 						@Override
 						public void handleEvent(AgentEventType eventType, Object eventData)
 						{
 							getLog().info("exiting...");
-							parentAgent.postAgentEvent(AgentEventType.AGENT_EXIT);
+							postAgentEvent(AgentEventType.AGENT_EXIT);
 						}
 					});
 		}
@@ -143,8 +167,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			@Override
 			public void handleEvent(AgentEventType eventType, Object eventData)
 			{
-				MovementComponent mvmt = (MovementComponent)parentAgent
-						.getComponent(AgentComponentName.MOVEMENT_COMPONENT);
+				MovementComponent mvmt = (MovementComponent) getComponent(AgentComponentName.MOVEMENT_COMPONENT);
 				if(mvmt != null)
 				{
 					String destination = mvmt.extractDestination(eventData);
@@ -162,7 +185,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			public void handleEvent(AgentEventType eventType, Object eventData)
 			{
 				resetVisualization();
-				log.info(parentAgent.getAgentName() + ": arrived after move");
+				getLog().info(getAgentName() + ": arrived after move");
 			}
 		});
 		
@@ -183,13 +206,11 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		ClassLoader cl = null;
 		
 		/*
-		 * if (hasPar(AgentParameterName.GUI)) {
-		 * guiConfig.setGuiClass(parVal(AgentParameterName.GUI),
+		 * if (hasPar(AgentParameterName.GUI)) { guiConfig.setGuiClass(parVal(AgentParameterName.GUI),
 		 * parVals(AgentParameterName.AGENT_PACKAGE)); // overrides any }
 		 */
 		
-		ParametricComponent parametric = (ParametricComponent)parentAgent
-				.getComponent(AgentComponentName.PARAMETRIC_COMPONENT);
+		ParametricComponent parametric = getParametric();
 		if(parametric != null && parametric.hasPar(AgentParameterName.GUI))
 			guiConfig.setGuiClass(parametric.parVal(AgentParameterName.GUI),
 					parametric.parVals(AgentParameterName.AGENT_PACKAGE));
@@ -199,16 +220,14 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			/*
 			 * if (PlatformUtils.Platform.ANDROID.equals(PlatformUtils .getPlatform()))
 			 * 
-			 * guiConfig.setGuiClass(parVal(AgentParameterName.GUI),
-			 * parVals(AgentParameterName.AGENT_PACKAGE));
+			 * guiConfig.setGuiClass(parVal(AgentParameterName.GUI), parVals(AgentParameterName.AGENT_PACKAGE));
 			 */
 			
 			cl = new ClassLoader(getClass().getClassLoader()) {
 				// nothing to extend
 			};
-			Constructor<?> cons = cl.loadClass(guiConfig.guiClassName).getConstructor(
-					AgentGuiConfig.class);
-			gui = (AgentGui)cons.newInstance(guiConfig);
+			Constructor<?> cons = cl.loadClass(guiConfig.guiClassName).getConstructor(AgentGuiConfig.class);
+			gui = (AgentGui) cons.newInstance(guiConfig);
 		} catch(Exception e)
 		{
 			e.printStackTrace(); // there is no log yet
@@ -216,23 +235,19 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		
 		// configure log / logging Unit
 		
-		UnitConfigData unitConfig = new UnitConfigData().setName(parentAgent.getAgentName())
-				.ensureNew().setReporter(this);
-		unitConfig.setType(PlatformUtils.platformLogType());
-		unitConfig.setLevel(Level.ALL);
+		loggingUnit = (UnitComponentExt) new UnitComponentExt().setUnitName(getAgentName()).setLogEnsureNew()
+				.setLogReporter(this).setLogType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL);
 		if(gui != null)
 			// unitConfig.setTextArea((TextArea)((PCDefaultAgentGui)gui).getComponent(DefaultComponent.AGENT_LOG.toString()));
-			unitConfig.setDisplay(new Log2AgentGui(gui, DefaultComponent.AGENT_LOG.toString()));
-		loggingUnit = new Unit(unitConfig);
-		log = getLog();
+			loggingUnit.setLogDisplay(new Log2AgentGui(gui, DefaultComponent.AGENT_LOG.toString()));
 		
-		log.trace("visualization on platform " + PlatformUtils.getPlatform());
+		getLog().trace("visualization on platform " + PlatformUtils.getPlatform());
 	}
 	
 	protected void removeVisualization()
 	{
 		getLog().trace("closing visualization");
-		loggingUnit.exit();
+		loggingUnit.doExit();
 		if(gui != null)
 			gui.close();
 	}
@@ -258,8 +273,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		// FIXME: check correct type
 		if(visualizationParent != null)
 		{
-			final MessagingComponent msgr = (MessagingComponent)parentAgent
-					.getComponent(AgentComponentName.MESSAGING_COMPONENT);
+			MessagingComponent msgr = (MessagingComponent) getComponent(AgentComponentName.MESSAGING_COMPONENT);
 			if(msgr != null)
 			{
 				msgr.sendMessage(visualizationParent, msgr.makePath(reportType.toString()), content);
@@ -269,9 +283,14 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		return false;
 	}
 	
+	protected void setVisualizationParent(String parentName)
+	{
+		visualizationParent = parentName;
+	}
+	
 	public Logger getLog()
 	{
-		return loggingUnit.getLog();
+		return loggingUnit;
 	}
 	
 	public AgentGui getGUI()

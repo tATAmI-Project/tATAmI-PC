@@ -13,8 +13,7 @@ package tatami.core.agent.visualization;
 
 import java.util.Vector;
 
-
-import tatami.core.util.logging.Log.DisplayEntity;
+import net.xqhs.util.logging.Logging.DisplayEntity;
 
 public class Log2AgentGui implements DisplayEntity
 {

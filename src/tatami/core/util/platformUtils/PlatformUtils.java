@@ -11,7 +11,8 @@
  ******************************************************************************/
 package tatami.core.util.platformUtils;
 
-import tatami.core.agent.visualization.Logger.LoggerType;
+import net.xqhs.util.logging.Log.LoggerType;
+
 
 /**
  * Platform-related functionality. All functions should be static.

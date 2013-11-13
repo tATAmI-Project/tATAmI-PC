@@ -15,7 +15,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Vector;
 
-import tatami.core.util.Config;
+import net.xqhs.util.config.Config;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 public interface AgentGui
@@ -26,23 +26,23 @@ public interface AgentGui
 	
 	public class AgentGuiConfig extends Config implements Serializable
 	{
-		private static final long				   serialVersionUID	= -5605500962863357519L;
+		private static final long					serialVersionUID	= -5605500962863357519L;
 		
-		private static final String				 DEFAULT_WINDOW_TYPE = "agent";
-		private static final String				 DEFAULT_AGENT_GUI   = "DefaultAgentGui";
+		private static final String					DEFAULT_WINDOW_TYPE	= "agent";
+		private static final String					DEFAULT_AGENT_GUI	= "DefaultAgentGui";
 		// FIXME should be elsewhere
-		private static final String				 ROOT_PACKAGE		= "tatami";
-		private static final String				 DEFAULT_GUI_PATH	= "agent.visualization";
-		//private static final String				 ANDROID_GUI		 = "AndroidDefaultAgentGui";
-		private static final PlatformUtils.Platform DEFAULT_PLATFORM	= PlatformUtils.Platform.PC;
+		private static final String					ROOT_PACKAGE		= "tatami";
+		private static final String					DEFAULT_GUI_PATH	= "agent.visualization";
+		// private static final String ANDROID_GUI = "AndroidDefaultAgentGui";
+		private static final PlatformUtils.Platform	DEFAULT_PLATFORM	= PlatformUtils.Platform.PC;
 		
-		protected String overrideClassName = null;
+		protected String							overrideClassName	= null;
 		// FIXME: make protected or private
-		public String							   guiClassName;								   // initialized
-		// FIXME: make protected or private																							 // makeDefaults
-		public String							   windowName		  = null;
+		public String								guiClassName;										// initialized
+		// FIXME: make protected or private // makeDefaults
+		public String								windowName			= null;
 		// FIXME: make protected or private
-		public String							   windowType		  = DEFAULT_WINDOW_TYPE;
+		public String								windowType			= DEFAULT_WINDOW_TYPE;
 		
 		public AgentGuiConfig()
 		{
@@ -73,7 +73,6 @@ public interface AgentGui
 			overrideClassName = className;
 			return this;
 		}
-		
 		
 		public AgentGuiConfig setGuiClass(String className, Collection<String> packages)
 		{

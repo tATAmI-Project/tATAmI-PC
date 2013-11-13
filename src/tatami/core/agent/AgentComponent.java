@@ -16,13 +16,12 @@ import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.webServices.WebserviceComponent;
 
 /**
- * This class serves as base for agent component. a component is characterized by its functionality,
- * denominated by means of its name -- an instance of {@link AgentComponentName}.
+ * This class serves as base for agent component. a component is characterized by its functionality, denominated by
+ * means of its name -- an instance of {@link AgentComponentName}.
  * <p>
  * A component can belong to at most one {@link CompositeAgent}, which is its parent.
  * <p>
- * The class serves as a relay to access some package-accessible functionality from
- * {@link CompositeAgent}.
+ * The class serves as a relay to access some package-accessible functionality from {@link CompositeAgent}.
  * 
  * @author Andrei Olaru
  */
@@ -88,15 +87,15 @@ public abstract class AgentComponent implements Serializable
 	/**
 	 * The name of the component, as instance of {@link AgentComponentName}.
 	 */
-	protected AgentComponentName						componentName	= null;
+	private AgentComponentName						componentName	= null;
 	/**
 	 * The {@link CompositeAgent} instance that this instance is part of.
 	 */
-	protected CompositeAgent							parentAgent;
+	private CompositeAgent							parentAgent;
 	/**
 	 * The {@link AgentEventHandler} instances that respond to various events in the agent.
 	 */
-	protected Map<AgentEventType, AgentEventHandler>	eventHandlers	= new HashMap<AgentEventHandler.AgentEventType, AgentEventHandler>();
+	private Map<AgentEventType, AgentEventHandler>	eventHandlers	= new HashMap<AgentEventHandler.AgentEventType, AgentEventHandler>();
 	
 	/**
 	 * The constructor assigns the name to the component
@@ -110,11 +109,11 @@ public abstract class AgentComponent implements Serializable
 	}
 	
 	/**
-	 * Setter for the parent of the agent. If an agent instance is already a parent of this
-	 * component, <code>removeParent</code> must be called first.
+	 * Setter for the parent of the agent. If an agent instance is already a parent of this component,
+	 * <code>removeParent</code> must be called first.
 	 * <p>
-	 * After assigning the parent, <code>the parentChangeNotifier</code> method will be called, so
-	 * that extending classes can take appropriate action.
+	 * After assigning the parent, <code>the parentChangeNotifier</code> method will be called, so that extending
+	 * classes can take appropriate action.
 	 * 
 	 * @param parent
 	 *            - the {@link CompositeAgent} instance that this component is part of.
@@ -127,8 +126,7 @@ public abstract class AgentComponent implements Serializable
 	}
 	
 	/**
-	 * Extending classes can override this method to perform actions when the parent of the
-	 * component changes.
+	 * Extending classes can override this method to perform actions when the parent of the component changes.
 	 * 
 	 * @param oldParent
 	 *            - the previous value for the parent, if any.
@@ -139,11 +137,10 @@ public abstract class AgentComponent implements Serializable
 	}
 	
 	/**
-	 * Sets the parent of the component to <code>null</code>, effectively eliminating the component
-	 * from the agent.
+	 * Sets the parent of the component to <code>null</code>, effectively eliminating the component from the agent.
 	 * <p>
-	 * After assigning the parent, <code>the parentChangeNotifier</code> method will be called, so
-	 * that extending classes can take appropriate action.
+	 * After assigning the parent, <code>the parentChangeNotifier</code> method will be called, so that extending
+	 * classes can take appropriate action.
 	 */
 	final void removeParent()
 	{
@@ -153,11 +150,11 @@ public abstract class AgentComponent implements Serializable
 	}
 	
 	/**
-	 * Extending classes should use this method to register {@link AgentEventHandler} instances that
-	 * would be invoked when the specified {@link AgentEventType} appears.
+	 * Extending classes should use this method to register {@link AgentEventHandler} instances that would be invoked
+	 * when the specified {@link AgentEventType} appears.
 	 * <p>
-	 * Should a handler for the same event already exist, the old handler will be discarded. A
-	 * reference to it will be returned.
+	 * Should a handler for the same event already exist, the old handler will be discarded. A reference to it will be
+	 * returned.
 	 * 
 	 * @param event
 	 *            - the agent event to be handled, as an {@link AgentEventType} instance.
@@ -177,9 +174,19 @@ public abstract class AgentComponent implements Serializable
 	/**
 	 * @return the name of the component (instance of {@link AgentComponentName}).
 	 */
-	AgentComponentName getComponentName()
+	protected AgentComponentName getComponentName()
 	{
 		return componentName;
+	}
+	
+	/**
+	 * Retrieves the parent of the component.
+	 * 
+	 * @return the {@link CompositeAgent} instance this component belongs to.
+	 */
+	protected CompositeAgent getParent()
+	{
+		return parentAgent;
 	}
 	
 	/**
@@ -189,7 +196,7 @@ public abstract class AgentComponent implements Serializable
 	 *            - the name of the component.
 	 * @return <code>true</code> if the component exists, false otherwise.
 	 */
-	boolean hasComponent(AgentComponentName name)
+	protected boolean hasComponent(AgentComponentName name)
 	{
 		return parentAgent.hasComponent(name);
 	}
@@ -201,7 +208,7 @@ public abstract class AgentComponent implements Serializable
 	 *            - the name of the component.
 	 * @return the {@link AgentComponent} instance, if any. <code>null</code> otherwise.
 	 */
-	AgentComponent getComponent(AgentComponentName name)
+	protected AgentComponent getComponent(AgentComponentName name)
 	{
 		return parentAgent.getComponent(name);
 	}
@@ -209,32 +216,28 @@ public abstract class AgentComponent implements Serializable
 	/**
 	 * Retrieves a direct reference to the {@link ParametricComponent} of the agent, if any.
 	 * <p>
-	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be
-	 * removed without notice.
+	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be removed without notice.
 	 * 
 	 * @return the component instance, if any. <code>null</code> otherwise.
 	 */
-	public ParametricComponent getParametric()
+	protected ParametricComponent getParametric()
 	{
 		if(parentAgent.hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
-			return (ParametricComponent)parentAgent
-					.getComponent(AgentComponentName.PARAMETRIC_COMPONENT);
+			return (ParametricComponent) parentAgent.getComponent(AgentComponentName.PARAMETRIC_COMPONENT);
 		return null;
 	}
 	
 	/**
 	 * Retrieves a direct reference to the {@link MessagingComponent} of the agent, if any.
 	 * <p>
-	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be
-	 * removed without notice.
+	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be removed without notice.
 	 * 
 	 * @return the component instance, if any. <code>null</code> otherwise.
 	 */
-	public MessagingComponent getMessaging()
+	protected MessagingComponent getMessaging()
 	{
 		if(parentAgent.hasComponent(AgentComponentName.MESSAGING_COMPONENT))
-			return (MessagingComponent)parentAgent
-					.getComponent(AgentComponentName.MESSAGING_COMPONENT);
+			return (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
 		return null;
 	}
 	
@@ -244,7 +247,7 @@ public abstract class AgentComponent implements Serializable
 	 * @param event
 	 *            - the event to disseminate.
 	 */
-	void postAgentEvent(AgentEventType event)
+	protected void postAgentEvent(AgentEventType event)
 	{
 		parentAgent.postAgentEvent(event);
 	}
@@ -254,7 +257,7 @@ public abstract class AgentComponent implements Serializable
 	 * 
 	 * @return the name of the agent.
 	 */
-	String getAgentName()
+	protected String getAgentName()
 	{
 		return parentAgent.getAgentName();
 	}
