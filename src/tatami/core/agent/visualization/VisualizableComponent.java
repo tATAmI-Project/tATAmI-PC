@@ -11,8 +11,6 @@
  ******************************************************************************/
 package tatami.core.agent.visualization;
 
-import java.lang.reflect.Constructor;
-
 import net.xqhs.util.config.Config;
 import net.xqhs.util.logging.Logger;
 import net.xqhs.util.logging.Logger.Level;
@@ -26,7 +24,6 @@ import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.movement.MovementComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
-import tatami.core.agent.visualization.AgentGui.AgentGuiConfig;
 import tatami.core.agent.visualization.AgentGui.DefaultComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
 
@@ -119,23 +116,36 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	private String							currentContainer	= null;
 	
 	/**
+	 * Create a new {@link VisualizableComponent} instance:
+	 * <ul>
+	 * <li>Creates a GUI
+	 * <li>Creates a log, links it to the GUI.
+	 * <li>Registers message receivers with the {@link MessagingComponent} (if any).
+	 * <li>Registers handlers for agent movement.
+	 * </ul>
+	 * 
 	 * windowType should be set before if a special value is needed
 	 */
 	public VisualizableComponent()
 	{
 		super(AgentComponentName.VISUALIZABLE_COMPONENT);
 		
-		// set GUI
+		// setup additional GUI configuration
 		guiConfig.setWindowName(getAgentName());
 		ParametricComponent parametric = getParametric();
-		if((parametric != null) && parametric.hasPar(AgentParameterName.WINDOW_TYPE))
-			guiConfig.setWindowType(parametric.parVal(AgentParameterName.WINDOW_TYPE));
+		if((parametric != null))
+		{
+			if(parametric.hasPar(AgentParameterName.WINDOW_TYPE))
+				guiConfig.setWindowType(parametric.parVal(AgentParameterName.WINDOW_TYPE));
+			if(parametric.hasPar(AgentParameterName.GUI))
+				guiConfig.setGuiClass(parametric.parVal(AgentParameterName.GUI),
+						parametric.parVals(AgentParameterName.AGENT_PACKAGE));
+		}
 		
+		// creates visualization & log
 		resetVisualization();
 		
-		// behaviors
-		
-		// receive the visualization root
+		// registers message receivers: receive the visualization root; receive exit message.
 		final MessagingComponent msgr = getMessaging();
 		if(msgr != null)
 		{
@@ -153,7 +163,6 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			msgr.registerMessageReceiver(
 					msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.DO_EXIT.toString()),
 					new AgentEventHandler() {
-						@SuppressWarnings("synthetic-access")
 						@Override
 						public void handleEvent(AgentEventType eventType, Object eventData)
 						{
@@ -163,15 +172,16 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 					});
 		}
 		
+		// registers event handlers
 		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEventType eventType, Object eventData)
 			{
-				MovementComponent mvmt = (MovementComponent) getComponent(AgentComponentName.MOVEMENT_COMPONENT);
+				MovementComponent mvmt = getMovement();
 				if(mvmt != null)
 				{
 					String destination = mvmt.extractDestination(eventData);
-					if(!destination.equals(currentContainer))
+					if(!destination.equals(getCurrentContainer()))
 					{
 						getLog().info("moving to [" + destination.toString() + "]");
 						removeVisualization();
@@ -203,31 +213,10 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	 */
 	protected void resetVisualization()
 	{
-		ClassLoader cl = null;
-		
-		/*
-		 * if (hasPar(AgentParameterName.GUI)) { guiConfig.setGuiClass(parVal(AgentParameterName.GUI),
-		 * parVals(AgentParameterName.AGENT_PACKAGE)); // overrides any }
-		 */
-		
-		ParametricComponent parametric = getParametric();
-		if(parametric != null && parametric.hasPar(AgentParameterName.GUI))
-			guiConfig.setGuiClass(parametric.parVal(AgentParameterName.GUI),
-					parametric.parVals(AgentParameterName.AGENT_PACKAGE));
-		
+		// load GUI
 		try
 		{
-			/*
-			 * if (PlatformUtils.Platform.ANDROID.equals(PlatformUtils .getPlatform()))
-			 * 
-			 * guiConfig.setGuiClass(parVal(AgentParameterName.GUI), parVals(AgentParameterName.AGENT_PACKAGE));
-			 */
-			
-			cl = new ClassLoader(getClass().getClassLoader()) {
-				// nothing to extend
-			};
-			Constructor<?> cons = cl.loadClass(guiConfig.guiClassName).getConstructor(AgentGuiConfig.class);
-			gui = (AgentGui) cons.newInstance(guiConfig);
+			gui = (AgentGui) PlatformUtils.loadClassInstance(this, guiConfig.guiClassName, guiConfig);
 		} catch(Exception e)
 		{
 			e.printStackTrace(); // there is no log yet
@@ -235,80 +224,171 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		
 		// configure log / logging Unit
 		
-<<<<<<< HEAD
 		loggingUnit = (UnitComponentExt) new UnitComponentExt().setUnitName(getAgentName()).setLogEnsureNew()
 				.setLogReporter(this).setLogType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL);
-=======
-		loggingUnit = new UnitComponentExt().setName(getAgentName()).ensureNew().setReporter(this)
-				.setType(PlatformUtils.platformLogType()).setLevel(Level.ALL);
->>>>>>> refs/remotes/github/tATAmI-3A/andrei
 		if(gui != null)
-			// unitConfig.setTextArea((TextArea)((PCDefaultAgentGui)gui).getComponent(DefaultComponent.AGENT_LOG.toString()));
-<<<<<<< HEAD
 			loggingUnit.setLogDisplay(new Log2AgentGui(gui, DefaultComponent.AGENT_LOG.toString()));
-=======
-			loggingUnit.setDisplay(new Log2AgentGui(gui, DefaultComponent.AGENT_LOG.toString()));
->>>>>>> refs/remotes/github/tATAmI-3A/andrei
 		
 		getLog().trace("visualization on platform " + PlatformUtils.getPlatform());
 	}
 	
+	/**
+	 * Unloads elements that were loaded during <code>resetVisualization</code>.
+	 */
 	protected void removeVisualization()
 	{
 		getLog().trace("closing visualization");
-		loggingUnit.doExit();
+		if(loggingUnit != null)
+			loggingUnit.doExit();
 		if(gui != null)
 			gui.close();
 	}
 	
+	/**
+	 * Reports an update to the log.
+	 * <p>
+	 * This method will be called by the logging infrastructure, that sees this component as a {@link ReportingEntity}.
+	 */
 	@Override
 	public boolean report(String content)
 	{
 		return report(Vocabulary.LOGGING_UPDATE, content);
 	}
 	
+	/**
+	 * Reports a new hierarchical parent for the agent.
+	 * 
+	 * @param parent
+	 *            - the name of the parent.
+	 */
 	public void reportAddParent(String parent)
 	{
 		report(Vocabulary.ADD_PARENT, parent);
 	}
 	
+	/**
+	 * Reports the removal of a parent of the agent.
+	 * 
+	 * @param parent
+	 *            - the name of the parent.
+	 */
 	public void reportRemoveParent(String parent)
 	{
 		report(Vocabulary.REMOVE_PARENT, parent);
 	}
 	
+	/**
+	 * Implements reporting as sending a message to the visualization parent.
+	 * <p>
+	 * Uses the messaging capabilities offered by {@link MessagingComponent}.
+	 * 
+	 * @param reportType
+	 *            - an adequate member of the {@link Vocabulary} (<code>LOGGING_UPDATE</code>, <code>ADD_PARENT</code>,
+	 *            <code>REMOVE_PARENT</code>, <code>MOVE</code>).
+	 * @param content
+	 *            - the content of the message.
+	 * @return - true if the message was successfully sent.
+	 */
 	protected boolean report(Vocabulary reportType, String content)
 	{
-		// FIXME: check correct type
 		if(visualizationParent != null)
 		{
-			MessagingComponent msgr = (MessagingComponent) getComponent(AgentComponentName.MESSAGING_COMPONENT);
-			if(msgr != null)
+			if((reportType == Vocabulary.LOGGING_UPDATE) || (reportType == Vocabulary.ADD_PARENT)
+					|| (reportType == Vocabulary.REMOVE_PARENT) || (reportType == Vocabulary.MOVE))
 			{
-				msgr.sendMessage(visualizationParent, msgr.makePath(reportType.toString()), content);
-				return true;
+				MessagingComponent msgr = (MessagingComponent) getComponent(AgentComponentName.MESSAGING_COMPONENT);
+				if(msgr != null)
+					return msgr.sendMessage(visualizationParent, msgr.makePath(reportType.toString()), content);
 			}
+			else
+				throw new IllegalArgumentException("Parameter is not a correct report type:" + reportType);
 		}
 		return false;
 	}
 	
-	protected void setVisualizationParent(String parentName)
-	{
-		visualizationParent = parentName;
-	}
-	
+	/**
+	 * Getter for the log.
+	 * 
+	 * @return the log, as a {@link Logger} instance.
+	 */
 	public Logger getLog()
 	{
 		return loggingUnit;
 	}
 	
+	/**
+	 * Getter for the GUI.
+	 * 
+	 * @return the GUI, as an {@link AgentGui} instance.
+	 */
 	public AgentGui getGUI()
 	{
 		return gui;
 	}
 	
-	public AgentGuiConfig getGuiConfig()
+	/**
+	 * Relays calls to the underlying {@link AgentComponent} instance in order to avoid synthetic access warnings for
+	 * event handlers.
+	 */
+	@Override
+	protected String getAgentName()
 	{
-		return guiConfig;
+		return super.getAgentName();
 	}
+	
+	/**
+	 * Relays calls to the underlying {@link AgentComponent} instance in order to avoid synthetic access warnings for
+	 * event handlers.
+	 */
+	@Override
+	protected MessagingComponent getMessaging()
+	{
+		return super.getMessaging();
+	}
+	
+	/**
+	 * Relays calls to the underlying {@link AgentComponent} instance in order to avoid synthetic access warnings for
+	 * event handlers.
+	 * 
+	 * @return the movement component.
+	 */
+	protected MovementComponent getMovement()
+	{
+		if(super.hasComponent(AgentComponentName.MOVEMENT_COMPONENT))
+			return (MovementComponent) super.getComponent(AgentComponentName.MOVEMENT_COMPONENT);
+		return null;
+	}
+	
+	/**
+	 * Relays calls to the underlying {@link AgentComponent} instance in order to avoid synthetic access warnings for
+	 * event handlers.
+	 * 
+	 */
+	@Override
+	protected void postAgentEvent(AgentEventType event)
+	{
+		super.postAgentEvent(event);
+	}
+	
+	/**
+	 * Setter for the name of the visualization parent.
+	 * 
+	 * @param parentName
+	 *            - name of the visualization parent.
+	 */
+	protected void setVisualizationParent(String parentName)
+	{
+		visualizationParent = parentName;
+	}
+	
+	/**
+	 * Getter for <code>currentContainer</code>.
+	 * 
+	 * @return the name of the current container.
+	 */
+	protected String getCurrentContainer()
+	{
+		return currentContainer;
+	}
+	
 }

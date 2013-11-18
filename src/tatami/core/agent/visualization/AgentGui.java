@@ -11,132 +11,102 @@
  ******************************************************************************/
 package tatami.core.agent.visualization;
 
-import java.io.Serializable;
-import java.util.Collection;
 import java.util.Vector;
 
-import net.xqhs.util.config.Config;
-import tatami.core.util.platformUtils.PlatformUtils;
-
+/**
+ * This class models the GUI of an agent (and a GUI in general) so as to make it platform-independent.
+ * <p>
+ * It models the GUI as a set of components that can perform input and/or output. Components are logical units that can
+ * contain one or more controls and that can correspond to non-disjoint sets of controls.
+ * <p>
+ * There are three types of functionalities that can be associated to a component:
+ * <ul>
+ * <li>output -- the component is able to change appearance according to set of {@link Object} instances;
+ * <li>'passive' input -- the component is able to store information entered by the user (or collected from the user),
+ * that can be retrieved as a set of {@link Object} instances.
+ * <li>'active' input -- the component is able to notify an {@link InputListener} instance about the user's activity,
+ * also transmitting a set of {@link Object} instances along with the notification.
+ * </ul>
+ * Basic examples of the functionalities are as follows: output in a text field; get passive input from a text field;
+ * receive active input / notifications when a button is pressed.
+ * <p>
+ * Components in the GUI are identified by {@link String} names. It is strongly recommended that the names are stored as
+ * constants in enumerations. For instance, default components exists in a GUI, which get their names from the
+ * {@link DefaultComponent} enumeration.
+ * 
+ * @author Andrei Olaru
+ */
 public interface AgentGui
 {
+	/**
+	 * Default components of a GUI.
+	 * 
+	 * @author Andrei Olaru
+	 */
 	public enum DefaultComponent {
-		AGENT_NAME, AGENT_LOG
+		/**
+		 * The name of the agent.
+		 */
+		AGENT_NAME,
+		
+		/**
+		 * The log of the agent (as an output component).
+		 */
+		AGENT_LOG
 	}
 	
-	public class AgentGuiConfig extends Config implements Serializable
-	{
-		private static final long					serialVersionUID	= -5605500962863357519L;
-		
-		private static final String					DEFAULT_WINDOW_TYPE	= "agent";
-		private static final String					DEFAULT_AGENT_GUI	= "DefaultAgentGui";
-		// FIXME should be elsewhere
-		private static final String					ROOT_PACKAGE		= "tatami";
-		private static final String					DEFAULT_GUI_PATH	= "agent.visualization";
-		// private static final String ANDROID_GUI = "AndroidDefaultAgentGui";
-		private static final PlatformUtils.Platform	DEFAULT_PLATFORM	= PlatformUtils.Platform.PC;
-		
-		protected String							overrideClassName	= null;
-		// FIXME: make protected or private
-		public String								guiClassName;										// initialized
-		// FIXME: make protected or private // makeDefaults
-		public String								windowName			= null;
-		// FIXME: make protected or private
-		public String								windowType			= DEFAULT_WINDOW_TYPE;
-		
-		public AgentGuiConfig()
-		{
-			super();
-		}
-		
-		@Override
-		public AgentGuiConfig makeDefaults()
-		{
-			setGuiClass(null, null);
-			return this;
-		}
-		
-		public AgentGuiConfig setWindowName(String name)
-		{
-			windowName = name;
-			return this;
-		}
-		
-		public AgentGuiConfig setWindowType(String type)
-		{
-			windowType = type;
-			return this;
-		}
-		
-		public AgentGuiConfig setClassNameOverride(String className)
-		{
-			overrideClassName = className;
-			return this;
-		}
-		
-		public AgentGuiConfig setGuiClass(String className, Collection<String> packages)
-		{
-			
-			PlatformUtils.Platform platform = PlatformUtils.getPlatform();
-			String defaultGuiPath = ROOT_PACKAGE + "." + platform.toString().toLowerCase() + "." + DEFAULT_GUI_PATH;
-			guiClassName = null;
-			if(overrideClassName != null)
-				className = overrideClassName;
-			if(className == null)
-			{
-				
-				if(PlatformUtils.Platform.PC.equals(platform) || (platform == null))
-					guiClassName = defaultGuiPath + "." + (platform != null ? platform : DEFAULT_PLATFORM)
-							+ DEFAULT_AGENT_GUI;
-				else
-					guiClassName = defaultGuiPath + "." + platform + DEFAULT_AGENT_GUI;
-				
-			}
-			else if(className.indexOf(defaultGuiPath) >= 0)
-				guiClassName = className;
-			else
-			{
-				for(String pack : packages)
-				{
-					String path = null;
-					try
-					{
-						path = pack + "." + platform + "." + className;
-						System.out.println("trying: [" + path + "]");
-						Class.forName(path);
-						guiClassName = path;
-						break;
-					} catch(ClassNotFoundException e)
-					{
-						System.out.println("not found: [" + path + "]");
-						// do nothing; go forth
-					}
-				}
-				if(guiClassName == null)
-				{ // FIXME: why is there code duplication here?
-					if(PlatformUtils.Platform.PC.equals(platform) || (platform == null))
-						guiClassName = defaultGuiPath + "." + (platform != null ? platform : DEFAULT_PLATFORM)
-								+ DEFAULT_AGENT_GUI;
-					else
-						guiClassName = defaultGuiPath + "." + platform + DEFAULT_AGENT_GUI;
-				}
-			}
-			return this;
-		}
-	}
-	
+	/**
+	 * This interface should be implemented by classes that are able to receive notifications from 'active' inputs. Such
+	 * notifications will be accompanied by some arguments describing the notification, beside the name of the component
+	 * generating the notification.
+	 * 
+	 * @author Andrei Olaru
+	 */
 	public interface InputListener
 	{
+		/**
+		 * The method is invoked whenever an 'active input' component is activated.
+		 * 
+		 * @param componentName
+		 *            - the name of the component invoking the method.
+		 * @param arguments
+		 *            - arguments accompanying the notification.
+		 */
 		public void receiveInput(String componentName, Vector<Object> arguments);
 	}
 	
-	// public Component getComponent(String componentName);
-	
+	/**
+	 * Sends information to a component meant to convey that information to the GUI.
+	 * 
+	 * @param componentName
+	 *            - the name of the component.
+	 * @param arguments
+	 *            - the information to transmit.
+	 */
 	public void doOutput(String componentName, Vector<Object> arguments);
 	
+	/**
+	 * Retrieves information from a component. The information is expected to come from the GUI.
+	 * 
+	 * @param componentName
+	 *            - the name of the component.
+	 * @return the received information.
+	 */
 	public Vector<Object> getinput(String componentName);
 	
+	/**
+	 * Connects a component, as active input, to an implementation of {@link InputListener}. The input will invoke the
+	 * <code>receiveInput()</code> method of the implementation whenever it is the case.
+	 * 
+	 * @param componentName
+	 *            - the name of the component
+	 * @param listener
+	 *            - the {@link InputListener} implementation to be invoked on activation.
+	 */
 	public void connectInput(String componentName, InputListener listener);
 	
+	/**
+	 * Instructs the GUI to unload, effectively closing the GUI.
+	 */
 	public void close();
 }
