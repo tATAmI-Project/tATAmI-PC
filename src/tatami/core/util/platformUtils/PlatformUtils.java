@@ -11,8 +11,10 @@
  ******************************************************************************/
 package tatami.core.util.platformUtils;
 
-import net.xqhs.util.logging.Log.LoggerType;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
+import net.xqhs.util.logging.Log.LoggerType;
 
 /**
  * Platform-related functionality. All functions should be static.
@@ -92,5 +94,22 @@ public class PlatformUtils
 		}
 		}
 		return null;
+	}
+	
+	public static Object loadClassInstance(Object loadingClass, String className, Object... constructorArguments)
+			throws SecurityException, NoSuchMethodException, ClassNotFoundException, IllegalArgumentException,
+			InstantiationException, IllegalAccessException, InvocationTargetException
+	{
+		ClassLoader cl = null;
+		cl = new ClassLoader(loadingClass.getClass().getClassLoader()) {
+			// nothing to extend
+		};
+		Class<?>[] argumentTypes = new Class<?>[constructorArguments.length];
+		int i = 0;
+		for(Object obj : constructorArguments)
+			argumentTypes[i++] = obj.getClass();
+		Constructor<?> constructor = cl.loadClass(className).getConstructor(argumentTypes);
+		Object ret = constructor.newInstance(constructorArguments);
+		return ret;
 	}
 }
