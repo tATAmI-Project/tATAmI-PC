@@ -20,11 +20,6 @@ package sclaim.constructs.basic;
 public class ClaimCondition extends ClaimConstruct
 {
 	/**
-	 * The behavior to which this construct belongs.
-	 */
-	private ClaimBehaviorDefinition myBehavior;
-
-	/**
 	 * May be a function call, either readK or a Java function
 	 */
 	private ClaimFunctionCall condition;
@@ -43,11 +38,4 @@ public class ClaimCondition extends ClaimConstruct
 		return condition;
 	}
 
-	public void setMyBehavior(ClaimBehaviorDefinition myBehavior) {
-		this.myBehavior = myBehavior;
-	}
-
-	public ClaimBehaviorDefinition getMyBehavior() {
-		return myBehavior;
-	}
 }

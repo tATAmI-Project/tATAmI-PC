@@ -21,11 +21,6 @@ import java.util.Vector;
  */
 @SuppressWarnings("serial")
 public class ClaimFunctionCall extends ClaimConstruct {
-	/**
-	 * The behavior to which this construct belongs.
-	 */
-	private ClaimBehaviorDefinition myBehavior;
-
 	private String functionName;
 	
 	/**
@@ -58,14 +53,6 @@ public class ClaimFunctionCall extends ClaimConstruct {
 		setFunctionType(type);
 		setFunctionName(functionName);
 		setArguments(arguments);
-	}
-
-	public void setMyBehavior(ClaimBehaviorDefinition myBehavior) {
-		this.myBehavior = myBehavior;
-	}
-
-	public ClaimBehaviorDefinition getMyBehavior() {
-		return myBehavior;
 	}
 
 	public void setFunctionName(String functionName) {

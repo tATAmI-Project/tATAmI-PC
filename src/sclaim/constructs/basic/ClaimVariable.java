@@ -31,11 +31,6 @@ public class ClaimVariable extends ClaimConstruct
 	 */
 	private boolean					isAffectable;
 
-	/**
-	 * The behavior to which this construct belongs.
-	 */
-	private ClaimBehaviorDefinition	myBehavior;
-	
 	@Override
 	public String toString()
 	{
@@ -105,16 +100,6 @@ public class ClaimVariable extends ClaimConstruct
 		this.isAffectable = isAffectable;
 	}
 
-	public void setMyBehavior(ClaimBehaviorDefinition behavior)
-	{
-		this.myBehavior = behavior;
-	}
-	
-	public ClaimBehaviorDefinition getMyBehavior()
-	{
-		return myBehavior;
-	}
-	
 	/**
 	 * Gets the complement of the current variable, according to the affectability
 	 */

@@ -52,7 +52,7 @@ public class ClaimAgent extends HierarchicalAgent
 			throw new IllegalArgumentException("agent definition not found");
 		}
 		
-		st = new SymbolTable(cad.getSymbolTablePrototype(),null);
+		st = new SymbolTable(null, cad.getParameters());
 		
 		st.setLog(log);
 		

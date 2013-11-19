@@ -136,7 +136,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 	public ClaimBehavior(ClaimBehaviorDefinition behaviorDefinition, SymbolTable agentSt)
 	{
 		this.cbd = behaviorDefinition;
-		st = new SymbolTable(cbd.getSymbolTablePrototype(),agentSt);
+		st = new SymbolTable(agentSt);
 		inputQueues = new HashMap<String, Queue<Vector<Object>>>();
 		finished = false;
 		wakeUpAtTime = -1;
@@ -304,7 +304,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 			handleSend(args);
 			return true;
 		case RECEIVE:
-			return handleReceive(args, function.getMyBehavior());
+			return handleReceive(args);
 		case IN:
 			handleIn(args);
 			return true;
@@ -482,7 +482,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 			ClaimStructure message = null;
 			String simpleMessage = null;
 			if(!simpleWebService)
-				message = ((ClaimStructure) args.get(1 - parametersAdjust)).bindStructure();
+				message = st.bindStructure((ClaimStructure) args.get(1 - parametersAdjust));
 			else
 			{
 				if(args.get(1 - parametersAdjust).getType() == ClaimConstructType.VARIABLE)
@@ -523,7 +523,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 					{ // integrate result
 						ClaimStructure pattern = (ClaimStructure) args.get(3);
 						Vector<ClaimConstruct> newArgs = pattern.getFields();
-						readMessage(received.bindStructure(), newArgs);
+						readMessage(st.bindStructure(received), newArgs);
 					}
 				}
 			}
@@ -588,7 +588,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 	 * @return <code>true</code> if the received message matches the pattern (the behavior should continue);
 	 *         <code>false</code> otherwise
 	 */
-	protected boolean handleReceive(Vector<ClaimConstruct> args, ClaimBehaviorDefinition myBehavior)
+	protected boolean handleReceive(Vector<ClaimConstruct> args)
 	{
 		ACLMessage msg = null;
 		
@@ -686,7 +686,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 		if(received != null)
 		{
 			Vector<ClaimConstruct> newArgs = ((ClaimStructure) args.get(argsSize - 1)).getFields();
-			if(!readMessage(received.bindStructure(), newArgs))
+			if(!readMessage(st.bindStructure(received), newArgs))
 			{ // the message does not match the patter
 				log.trace("message not matching pattern [" + ClaimMessage.printMessage(msg) + "]");
 				myAgent.putBack(msg);
@@ -1227,7 +1227,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 	 */
 	protected ClaimStructure knowledge2Structure(SimpleKnowledge knowledge)
 	{
-		ClaimStructure ret = new ClaimStructure(cbd);
+		ClaimStructure ret = new ClaimStructure();
 		Vector<ClaimConstruct> fields = new Vector<ClaimConstruct>();
 		fields.add(new ClaimValue("knowledge"));
 		fields.add(new ClaimValue(knowledge.getKnowledgeType()));

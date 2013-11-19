@@ -13,11 +13,13 @@ package tatami.core.agent.claim;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Vector;
 
 
+import sclaim.constructs.basic.ClaimConstruct;
+import sclaim.constructs.basic.ClaimStructure;
 import sclaim.constructs.basic.ClaimValue;
 import sclaim.constructs.basic.ClaimVariable;
-import sclaim.parser.symbol_table.Prototype;
 import tatami.core.interfaces.Logger;
 
 
@@ -70,13 +72,16 @@ public class SymbolTable implements Serializable
 	
 	/**
 	 * Creates a new symbol table and links it to an upper level symbol table, if any.
-	 * @param stp - the symbol table prototype to make a copy of, resulted while parsing.
 	 * @param link - symbol table to link to or null.
+	 * @param init - the variables found for this symbol table, while parsing.
 	 */
 	
-	public SymbolTable(Prototype stp,SymbolTable link)
+	public SymbolTable(SymbolTable link, Vector<ClaimVariable> init)
 	{
-		table = new HashMap<ClaimVariable, ClaimValue>(stp.getTable());
+		table = new HashMap<ClaimVariable, ClaimValue>();
+		for(ClaimVariable currentVariable:init) {
+			table.put(currentVariable,null);
+		}
 		prev = link;
 	}
 	
@@ -101,8 +106,7 @@ public class SymbolTable implements Serializable
 			else
 			{
 				log.error("Trying to bind the already bound unaffectable variable "+variable.getName()+
-						" in behavior "+variable.getMyBehavior().getName()+". The old value: "+
-						st.table.get(variable).getValue()+" was not replaced by the new one: "+
+						". The old value: "+st.table.get(variable).getValue()+" was not replaced by the new one: "+
 						(value==null?"null":value.getValue()));
 				
 				System.exit(1);
@@ -176,6 +180,50 @@ public class SymbolTable implements Serializable
 				return found;
 		}
 		return false;
+	}
+	
+	/**
+	 * Binds / replaces the variables in a structure to / with the associated values.
+	 * @param structure the structure to to be bound
+	 * @return
+	 */
+	public ClaimStructure bindStructure(ClaimStructure structure)
+	{
+		Vector<ClaimConstruct> fields = structure.getFields();
+		
+		ClaimStructure bound = new ClaimStructure();
+		Vector<ClaimConstruct> fieldsBound = new Vector<ClaimConstruct>();
+		// String structure = new String("( struct ");
+		for(ClaimConstruct currentConstruct : fields)
+		{
+			switch(currentConstruct.getType())
+			{
+			case VALUE:
+				fieldsBound.add(currentConstruct);
+				break;
+			case VARIABLE:
+				ClaimVariable variable = (ClaimVariable) currentConstruct;
+				if(getStatus(variable) == VariableStatus.BOUND)
+				{
+					ClaimValue value = get(variable);
+
+					if(value != null)
+					{
+						fieldsBound.add(value);
+					}
+					else
+						fieldsBound.add(currentConstruct);
+				}
+				break;
+			case STRUCTURE:
+				fieldsBound.add(bindStructure((ClaimStructure)currentConstruct));
+				break;
+			default:
+				break;
+			}
+		}
+		bound.setFields(fieldsBound);
+		return bound;
 	}
 	
 	/**

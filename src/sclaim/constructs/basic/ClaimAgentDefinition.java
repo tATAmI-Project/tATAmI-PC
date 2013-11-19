@@ -15,8 +15,6 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Vector;
 
-import sclaim.parser.symbol_table.Prototype;
-
 /**
  * Structure returned by the parser for an agent definition
  * 
@@ -29,7 +27,6 @@ public class ClaimAgentDefinition extends ClaimConstruct implements Serializable
 	
 	private Vector<ClaimVariable> parameters;
 	private Vector<ClaimBehaviorDefinition> behaviors;
-	private Prototype agentSymbolTablePrototype;
 	private List<Class<?>> codeAttachements = new Vector<Class<?>>();
 	
 	/**
@@ -52,15 +49,6 @@ public class ClaimAgentDefinition extends ClaimConstruct implements Serializable
 		setClassName(agentClassName);
 		setParameters(parameters);
 		setBehaviors(behaviors);
-		agentSymbolTablePrototype = new Prototype(null);
-		
-		if(this.parameters!=null)
-			for(ClaimVariable currentParameter:this.parameters)
-				agentSymbolTablePrototype.put(currentParameter, null);
-	}
-
-	public Prototype getSymbolTablePrototype() {
-		return agentSymbolTablePrototype;
 	}
 
 	public void setParameters(Vector<ClaimConstruct> parameters) {

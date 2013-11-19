@@ -22,11 +22,6 @@ import java.util.Vector;
 public class ClaimIf extends ClaimConstruct
 {
 	/**
-	 * The behavior to which this construct belongs.
-	 */
-	private ClaimBehaviorDefinition myBehavior;
-
-	/**
 	 * May be a function call (either readK or a Java function) 
 	 */
 	private ClaimFunctionCall condition;
@@ -69,14 +64,6 @@ public class ClaimIf extends ClaimConstruct
 
 	public Vector<ClaimConstruct> getFalseBranch() {
 		return falseBranch;
-	}
-
-	public void setMyBehavior(ClaimBehaviorDefinition myBehavior) {
-		this.myBehavior = myBehavior;
-	}
-
-	public ClaimBehaviorDefinition getMyBehavior() {
-		return myBehavior;
 	}
 
 }

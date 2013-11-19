@@ -24,11 +24,6 @@ public class ClaimForAllK extends ClaimConstruct
 	private static final long serialVersionUID = -5092381799277193948L;
 
 	/**
-	 * The behavior to which this construct belongs.
-	 */
-	private ClaimBehaviorDefinition myBehavior;
-
-	/**
 	 * A structure to be matched with the knowledge in the knowledge base. Must contain at least a variable
 	 */
 	private ClaimStructure structure;
@@ -43,14 +38,6 @@ public class ClaimForAllK extends ClaimConstruct
 		super(ClaimConstructType.FORALLK);
 		setStructure(structure);
 		setStatements(statements);
-	}
-
-	public void setMyBehavior(ClaimBehaviorDefinition myBehavior) {
-		this.myBehavior = myBehavior;
-	}
-
-	public ClaimBehaviorDefinition getMyBehavior() {
-		return myBehavior;
 	}
 
 	public void setStructure(ClaimStructure structure) {

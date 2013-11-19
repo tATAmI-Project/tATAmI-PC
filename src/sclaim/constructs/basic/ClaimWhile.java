@@ -22,11 +22,6 @@ import java.util.Vector;
 public class ClaimWhile extends ClaimConstruct
 {
 	/**
-	 * The behavior to which this construct belongs.
-	 */
-	private ClaimBehaviorDefinition myBehavior;
-
-	/**
 	 * May be a function call, either readK or a Java function
 	 */
 	private ClaimFunctionCall condition;
@@ -42,14 +37,6 @@ public class ClaimWhile extends ClaimConstruct
 		super(ClaimConstructType.WHILE);
 		setCondition(condition);
 		setStatements(statements);
-	}
-
-	public void setMyBehavior(ClaimBehaviorDefinition myBehavior) {
-		this.myBehavior = myBehavior;
-	}
-
-	public ClaimBehaviorDefinition getMyBehavior() {
-		return myBehavior;
 	}
 
 	public void setStatements(Vector<ClaimConstruct> statements) {

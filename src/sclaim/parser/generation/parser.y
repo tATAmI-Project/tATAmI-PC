@@ -679,22 +679,16 @@ behavior
 		{
 			//log.info("behavior -> '(' behavior_type name ')'");
 			$$ = new ParserSClaimVal(new ClaimBehaviorDefinition($3.sval, $2.claimBehaviorType, null));
-			ClaimBehaviorDefinition currentBehavior = (ClaimBehaviorDefinition) yyval.claimConstruct;
-			setBehaviorToSubConstructs(currentBehavior);
 		}
 	|*/: '(' behavior_type name behavior_content_list ')'
 		{
 			//log.info("behavior -> '(' behavior_type name behavior_content_list ')'");
 			$$ = new ParserSClaimVal(new ClaimBehaviorDefinition($3.sval, $2.claimBehaviorType, $4.claimConstructVector));
-			ClaimBehaviorDefinition currentBehavior = (ClaimBehaviorDefinition) yyval.claimConstruct;
-			setBehaviorToSubConstructs(currentBehavior);
 		}
 	| '(' behavior_type name behavior_content_header_list ')'
 		{
 			//log.info("behavior -> '(' behavior_type name behavior_content_header_list ')'");
 			$$ = new ParserSClaimVal(new ClaimBehaviorDefinition($3.sval, $2.claimBehaviorType, $4.claimConstructVector));
-			ClaimBehaviorDefinition currentBehavior = (ClaimBehaviorDefinition) yyval.claimConstruct;
-			setBehaviorToSubConstructs(currentBehavior);
 		}
 	| '(' behavior_type name behavior_content_header_list behavior_content_list ')'
 		{
@@ -704,8 +698,6 @@ behavior
 				$$ = new ParserSClaimVal(new ClaimBehaviorDefinition($3.sval, $2.claimBehaviorType, $4.claimConstructVector));
 			else
 				log.error("error while concatenating the vectors of statements, while creating the behavior");
-			ClaimBehaviorDefinition currentBehavior = (ClaimBehaviorDefinition) yyval.claimConstruct;
-			setBehaviorToSubConstructs(currentBehavior);
 		}
 	;
 
@@ -743,11 +735,7 @@ agent_specification
 					));
 			//Set the references of the contained behaviors to this agent:
 			for(ClaimBehaviorDefinition currentBehavior:parsedAgent.getBehaviors())
-			{
 				currentBehavior.setMyAgent(parsedAgent);
-				currentBehavior.initSymbolTablePrototype();
-				fillSymbolTablePrototype(currentBehavior);
-			}
 		}
 	| '(' AGENT name behaviors_declaration ')'
 		{
@@ -764,11 +752,7 @@ agent_specification
 					));
 			//Set the references of the contained behaviors to this agent:
 			for(ClaimBehaviorDefinition currentBehavior:parsedAgent.getBehaviors())
-			{
 				currentBehavior.setMyAgent(parsedAgent);
-				currentBehavior.initSymbolTablePrototype();
-				fillSymbolTablePrototype(currentBehavior);
-			}
 		}
 	;
 
@@ -794,188 +778,6 @@ private int yylex () {
     System.err.println("IO error :"+e);
   }
   return yyl_return;
-}
-
-/**
- * Function used after the identification of a behavior by the parser, in order to set the field
- * myBehavior to all the Claim constructs that belong to the specified behavior, in order to give
- * them access to the symbol table prototype.
- * 
- * @param currentBehavior - the behavior that was read by the parser
- */
-public void setBehaviorToSubConstructs(ClaimBehaviorDefinition currentBehavior)
-{
-	for(ClaimConstruct currentConstruct:currentBehavior.getStatements())
-		setBehaviorRecursively(currentConstruct, currentBehavior);
-}
-
-/**
- * Function used by the method <em>setBehaviorToSubConstructs(ClaimBehaviorDefinition)</em> in order to set the field
- * myBehavior to the current constructs and to all the constructs that are included in it
- *  
- * @param currentConstruct - the construct to be modified
- * @param currentBehavior - the behavior that was read by the parser
- */
-public void setBehaviorRecursively(ClaimConstruct currentConstruct, ClaimBehaviorDefinition currentBehavior)
-{
-	ClaimConstruct currentSubConstruct;
-	switch(currentConstruct.getType())
-	{
-	case VARIABLE:
-		 ClaimVariable currentVariable = (ClaimVariable) currentConstruct;
-		 currentVariable.setMyBehavior(currentBehavior);
-		break;
-	case FUNCTION_CALL:
-		ClaimFunctionCall functionCall = (ClaimFunctionCall) currentConstruct;
-		functionCall.setMyBehavior(currentBehavior);
-		if(functionCall.getArguments()!=null)
-			for (ClaimConstruct subConstruct:functionCall.getArguments())
-				setBehaviorRecursively(subConstruct, currentBehavior);
-		break;
-	case STRUCTURE:
-		ClaimStructure currentStructure = (ClaimStructure) currentConstruct;
-		currentStructure.setMyBehavior(currentBehavior);
-		for (ClaimConstruct subConstruct:currentStructure.getFields())
-			setBehaviorRecursively(subConstruct, currentBehavior);
-		break;
-	case IF:
-		ClaimIf currentIf = (ClaimIf) currentConstruct;
-		currentIf.setMyBehavior(currentBehavior);
-		
-		currentSubConstruct = currentIf.getCondition();
-		setBehaviorRecursively(currentSubConstruct, currentBehavior);
-		
-		for (ClaimConstruct subConstruct:currentIf.getTrueBranch())
-			setBehaviorRecursively(subConstruct, currentBehavior);
-		
-		if(currentIf.getFalseBranch() != null)
-			for (ClaimConstruct subConstruct:currentIf.getFalseBranch())
-				setBehaviorRecursively(subConstruct, currentBehavior);
-		break;
-	case FORALLK:
-		ClaimForAllK currentForAllK = (ClaimForAllK) currentConstruct;
-		currentForAllK.setMyBehavior(currentBehavior);
-		
-		currentSubConstruct = currentForAllK.getStructure();
-		setBehaviorRecursively(currentSubConstruct, currentBehavior);
-		
-		for (ClaimConstruct subConstruct:currentForAllK.getStatements())
-			setBehaviorRecursively(subConstruct, currentBehavior);
-		break;
-	case WHILE:
-		ClaimWhile currentWhile = (ClaimWhile) currentConstruct;
-		currentWhile.setMyBehavior(currentBehavior);
-		
-		currentSubConstruct = currentWhile.getCondition();
-		setBehaviorRecursively(currentSubConstruct, currentBehavior);
-		
-		for (ClaimConstruct subConstruct:currentWhile.getStatements())
-			setBehaviorRecursively(subConstruct, currentBehavior);
-		break;
-	case CONDITION:
-		ClaimCondition currentCond = (ClaimCondition) currentConstruct;
-		currentCond.setMyBehavior(currentBehavior);
-		
-		currentSubConstruct = currentCond.getCondition();
-		setBehaviorRecursively(currentSubConstruct, currentBehavior);
-		break;
-	default:
-		break;
-	}
-}
-
-/**
- * Function used after the creation of the agent definition object, in order to populate the symbol table prototype 
- * with variables (which are unbound, for the moment)
- * 
- * @param currentBehavior - the behavior which is used as scope for the symbol table prototype
- */
-public void fillSymbolTablePrototype(ClaimBehaviorDefinition currentBehavior)
-{
-	for(ClaimConstruct currentConstruct:currentBehavior.getStatements())
-		fillSymbolTablePrototypeRecursively(currentConstruct);
-}
-
-/**
- * Function used by the method <em>fillSymbolTablePrototype(ClaimBehaviorDefinition)</em> in order to put the
- * variables that belong to a behavior in the corresponding symbol table prototype
- *  
- * @param currentConstruct - the construct which is analyzed in order to be put in the symbol table prototype
- */
-public void fillSymbolTablePrototypeRecursively(ClaimConstruct currentConstruct)
-{
-	ClaimConstruct currentSubConstruct;
-	switch(currentConstruct.getType())
-	{
-	case VARIABLE:
-		ClaimVariable currentVariable = (ClaimVariable) currentConstruct;
-		if(currentVariable.getMyBehavior().getSymbolTablePrototype().containsSymbol(currentVariable)==false)
-		{
-			ClaimVariable complementaryVariable = currentVariable.getComplement(); //variable complementary in what concerns the affectability
-			if(currentVariable.getMyBehavior().getSymbolTablePrototype().containsSymbol(complementaryVariable)==false)
-				currentVariable.getMyBehavior().getSymbolTablePrototype().put(currentVariable, null);
-			else {
-				String msg = new String("The variable: "+currentVariable.getName()+" is used both as affectable and as not affectable. ");
-				if(currentVariable.getName().equals(new String("parent")))
-					yyerror(msg+"The \"parent\" variable belongs to the language and it could be only affectable.");
-				else if(currentVariable.getName().equals(new String("this")))
-					yyerror(msg+"The \"this\" variable belongs to the language and it could be only not affectable.");
-				else
-					yyerror(msg);
-			}
-		}
-		break;
-	case FUNCTION_CALL:
-		ClaimFunctionCall functionCall = (ClaimFunctionCall) currentConstruct;
-		if(functionCall.getArguments()!=null)
-			for (ClaimConstruct subConstruct:functionCall.getArguments())
-				fillSymbolTablePrototypeRecursively(subConstruct);
-		break;
-	case STRUCTURE:
-		ClaimStructure currentStructure = (ClaimStructure) currentConstruct;
-		for (ClaimConstruct subConstruct:currentStructure.getFields())
-			fillSymbolTablePrototypeRecursively(subConstruct);
-		break;
-	case IF:
-		ClaimIf currentIf = (ClaimIf) currentConstruct;
-		
-		currentSubConstruct = currentIf.getCondition();
-		fillSymbolTablePrototypeRecursively(currentSubConstruct);
-		
-		for (ClaimConstruct subConstruct:currentIf.getTrueBranch())
-			fillSymbolTablePrototypeRecursively(subConstruct);
-		
-		if(currentIf.getFalseBranch() != null)
-			for (ClaimConstruct subConstruct:currentIf.getFalseBranch())
-				fillSymbolTablePrototypeRecursively(subConstruct);
-		break;
-	case FORALLK:
-		ClaimForAllK currentForAllK = (ClaimForAllK) currentConstruct;
-		
-		currentSubConstruct = currentForAllK.getStructure();
-		fillSymbolTablePrototypeRecursively(currentSubConstruct);
-		
-		for (ClaimConstruct subConstruct:currentForAllK.getStatements())
-			fillSymbolTablePrototypeRecursively(subConstruct);
-		break;
-	case WHILE:
-		ClaimWhile currentWhile = (ClaimWhile) currentConstruct;
-		
-		currentSubConstruct = currentWhile.getCondition();
-		fillSymbolTablePrototypeRecursively(currentSubConstruct);
-		
-		for (ClaimConstruct subConstruct:currentWhile.getStatements())
-			fillSymbolTablePrototypeRecursively(subConstruct);
-		break;
-	case CONDITION:
-		ClaimCondition currentCond = (ClaimCondition) currentConstruct;
-		
-		currentSubConstruct = currentCond.getCondition();
-		fillSymbolTablePrototypeRecursively(currentSubConstruct);
-		break;
-	default:
-		break;
-	}
 }
 
 /**

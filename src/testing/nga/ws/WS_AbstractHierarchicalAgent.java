@@ -75,7 +75,7 @@ public abstract class WS_AbstractHierarchicalAgent extends VisualizableAgent
 		getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL0);
 		getContentManager().registerOntology(MobilityOntology.getInstance());
 		
-		st = new SymbolTable(cad.getSymbolTablePrototype(),null);
+		st = new SymbolTable(st,null);
 		
 		/**************************************
 		 * INITIAL HIERARCHICAL RELATIONSHIP AND KNOWLEDGE

@@ -16,7 +16,6 @@ import java.util.Vector;
 
 
 
-import sclaim.parser.symbol_table.Prototype.VariableStatus;
 import tatami.core.interfaces.Logger;
 import tatami.core.util.logging.Log;
 
@@ -30,10 +29,10 @@ public class ClaimStructure extends ClaimConstruct
 {
 	private static final long	serialVersionUID	= 8509247150199469666L;
 
-	/**
+	/*/**
 	 * The behavior to which this construct belongs.
 	 */
-	private ClaimBehaviorDefinition	myBehavior;
+	/*private ClaimBehaviorDefinition	myBehavior;*/
 	
 	/**
 	 * <em>fields</em> will contain a vector of ClaimConstruct objects, with the following possible types: 1. VALUE 2. VARIABLE 3. STRUCTURE
@@ -68,46 +67,6 @@ public class ClaimStructure extends ClaimConstruct
 		structure += ")";
 		
 		return structure;
-	}
-	
-	public ClaimStructure bindStructure()
-	{
-		ClaimStructure bound = new ClaimStructure(getMyBehavior());
-		Vector<ClaimConstruct> fieldsBound = new Vector<ClaimConstruct>();
-		// String structure = new String("( struct ");
-		for(ClaimConstruct currentConstruct : fields)
-		{
-			switch(currentConstruct.getType())
-			{
-			case VALUE:
-				fieldsBound.add(currentConstruct);
-				break;
-			case VARIABLE:
-				ClaimVariable variable = (ClaimVariable) currentConstruct;
-				if(bound.getMyBehavior().getSymbolTablePrototype().getStatus(variable) == VariableStatus.BOUND)
-				{
-					ClaimValue value = bound.getMyBehavior().getSymbolTablePrototype().get(variable);
-					if(value == null)
-					{
-						value = bound.getMyBehavior().getMyAgent().getSymbolTablePrototype().get(variable);
-					}
-					if(value != null)
-					{
-						fieldsBound.add(value);
-					}
-					else
-						fieldsBound.add(currentConstruct);
-				}
-				break;
-			case STRUCTURE:
-				fieldsBound.add(((ClaimStructure)currentConstruct).bindStructure());
-				break;
-			default:
-				break;
-			}
-		}
-		bound.setFields(fieldsBound);
-		return bound;
 	}
 	
 	/**
@@ -192,10 +151,10 @@ public class ClaimStructure extends ClaimConstruct
 		return null;
 	}
 	
-	public ClaimStructure(ClaimBehaviorDefinition cbd)
+	public ClaimStructure()
 	{
 		super(ClaimConstructType.STRUCTURE);
-		this.myBehavior = cbd;
+		setFields(new Vector<ClaimConstruct>());
 	}
 	
 	public ClaimStructure(Vector<ClaimConstruct> _fields)
@@ -204,7 +163,7 @@ public class ClaimStructure extends ClaimConstruct
 		setFields(_fields);
 	}
 	
-	public void setMyBehavior(ClaimBehaviorDefinition _myBehavior)
+	/*public void setMyBehavior(ClaimBehaviorDefinition _myBehavior)
 	{
 		this.myBehavior = _myBehavior;
 	}
@@ -212,7 +171,7 @@ public class ClaimStructure extends ClaimConstruct
 	public ClaimBehaviorDefinition getMyBehavior()
 	{
 		return myBehavior;
-	}
+	}*/
 	
 	public void setFields(Vector<ClaimConstruct> _fields)
 	{

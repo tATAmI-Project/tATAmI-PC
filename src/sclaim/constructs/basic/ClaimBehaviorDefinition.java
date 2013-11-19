@@ -14,8 +14,6 @@ package sclaim.constructs.basic;
 import java.io.Serializable;
 import java.util.Vector;
 
-import sclaim.parser.symbol_table.Prototype;
-
 /**
  * Structure returned by the parser for a behavior definition
  * 
@@ -23,7 +21,6 @@ import sclaim.parser.symbol_table.Prototype;
  *
  */
 public class ClaimBehaviorDefinition extends ClaimConstruct implements Serializable{
-	private Prototype behaviorSymbolTablePrototype;
 	private ClaimAgentDefinition myAgent;
 	
 	/**
@@ -57,26 +54,12 @@ public class ClaimBehaviorDefinition extends ClaimConstruct implements Serializa
 		setStatements(statements);
 	}
 
-	public void initSymbolTablePrototype()
-	{
-		behaviorSymbolTablePrototype = new Prototype(myAgent.getSymbolTablePrototype());
-	}
-	
-	public void clearSymbolTablePrototype()
-	{
-		behaviorSymbolTablePrototype.clearSymbolTablePrototype();
-	}
-	
 	public ClaimAgentDefinition getMyAgent() {
 		return myAgent;
 	}
 
 	public void setMyAgent(ClaimAgentDefinition myAgent) {
 		this.myAgent = myAgent;
-	}
-
-	public Prototype getSymbolTablePrototype() {
-		return behaviorSymbolTablePrototype;
 	}
 
 	public void setStatements(Vector<ClaimConstruct> statements) {
