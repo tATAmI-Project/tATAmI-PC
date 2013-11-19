@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="testing/tudor/|simulation/oldBoot.java|agent_packages/phase1/" kind="src" path="src"/>
+	<classpathentry excluding="testing/tudor/|simulation/oldBoot.java|agent_packages/phase1/|testing/planning/|testing/nga/|testing/gerard/" kind="src" path="src"/>
 	<classpathentry kind="lib" path="libs/log4j-1.2.16.jar"/>
 	<classpathentry kind="lib" path="libs/Logging.jar" sourcepath="libs/Logging.jar">
 		<attributes>

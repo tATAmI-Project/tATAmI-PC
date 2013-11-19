@@ -13,10 +13,7 @@ package testing.andrei;
 
 import java.util.List;
 
-
-
-import tatami.core.agent.visualization.Logger;
-import tatami.core.util.logging.Log;
+import net.xqhs.util.logging.UnitComponentExt;
 import tatami.pc.util.XML.XMLParser;
 import tatami.pc.util.XML.XMLTree;
 import tatami.pc.util.XML.XMLTree.XMLNode;
@@ -33,7 +30,7 @@ public class ScenarioLoadTest
 	
 	public static void main(String args[])
 	{
-		Logger log = Log.getLogger(unitName);
+		UnitComponentExt log = (UnitComponentExt) new UnitComponentExt().setUnitName(unitName);
 		log.trace("Hello World");
 		
 		// load the scenario
@@ -57,7 +54,7 @@ public class ScenarioLoadTest
 		}
 			
 		
-		Log.exitLogger(unitName);
+		log.doExit();
 	}
 	
 }

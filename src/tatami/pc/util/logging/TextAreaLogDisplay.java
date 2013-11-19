@@ -13,7 +13,7 @@ package tatami.pc.util.logging;
 
 import java.awt.TextArea;
 
-import tatami.core.util.logging.Log.DisplayEntity;
+import net.xqhs.util.logging.Logging.DisplayEntity;
 
 
 /**
