@@ -40,21 +40,21 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Vector;
 
+import sclaim.constructs.basic.ClaimBehaviorDefinition;
+import sclaim.constructs.basic.ClaimCondition;
+import sclaim.constructs.basic.ClaimConstruct;
+import sclaim.constructs.basic.ClaimConstructType;
+import sclaim.constructs.basic.ClaimForAllK;
+import sclaim.constructs.basic.ClaimFunctionCall;
+import sclaim.constructs.basic.ClaimFunctionType;
+import sclaim.constructs.basic.ClaimIf;
+import sclaim.constructs.basic.ClaimStructure;
+import sclaim.constructs.basic.ClaimValue;
+import sclaim.constructs.basic.ClaimVariable;
+import sclaim.constructs.basic.ClaimWhile;
 import tatami.core.agent.BaseAgent;
 import tatami.core.agent.claim.behavior.AskForBeingChildBehaviour;
 import tatami.core.agent.claim.behavior.AskForLocation;
-import tatami.core.agent.claim.parser.ClaimBehaviorDefinition;
-import tatami.core.agent.claim.parser.ClaimCondition;
-import tatami.core.agent.claim.parser.ClaimConstruct;
-import tatami.core.agent.claim.parser.ClaimConstructType;
-import tatami.core.agent.claim.parser.ClaimForAllK;
-import tatami.core.agent.claim.parser.ClaimFunctionCall;
-import tatami.core.agent.claim.parser.ClaimFunctionType;
-import tatami.core.agent.claim.parser.ClaimIf;
-import tatami.core.agent.claim.parser.ClaimStructure;
-import tatami.core.agent.claim.parser.ClaimValue;
-import tatami.core.agent.claim.parser.ClaimVariable;
-import tatami.core.agent.claim.parser.ClaimWhile;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
 import tatami.core.agent.visualization.VisualizableAgent;
 import tatami.core.agent.webServices.WSAgent;
@@ -116,6 +116,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 	private static final long						serialVersionUID	= 1212301036264628711L;
 	
 	protected ClaimBehaviorDefinition				cbd;
+	protected SymbolTable 							st;
 	protected transient Logger						log					= null;
 	
 	/**
@@ -132,9 +133,10 @@ public class ClaimBehavior extends Behaviour implements InputListener
 	 */
 	protected Map<String, Queue<Vector<Object>>>	inputQueues			= null;
 	
-	public ClaimBehavior(ClaimBehaviorDefinition behaviorDefinition)
+	public ClaimBehavior(ClaimBehaviorDefinition behaviorDefinition, SymbolTable agentSt)
 	{
 		this.cbd = behaviorDefinition;
+		st = new SymbolTable(cbd.getSymbolTablePrototype(),agentSt);
 		inputQueues = new HashMap<String, Queue<Vector<Object>>>();
 		finished = false;
 		wakeUpAtTime = -1;
@@ -166,10 +168,10 @@ public class ClaimBehavior extends Behaviour implements InputListener
 		}
 		else
 		{
-			if(cbd.getSymbolTable().getLog() == null)
-				cbd.getSymbolTable().setLog(log);
+			if(st.getLog() == null)
+				st.setLog(log);
 			
-			cbd.clearSymbolTable(); // reinitialize symbol table
+			st.clearSymbolTable(); // reinitialize symbol table
 			currentStatement = 0;
 			
 			if(!initialized)
@@ -484,7 +486,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 			else
 			{
 				if(args.get(1 - parametersAdjust).getType() == ClaimConstructType.VARIABLE)
-					simpleMessage = (String) (this.cbd.getSymbolTable().get((ClaimVariable) args
+					simpleMessage = (String) (this.st.get((ClaimVariable) args
 							.get(1 - parametersAdjust))).getValue();
 				else
 					simpleMessage = (String) ((ClaimValue) args.get(1 - parametersAdjust)).getValue();
@@ -502,7 +504,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 					{ // integrate result
 						log.trace("received result " + result + "; binding to "
 								+ ((ClaimVariable) args.get(3)).getName());
-						this.cbd.getSymbolTable().put((ClaimVariable) args.get(3), new ClaimValue(result));
+						this.st.put((ClaimVariable) args.get(3), new ClaimValue(result));
 					}
 					
 				}
@@ -694,7 +696,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 			{
 				log.trace("message received: [" + ClaimMessage.printMessage(msg) + "]");
 				if(argsSize == 2)
-					myBehavior.getSymbolTable().put((ClaimVariable) args.get(0),
+					st.put((ClaimVariable) args.get(0),
 							new ClaimValue(msg.getSender().getLocalName()));
 			}
 		}
@@ -769,7 +771,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 			if(arg instanceof ClaimValue)
 				outputV.add((ClaimValue) arg);
 			else
-				outputV.add(this.cbd.getSymbolTable().get((ClaimVariable) arg));
+				outputV.add(this.st.get((ClaimVariable) arg));
 		}
 		
 		AgentGui myAgentGUI = ((VisualizableAgent) myAgent).getGUI();
@@ -803,7 +805,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 		}
 		
 		// changing the value of the "parent" parameter of the agent:
-		cbd.getSymbolTable().put(new ClaimVariable("parent", true), value);
+		st.put(new ClaimVariable("parent", true), value);
 		
 		// after IN there's always one variable of destination
 		// check if this variable is bound or not
@@ -1004,14 +1006,14 @@ public class ClaimBehavior extends Behaviour implements InputListener
 					for(Iterator<Entry<ClaimVariable, ClaimValue>> it = set.iterator(); it.hasNext();)
 					{
 						Map.Entry<ClaimVariable, ClaimValue> entry = it.next();
-						cbd.getSymbolTable().put(entry.getKey(), entry.getValue());
+						st.put(entry.getKey(), entry.getValue());
 					}
 					for(ClaimConstruct statement : statements)
 						handleStatement(statement);
 					/*
 					 * // reset all variables bound in this procedure to null for(Iterator<Entry<ClaimVariable,
 					 * ClaimValue>> it = set.iterator(); it.hasNext();) { Map.Entry<ClaimVariable, ClaimValue> entry =
-					 * it.next(); cbd.getSymbolTable().put(entry.getKey(), null); }
+					 * it.next(); st.put(entry.getKey(), null); }
 					 */}
 			}
 		}
@@ -1378,7 +1380,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 	protected ClaimValue getVariableValue(ClaimVariable variable)
 	{
 		ClaimValue value = null;
-		value = this.cbd.getSymbolTable().get(variable);
+		value = this.st.get(variable);
 		/*
 		 * if(value == null) value = this.cbd.getMyAgent().getSymbolTable().get(variable);
 		 */// not needed. The implementation of the symbol table already permits this
@@ -1397,12 +1399,12 @@ public class ClaimBehavior extends Behaviour implements InputListener
 	{
 		if(getVariableValue(variable) == null)
 		{
-			cbd.getSymbolTable().put(variable, value);
+			st.put(variable, value);
 			log.trace("variable [" + variable.getName() + "] bound to [" + value + "]");
 		}
 		else
 		{
-			cbd.getSymbolTable().put(variable, value);
+			st.put(variable, value);
 			// log.warn("variable [" + variable.getName() + "] already bound; rebound to [" + value + "]");
 			// // FIXME: decide on whether variables can be rebound
 		}
