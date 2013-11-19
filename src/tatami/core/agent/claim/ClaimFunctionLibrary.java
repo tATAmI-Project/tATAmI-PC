@@ -13,7 +13,7 @@ package tatami.core.agent.claim;
 
 import java.util.Vector;
 
-import tatami.core.agent.claim.parser.ClaimValue;
+import sclaim.constructs.basic.ClaimValue;
 
 
 /**

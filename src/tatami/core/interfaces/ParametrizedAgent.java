@@ -21,9 +21,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import sclaim.constructs.basic.ClaimAgentDefinition;
 import tatami.core.agent.BaseAgent;
 import tatami.core.agent.claim.ClaimAgent;
-import tatami.core.agent.claim.parser.ClaimAgentDefinition;
 import tatami.core.agent.hierarchical.HierarchicalAgent;
 import tatami.core.agent.visualization.VisualizableAgent;
 

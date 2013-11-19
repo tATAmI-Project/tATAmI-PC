@@ -13,7 +13,7 @@ package testing.eric.scenario.hello_world_help.agent_package;
 
 import java.util.Vector;
 
-import tatami.core.agent.claim.parser.ClaimValue;
+import sclaim.constructs.basic.ClaimValue;
 
 public class IOFunctions
 {

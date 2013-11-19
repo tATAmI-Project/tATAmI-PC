@@ -17,8 +17,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import tatami.core.agent.claim.parser.ClaimAgentDefinition;
-import tatami.core.agent.claim.parser.Parser;
+import sclaim.constructs.basic.ClaimAgentDefinition;
+import sclaim.parser.Parser;
 import tatami.core.interfaces.Logger;
 
 /**

@@ -42,10 +42,10 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
+import sclaim.constructs.basic.ClaimConstruct;
+import sclaim.constructs.basic.ClaimStructure;
+import sclaim.constructs.basic.ClaimValue;
 import tatami.core.agent.claim.ClaimMessage;
-import tatami.core.agent.claim.parser.ClaimConstruct;
-import tatami.core.agent.claim.parser.ClaimStructure;
-import tatami.core.agent.claim.parser.ClaimValue;
 import tatami.core.agent.visualization.VisualizableAgent;
 import tatami.core.agent.visualization.VisualizationOntology;
 import tatami.core.agent.visualization.VisualizationOntology.Vocabulary;

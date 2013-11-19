@@ -13,8 +13,8 @@ package agent_packages.example;
 
 import java.util.Vector;
 
+import sclaim.constructs.basic.ClaimValue;
 import tatami.core.agent.claim.ClaimFunctionLibrary;
-import tatami.core.agent.claim.parser.ClaimValue;
 
 
 public class StringFunctions implements ClaimFunctionLibrary

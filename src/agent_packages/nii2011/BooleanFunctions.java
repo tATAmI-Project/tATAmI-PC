@@ -13,8 +13,8 @@ package agent_packages.nii2011;
 
 import java.util.Vector;
 
+import sclaim.constructs.basic.ClaimValue;
 import tatami.core.agent.claim.ClaimFunctionLibrary;
-import tatami.core.agent.claim.parser.ClaimValue;
 
 
 public class BooleanFunctions implements ClaimFunctionLibrary

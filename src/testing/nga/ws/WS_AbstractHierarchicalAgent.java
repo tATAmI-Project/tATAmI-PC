@@ -28,9 +28,10 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 
-import tatami.core.agent.claim.parser.ClaimAgentDefinition;
-import tatami.core.agent.claim.parser.ClaimValue;
-import tatami.core.agent.claim.parser.ClaimVariable;
+import sclaim.constructs.basic.ClaimAgentDefinition;
+import sclaim.constructs.basic.ClaimValue;
+import sclaim.constructs.basic.ClaimVariable;
+import tatami.core.agent.claim.SymbolTable;
 import tatami.core.agent.hierarchical.FollowParentBehaviour;
 import tatami.core.agent.hierarchical.HierarchicalRelation;
 import tatami.core.agent.hierarchical.HierarchyOntology;
@@ -55,6 +56,7 @@ public abstract class WS_AbstractHierarchicalAgent extends VisualizableAgent
 
 	protected String agentType = "";
 	protected ClaimAgentDefinition cad;
+	protected SymbolTable st;
 	protected HashMap<String,String> parameters;
 	protected HierarchicalRelation	hierRelation = new HierarchicalRelation();
 	private ArrayList<SimpleKnowledge>	knowledge;
@@ -73,6 +75,7 @@ public abstract class WS_AbstractHierarchicalAgent extends VisualizableAgent
 		getContentManager().registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL0);
 		getContentManager().registerOntology(MobilityOntology.getInstance());
 		
+		st = new SymbolTable(cad.getSymbolTablePrototype(),null);
 		
 		/**************************************
 		 * INITIAL HIERARCHICAL RELATIONSHIP AND KNOWLEDGE
@@ -114,7 +117,7 @@ public abstract class WS_AbstractHierarchicalAgent extends VisualizableAgent
 //							register(this.agentType, value);
 //						}
 						/****************************/
-						this.cad.getSymbolTable().put(new ClaimVariable(key), new ClaimValue(value));
+						this.st.put(new ClaimVariable(key), new ClaimValue(value));
 					}
 				}
 			}

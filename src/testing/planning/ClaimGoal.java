@@ -14,10 +14,10 @@ package testing.planning;
 import java.util.Collection;
 import java.util.Vector;
 
-import tatami.core.agent.claim.parser.ClaimConstruct;
-import tatami.core.agent.claim.parser.ClaimConstructType;
-import tatami.core.agent.claim.parser.ClaimStructure;
-import tatami.core.agent.claim.parser.ClaimValue;
+import sclaim.constructs.basic.ClaimConstruct;
+import sclaim.constructs.basic.ClaimConstructType;
+import sclaim.constructs.basic.ClaimStructure;
+import sclaim.constructs.basic.ClaimValue;
 import testing.planning.graphplan.Conjunction;
 
 

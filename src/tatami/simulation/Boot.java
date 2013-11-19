@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.Set;
 
 
+import sclaim.constructs.basic.ClaimAgentDefinition;
 import tatami.core.agent.claim.ClaimAgent;
-import tatami.core.agent.claim.parser.ClaimAgentDefinition;
 import tatami.core.interfaces.JadeInterface;
 import tatami.core.interfaces.Logger;
 import tatami.core.interfaces.ParametrizedAgent;

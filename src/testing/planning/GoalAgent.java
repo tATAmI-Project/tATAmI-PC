@@ -17,13 +17,13 @@ import jade.lang.acl.ACLMessage;
 
 import java.util.Vector;
 
+import sclaim.constructs.basic.ClaimConstruct;
+import sclaim.constructs.basic.ClaimValue;
+import sclaim.constructs.goal_driven.simons_and_garella.ClaimGoal;
+import sclaim.constructs.goal_driven.simons_and_garella.ClaimaGoal;
+import sclaim.constructs.goal_driven.simons_and_garella.ClaimmGoal;
+import sclaim.constructs.goal_driven.simons_and_garella.ClaimpGoal;
 import tatami.core.agent.claim.ClaimAgent;
-import tatami.core.agent.claim.parser.ClaimConstruct;
-import tatami.core.agent.claim.parser.ClaimGoal;
-import tatami.core.agent.claim.parser.ClaimValue;
-import tatami.core.agent.claim.parser.ClaimaGoal;
-import tatami.core.agent.claim.parser.ClaimmGoal;
-import tatami.core.agent.claim.parser.ClaimpGoal;
 import tatami.core.agent.hierarchical.HierarchyOntology;
 import tatami.core.agent.hierarchical.HierarchyOntology.Vocabulary;
 import testing.planning.graphplan.*;

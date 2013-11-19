@@ -32,8 +32,8 @@ import java.util.HashSet;
 import java.util.List;
 
 
-import tatami.core.agent.claim.parser.ClaimAgentDefinition;
-import tatami.core.agent.claim.parser.Parser;
+import sclaim.constructs.basic.ClaimAgentDefinition;
+import sclaim.parser.Parser;
 import tatami.core.agent.kb.Knowledge;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
 import tatami.core.interfaces.Logger;

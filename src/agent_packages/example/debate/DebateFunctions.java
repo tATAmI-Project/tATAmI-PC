@@ -13,7 +13,7 @@ package agent_packages.example.debate;
 
 import java.util.Vector;
 
-import tatami.core.agent.claim.parser.ClaimValue;
+import sclaim.constructs.basic.ClaimValue;
 
 
 public class DebateFunctions {
