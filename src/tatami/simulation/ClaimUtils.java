@@ -31,7 +31,7 @@ public class ClaimUtils
 {
 	
 	protected static Map<String, ClaimAgentDefinition>	claimDefinitions	= new HashMap<String, ClaimAgentDefinition>();
-	protected static boolean							cachingEnabled		= false;
+	protected static boolean							cachingEnabled		= true;
 	
 	/**
 	 * //TODO: to document

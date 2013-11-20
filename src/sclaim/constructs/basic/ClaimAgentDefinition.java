@@ -51,6 +51,17 @@ public class ClaimAgentDefinition extends ClaimConstruct implements Serializable
 		setBehaviors(behaviors);
 	}
 
+/*	public ClaimAgentDefinition(String agentClassName, Vector<ClaimVariable> parameters, Vector<ClaimBehaviorDefinition> behaviors, List<Class<?>> codeAttachements)
+	{
+		
+		super(ClaimConstructType.AGENT);
+		setClassName(agentClassName);
+		this.parameters = parameters;
+		setBehaviors(behaviors);
+		if(codeAttachements != null)
+			this.codeAttachements = codeAttachements;
+	}*/
+
 	public void setParameters(Vector<ClaimConstruct> parameters) {
 		this.parameters = new Vector<ClaimVariable>();
 		if (parameters!=null)
@@ -80,4 +91,10 @@ public class ClaimAgentDefinition extends ClaimConstruct implements Serializable
 	{
 		return new Vector<Class<?>>(codeAttachements);
 	}
+	
+/*	public ClaimAgentDefinition createCopy() {
+		ClaimAgentDefinition copy = new ClaimAgentDefinition(getClassName(), getParameters(), getBehaviors(), null);
+		
+		return copy;
+	}*/
 }
