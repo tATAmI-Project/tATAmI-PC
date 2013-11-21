@@ -2,16 +2,12 @@
 <classpath>
 	<classpathentry excluding="testing/tudor/|simulation/oldBoot.java|agent_packages/phase1/|testing/planning/|testing/nga/|testing/gerard/" kind="src" path="src"/>
 	<classpathentry kind="lib" path="libs/log4j-1.2.16.jar"/>
-	<classpathentry kind="lib" path="libs/Logging.jar" sourcepath="libs/Logging.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/Logging.jar!/doc-Logging"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="libs/Config.jar" sourcepath="libs/Config.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/Config.jar!/doc-Config/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="libs/Logging.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre6"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
