@@ -4,7 +4,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import tatami.core.agent.AgentEventHandler.AgentEventType;
+import tatami.core.agent.AgentEvent.AgentEventHandler;
+import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.hierarchical.HierarchicalComponent;
 import tatami.core.agent.jade.JadeComponent;
@@ -20,6 +21,9 @@ import tatami.core.agent.webServices.WebserviceComponent;
  * means of its name -- an instance of {@link AgentComponentName}.
  * <p>
  * A component can belong to at most one {@link CompositeAgent}, which is its parent.
+ * <p>
+ * The class also offers direct access to a basic set of components. It is not recommended for components to retain the
+ * reference, as it may become null if the component is removed.
  * <p>
  * The class serves as a relay to access some package-accessible functionality from {@link CompositeAgent}.
  * 
@@ -82,6 +86,8 @@ public abstract class AgentComponent implements Serializable
 		 * The name of a component extending {@link JadeComponent}.
 		 */
 		JADE_COMPONENT,
+		
+		TESTING_COMPONENT,
 	}
 	
 	/**
@@ -95,7 +101,7 @@ public abstract class AgentComponent implements Serializable
 	/**
 	 * The {@link AgentEventHandler} instances that respond to various events in the agent.
 	 */
-	private Map<AgentEventType, AgentEventHandler>	eventHandlers	= new HashMap<AgentEventHandler.AgentEventType, AgentEventHandler>();
+	private Map<AgentEventType, AgentEventHandler>	eventHandlers	= new HashMap<AgentEventType, AgentEventHandler>();
 	
 	/**
 	 * The constructor assigns the name to the component
@@ -123,10 +129,24 @@ public abstract class AgentComponent implements Serializable
 		CompositeAgent oldParent = parentAgent;
 		parentAgent = parent;
 		parentChangeNotifier(oldParent);
+		componentInitializer();
+	}
+	
+	/**
+	 * Extending anonymous classes can override this method to perform actions when the component is created. The method
+	 * is called at the end of the constructor.
+	 * <p>
+	 * Extending classes should always call super.componentInitializer() first.
+	 */
+	protected void componentInitializer()
+	{
+		// this class does not do anything here.
 	}
 	
 	/**
 	 * Extending classes can override this method to perform actions when the parent of the component changes.
+	 * <p>
+	 * Extending classes should always call super.parentChangeNotifier() first.
 	 * 
 	 * @param oldParent
 	 *            - the previous value for the parent, if any.
@@ -247,9 +267,23 @@ public abstract class AgentComponent implements Serializable
 	 * @param event
 	 *            - the event to disseminate.
 	 */
-	protected void postAgentEvent(AgentEventType event)
+	protected void postAgentEvent(AgentEvent event)
 	{
 		parentAgent.postAgentEvent(event);
+	}
+	
+	/**
+	 * The method calls the event handler of the component for the event which occurred.
+	 * <p>
+	 * It relays the call from the parent {@link CompositeAgent}.
+	 * 
+	 * @param event
+	 *            - the event which occurred.
+	 */
+	void signalAgentEvent(AgentEvent event)
+	{
+		if(eventHandlers.containsKey(event.getType()))
+			eventHandlers.get(event.getType()).handleEvent(event);
 	}
 	
 	/**
