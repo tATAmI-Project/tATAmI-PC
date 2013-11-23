@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import tatami.core.agent.AgentComponent;
-import tatami.core.agent.AgentEventHandler;
+import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.CompositeAgent;
 
 public class MessagingComponent extends AgentComponent
@@ -15,7 +15,7 @@ public class MessagingComponent extends AgentComponent
 	
 	protected MessagingComponent(CompositeAgent parent)
 	{
-		super(parent, AgentComponentName.MESSAGING_COMPONENT);
+		super(AgentComponentName.MESSAGING_COMPONENT);
 		
 		// TODO: register this as message/event receiver
 	}

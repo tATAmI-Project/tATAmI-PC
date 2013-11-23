@@ -18,8 +18,9 @@ import net.xqhs.util.logging.Logging.ReportingEntity;
 import net.xqhs.util.logging.Unit;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent;
-import tatami.core.agent.AgentEventHandler;
-import tatami.core.agent.AgentEventHandler.AgentEventType;
+import tatami.core.agent.AgentEvent;
+import tatami.core.agent.AgentEvent.AgentEventHandler;
+import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.movement.MovementComponent;
 import tatami.core.agent.parametric.AgentParameterName;
@@ -153,9 +154,9 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 					msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.VISUALIZATION_MONITOR.toString()),
 					new AgentEventHandler() {
 						@Override
-						public void handleEvent(AgentEventType eventType, Object eventData)
+						public void handleEvent(AgentEvent event)
 						{
-							String parent = msgr.extractContent(eventData);
+							String parent = msgr.extractContent(event);
 							setVisualizationParent(parent);
 							getLog().info("visualization root received: [" + parent + "]");
 						}
@@ -164,10 +165,10 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 					msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.DO_EXIT.toString()),
 					new AgentEventHandler() {
 						@Override
-						public void handleEvent(AgentEventType eventType, Object eventData)
+						public void handleEvent(AgentEvent event)
 						{
 							getLog().info("exiting...");
-							postAgentEvent(AgentEventType.AGENT_EXIT);
+							postAgentEvent(new AgentEvent(AgentEventType.AGENT_EXIT));
 						}
 					});
 		}
@@ -175,12 +176,12 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		// registers event handlers
 		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler() {
 			@Override
-			public void handleEvent(AgentEventType eventType, Object eventData)
+			public void handleEvent(AgentEvent event)
 			{
 				MovementComponent mvmt = getMovement();
 				if(mvmt != null)
 				{
-					String destination = mvmt.extractDestination(eventData);
+					String destination = mvmt.extractDestination(event);
 					if(!destination.equals(getCurrentContainer()))
 					{
 						getLog().info("moving to [" + destination.toString() + "]");
@@ -192,7 +193,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		
 		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler() {
 			@Override
-			public void handleEvent(AgentEventType eventType, Object eventData)
+			public void handleEvent(AgentEvent event)
 			{
 				resetVisualization();
 				getLog().info(getAgentName() + ": arrived after move");
@@ -201,7 +202,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		
 		registerHandler(AgentEventType.AGENT_EXIT, new AgentEventHandler() {
 			@Override
-			public void handleEvent(AgentEventType eventType, Object eventData)
+			public void handleEvent(AgentEvent event)
 			{
 				removeVisualization();
 			}
@@ -365,7 +366,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	 * 
 	 */
 	@Override
-	protected void postAgentEvent(AgentEventType event)
+	protected void postAgentEvent(AgentEvent event)
 	{
 		super.postAgentEvent(event);
 	}
