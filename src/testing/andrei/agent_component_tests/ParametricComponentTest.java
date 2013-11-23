@@ -39,7 +39,7 @@ public class ParametricComponentTest extends Unit
 		});
 		
 		agent.start();
-		
+		agent.exit();
 		li("done.");
 		doExit();
 	}

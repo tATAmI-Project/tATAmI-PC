@@ -33,6 +33,103 @@ import tatami.core.agent.parametric.ParametricComponent;
 public class CompositeAgent implements Serializable
 {
 	/**
+	 * Values indicating the current state of the agent, especially with respect to processing events.
+	 * 
+	 * @author Andrei Olaru
+	 */
+	enum AgentState {
+		/**
+		 * State indicating that the agent is currently behaving normally and agent events are processed in good order.
+		 * All components are running.
+		 */
+		RUNNING,
+		
+		/**
+		 * State indicating that the agent has been created and that it is waiting to start. THe agent's thread has not
+		 * yet started.
+		 */
+		INITIALIZING,
+		
+		/**
+		 * State indicating that the agent is in the process of starting, but is not currently accepting events. The
+		 * thread may or may not have been started. The components are in the process of starting.
+		 */
+		STARTING,
+		
+		/**
+		 * State indicating that the agent is currently stopping. It is not accepting events any more. The thread may or
+		 * may not have been started. The components are in the process of stopping.
+		 */
+		STOPPING,
+		
+		/**
+		 * State indicating that the agent has been stopped and is unable to process events. The agent's thread has
+		 * been stopped. All components are stopped.
+		 */
+		STOPPED,
+	}
+	
+	/**
+	 * THis is the event-processing thread of the agent.
+	 * 
+	 * @author Andrei Olaru
+	 */
+	class AgentThread implements Runnable
+	{
+		@Override
+		public void run()
+		{
+			boolean doexit = false;
+			while(!doexit)
+			{
+				// System.out.println("oops");
+				if((eventQueue != null) && eventQueue.isEmpty())
+					try
+					{
+						synchronized(eventQueue)
+						{
+							eventQueue.wait();
+						}
+					} catch(InterruptedException e)
+					{
+						// do nothing
+					}
+				else
+				{
+					AgentEvent event = eventQueue.poll();
+					for(AgentComponent component : componentOrder)
+					{
+						component.signalAgentEvent(event);
+					}
+					switch(event.getType())
+					{
+					case AGENT_START: // the agent has completed starting and all components are up.
+						synchronized(eventQueue)
+						{
+							state = AgentState.RUNNING;
+						}
+						break;
+					case AGENT_EXIT:
+						synchronized(eventQueue)
+						{
+							if(!eventQueue.isEmpty())
+							{
+								// TODO: do something
+							}
+						}
+						eventQueue = null;
+						state = AgentState.STOPPED;
+						doexit = true;
+						break;
+					default:
+						// do nothing
+					}
+				}
+			}
+		}
+	}
+	
+	/**
 	 * The class UID
 	 */
 	private static final long							serialVersionUID	= -2693230015986527097L;
@@ -66,6 +163,12 @@ public class CompositeAgent implements Serializable
 	 * The thread managing the agent's lifecycle (managing events).
 	 */
 	protected Thread									agentThread			= null;
+	
+	/**
+	 * The agent state. See {@link AgentState}. Access to this member should be synchronized with the lock of
+	 * <code>eventQueue</code>.
+	 */
+	protected AgentState								state				= AgentState.INITIALIZING;
 	
 	/**
 	 * Adds a component to the agent that has been configured beforehand. The agent will register with the component, as
@@ -104,7 +207,7 @@ public class CompositeAgent implements Serializable
 	public AgentComponent removeComponent(AgentComponentName name)
 	{
 		if(!hasComponent(name))
-			throw new InvalidParameterException("Coomponent [" + name + "] does not exist");
+			throw new InvalidParameterException("Component [" + name + "] does not exist");
 		AgentComponent component = getComponent(name);
 		componentOrder.remove(component);
 		components.remove(component);
@@ -113,43 +216,83 @@ public class CompositeAgent implements Serializable
 	
 	/**
 	 * Starts the lifecycle of the agent. All components will receive an <code>AGENT_START</code> event.
+	 * 
+	 * @return true if the event has been successfully posted. See <code>postAgentEvent()</code>.
 	 */
-	public void start()
+	public boolean start()
 	{
+		if(eventQueue != null)
+			return false;
+		if(!((state == AgentState.INITIALIZING) || (state == AgentState.STOPPED)))
+			return false;
+		state = AgentState.STARTING;
 		eventQueue = new LinkedBlockingQueue<AgentEvent>();
-		agentThread = new Thread(new Runnable() {
-			@Override
-			public void run()
-			{
-				boolean doexit = false;
-				while(!doexit)
-				{
-					if(eventQueue.isEmpty())
-						try
-						{
-							synchronized(this)
-							{
-								wait();
-							}
-						} catch(InterruptedException e)
-						{
-							// do nothing
-						}
-					else
-					{
-						AgentEvent event = eventQueue.poll();
-						for(AgentComponent component : componentOrder)
-						{
-							component.signalAgentEvent(event);
-						}
-					}
-				}
-			}
-		});
+		agentThread = new Thread(new AgentThread());
 		agentThread.start();
-		postAgentEvent(new AgentEvent(AgentEventType.AGENT_START));
+		return postAgentEvent(new AgentEvent(AgentEventType.AGENT_START));
 	}
 	
+	/**
+	 * Instructs the agent to unload all components and exit. All components will receive an <code>AGENT_EXIT</code>
+	 * event.
+	 * <p>
+	 * No events will be successfully received after this event has been posted.
+	 * 
+	 * @return true if the event has been successfully posted. See <code>postAgentEvent()</code>.
+	 */
+	public boolean exit()
+	{
+		if(!postAgentEvent(new AgentEvent(AgentEventType.AGENT_EXIT)))
+			return false;
+		try
+		{
+			agentThread.join();
+		} catch(InterruptedException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * The method should be called by an agent component (relayed through {@link AgentComponent}) to disseminate a an
+	 * {@link AgentEvent} to the other components.
+	 * <p>
+	 * If the event has been successfully posted, the method returns <code>true</code>, guaranteeing that, except in the
+	 * case of abnormal termination, the event will be processed eventually. Otherwise, it returns <code>false</code>,
+	 * indicating that either the agent has not been started, or has been instructed to exit, or is in another
+	 * inappropriate state.
+	 * 
+	 * @param event
+	 *            the event to disseminate.
+	 * @return <code>true</code> if the event has been successfully posted; <code>false</code> otherwise.
+	 */
+	boolean postAgentEvent(AgentEvent event)
+	{
+		if(!(((state == AgentState.STARTING) && (event.getType() == AgentEventType.AGENT_START)) || (state == AgentState.RUNNING)))
+			return false;
+		boolean exiting = (event.getType() == AgentEventType.AGENT_EXIT);
+		try
+		{
+			if(eventQueue != null)
+				synchronized(eventQueue)
+				{
+					if(exiting)
+						state = AgentState.STOPPING;
+					eventQueue.put(event);
+					eventQueue.notify();
+				}
+			else
+				return false;
+		} catch(InterruptedException e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
 	/**
 	 * Returns <code>true</code> if the agent contains said component.
 	 * 
@@ -174,30 +317,6 @@ public class CompositeAgent implements Serializable
 	AgentComponent getComponent(AgentComponentName name)
 	{
 		return components.get(name);
-	}
-	
-	/**
-	 * The method should be called by an agent component (relayed through {@link AgentComponent}) to disseminate a an
-	 * {@link AgentEvent} to the other components.
-	 * 
-	 * @param event
-	 *            the event to disseminate.
-	 */
-	void postAgentEvent(AgentEvent event)
-	{
-		try
-		{
-			if(eventQueue != null)
-				eventQueue.put(event);
-			if(agentThread != null)
-				synchronized(agentThread)
-				{
-					agentThread.notify();
-				}
-		} catch(InterruptedException e)
-		{
-			e.printStackTrace();
-		}
 	}
 	
 	/**
