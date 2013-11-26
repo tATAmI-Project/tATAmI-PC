@@ -55,9 +55,20 @@ public class XMLTree
 		 */
 		public class NodeIterator implements Iterator<XMLNode>
 		{
+			/**
+			 * The searched name.
+			 */
 			String	search	= null;
+			/**
+			 * The current index in browsing through nodes.
+			 */
 			int		cIndex	= 0;
 			
+			/**
+			 * Creates a new iterator, that iterates over nodes with the searched name.
+			 * 
+			 * @param searchName - the searched name.
+			 */
 			public NodeIterator(String searchName)
 			{
 				search = searchName;
@@ -95,15 +106,27 @@ public class XMLTree
 		}
 		
 		/**
+		 * Stores information about an XML attribute.
 		 * 
 		 * @author Andrei Olaru
-		 * 
 		 */
 		public static class XMLAttribute
 		{
+			/**
+			 * The name of the attribute.
+			 */
 			String	name	= null;
+			/**
+			 * The value of the attribute.
+			 */
 			String	value	= null;
 			
+			/**
+			 * Creates a new instance.
+			 * 
+			 * @param attrName - the name of the attribute.
+			 * @param attrValue - the value of the attribute.
+			 */
 			public XMLAttribute(String attrName, String attrValue)
 			{
 				super();

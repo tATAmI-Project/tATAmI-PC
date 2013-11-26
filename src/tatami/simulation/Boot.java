@@ -13,21 +13,22 @@ package tatami.simulation;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-
+import net.xqhs.util.logging.Log;
+import net.xqhs.util.logging.Logger;
+import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.claim.parser.ClaimAgentDefinition;
 import tatami.core.agent.jade.JadeInterface;
 import tatami.core.agent.jade.JadeInterface.JadeConfig;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
-import tatami.core.agent.visualization.Logger;
-import tatami.core.util.logging.Log;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.pc.agent.visualization.VisualizationAgent;
 import tatami.pc.util.XML.XMLParser;
@@ -36,27 +37,60 @@ import tatami.pc.util.XML.XMLTree.XMLNode;
 import tatami.pc.util.windowLayout.WindowLayout;
 
 /**
+ * The Boot class manages the startup of the multi-agent system. It manages settings, it loads the scenario, loads the
+ * agent definitions (agents are actually created later).
  * 
  * @author Andrei Olaru
  * @author Nguyen Thi Thuy Nga
  */
 public class Boot
 {
+	/**
+	 * Available types of loaders for agents.
+	 * 
+	 * @author Andrei Olaru
+	 */
 	enum Loader {
 		
-		ADF2("adf2"),
+		/**
+		 * The agent is described by means of an .adf2 file.
+		 */
+		ADF2,
 		
-		JAVA("java"),
+		/**
+		 * The agent is described by means of traditional Java code.
+		 */
+		JAVA,
 		
 		;
 		
+		/**
+		 * The name of the loader.
+		 */
 		private String	name	= null;
 		
+		/**
+		 * Creates a new loader type, giving it a name unrelated to the enumeration value.
+		 * 
+		 * @param loaderName
+		 *            - the name of the loader.
+		 */
 		private Loader(String loaderName)
 		{
 			name = loaderName;
 		}
 		
+		/**
+		 * Creates a new loader type, giving it a name that is the lower case version of the enumeration value.
+		 */
+		private Loader()
+		{
+			name = super.toString().toLowerCase();
+		}
+		
+		/**
+		 * Overrides the inherited method to return the 'given name' of the loader.
+		 */
 		@Override
 		public String toString()
 		{
@@ -65,174 +99,91 @@ public class Boot
 		
 	}
 	
-	private static String	unitName	= "boot";
-	protected static Logger	log			= Log.getLogger(unitName);
+	/**
+	 * The log of the class.
+	 */
+	protected static UnitComponentExt	log	= (UnitComponentExt) new UnitComponentExt().setUnitName("boot");
 	
-	private static String	schemaName	= "config/scenarioSchema2.xsd";
-	
+	/**
+	 * The <code>main</code> method, handling all functionality of {@link Boot}.
+	 * <p>
+	 * 
+	 * @param args
+	 *            - the arguments received by the program.
+	 */
 	public static void main(String args[])
 	{
 		log.trace("Booting World.");
 		
-		BootSettings settings = new BootSettings();
-		
-		// default arguments
-		String scenarioFileName = settings.scenarioFileName;
-		int windowLayoutWidth = settings.windowLayoutWidth;
-		int windowLayoutHeight = settings.windowLayoutHeight;
-		
-		String jadeIP = null;
-		String jadePort = null;
-		String localIP = null;
-		String localPort = null;
-		
-		// expected arguments: scenario xml, remote IP, remote port, local IP, local port, screen width, screen height
-		switch(args.length)
-		{
-		default:
-			log.warn("too many arguments");
-			//$FALL-THROUGH$
-		case 7:
-			windowLayoutWidth = Integer.parseInt(args[5]);
-			windowLayoutHeight = Integer.parseInt(args[6]);
-			//$FALL-THROUGH$
-		case 6:
-			log.warn("incorrect number of arguments");
-			//$FALL-THROUGH$
-		case 5:
-			try
-			{
-				if(Integer.parseInt(args[4]) >= 0)
-					localPort = args[4];
-			} catch(NumberFormatException e1)
-			{
-				// TODO
-			}
-			//$FALL-THROUGH$
-		case 4:
-			if(!"null".equals(args[3]))
-				localIP = args[3];
-			//$FALL-THROUGH$
-		case 3:
-			try
-			{
-				if(Integer.parseInt(args[2]) >= 0)
-					jadePort = args[2];
-			} catch(NumberFormatException e1)
-			{
-				// TODO
-			}
-			//$FALL-THROUGH$
-		case 2:
-			if(!"null".equals(args[1]))
-				jadeIP = args[1];
-			//$FALL-THROUGH$
-		case 1:
-			if(!args[0].equals("default") && new File(args[0]).exists())
-				scenarioFileName = args[0];
-			else
-				log.error("file [" + args[0] + "] does not exist");
-			//$FALL-THROUGH$
-		case 0:
-		}
+		// load settings
+		BootSettingsManager settings = new BootSettingsManager();
+		XMLTree scenarioTree = settings.load(args, true);
 		
 		// create window layout
-		WindowLayout.staticLayout = new WindowLayout(windowLayoutWidth, windowLayoutHeight, settings.layout, null);
+		WindowLayout.staticLayout = new WindowLayout(settings.getApplicationLayoutWidth(),
+				settings.getApplicationLayoutHeight(), settings.getLayout(), null);
 		
-		// parse scenario; get jade initialization data
-		Map<String, AgentCreationData> allAgents = new HashMap<String, AgentCreationData>();
-		
-		log.info("loading scenario [" + scenarioFileName + "]");
-		XMLTree scenarioTree = XMLParser.validateParse(schemaName, scenarioFileName);
-		log.info("scenario:");
-		log.info(scenarioTree.toString());
-		
-		XMLNode jadeConfigNode = (scenarioTree.getRoot().getNodeIterator("jadeConfig").hasNext() ? scenarioTree.getRoot().getNodeIterator("jadeConfig").next() : null);
-		String mainContainerName = null;
-		boolean createMainContainer = false;
-		
-		String jadePlatform = null;
-		if(jadeConfigNode != null)
+		if(settings.loadJade)
 		{
-			if(jadeConfigNode.getAttributeValue("IPaddress") != null)
-				jadeIP = jadeConfigNode.getAttributeValue("IPaddress");
-			if(jadeConfigNode.getAttributeValue("port") != null)
-				jadePort = jadeConfigNode.getAttributeValue("port");
-			if(jadeConfigNode.getAttributeValue("localIPaddress") != null)
-				localIP = jadeConfigNode.getAttributeValue("localIPaddress");
-			if(jadeConfigNode.getAttributeValue("localPort") != null)
-				localPort = jadeConfigNode.getAttributeValue("localPort");
-			if(jadeConfigNode.getAttributeValue("platformID") != null)
-				jadePlatform = jadeConfigNode.getAttributeValue("platformID");
-			if(jadeConfigNode.getAttributeValue("mainContainerName") != null)
+			// boot JADE platform
+			log.info("booting JADE");
+			
+			// identify appropriate JadeInterface instance
+			JadeInterface jade;
+			try
 			{
-				mainContainerName = jadeConfigNode.getAttributeValue("mainContainerName");
-				createMainContainer = true;
+				jade = (JadeInterface) PlatformUtils.loadClassInstance(new Object(), PlatformUtils.jadeInterfaceClass()
+						.getName(), new Object[] {});
+			} catch(Exception e)
+			{
+				log.error("unable to create jade interface: " + e.toString() + ": " + e.getStackTrace().toString());
+				return;
 			}
-			if((jadeConfigNode.getAttributeValue("isMain") != null) && jadeConfigNode.getAttributeValue("isMain").equals(new Boolean(true).toString()))
-				createMainContainer = true;
+			if(jade == null)
+			{
+				log.error("unable to create jade interface");
+				return;
+			}
+			
+			JadeConfig jadeConfig = jade.fillConfig(new JadeConfig());
+			jadeConfig.setLocalHost(settings.getLocalHost()).setLocalPort(settings.getLocalPort())
+					.setMainHost(settings.mainHost).setMainPort(settings.mainPort);
+			if(settings.doCreateMainContainer())
+				jadeConfig.setPlatformID(settings.getJadePlatformName()).setMainContainerName(
+						settings.getMainContainerName());
+			jade.setConfig(jadeConfig);
+			
+			if(settings.doCreateMainContainer())
+			{
+				log.info("booting platform / main container");
+				jade.startPlatform();
+			}
 		}
 		
-		// boot JADE platform
-		log.info("booting JADE");
+		// build agent creation data
 		
-		// identify appropriate JadeInterface instance
-		JadeInterface jade = null;
-		Class<?> jadeinterfaceClass = PlatformUtils.jadeInterfaceClass();
-		try
-		{
-			ClassLoader cl = new ClassLoader(Boot.class.getClassLoader()) {
-				// nothing to extend
-			};
-			Constructor<?> cons = cl.loadClass(jadeinterfaceClass.getCanonicalName()).getConstructor();
-			jade = (JadeInterface)cons.newInstance();
-		} catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		if(jade == null)
-		{
-			log.error("unable to create jade interface");
-			return;
-		}
+		Map<String, AgentCreationData> allAgents = new HashMap<String, AgentCreationData>();
+		Map<String, Boolean> allContainers = new HashMap<String, Boolean>(); // container name -> do create
 		
-		JadeConfig jadeConfig = jade.fillConfig(new JadeConfig());
-		jadeConfig.setLocalHost(localIP).setLocalPort(localPort).setMainHost(jadeIP).setMainPort(jadePort);
-		if(createMainContainer)
-			jadeConfig.setPlatformID(jadePlatform).setMainContainerName(mainContainerName);
-		jade.setConfig(jadeConfig);
+		Set<String> adfPaths = new HashSet<String>(), agentPackages = new HashSet<String>();
+		Iterator<XMLNode> adfPathsIt = scenarioTree.getRoot().getNodeIterator("adfPath");
+		while(adfPathsIt.hasNext())
+			adfPaths.add((String) adfPathsIt.next().getValue());
+		Iterator<XMLNode> packagePathsIt = scenarioTree.getRoot().getNodeIterator(
+				AgentParameterName.AGENT_PACKAGE.toString());
+		while(packagePathsIt.hasNext())
+			agentPackages.add((String) packagePathsIt.next().getValue());
 		
-		if(createMainContainer)
-		{
-			log.info("booting platform / main container");
-			jade.startPlatform();
-		}
+		// iterate containers and find agents
 		
-		// create containers
 		XMLNode initial = scenarioTree.getRoot().getNodeIterator("initial").next();
 		for(Iterator<XMLNode> itC = initial.getNodeIterator("container"); itC.hasNext();)
 		{
 			XMLNode containerConfig = itC.next();
 			String containerName = containerConfig.getAttributeValue("name");
-			boolean doCreateContainer = (containerConfig.getAttributeValue("create") == null) || containerConfig.getAttributeValue("create").equals(new Boolean(true));
-			
-			if(!containerName.equals(mainContainerName) && doCreateContainer)
-			{
-				log.info("creating container [" + containerName + "]...");
-				jade.startContainer(containerName);
-				log.info("container created; adding agents...");
-			}
-			else
-				log.info("adding agents in main container");
-			
-			// get general parameters
-			Set<String> adfPaths = new HashSet<String>(), agentPackages = new HashSet<String>();
-			Iterator<XMLNode> adfPathsIt = scenarioTree.getRoot().getNodeIterator("adfPath");
-			while(adfPathsIt.hasNext())
-				adfPaths.add((String)adfPathsIt.next().getValue());
-			Iterator<XMLNode> packagePathsIt = scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_PACKAGE.toString());
-			while(packagePathsIt.hasNext())
-				agentPackages.add((String)packagePathsIt.next().getValue());
+			boolean doCreateContainer = (containerConfig.getAttributeValue("create") == null)
+					|| containerConfig.getAttributeValue("create").equals(new Boolean(true));
+			allContainers.put(containerName, new Boolean(doCreateContainer));
 			
 			// set up creation for all agents in the container
 			for(Iterator<XMLNode> itA = containerConfig.getNodeIterator("agent"); itA.hasNext();)
@@ -252,18 +203,22 @@ public class Boot
 					continue;
 				}
 				
-				String agentLoader = getParameterValue(agentConfig, "loader");
 				Loader loader = null;
-				for(Loader ld : Loader.values())
-					if(ld.toString().equals(agentLoader))
-						loader = ld;
-				if(loader == null)
+				try
 				{
-					log.error("unknown agent loader [" + agentLoader + "]; agent [" + agentName + "] will not be created");
+					loader = Loader.valueOf(getParameterValue(agentConfig, "loader"));
+				} catch(NullPointerException e)
+				{
+					log.error("agent loader is null. agent [" + agentName + "] will not be created.");
 					continue;
-				}
+				} catch(IllegalArgumentException e)
+				{
+					log.error("unknown agent loader [" + getParameterValue(agentConfig, "loader") + "]; agent ["
+							+ agentName + "] will not be created.");
+					continue;
+				} // agent loader must be ok here.
 				
-				// get parameters and put them into a neat HashMap
+				// get all parameters and put them into an AgentParameters instance.
 				AgentParameters parameters = new AgentParameters();
 				for(Iterator<XMLNode> paramIt = agentConfig.getNodeIterator("parameter"); paramIt.hasNext();)
 				{
@@ -283,21 +238,35 @@ public class Boot
 				switch(loader)
 				{
 				case JAVA:
-					// TODO: to do, if needed; see oldBoot for the code
+					// TODO: to do.
 					break;
 				case ADF2:
 				{
-					ClaimAgentDefinition cad = ClaimUtils.fillCAD(parameters.get(AgentParameterName.AGENT_CLASS.toString()), parameters.getValues(AgentParameterName.JAVA_CODE.toString()), adfPaths, agentPackages, log);
+					ClaimAgentDefinition cad = ClaimUtils
+							.fillCAD(parameters.get(AgentParameterName.AGENT_CLASS.toString()),
+									parameters.getValues(AgentParameterName.JAVA_CODE.toString()), adfPaths,
+									agentPackages, log);
 					parameters.addObject(AgentParameterName.AGENT_DEFINITION, cad);
 					// register agent
-					allAgents.put(agentName, new AgentCreationData(agentName, ClaimComponent.class.getCanonicalName(), parameters, containerName, !doCreateContainer));
-					log.info("configured [" + agentLoader + "] agent [" + agentName + "] in container [" + containerName + "]");
+					allAgents.put(agentName, new AgentCreationData(agentName, ClaimComponent.class.getCanonicalName(),
+							parameters, containerName, !doCreateContainer));
+					log.info("configured [" + loader.toString() + "] agent [" + agentName + "] in container ["
+							+ containerName + "]");
 					break;
 				}
 				}
 				
 			}
 		}
+		
+		if(!containerName.equals(mainContainerName) && doCreateContainer)
+		{
+			log.info("creating container [" + containerName + "]...");
+			jade.startContainer(containerName);
+			log.info("container created; adding agents...");
+		}
+		else
+			log.info("adding agents in main container");
 		
 		if(createMainContainer)
 		{
@@ -315,11 +284,12 @@ public class Boot
 			if(timeline != null)
 				parameters.addObject(AgentParameterName.TIMELINE, timeline);
 			parameters.add(AgentParameterName.VISUALIZTION_AGENT, vizName);
-			jade.addAgentToContainer(mainContainerName, "simulator", SimulationAgent.class.getCanonicalName(), new Object[] { parameters });
+			jade.addAgentToContainer(mainContainerName, "simulator", SimulationAgent.class.getCanonicalName(),
+					new Object[] { parameters });
 			
 		}
 		
-		Log.exitLogger(unitName);
+		log.doExit();
 	}
 	
 	static String getParameterValue(XMLNode agentConfig, String parameterName)

@@ -35,14 +35,4 @@ public class AgentCreationData
 		destinationContainer = destination;
 		isRemote = remote;
 	}
-	
-	@Deprecated
-	public AgentCreationData(String name, String path, @SuppressWarnings("unused") Object[] params, String destination, boolean remote)
-	{
-		agentName = name;
-		classpath = path;
-		destinationContainer = destination;
-		isRemote = remote;
-	}
-	
 }

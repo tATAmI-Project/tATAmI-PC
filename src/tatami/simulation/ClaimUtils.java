@@ -17,9 +17,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.claim.parser.ClaimAgentDefinition;
 import tatami.core.agent.claim.parser.Parser;
-import tatami.core.agent.visualization.Logger;
 
 /**
  * The purpose of this class is to hold functions that are necessary for the simulation, but are related to CLAIM
@@ -44,7 +44,7 @@ public class ClaimUtils
 	 * @return
 	 */
 	public static ClaimAgentDefinition fillCAD(String agentClass, Collection<String> javaCodeAttachments,
-			Collection<String> adfPaths, Collection<String> agentPackages, Logger log)
+			Collection<String> adfPaths, Collection<String> agentPackages, UnitComponentExt log)
 	{
 		ClaimAgentDefinition cad = null;
 		// should not cache for now: some parameters and java code attachments might differ even

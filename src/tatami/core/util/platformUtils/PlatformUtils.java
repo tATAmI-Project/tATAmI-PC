@@ -96,6 +96,33 @@ public class PlatformUtils
 		return null;
 	}
 	
+	/**
+	 * Creates a new instance of a class that is now known at compile-time.
+	 * 
+	 * @param loadingClass
+	 *            - an instance created with the class loader to use to create the new instance. Can be
+	 *            <code>new Object()</code>.
+	 * @param className
+	 *            - the name of the class to instantiate.
+	 * @param constructorArguments
+	 *            - an object array specifying the arguments to pass to the constructor of the new instance. The types
+	 *            of the objects in this array will be used to identify the constructor of the new instance.
+	 * @return the newly created instance. If the creation fails, an exception will be surely thrown.
+	 * @throws SecurityException
+	 *             -
+	 * @throws NoSuchMethodException
+	 *             -
+	 * @throws ClassNotFoundException
+	 *             -
+	 * @throws IllegalArgumentException
+	 *             -
+	 * @throws InstantiationException
+	 *             -
+	 * @throws IllegalAccessException
+	 *             -
+	 * @throws InvocationTargetException
+	 *             -
+	 */
 	public static Object loadClassInstance(Object loadingClass, String className, Object... constructorArguments)
 			throws SecurityException, NoSuchMethodException, ClassNotFoundException, IllegalArgumentException,
 			InstantiationException, IllegalAccessException, InvocationTargetException

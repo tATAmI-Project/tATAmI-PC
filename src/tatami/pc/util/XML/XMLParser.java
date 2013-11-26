@@ -33,31 +33,31 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import net.xqhs.util.logging.Logger.Level;
+import net.xqhs.util.logging.UnitComponentExt;
+
 import org.w3c.dom.Document;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-
-import tatami.core.agent.visualization.Logger;
-import tatami.core.agent.visualization.Logger.Level;
-import tatami.core.util.logging.Log;
 import tatami.pc.util.XML.XMLTree.XMLNode;
 import tatami.pc.util.XML.XMLTree.XMLNode.XMLAttribute;
 
 /**
- * Executes the parsing of an XML file, using the SAX parser. Parsing should be done using one of the provided static functions.
+ * Executes the parsing of an XML file, using the SAX parser. Parsing should be done using one of the provided static
+ * functions.
  * 
  * @author Andrei Olaru
  * 
  */
 public class XMLParser extends DefaultHandler
 {
-	protected String	unitName		= null; // for logging
-	protected Logger	log				= null;
+	protected String			unitName		= null; // for logging
+	protected UnitComponentExt	log				= null;
 	
-	private String		schemaFiles[]	= null;
-	private XMLTree		thetree			= null;
+	private String				schemaFiles[]	= null;
+	private XMLTree				thetree			= null;
 	
 	/**
 	 * Validates and parses an XML file.
@@ -104,8 +104,7 @@ public class XMLParser extends DefaultHandler
 		for(String schema : schemas)
 			names += schema.substring(schema.lastIndexOf('/') + 1) + "; ";
 		this.unitName = this.getClass().getName() + ":" + names;
-		log = Log.getLogger(unitName);
-		log.setLevel(Level.INFO);
+		log = (UnitComponentExt) new UnitComponentExt().setUnitName(unitName).setLogLevel(Level.INFO);
 	}
 	
 	protected boolean validate(String file)
@@ -120,7 +119,7 @@ public class XMLParser extends DefaultHandler
 		Schema schemaXSD;
 		try
 		{
-			Vector<Source> src = new Vector<Source>(schemaFiles.length); 
+			Vector<Source> src = new Vector<Source>(schemaFiles.length);
 			for(String schemaFile : schemaFiles)
 			{
 				File schema = new File(schemaFile);
@@ -135,7 +134,7 @@ public class XMLParser extends DefaultHandler
 					}
 				src.add(new StreamSource(schema));
 			}
-			Source srcA[] = (Source[])src.toArray(new Source[0]);
+			Source srcA[] = (Source[]) src.toArray(new Source[0]);
 			schemaXSD = schemaFactory.newSchema(srcA);
 		} catch(SAXException e)
 		{
@@ -287,7 +286,7 @@ public class XMLParser extends DefaultHandler
 		// {
 		// e.printStackTrace();
 		// }
-		//		
+		//
 		Transformer transformer = null;
 		try
 		{
@@ -317,7 +316,7 @@ public class XMLParser extends DefaultHandler
 	
 	public void close()
 	{
-		Log.exitLogger(unitName);
+		log.doExit();
 	}
 	
 }
