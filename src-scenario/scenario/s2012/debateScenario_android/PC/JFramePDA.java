@@ -9,13 +9,13 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package agent_packages.example.debate.PC;
+package s2012.debateScenario_android.PC;
 
 import java.util.Vector;
 
+import s2012.debateScenario_android.PC.PDAAgentGui.PDAComponents;
 import tatami.core.agent.visualization.AgentGui.InputListener;
 
-import agent_packages.example.debate.PC.PDAAgentGui.PDAComponents;
 
 
 /**

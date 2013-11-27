@@ -9,43 +9,35 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package agent_packages.nii2011;
+package scenario.examples_sclaim.simpleScenarioE;
 
-import java.awt.Button;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
+import java.util.Vector;
 
-import javax.swing.JPanel;
-
-import tatami.pc.agent.visualization.PCDefaultAgentGui;
+import tatami.core.agent.claim.ClaimFunctionLibrary;
+import tatami.core.agent.claim.parser.ClaimValue;
 
 
-
-public class AgentPCGui_Professor extends PCDefaultAgentGui
+public class ChatFunctions implements ClaimFunctionLibrary
 {
-	public AgentPCGui_Professor(AgentGuiConfig config)
+	public static boolean increment(Vector<ClaimValue> arguments)
 	{
-		super(config);
-		
-		JPanel buttonsPanel = new JPanel(new FlowLayout());
-		
-		Button lsb = new Button("Last Slide");
-		buttonsPanel.add(lsb);
-		components.put("lastSlideButton", lsb);
-		
-		Button ecb = new Button("End Course");
-		buttonsPanel.add(ecb);
-		components.put("endCourseButton", ecb);
-		
-		GridBagConstraints c = new GridBagConstraints();
-		c.fill = GridBagConstraints.BOTH;
-		c.gridx = 0;
-		c.gridy = 1;
-		c.gridwidth = 3;
-		c.gridheight = 2;
-		c.weightx = c.weighty = 1;
-		window.add(buttonsPanel, c);
-		
-		window.setVisible(true);
+		arguments.set(1, new ClaimValue(new Integer(Integer.parseInt((String)arguments.get(0).getValue()) + 1).toString()));
+		return true;
+	}
+	
+	public static boolean initOutput(Vector<ClaimValue> arguments)
+	{
+		arguments.set(0, new ClaimValue(new String("")));
+		return true;
+	}
+	
+	public static boolean assembleOutput(Vector<ClaimValue> arguments)
+	{
+		String dir = (String)arguments.get(0).getValue();
+		String seq = (String)arguments.get(1).getValue();
+		String msg = (String)arguments.get(2).getValue();
+		String output = (String)arguments.get(3).getValue();
+		arguments.set(3, new ClaimValue(output + "\n(" + seq + ")" + dir + ": " + msg));
+		return true;
 	}
 }

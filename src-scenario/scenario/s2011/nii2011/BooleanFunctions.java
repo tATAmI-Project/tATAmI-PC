@@ -9,13 +9,30 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package agent_packages.example.debate.PC;
+package s2011.nii2011;
 
-import tatami.pc.agent.visualization.PCDefaultAgentGui;
+import java.util.Vector;
 
-public class EmissaryAgentGui extends PCDefaultAgentGui{
+import tatami.core.agent.claim.ClaimFunctionLibrary;
+import tatami.core.agent.claim.parser.ClaimValue;
 
-	public EmissaryAgentGui(AgentGuiConfig configuration) {
-		super(configuration);
+
+public class BooleanFunctions implements ClaimFunctionLibrary
+{
+	
+	public static boolean not(Vector<ClaimValue> arguments)
+	{
+		if(((String)arguments.get(0).getValue()).equals("true"))
+			return false;
+		else
+			return true;
 	}
+	
+	public static boolean isDifferent(Vector<ClaimValue> arguments)
+	{
+		String s1 = (String)arguments.get(0).getValue();
+		String s2 = (String)arguments.get(1).getValue();
+		return !s1.equals(s2);
+	}
+	
 }

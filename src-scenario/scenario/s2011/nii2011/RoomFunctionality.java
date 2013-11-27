@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package agent_packages.nii2011;
+package s2011.nii2011;
 
 import java.util.HashMap;
 import java.util.HashSet;

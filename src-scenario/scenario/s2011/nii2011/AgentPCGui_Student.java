@@ -9,15 +9,49 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package agent_packages.example.smartRoom.PC;
+package s2011.nii2011;
+
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.TextArea;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import tatami.pc.agent.visualization.PCDefaultAgentGui;
 
-public class UserAgentGUI extends PCDefaultAgentGui
-{
 
-	public UserAgentGUI(AgentGuiConfig configuration) {
-		super(configuration);
-		// TODO Auto-generated constructor stub
+
+public class AgentPCGui_Student extends PCDefaultAgentGui
+{
+	public AgentPCGui_Student(AgentGuiConfig config)
+	{
+		super(config);
+		
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.BOTH;
+		c.gridx = 0;
+		c.gridy = 1;
+		c.gridwidth = 3;
+		c.gridheight = 1;
+		c.weightx = c.weighty = 1;
+		TextArea ita = new TextArea();
+		ita.setMinimumSize(new Dimension(100, 100));
+		
+		JPanel panel = new JPanel(new FlowLayout());
+		JLabel output = new JLabel("");
+		panel.add(output);
+		components.put("outputField", output);
+		JLabel output2 = new JLabel("");
+		panel.add(output2);
+		components.put("outputField2", output2);
+		panel.add(new JLabel(" | opinion:"));
+		panel.add(ita);
+		
+		window.add(panel, c);
+		components.put("inputTextArea", ita);
+		
+		window.setVisible(true);
 	}
 }

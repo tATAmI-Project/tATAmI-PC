@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package agent_packages.nii2011;
+package scenario.examples_sclaim;
 
 import java.util.Vector;
 
@@ -17,22 +17,14 @@ import tatami.core.agent.claim.ClaimFunctionLibrary;
 import tatami.core.agent.claim.parser.ClaimValue;
 
 
-public class BooleanFunctions implements ClaimFunctionLibrary
+public class StringFunctions implements ClaimFunctionLibrary
 {
 	
-	public static boolean not(Vector<ClaimValue> arguments)
-	{
-		if(((String)arguments.get(0).getValue()).equals("true"))
-			return false;
-		else
-			return true;
-	}
-	
-	public static boolean isDifferent(Vector<ClaimValue> arguments)
+	public static boolean equalString(Vector<ClaimValue> arguments)
 	{
 		String s1 = (String)arguments.get(0).getValue();
 		String s2 = (String)arguments.get(1).getValue();
-		return !s1.equals(s2);
+		return s1.equals(s2);
 	}
 	
 }
