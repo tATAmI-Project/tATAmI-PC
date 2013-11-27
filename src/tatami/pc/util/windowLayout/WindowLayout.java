@@ -14,10 +14,7 @@ package tatami.pc.util.windowLayout;
 import java.util.HashMap;
 import java.util.Map;
 
-
-
-import tatami.core.agent.visualization.Logger;
-import tatami.core.util.logging.Log;
+import net.xqhs.util.logging.UnitComponentExt;
 import tatami.pc.util.windowLayout.LayoutIndications.Bar;
 import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
 
@@ -100,7 +97,7 @@ public class WindowLayout
 	
 	public static WindowLayout			staticLayout	= null;
 	
-	protected Logger					log				= null;
+	protected UnitComponentExt					log				= null;
 	
 	Integer								startX			= null;
 	Integer								startY			= null;
@@ -129,7 +126,7 @@ public class WindowLayout
 	 */
 	public WindowLayout(int globalWidth, int globalHeight, LayoutIndications ind, MultipleDisplaySupport mds)
 	{
-		log = Log.getLogger(this.getClass().getName());
+		log = (UnitComponentExt) new UnitComponentExt().setUnitName(this.getClass().getName());
 		
 		indications = (ind != null) ? ind : new LayoutIndications();
 		
@@ -287,6 +284,6 @@ public class WindowLayout
 	{
 		grid = null;
 		windows = null;
-		Log.exitLogger(this.getClass().getName());
+		log.doExit();
 	}
 }

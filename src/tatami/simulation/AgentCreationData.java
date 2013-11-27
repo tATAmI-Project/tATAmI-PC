@@ -21,13 +21,45 @@ import tatami.core.agent.parametric.AgentParameters;
  */
 public class AgentCreationData
 {
+	/**
+	 * <code>true</code> if the agent should be created on the local machine, false if it should be created on a
+	 * different machine.
+	 */
 	boolean			isRemote;
+	/**
+	 * The name of the agent.
+	 */
 	String			agentName;
+	/**
+	 * The class to instantiate at agent creation.
+	 */
 	String			classpath;
+	/**
+	 * The parameters to pass to the agent.
+	 */
 	AgentParameters	parameters;
+	/**
+	 * If the agent is remote, the name of the destination container.
+	 */
 	String			destinationContainer;
 	
-	public AgentCreationData(String name, String path, AgentParameters agentParameters, String destination, boolean remote)
+	/**
+	 * Creates a new instance of information for the creation of an agent.
+	 * 
+	 * @param name
+	 *            - the name of the agent.
+	 * @param path
+	 *            - the fully qualified name of the class to instantiate at agent creation.
+	 * @param agentParameters
+	 *            - the {@link AgentParameters} instance to pass to the agent.
+	 * @param destination
+	 *            - the container on which the agent should be created.
+	 * @param remote
+	 *            - <code>true</code> if the container is remote (not on the local machine); <code>false</code>
+	 *            otherwise.
+	 */
+	public AgentCreationData(String name, String path, AgentParameters agentParameters, String destination,
+			boolean remote)
 	{
 		agentName = name;
 		classpath = path;

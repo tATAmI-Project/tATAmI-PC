@@ -24,19 +24,43 @@ import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
  */
 public class BootDefaultArguments
 {
-	// static final String scenarioFileName = "scenario/examples/simpleScenarioE/scenario.xml";
+	/**
+	 * The scenario file.
+	 */
+	static final String			scenarioFileName	= "scenario/examples/simpleScenarioA/scenario.xml";
 	// static final String scenarioFileName = "scenario/examples/simpleScenarioE/scenario-distributed.xml";
 	// static final String scenarioFileName = "scenario/examples/debateScenario-android/scenario.xml";
-	static final String			scenarioFileName	= "scenario/2011/phase2-android/scenario_new_schema.xml";
+	// static final String scenarioFileName = "scenario/2011/phase2-android/scenario_new_schema.xml";
 	
-	static final String			jadeIP				= null;
-	static final String			jadePort			= null;
-	static final String			localIP				= null;
+	/**
+	 * Main (Jade) host.
+	 */
+	static final String			mainHost				= null;
+	/**
+	 * Main (Jade) port.
+	 */
+	static final String			mainPort			= null;
+	/**
+	 * Local host.
+	 */
+	static final String			localHost				= null;
+	/**
+	 * Local port.
+	 */
 	static final String			localPort			= null;
 	
-	static final int			windowLayoutWidth	= 1530;
-	static final int			windowLayoutHeight	= 600;
+	/**
+	 * The width of the application space.
+	 */
+	static final int			applicationLayoutWidth	= 1530;
+	/**
+	 * The height of the application space.
+	 */
+	static final int			applicationLayoutHeight	= 600;
 	
+	/**
+	 * The layout indications for the PC application.
+	 */
 	static LayoutIndications	layout				= new LayoutIndications(12, 6)
 													
 													.indicateBar(BarPosition.LEFT, 70, 0) // Taskbar on the left (70

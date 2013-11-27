@@ -103,13 +103,13 @@ public class BootSettingsManager extends Config
 	{
 		scenarioFileName = BootDefaultArguments.scenarioFileName;
 		
-		mainHost = BootDefaultArguments.jadeIP;
-		mainPort = BootDefaultArguments.jadePort;
-		localHost = BootDefaultArguments.localIP;
+		mainHost = BootDefaultArguments.mainHost;
+		mainPort = BootDefaultArguments.mainPort;
+		localHost = BootDefaultArguments.localHost;
 		localPort = BootDefaultArguments.localPort;
 		
-		applicationLayoutWidth = BootDefaultArguments.windowLayoutWidth;
-		applicationLayoutHeight = BootDefaultArguments.windowLayoutHeight;
+		applicationLayoutWidth = BootDefaultArguments.applicationLayoutWidth;
+		applicationLayoutHeight = BootDefaultArguments.applicationLayoutHeight;
 		layout = BootDefaultArguments.layout;
 		
 		return (BootSettingsManager) super.makeDefaults();
@@ -284,7 +284,7 @@ public class BootSettingsManager extends Config
 	/**
 	 * @return the loadJade
 	 */
-	public boolean isLoadJade()
+	public boolean doLoadJade()
 	{
 		return loadJade;
 	}

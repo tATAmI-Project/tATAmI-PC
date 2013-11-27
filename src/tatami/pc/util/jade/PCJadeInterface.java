@@ -25,11 +25,10 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import net.xqhs.util.logging.UnitComponentExt;
+
 
 import tatami.core.agent.jade.JadeInterface;
-import tatami.core.agent.visualization.Logger;
-import tatami.core.util.logging.Unit;
-import tatami.core.util.logging.Unit.UnitConfigData;
 
 /**
  * A class used in order to interact with Jade. One instance of this class corresponds to one JADE Platform.
@@ -43,8 +42,7 @@ public class PCJadeInterface implements JadeInterface
 	private final static String					DEFAULT_HOST	= "localhost";
 	private final static String					DEFAULT_PORT	= "1099";
 	
-	private Unit								loggingUnit		= null;
-	protected Logger							log				= null;
+	private UnitComponentExt					log		= null;
 	protected JadeConfig						config			= null;
 	/**
 	 * the main agent container, if situated on this machine
@@ -70,8 +68,7 @@ public class PCJadeInterface implements JadeInterface
 	@Override
 	public JadeInterface setConfig(JadeConfig configuration)
 	{
-		loggingUnit = new Unit(new UnitConfigData());
-		log = loggingUnit.getLog();
+		log = new UnitComponentExt();
 		config = configuration;
 		return this;
 	}

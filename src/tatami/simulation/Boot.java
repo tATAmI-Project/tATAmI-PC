@@ -11,18 +11,18 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
-import net.xqhs.util.logging.Log;
-import net.xqhs.util.logging.Logger;
+import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.UnitComponentExt;
+import tatami.core.agent.AgentComponent;
+import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.claim.parser.ClaimAgentDefinition;
 import tatami.core.agent.jade.JadeInterface;
@@ -31,7 +31,6 @@ import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.pc.agent.visualization.VisualizationAgent;
-import tatami.pc.util.XML.XMLParser;
 import tatami.pc.util.XML.XMLTree;
 import tatami.pc.util.XML.XMLTree.XMLNode;
 import tatami.pc.util.windowLayout.WindowLayout;
@@ -53,12 +52,19 @@ public class Boot
 	enum Loader {
 		
 		/**
-		 * The agent is described by means of an .adf2 file.
+		 * The agent is described by means of an .adf2 file. The ADF2 agent is a special kind of {@link CompositeAgent},
+		 * with some pre-configured components. An S-CLAIM agent can be easily loaded as a COMPOSITE agent. This
+		 * enumeration value is kept only for backwards compatibility of scenarios.
 		 */
 		ADF2,
 		
 		/**
-		 * The agent is described by means of traditional Java code.
+		 * The agent is a {@link CompositeAgent} that is made up of various components.
+		 */
+		COMPOSITE,
+		
+		/**
+		 * The agent is described by means of traditional Java code. Currently unimplemented.
 		 */
 		JAVA,
 		
@@ -117,48 +123,19 @@ public class Boot
 		
 		// load settings
 		BootSettingsManager settings = new BootSettingsManager();
-		XMLTree scenarioTree = settings.load(args, true);
+		XMLTree scenarioTree;
+		try
+		{
+			scenarioTree = settings.load(args, true);
+		} catch(ConfigLockedException e)
+		{
+			log.error("settings were locked (shouldn't ever happen): " + e.getStackTrace().toString());
+			return;
+		}
 		
 		// create window layout
 		WindowLayout.staticLayout = new WindowLayout(settings.getApplicationLayoutWidth(),
 				settings.getApplicationLayoutHeight(), settings.getLayout(), null);
-		
-		if(settings.loadJade)
-		{
-			// boot JADE platform
-			log.info("booting JADE");
-			
-			// identify appropriate JadeInterface instance
-			JadeInterface jade;
-			try
-			{
-				jade = (JadeInterface) PlatformUtils.loadClassInstance(new Object(), PlatformUtils.jadeInterfaceClass()
-						.getName(), new Object[] {});
-			} catch(Exception e)
-			{
-				log.error("unable to create jade interface: " + e.toString() + ": " + e.getStackTrace().toString());
-				return;
-			}
-			if(jade == null)
-			{
-				log.error("unable to create jade interface");
-				return;
-			}
-			
-			JadeConfig jadeConfig = jade.fillConfig(new JadeConfig());
-			jadeConfig.setLocalHost(settings.getLocalHost()).setLocalPort(settings.getLocalPort())
-					.setMainHost(settings.mainHost).setMainPort(settings.mainPort);
-			if(settings.doCreateMainContainer())
-				jadeConfig.setPlatformID(settings.getJadePlatformName()).setMainContainerName(
-						settings.getMainContainerName());
-			jade.setConfig(jadeConfig);
-			
-			if(settings.doCreateMainContainer())
-			{
-				log.info("booting platform / main container");
-				jade.startPlatform();
-			}
-		}
 		
 		// build agent creation data
 		
@@ -235,6 +212,7 @@ public class Boot
 				for(String pack : agentPackages)
 					parameters.add(AgentParameterName.AGENT_PACKAGE, pack);
 				
+				ArrayList<AgentComponent> components = new ArrayList<AgentComponent>();
 				switch(loader)
 				{
 				case JAVA:
@@ -248,50 +226,106 @@ public class Boot
 									agentPackages, log);
 					parameters.addObject(AgentParameterName.AGENT_DEFINITION, cad);
 					// register agent
-					allAgents.put(agentName, new AgentCreationData(agentName, ClaimComponent.class.getCanonicalName(),
+					break;
+				}
+				case COMPOSITE:
+					allAgents.put(agentName, new AgentCreationData(agentName, CompositeAgent.class.getCanonicalName(),
 							parameters, containerName, !doCreateContainer));
 					log.info("configured [" + loader.toString() + "] agent [" + agentName + "] in container ["
 							+ containerName + "]");
 					break;
 				}
-				}
 				
 			}
 		}
 		
-		if(!containerName.equals(mainContainerName) && doCreateContainer)
+		if(settings.doLoadJade())
 		{
-			log.info("creating container [" + containerName + "]...");
-			jade.startContainer(containerName);
-			log.info("container created; adding agents...");
-		}
-		else
-			log.info("adding agents in main container");
-		
-		if(createMainContainer)
-		{
-			// FIXME visualizer / simulator name should be set by scenario
-			String vizName = "visualizer";
-			jade.addAgentToContainer(mainContainerName, vizName, VisualizationAgent.class.getCanonicalName(), null);
+			// boot JADE platform
+			log.info("booting JADE");
 			
-			XMLNode timeline = null;
-			if(scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).hasNext())
-				timeline = scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).next();
+			// identify appropriate JadeInterface instance
+			JadeInterface jade;
+			try
+			{
+				jade = (JadeInterface) PlatformUtils.loadClassInstance(new Object(), PlatformUtils.jadeInterfaceClass()
+						.getName(), new Object[] {});
+			} catch(Exception e)
+			{
+				log.error("unable to create jade interface: " + e.toString() + ": " + e.getStackTrace().toString());
+				return;
+			}
+			if(jade == null)
+			{
+				log.error("unable to create jade interface");
+				return;
+			}
 			
-			AgentParameters parameters = new AgentParameters();
-			parameters.addObject(AgentParameterName.JADE_INTERFACE, jade);
-			parameters.addObject(AgentParameterName.AGENTS, allAgents.values());
-			if(timeline != null)
-				parameters.addObject(AgentParameterName.TIMELINE, timeline);
-			parameters.add(AgentParameterName.VISUALIZTION_AGENT, vizName);
-			jade.addAgentToContainer(mainContainerName, "simulator", SimulationAgent.class.getCanonicalName(),
-					new Object[] { parameters });
+			// configure jade
+			JadeConfig jadeConfig = jade.fillConfig(new JadeConfig());
+			jadeConfig.setLocalHost(settings.getLocalHost()).setLocalPort(settings.getLocalPort())
+					.setMainHost(settings.mainHost).setMainPort(settings.mainPort);
+			if(settings.doCreateMainContainer())
+				jadeConfig.setPlatformID(settings.getJadePlatformName()).setMainContainerName(
+						settings.getMainContainerName());
+			jade.setConfig(jadeConfig);
 			
+			boolean isMain = settings.doCreateMainContainer();
+			String mainContainerName = settings.getMainContainerName();
+			
+			// start jade
+			if(isMain)
+			{
+				log.info("booting platform / main container");
+				jade.startPlatform();
+			}
+			
+			// start containers
+			for(Map.Entry<String, Boolean> containerData : allContainers.entrySet())
+			{
+				if(containerData.getValue().booleanValue() && !containerData.getKey().equals(mainContainerName))
+				{
+					log.info("creating container [" + containerData.getKey() + "]...");
+					jade.startContainer(containerData.getKey());
+					log.info("container created.");
+				}
+			}
+			
+			if(isMain)
+			{
+				// FIXME visualizer / simulator name should be set by scenario
+				String vizName = "visualizer";
+				jade.addAgentToContainer(mainContainerName, vizName, VisualizationAgent.class.getCanonicalName(), null);
+				
+				XMLNode timeline = null;
+				if(scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).hasNext())
+					timeline = scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).next();
+				
+				AgentParameters parameters = new AgentParameters();
+				parameters.addObject(AgentParameterName.JADE_INTERFACE, jade);
+				parameters.addObject(AgentParameterName.AGENTS, allAgents.values());
+				if(timeline != null)
+					parameters.addObject(AgentParameterName.TIMELINE, timeline);
+				parameters.add(AgentParameterName.VISUALIZTION_AGENT, vizName);
+				jade.addAgentToContainer(mainContainerName, "simulator", SimulationAgent.class.getCanonicalName(),
+						new Object[] { parameters });
+				
+			}
 		}
 		
 		log.doExit();
 	}
 	
+	/**
+	 * method to simplify the access to a parameter of an agent. Having the {@link XMLNode} instance associated with the
+	 * agent, the method retrieves the value associated with the first occurrence of the desired parameter name.
+	 * 
+	 * @param agentConfig
+	 *            - the node containing the configuration information for the agent.
+	 * @param parameterName
+	 *            - the name of the searched parameter.
+	 * @return the value associated with the searched name.
+	 */
 	static String getParameterValue(XMLNode agentConfig, String parameterName)
 	{
 		Iterator<XMLNode> paramsIt = agentConfig.getNodeIterator("parameter");

@@ -87,6 +87,9 @@ public abstract class AgentComponent implements Serializable
 		 */
 		JADE_COMPONENT,
 		
+		/**
+		 * TEMPORARY type for testing. TODO: remove this type.
+		 */
 		TESTING_COMPONENT,
 	}
 	
