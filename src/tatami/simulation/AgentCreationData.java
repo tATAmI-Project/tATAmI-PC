@@ -12,9 +12,16 @@
 package tatami.simulation;
 
 import tatami.core.agent.parametric.AgentParameters;
+import tatami.pc.util.XML.XMLTree.XMLNode;
 
 /**
  * Class containing the data for the creation of an agent.
+ * <p>
+ * Some data (agentName and platform) is covered by the enclosed {@link AgentParameters} instance, but it is also added
+ * separately so as to guarantee is availability.
+ * <p>
+ * Most of the information available otherwise is also covered by the enclosed {@link XMLNode} reference. The node may
+ * however contain additional information. Loaders not needing (or not handling) this information may never use it.
  * 
  * @author Andrei Olaru
  * 
@@ -22,34 +29,33 @@ import tatami.core.agent.parametric.AgentParameters;
 public class AgentCreationData
 {
 	/**
-	 * <code>true</code> if the agent should be created on the local machine, false if it should be created on a
-	 * different machine.
-	 */
-	boolean			isRemote;
-	/**
-	 * The name of the agent.
+	 * The name of the agent. It cannot be <code>null</code>.
 	 */
 	String			agentName;
 	/**
-	 * The class to instantiate at agent creation.
-	 */
-	String			classpath;
-	/**
-	 * The parameters to pass to the agent.
+	 * The parameters to pass to the agent. The reference cannot be <code>null</code>.
 	 */
 	AgentParameters	parameters;
 	/**
-	 * If the agent is remote, the name of the destination container.
+	 * <code>true</code> if the agent should be created on the local machine, <code>false</code> if it should be created
+	 * on a different machine.
 	 */
-	String			destinationContainer;
+	boolean			isRemote;
+	/**
+	 * The name in which the container should be created.
+	 */
+	String			destinationContainer	= null;
+	
+	/**
+	 * A reference to the actual node resulted from parsing the scenario file. It cannot be <code>null</code>.
+	 */
+	XMLNode			node;
 	
 	/**
 	 * Creates a new instance of information for the creation of an agent.
 	 * 
 	 * @param name
 	 *            - the name of the agent.
-	 * @param path
-	 *            - the fully qualified name of the class to instantiate at agent creation.
 	 * @param agentParameters
 	 *            - the {@link AgentParameters} instance to pass to the agent.
 	 * @param destination
@@ -57,14 +63,64 @@ public class AgentCreationData
 	 * @param remote
 	 *            - <code>true</code> if the container is remote (not on the local machine); <code>false</code>
 	 *            otherwise.
+	 * @param scenarioNode
+	 *            - the {@link XMLNode} instance corresponding to the agent, as resulted from parsing the scenario file.
 	 */
-	public AgentCreationData(String name, String path, AgentParameters agentParameters, String destination,
-			boolean remote)
+	public AgentCreationData(String name, AgentParameters agentParameters, String destination, boolean remote,
+			XMLNode scenarioNode)
 	{
+		if(name == null)
+			throw new NullPointerException("Agent name cannot be null");
+		if(agentParameters == null)
+			throw new NullPointerException("Agent parameters cannot be null");
+		if(scenarioNode == null)
+			throw new NullPointerException("XML node cannot be null");
+		
 		agentName = name;
-		classpath = path;
 		parameters = agentParameters;
 		destinationContainer = destination;
 		isRemote = remote;
+		node = scenarioNode;
+	}
+	
+	/**
+	 * @return the name of the agent.
+	 */
+	public String getAgentName()
+	{
+		return agentName;
+	}
+	
+	/**
+	 * @return the parameters to pass to the agent.
+	 */
+	public AgentParameters getParameters()
+	{
+		return parameters;
+	}
+	
+	/**
+	 * @return <code>true</code> if the agent should be created on the local machine, <code>false</code> if it should be
+	 *         created on a different machine.
+	 */
+	public boolean isRemote()
+	{
+		return isRemote;
+	}
+	
+	/**
+	 * @return the name of the container in which the agent should be created.
+	 */
+	public String getDestinationContainer()
+	{
+		return destinationContainer;
+	}
+	
+	/**
+	 * @return a reference to the actual node resulted from parsing the scenario file.
+	 */
+	public XMLNode getNode()
+	{
+		return node;
 	}
 }

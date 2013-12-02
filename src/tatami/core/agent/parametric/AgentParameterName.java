@@ -2,6 +2,7 @@ package tatami.core.agent.parametric;
 
 import java.util.Collection;
 
+
 /**
  * Here be all names of 'registered' parameters (see {@link AgentParameters}) used by any component of the agent.
  * <p>
@@ -26,6 +27,23 @@ public enum AgentParameterName {
 	 * this type).
 	 */
 	AGENT_CLASS("class"),
+	
+	/**
+	 * The {@link AgentLoader} to use for this agent.
+	 */
+	AGENT_LOADER("loader"),
+	
+	/**
+	 * The {@link PlatformLoader} to use for this agent.
+	 */
+	AGENT_PLATFORM("platform"),
+	
+	/**
+	 * Agent packages with classes that are relevant to this agent (GUIs, java functions, etc).
+	 * 
+	 * Used by {@link VisualizableAgent} (for the GUI) and {@link ClaimAgent} (for java function classes).
+	 */
+	AGENT_PACKAGE("agentPackage"),
 	
 	/**
 	 * Specifies the classes with java code to attach to the agent definition.
@@ -63,13 +81,6 @@ public enum AgentParameterName {
 	 * Used by {@link VisualizableAgent}.
 	 */
 	GUI("GUI"),
-	
-	/**
-	 * Agent packages with classes that are relevant to this agent (GUIs, java functions, etc).
-	 * 
-	 * Used by {@link VisualizableAgent} (for the GUI) and {@link ClaimAgent} (for java function classes).
-	 */
-	AGENT_PACKAGE("agentPackage"),
 	
 	// ///////// HierarchicalAgent
 	/**
@@ -119,7 +130,7 @@ public enum AgentParameterName {
 	/**
 	 * Name of the Visualization Agent.
 	 */
-	VISUALIZTION_AGENT("visualizationAgent"),
+	VISUALIZATION_AGENT("visualizationAgent"),
 	
 	/**
 	 * The timeline.
@@ -150,7 +161,8 @@ public enum AgentParameterName {
 	/**
 	 * Retrieves the {@link AgentParameterName} instance that corresponds to the specified name.
 	 * 
-	 * @param name - the name to search for (the name with which the instance was created).
+	 * @param name
+	 *            - the name to search for (the name with which the instance was created).
 	 * @return - the corresponding {@link AgentParameterName} instance.
 	 */
 	public static AgentParameterName getName(String name)

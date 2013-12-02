@@ -126,7 +126,7 @@ public class XMLParser extends DefaultHandler
 				if(!schema.exists())
 					try
 					{
-						throw new IOException("File does not exist [" + schemaFiles + "]");
+						throw new IOException("File does not exist [" + schemaFiles.toString() + "]");
 					} catch(IOException e)
 					{
 						e.printStackTrace();

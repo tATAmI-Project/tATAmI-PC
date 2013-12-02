@@ -14,7 +14,7 @@ import net.xqhs.util.logging.UnitComponentExt;
  * {@link BootDefaultArguments}, arguments given to the <code>main()</code> method in {@link Boot}, or settings
  * specified in the scenario file.
  * <p>
- * The precedence of values for settings is the following:
+ * The precedence of values for settings is the following (latter values override former values):
  * <ul>
  * <li>values given in {@link BootDefaultArguments};
  * <li>values given as arguments to method <code>main()</code> in {@link Boot};
@@ -31,7 +31,7 @@ public class BootSettingsManager extends Config
 	/**
 	 * The schema for scenario files.
 	 */
-	protected String			SCENARIO_SCHEMA		= "config/scenarioSchema2.xsd";
+	protected String			SCENARIO_SCHEMA		= "src-schema/scenarioSchema3.xsd";
 	
 	/**
 	 * The name of the XML scenario file that contains the settings for the current simulation.
@@ -63,25 +63,14 @@ public class BootSettingsManager extends Config
 	 * For Jade-based setups, it is the port of the local container.
 	 */
 	protected String			localPort;
-	
-	// /////////////////// jade-specific settings
-	// TODO: make this file Jade-independent
 	/**
-	 * <code>true</code> if this scenario is based on Jade.
+	 * The name of the local agent container. If the main container will be created on this machine, this will be the
+	 * name of the main container.
+	 * <p>
+	 * This name may be used, for instance, to be able to specify all necessary settings through command line arguments
+	 * and not use a whole scenario file just for the host information and the container name.
 	 */
-	protected boolean			loadJade			= false;
-	/**
-	 * The name of the main Jade container.
-	 */
-	protected String			mainContainerName	= null;
-	/**
-	 * <code>true</code> if the main container should be created on the local host.
-	 */
-	protected boolean			createMainContainer	= false;
-	/**
-	 * The name of the current Jade platform.
-	 */
-	protected String			jadePlatformName	= null;
+	protected String			localContainerName	= null;
 	
 	// /////////////////// visualization layout
 	/**
@@ -107,6 +96,8 @@ public class BootSettingsManager extends Config
 		mainPort = BootDefaultArguments.mainPort;
 		localHost = BootDefaultArguments.localHost;
 		localPort = BootDefaultArguments.localPort;
+		
+		localContainerName = BootDefaultArguments.localContainerName;
 		
 		applicationLayoutWidth = BootDefaultArguments.applicationLayoutWidth;
 		applicationLayoutHeight = BootDefaultArguments.applicationLayoutHeight;
@@ -149,6 +140,10 @@ public class BootSettingsManager extends Config
 		{
 		default:
 			log.warn("too many arguments; additional arguments ignored.");
+			//$FALL-THROUGH$
+		case 8:
+			if(!"null".equals(programArguments[7]))
+				localContainerName = programArguments[7];
 			//$FALL-THROUGH$
 		case 7:
 			applicationLayoutHeight = Integer.parseInt(programArguments[6]);
@@ -195,10 +190,11 @@ public class BootSettingsManager extends Config
 		case 0:
 		}
 		
+		XMLTree scenarioTree = null;
 		if(parseScenarioFile)
 		{
 			log.info("loading scenario [" + scenarioFileName + "]");
-			XMLTree scenarioTree = XMLParser.validateParse(SCENARIO_SCHEMA, scenarioFileName);
+			scenarioTree = XMLParser.validateParse(SCENARIO_SCHEMA, scenarioFileName);
 			
 			if(scenarioTree == null)
 			{
@@ -210,37 +206,28 @@ public class BootSettingsManager extends Config
 			log.info(scenarioTree.toString());
 			
 			// TODO: make this jade-independent
-			XMLNode jadeConfigNode = (scenarioTree.getRoot().getNodeIterator("jadeConfig").hasNext() ? scenarioTree
-					.getRoot().getNodeIterator("jadeConfig").next() : null);
-			if(jadeConfigNode != null)
+			XMLNode configNode = (scenarioTree.getRoot().getNodeIterator("config").hasNext() ? scenarioTree.getRoot()
+					.getNodeIterator("config").next() : null);
+			if(configNode != null)
 			{
-				loadJade = true;
-				if(jadeConfigNode.getAttributeValue("IPaddress") != null)
-					mainHost = jadeConfigNode.getAttributeValue("IPaddress");
-				if(jadeConfigNode.getAttributeValue("port") != null)
-					mainPort = jadeConfigNode.getAttributeValue("port");
-				if(jadeConfigNode.getAttributeValue("localIPaddress") != null)
-					localHost = jadeConfigNode.getAttributeValue("localIPaddress");
-				if(jadeConfigNode.getAttributeValue("localPort") != null)
-					localPort = jadeConfigNode.getAttributeValue("localPort");
-				if(jadeConfigNode.getAttributeValue("platformID") != null)
-					jadePlatformName = jadeConfigNode.getAttributeValue("platformID");
-				if(jadeConfigNode.getAttributeValue("mainContainerName") != null)
-				{
-					mainContainerName = jadeConfigNode.getAttributeValue("mainContainerName");
-					createMainContainer = true;
-				}
-				if((jadeConfigNode.getAttributeValue("isMain") != null)
-						&& jadeConfigNode.getAttributeValue("isMain").equals(new Boolean(true).toString()))
-					createMainContainer = true;
+				if(configNode.getAttributeValue("mainHost") != null)
+					mainHost = configNode.getAttributeValue("IPaddress");
+				if(configNode.getAttributeValue("mainPort") != null)
+					mainPort = configNode.getAttributeValue("port");
+				if(configNode.getAttributeValue("localHost") != null)
+					localHost = configNode.getAttributeValue("localIPaddress");
+				if(configNode.getAttributeValue("localPort") != null)
+					localPort = configNode.getAttributeValue("localPort");
+				if(configNode.getAttributeValue("mainContainerName") != null)
+					localContainerName = configNode.getAttributeValue("mainContainerName");
 			}
 		}
 		
 		log.doExit();
 		lock();
-		return null;
+		return scenarioTree;
 	}
-
+	
 	/**
 	 * @return the scenarioFileName
 	 */
@@ -248,7 +235,7 @@ public class BootSettingsManager extends Config
 	{
 		return scenarioFileName;
 	}
-
+	
 	/**
 	 * @return the mainHost
 	 */
@@ -256,7 +243,7 @@ public class BootSettingsManager extends Config
 	{
 		return mainHost;
 	}
-
+	
 	/**
 	 * @return the mainPort
 	 */
@@ -264,7 +251,7 @@ public class BootSettingsManager extends Config
 	{
 		return mainPort;
 	}
-
+	
 	/**
 	 * @return the localHost
 	 */
@@ -272,7 +259,7 @@ public class BootSettingsManager extends Config
 	{
 		return localHost;
 	}
-
+	
 	/**
 	 * @return the localPort
 	 */
@@ -280,39 +267,15 @@ public class BootSettingsManager extends Config
 	{
 		return localPort;
 	}
-
-	/**
-	 * @return the loadJade
-	 */
-	public boolean doLoadJade()
-	{
-		return loadJade;
-	}
-
+	
 	/**
 	 * @return the mainContainerName
 	 */
 	public String getMainContainerName()
 	{
-		return mainContainerName;
+		return localContainerName;
 	}
-
-	/**
-	 * @return the createMainContainer
-	 */
-	public boolean doCreateMainContainer()
-	{
-		return createMainContainer;
-	}
-
-	/**
-	 * @return the jadePlatformName
-	 */
-	public String getJadePlatformName()
-	{
-		return jadePlatformName;
-	}
-
+	
 	/**
 	 * @return the applicationLayoutWidth
 	 */
@@ -320,7 +283,7 @@ public class BootSettingsManager extends Config
 	{
 		return applicationLayoutWidth;
 	}
-
+	
 	/**
 	 * @return the applicationLayoutHeight
 	 */
@@ -328,7 +291,7 @@ public class BootSettingsManager extends Config
 	{
 		return applicationLayoutHeight;
 	}
-
+	
 	/**
 	 * @return the layout
 	 */

@@ -113,7 +113,7 @@ public class SimulationAgent extends VisualizableComponent {
 			for (Iterator<XMLNode> it = ((XMLNode) parObj(AgentParameterName.TIMELINE))
 					.getNodeIterator("event"); it.hasNext();)
 				events.add(it.next());
-		visualizer = parVal(AgentParameterName.VISUALIZTION_AGENT);
+		visualizer = parVal(AgentParameterName.VISUALIZATION_AGENT);
 
 		// GUI
 		setupGui();

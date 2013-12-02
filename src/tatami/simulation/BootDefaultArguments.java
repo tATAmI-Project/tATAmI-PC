@@ -27,10 +27,7 @@ public class BootDefaultArguments
 	/**
 	 * The scenario file.
 	 */
-	static final String			scenarioFileName	= "scenario/examples/simpleScenarioA/scenario.xml";
-	// static final String scenarioFileName = "scenario/examples/simpleScenarioE/scenario-distributed.xml";
-	// static final String scenarioFileName = "scenario/examples/debateScenario-android/scenario.xml";
-	// static final String scenarioFileName = "scenario/2011/phase2-android/scenario_new_schema.xml";
+	static final String			scenarioFileName		= "src-scenario/scenario/examples/composite/simpleA/scenario.xml";
 	
 	/**
 	 * Main (Jade) host.
@@ -39,7 +36,7 @@ public class BootDefaultArguments
 	/**
 	 * Main (Jade) port.
 	 */
-	static final String			mainPort			= null;
+	static final String			mainPort				= null;
 	/**
 	 * Local host.
 	 */
@@ -47,7 +44,11 @@ public class BootDefaultArguments
 	/**
 	 * Local port.
 	 */
-	static final String			localPort			= null;
+	static final String			localPort				= null;
+	/**
+	 * Main container name.
+	 */
+	static final String			localContainerName		= null;
 	
 	/**
 	 * The width of the application space.
@@ -61,21 +62,21 @@ public class BootDefaultArguments
 	/**
 	 * The layout indications for the PC application.
 	 */
-	static LayoutIndications	layout				= new LayoutIndications(12, 6)
-													
-													.indicateBar(BarPosition.LEFT, 70, 0) // Taskbar on the left (70
-																							// pixels)
-															
-															// .indicateBar(BarPosition.LEFT, 0, 0) // otherwise
-															
-															.indicateWindowType("agent", 5, 2)
-															
-															.indicateWindowType("system", 6, 3)
-															
-															.indicateWindowType("systemSmall", 6, 1)
-															
-															.indicateWindowType("screen", 3, 4)
-															
-															.indicateReservation("system", "visualizer", 0, 0);
+	static LayoutIndications	layout					= new LayoutIndications(12, 6)
+														
+														.indicateBar(BarPosition.LEFT, 70, 0) // Taskbar on the left (70
+																								// pixels)
+																
+																// .indicateBar(BarPosition.LEFT, 0, 0) // otherwise
+																
+																.indicateWindowType("agent", 5, 2)
+																
+																.indicateWindowType("system", 6, 3)
+																
+																.indicateWindowType("systemSmall", 6, 1)
+																
+																.indicateWindowType("screen", 3, 4)
+																
+																.indicateReservation("system", "visualizer", 0, 0);
 	
 }

@@ -11,6 +11,8 @@
  ******************************************************************************/
 package tatami.core.util.platformUtils;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -25,7 +27,7 @@ import net.xqhs.util.logging.Log.LoggerType;
 public class PlatformUtils
 {
 	/**
-	 * This enums contains all supported platforms.
+	 * This enumeration contains all supported platforms.
 	 * 
 	 * @author Andrei Olaru
 	 */
@@ -139,4 +141,19 @@ public class PlatformUtils
 		Object ret = constructor.newInstance(constructorArguments);
 		return ret;
 	}
+	
+	/**
+	 * Method to print an exception as a string.
+	 * 
+	 * @param e
+	 *            - the exception.
+	 * @return a {@link String} containing all details of the exception.
+	 */
+	public static String printException(Exception e)
+	{
+		StringWriter sw = new StringWriter();
+		e.printStackTrace(new PrintWriter(sw));
+		return sw.toString();
+	}
+	
 }

@@ -14,6 +14,7 @@ import tatami.core.agent.AgentEvent.AgentSequenceType;
 import tatami.core.agent.jade.JadeComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
+import tatami.simulation.AgentManager;
 
 /**
  * This class reunites the components of an agent in order for components to be able to call each other and for events
@@ -26,11 +27,13 @@ import tatami.core.agent.parametric.ParametricComponent;
  * It is this class that handles agent events, by means of the <code>postAgentEvent()</code> method, which disseminates
  * an event to all components, which handle it by means of registered handles (each component registers a handle for an
  * event with itself). See {@link AgentComponent}.
+ * <p>
+ * A composite agent instance is its own {@link AgentManager}.
  * 
  * @author Andrei Olaru
  * 
  */
-public class CompositeAgent implements Serializable
+public class CompositeAgent implements Serializable, AgentManager
 {
 	/**
 	 * Values indicating the current state of the agent, especially with respect to processing events.
@@ -63,8 +66,8 @@ public class CompositeAgent implements Serializable
 		STOPPING,
 		
 		/**
-		 * State indicating that the agent has been stopped and is unable to process events. The agent's thread has
-		 * been stopped. All components are stopped.
+		 * State indicating that the agent has been stopped and is unable to process events. The agent's thread has been
+		 * stopped. All components are stopped.
 		 */
 		STOPPED,
 	}
@@ -219,6 +222,7 @@ public class CompositeAgent implements Serializable
 	 * 
 	 * @return true if the event has been successfully posted. See <code>postAgentEvent()</code>.
 	 */
+	@Override
 	public boolean start()
 	{
 		if(eventQueue != null)
@@ -256,6 +260,15 @@ public class CompositeAgent implements Serializable
 	}
 	
 	/**
+	 * Alias for {@link #exit()}.
+	 */
+	@Override
+	public boolean stop()
+	{
+		return exit();
+	}
+
+	/**
 	 * The method should be called by an agent component (relayed through {@link AgentComponent}) to disseminate a an
 	 * {@link AgentEvent} to the other components.
 	 * <p>
@@ -292,7 +305,7 @@ public class CompositeAgent implements Serializable
 		}
 		return true;
 	}
-
+	
 	/**
 	 * Returns <code>true</code> if the agent contains said component.
 	 * 

@@ -37,7 +37,12 @@ public abstract class AgentComponent implements Serializable
 	private static final long	serialVersionUID	= -8282262747231347473L;
 	
 	/**
-	 * Enumeration of available component names / functionalities.
+	 * Enumeration of available component names / functionalities. These are the standard types of components. Other
+	 * types of components may be added to an agent (TODO).
+	 * <p>
+	 * The enumeration entries also contain information about the default implementation of the specified component
+	 * type. The name of the implementation class can be given when creating the entry, or can be inferred based on the
+	 * name of the entry and the constants in the enumeration.
 	 * 
 	 * @author Andrei Olaru
 	 */
@@ -91,6 +96,59 @@ public abstract class AgentComponent implements Serializable
 		 * TEMPORARY type for testing. TODO: remove this type.
 		 */
 		TESTING_COMPONENT,
+		
+		;
+		
+		/**
+		 * Suffix for component classes.
+		 */
+		private static final String	AGENT_COMPONENT_CLASS_SUFFIX	= "Component";
+		/**
+		 * Default parent package packages containing default component implementations.
+		 */
+		private static final String	AGENT_COMPONENT_PACKAGE_ROOT	= "tatami.core.agent";
+		
+		/**
+		 * The fully qualified class name of the default component implementation.
+		 */
+		String						componentClass;
+		
+		/**
+		 * Specifies the fully qualified class name of the component implementation.
+		 * 
+		 * @param classname
+		 *            - the fully qualified class name.
+		 */
+		private AgentComponentName(String classname)
+		{
+			// FIXME: check that package and class exist
+			componentClass = classname;
+		}
+		
+		/**
+		 * Inferres the class of the component implementation based on the name of the component and constants in this
+		 * class.
+		 */
+		private AgentComponentName()
+		{
+			// FIXME: check that package and class exist
+			// lower case entry name, without "_COMPONENT" suffix.
+			String compName = this.name().split("_")[0].toLowerCase();
+			String componentPackage = AGENT_COMPONENT_PACKAGE_ROOT + "." + compName;
+			componentClass = componentPackage + "." + compName.substring(0, 1).toUpperCase() + compName.substring(1)
+					+ AGENT_COMPONENT_CLASS_SUFFIX;
+		}
+		
+		/**
+		 * Gets the specified or inferred class name for the default implementation of the component.
+		 * 
+		 * @return the class name.
+		 */
+		public String getClassName()
+		{
+			return componentClass;
+		}
+		
 	}
 	
 	/**
