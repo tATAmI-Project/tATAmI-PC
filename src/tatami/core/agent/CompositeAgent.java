@@ -268,6 +268,13 @@ public class CompositeAgent implements Serializable, AgentManager
 		return exit();
 	}
 
+	@Override
+	public boolean setPlatformLink()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	/**
 	 * The method should be called by an agent component (relayed through {@link AgentComponent}) to disseminate a an
 	 * {@link AgentEvent} to the other components.

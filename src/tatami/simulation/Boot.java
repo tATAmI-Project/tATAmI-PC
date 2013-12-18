@@ -71,7 +71,7 @@ public class Boot
 	{
 		log.trace("Booting World.");
 		
-		// load settings
+		// load settings & scenario
 		BootSettingsManager settings = new BootSettingsManager();
 		XMLTree scenarioTree;
 		try
@@ -89,28 +89,129 @@ public class Boot
 		
 		// build agent creation data
 		
-		Map<String, AgentManager> allAgents = new HashMap<String, AgentManager>();
-		Map<String, Boolean> allContainers = new HashMap<String, Boolean>(); // container name -> do create
-		Map<String, Set<String>> platformContainers = new HashMap<String, Set<String>>();
-		Map<String, AgentLoader> agentLoaders = new HashMap<String, AgentLoader>();
-		Map<String, PlatformLoader> platforms = new HashMap<String, PlatformLoader>();
-		Set<String> agentPackages = new HashSet<String>();
+		// the name of the default platform
 		String defaultPlatform = PlatformLoader.DEFAULT_PLATFORM.toString();
+		// platform name -> platform loader
+		Map<String, PlatformLoader> platforms = new HashMap<String, PlatformLoader>();
+		// agent loader name -> agent loader
+		Map<String, AgentLoader> agentLoaders = new HashMap<String, AgentLoader>();
+		// package names where agent code (adf & java) may be located
+		Set<String> agentPackages = new HashSet<String>();
+		// container name -> do create (true for local containers, false for remote)
+		Map<String, Boolean> allContainers = new HashMap<String, Boolean>();
+		// platform name -> names of containers to be present in the platform
+		Map<String, Set<String>> platformContainers = new HashMap<String, Set<String>>();
+		// platform name -> container name -> agent name -> agent manager
+		// for the agent to be started in the container, on the platform
+		Map<String, Map<String, Map<String, AgentManager>>> platformContainersAgents = new HashMap<String, Map<String, Map<String, AgentManager>>>();
 		
 		// add agent packages specified in the scenario
-		
 		Iterator<XMLNode> packagePathsIt = scenarioTree.getRoot().getNodeIterator(
 				AgentParameterName.AGENT_PACKAGE.toString());
 		while(packagePathsIt.hasNext())
 			agentPackages.add((String) packagePathsIt.next().getValue());
 		
 		// iterate over platform entries in the scenario
+		defaultPlatform = loadPlatforms(
+				scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_PLATFORM.toString()), platforms);
 		
-		Iterator<XMLNode> platformIt = scenarioTree.getRoot().getNodeIterator(
-				AgentParameterName.AGENT_PLATFORM.toString());
-		while(platformIt.hasNext())
+		// iterate over agent loader entries in the scenario
+		loadAgentLoaders(scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_LOADER.toString()),
+				agentLoaders);
+		
+		// iterate containers and find agents
+		loadContainerAgents(scenarioTree.getRoot().getNodeIterator("initial").next().getNodeIterator("container"),
+				defaultPlatform, platforms, agentLoaders, agentPackages, allContainers, platformContainers,
+				platformContainersAgents);
+		
+		// agents prepared, time to start platforms and the containers.
+		if(startPlatforms(platforms, platformContainers) > 0)
 		{
-			XMLNode platformNode = platformIt.next();
+			// load timeline (if any)
+			XMLNode timeline = null;
+			if(scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).hasNext())
+				timeline = scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).next();
+			
+			// start simulation
+			new SimulationManager(platforms, allContainers, platformContainersAgents, timeline).start();
+		}
+		else
+			log.error("No agent platforms loaded. Simulation will not start.");
+		log.doExit();
+	}
+	
+	/**
+	 * The method starts the platforms specified in the first parameter and adds to each platform the containers
+	 * corresponding to it, as indicated by the second parameter.
+	 * 
+	 * @param platforms
+	 *            - the {@link Map} of platform names and respective {@link PlatformLoader} instances.
+	 * @param platformContainers
+	 *            - the {@link Map} containing platform name &rarr; {@link Set} of the names of the containers to add to
+	 *            the platform.
+	 * @return the number of platforms successfully started.
+	 */
+	protected int startPlatforms(Map<String, PlatformLoader> platforms, Map<String, Set<String>> platformContainers)
+	{
+		int platformsOK = 0;
+		for(Iterator<PlatformLoader> itP = platforms.values().iterator(); itP.hasNext();)
+		{
+			PlatformLoader platform = itP.next();
+			String platformName = platform.getName();
+			if(!platform.start())
+			{
+				log.error("Platform [" + platformName + "] failed to start.");
+				itP.remove();
+				continue;
+			}
+			log.info("Platform [" + platformName + "] started.");
+			platformsOK++;
+			if(platformContainers.containsKey(platformName))
+				for(Iterator<String> itC = platformContainers.get(platformName).iterator(); itC.hasNext();)
+				{
+					String containerName = itC.next();
+					if(!platform.addContainer(containerName))
+					{
+						log.error("Adding container [" + containerName + "] to [" + platformName + "] has failed.");
+						itC.remove();
+					}
+					else
+						log.info("Container [" + containerName + "] added to [" + platformName + "].");
+				}
+		}
+		return platformsOK;
+	}
+	
+	/**
+	 * Loads the available platform loaders and fills in the {@link Map} of platforms, also returning the default
+	 * platform (decided according to the information in the scenario file).
+	 * <p>
+	 * The available platform loaders will be the ones mentioned in the scenario file. If the name of the platform is
+	 * the name of a standard platform (see {@link StandardPlatformType}), the predefined class path will be used;
+	 * otherwise, the class path must be present in the scenario.
+	 * <p>
+	 * If no platforms are specified in the scenario, the default platform {@link StandardPlatformType#DEFAULT} will be
+	 * used, and this will be the default platform of the scenario.
+	 * <p>
+	 * If only one platform is specified in the scenario, this will be the default platform of the scenario.
+	 * <p>
+	 * If multiple platforms are specified, there will be no default platform (all agents have to specify their
+	 * platform).
+	 * 
+	 * TODO: indicate default platform among multiple platforms; have a default per-container platform.
+	 * 
+	 * @param platformNodes
+	 *            - {@link Iterator} over the nodes in the scenario file describing platforms.
+	 * @param platforms
+	 *            - map in which to fill in the names of the platforms and the respective {@link PlatformLoader}
+	 *            instances.
+	 * @return the name of the default platform loader (which will be present in parameter <code>platforms</code>).
+	 */
+	protected String loadPlatforms(Iterator<XMLNode> platformNodes, Map<String, PlatformLoader> platforms)
+	{
+		while(platformNodes.hasNext())
+		{
+			XMLNode platformNode = platformNodes.next();
 			String platformName = getParameterValue(platformNode, PlatformLoader.NAME_ATTRIBUTE);
 			if(platformName == null)
 				log.error("Platform name is null.");
@@ -158,32 +259,45 @@ public class Boot
 						+ PlatformUtils.printException(e));
 			}
 		}
+		
+		String defaultPlatform = null;
 		if(platforms.size() == 1)
 			defaultPlatform = platforms.values().iterator().next().getName();
 		log.trace("Default platform is [" + defaultPlatform + "].");
-		
-		// iterate over agent loader entries in the scenario
-		
-		Iterator<XMLNode> loaderIt = scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_LOADER.toString());
-		while(loaderIt.hasNext())
+		return defaultPlatform;
+	}
+	
+	/**
+	 * Loads the available agent loaders and fills in the {@link Map} of agent loaders. Event if not defined explicitly
+	 * in the scenario file (which is possible), all loaders in {@link StandardAgentLoaderType} are also loaded.
+	 * 
+	 * @param loaderNodes
+	 *            - {@link Iterator} over the nodes in the scenario file describing agent loaders.
+	 * @param agentLoaders
+	 *            - map in which to fill in the names of the agent loaders and the respective {@link AgentLoader}
+	 *            instances.
+	 */
+	protected void loadAgentLoaders(Iterator<XMLNode> loaderNodes, Map<String, AgentLoader> agentLoaders)
+	{
+		while(loaderNodes.hasNext())
 		{
-			XMLNode loaderNode = loaderIt.next();
+			XMLNode loaderNode = loaderNodes.next();
 			String loaderName = getParameterValue(loaderNode, AgentLoader.NAME_ATTRIBUTE);
 			if(loaderName == null)
-				log.error("Platform name is null.");
+				log.error("Agent loader name is null.");
 			else if(agentLoaders.containsKey(loaderName))
-				log.error("Platform [" + loaderName + "] already defined.");
+				log.error("Agent loader [" + loaderName + "] already defined.");
 			else
 			{
 				String loaderClassPath = null;
 				try
 				{
-					loaderClassPath = StandardPlatformType.valueOf(loaderName).getClassName();
+					loaderClassPath = StandardAgentLoaderType.valueOf(loaderName).getClassName();
 				} catch(IllegalArgumentException e)
 				{ // platform is not standard
 					loaderClassPath = getParameterValue(loaderNode, AgentLoader.CLASSPATH_ATTRIBUTE);
 					if(loaderClassPath == null)
-						log.error("Class path for platform [" + loaderName + "] is not known.");
+						log.error("Class path for agent loader [" + loaderName + "] is not known.");
 				}
 				if(loaderClassPath != null)
 					try
@@ -202,7 +316,7 @@ public class Boot
 		// add standard agent loaders (except if they have already been specified and configured explicitly.
 		
 		for(StandardAgentLoaderType loader : StandardAgentLoaderType.values())
-			if(!agentLoaders.containsKey(loader.toString()))
+			if(!agentLoaders.containsKey(loader.toString()) && (loader.getClassName() != null))
 				try
 				{
 					agentLoaders.put(loader.toString(),
@@ -213,87 +327,92 @@ public class Boot
 					log.error("Loading agent loader [" + loader.toString() + "] failed; loader will not be available: "
 							+ PlatformUtils.printException(e));
 				}
-		
-		// iterate containers and find agents
-		
-		XMLNode initial = scenarioTree.getRoot().getNodeIterator("initial").next();
-		for(Iterator<XMLNode> itC = initial.getNodeIterator("container"); itC.hasNext();)
+	}
+	
+	/**
+	 * Loads container and agent information from the scenario file. Based on the first 5 arguments, the method will
+	 * fill in the information in the last 3 arguments.
+	 * 
+	 * @param containerNodes
+	 *            - {@link Iterator} over the nodes in the scenario file describing containers (and, inside, agents).
+	 * @param defaultPlatform
+	 *            - the name of the default platform.
+	 * @param platforms
+	 *            - the {@link Map} of platform names and respective {@link PlatformLoader} instances.
+	 * @param agentLoaders
+	 *            - the {@link Map} of platform names and respective {@link AgentLoader} instances.
+	 * @param agentPackages
+	 *            - the {@link Set} of package names where agent code may be located.
+	 * @param allContainers
+	 *            - the {@link Map} in which the method will fill in all containers, specifying the name and whether the
+	 *            container should be created.
+	 * @param platformContainers
+	 *            - the {@link Map} in which the method will fill in the containers to load on the local machine, for
+	 *            each platform (the map contains: platform name &rarr; set of containers to load).
+	 * @param platformContainersAgents
+	 *            - the {@link Map} in which the method will fill in entries of the form: name of the platform &rarr;
+	 *            name of the container &rarr; name of the agent to create in the said container and on the said
+	 *            platform &rarr; {@link AgentManager} instance for said agent.
+	 */
+	protected void loadContainerAgents(Iterator<XMLNode> containerNodes, String defaultPlatform,
+			Map<String, PlatformLoader> platforms, Map<String, AgentLoader> agentLoaders, Set<String> agentPackages,
+			Map<String, Boolean> allContainers, Map<String, Set<String>> platformContainers,
+			Map<String, Map<String, Map<String, AgentManager>>> platformContainersAgents)
+	{
+		while(containerNodes.hasNext())
 		{
-			XMLNode containerConfig = itC.next();
+			XMLNode containerConfig = containerNodes.next();
+			
+			// container information
 			String containerName = containerConfig.getAttributeValue("name");
 			boolean doCreateContainer = (containerConfig.getAttributeValue("create") == null)
 					|| containerConfig.getAttributeValue("create").equals(new Boolean(true));
 			allContainers.put(containerName, new Boolean(doCreateContainer));
 			
-			// set up creation for all agents in the container
-			for(Iterator<XMLNode> itA = containerConfig.getNodeIterator("agent"); itA.hasNext();)
+			// container has no agents, but should be created in said platform
+			if(doCreateContainer && !containerConfig.getNodeIterator("agent").hasNext())
 			{
-				XMLNode agentConfig = itA.next();
-				// get interesting parameters
-				if(!agentConfig.getNodeIterator("parameter").hasNext())
+				String platformName = containerConfig.getAttributeValue("platform");
+				if((platformName != null) && platforms.containsKey(platformName))
 				{
-					log.error("agent has no parameters");
-					continue;
+					if(!platformContainers.containsKey(platformName))
+						platformContainers.put(platformName, new HashSet<String>());
+					platformContainers.get(platformName).add(containerName);
 				}
-				
-				// name
-				String agentName = getParameterValue(agentConfig, AgentParameterName.AGENT_NAME.toString());
+			}
+			
+			// set up creation for all agents in the container
+			for(Iterator<XMLNode> agentNodes = containerConfig.getNodeIterator("agent"); agentNodes.hasNext();)
+			{
+				XMLNode agentNode = agentNodes.next();
+				// agent name
+				String agentName = getParameterValue(agentNode, AgentParameterName.AGENT_NAME.toString());
 				if(agentName == null)
 				{
 					log.error("agent has no name; will not be created.");
 					continue;
 				}
-				
-				// loader
-				String agentLoaderName = getParameterValue(agentConfig, AgentParameterName.AGENT_LOADER.toString());
-				if(agentLoaderName == null)
-				{
-					log.error("no agent loader specified. agent [" + agentName + "] will not be created.");
-					continue;
-				}
-				if(!agentLoaders.containsKey(agentLoaderName))
-				{
-					log.error("agent loader [" + agentLoaderName + "] is unknown. agent [" + agentName
-							+ "] will not be created.");
-					continue;
-				}
-				
 				// platform
-				String platformName = getParameterValue(agentConfig, AgentParameterName.AGENT_PLATFORM.toString());
+				String platformName = getParameterValue(agentNode, AgentParameterName.AGENT_PLATFORM.toString());
 				if(platformName == null)
-				{
 					platformName = defaultPlatform; // no platform specified: go to default
-				}
 				if(!platforms.containsKey(platformName))
 				{
 					log.error("unknown platform [" + platformName + "]; agent [" + agentName + "] will not be created.");
 					continue;
 				}
 				
-				// get all parameters and put them into an AgentParameters instance.
-				AgentParameters parameters = new AgentParameters();
-				for(Iterator<XMLNode> paramIt = agentConfig.getNodeIterator("parameter"); paramIt.hasNext();)
-				{
-					XMLNode param = paramIt.next();
-					AgentParameterName parName = AgentParameterName.getName(param.getAttributeValue("name"));
-					if(parName != null)
-						parameters.add(parName, param.getAttributeValue("value"));
-					else
-					{
-						log.trace("adding unregistered parameter [" + param.getAttributeValue("name") + "].");
-						parameters.add(param.getAttributeValue("name"), param.getAttributeValue("value"));
-					}
-				}
-				for(String pack : agentPackages)
-					parameters.add(AgentParameterName.AGENT_PACKAGE, pack);
+				AgentManager agentManager = loadAgent(agentNode, agentName, containerName, doCreateContainer,
+						agentLoaders, agentPackages);
+				if(agentManager == null)
+					continue;
 				
-				AgentCreationData agentCreationData = new AgentCreationData(agentName, parameters, containerName,
-						!doCreateContainer, agentConfig);
-				AgentManager manager = agentLoaders.get(agentLoaderName).load(agentCreationData);
-				allAgents.put(agentName, manager);
-				log.info("Agent [" + agentName + "] loaded.");
-				
-				// associate container
+				// associate platform-container-agent
+				if(!platformContainersAgents.containsKey(platformName))
+					platformContainersAgents.put(platformName, new HashMap<String, Map<String, AgentManager>>());
+				if(!platformContainersAgents.get(platformName).containsKey(containerName))
+					platformContainersAgents.get(platformName).put(containerName, new HashMap<String, AgentManager>());
+				platformContainersAgents.get(platformName).get(containerName).put(agentName, agentManager);
 				if(doCreateContainer)
 				{
 					if(!platformContainers.containsKey(platformName))
@@ -302,136 +421,72 @@ public class Boot
 					log.trace("Agent [" + agentName + "] will be run on platform [" + platformName
 							+ "], in local container [" + containerName + "]");
 				}
-				// switch(loader)
-				// {
-				// case JAVA: // TODO: to do.
-				// break;
-				// case ADF2:
-				// {
-				// ClaimAgentDefinition cad = ClaimUtils.fillCAD(
-				// parameters.get(AgentParameterName.AGENT_CLASS.toString()),
-				// parameters.getValues(AgentParameterName.JAVA_CODE.toString()), agentPackages,
-				// agentPackages, log);
-				// parameters.addObject(AgentParameterName.AGENT_DEFINITION, cad); // register agent
-				// break;
-				// }
-				// case COMPOSITE:
-				// allAgents.put(agentName, new AgentCreationData(agentName, CompositeAgent.class.getCanonicalName(),
-				// parameters, containerName, !doCreateContainer));
-				// log.info("configured [" + loader.toString() + "] agent [" + agentName + "] in container ["
-				// + containerName + "]");
-				// break;
-				// }
-				
-			}
-		}
-		
-		// agents prepared, time to start platforms and the containers.
-		
-		for(Iterator<PlatformLoader> itP = platforms.values().iterator(); itP.hasNext();)
-		{
-			PlatformLoader platform = itP.next();
-			if(!platform.start())
-			{
-				log.error("Platform [" + platform.getName() + "] failed to start.");
-				itP.remove();
-				continue;
-			}
-			log.info("Platform [" + platform.getName() + "] started.");
-			for(Iterator<String> itC = platformContainers.get(platform.getName()).iterator(); itC.hasNext();)
-			{
-				String containerName = itC.next();
-				if(!platform.addContainer(containerName))
-				{
-					log.error("Adding container [" + containerName + "] to [" + platform.getName() + "] has failed.");
-					itC.remove();
-				}
 				else
-					log.info("Container [" + containerName + "] added to [" + platform.getName() + "].");
+					log.trace("Agent [" + agentName + "] will be run on platform [" + platformName
+							+ "], in remote container [" + containerName + "]");
 			}
 		}
+	}
+	
+	/**
+	 * Loads agent information from the scenario file and loads the agent using the appropriate {@link AgentLoader}. The
+	 * method uses the already found agent name, together with container information and existing information on
+	 * available agent loaders and existing agent packages.
+	 * <p>
+	 * If successful, the method returns an {@link AgentManager} instance that can be used to control the lifecycle of
+	 * the agent.
+	 * 
+	 * @param agentNode
+	 *            - the {@link XMLNode} containing the information about the agent.
+	 * @param agentName
+	 *            - the name of the agent, already determined by the caller.
+	 * @param containerName
+	 *            - the name of the container the agent will reside in.
+	 * @param doCreateContainer
+	 *            - <code>true</code> if the container is local, <code>false</code> if remote.
+	 * @param agentLoaders
+	 *            - the {@link Map} of agent loader names and respective {@link AgentLoader} instances.
+	 * @param agentPackages
+	 *            - the {@link Set} of packages containing agent code.
+	 * @return an {@link AgentManager} instance that can be used to control the lifecycle of the just loaded agent, if
+	 *         the loading was successful; <code>null</code> otherwise.
+	 */
+	protected AgentManager loadAgent(XMLNode agentNode, String agentName, String containerName,
+			boolean doCreateContainer, Map<String, AgentLoader> agentLoaders, Set<String> agentPackages)
+	{
+		// loader
+		String agentLoaderName = getParameterValue(agentNode, AgentParameterName.AGENT_LOADER.toString());
+		if(agentLoaderName == null)
+			log.lr(null, "no agent loader specified. agent [" + agentName + "] will not be created.");
+		if(!agentLoaders.containsKey(agentLoaderName))
+			log.lr(null, "agent loader [" + agentLoaderName + "] is unknown. agent [" + agentName
+					+ "] will not be created.");
 		
-		// String vizName = "visualizer";
-		// jade.addAgentToContainer(mainContainerName, vizName, VisualizationAgent.class.getCanonicalName(), null);
+		// get all parameters and put them into an AgentParameters instance.
+		AgentParameters parameters = new AgentParameters();
+		for(Iterator<XMLNode> paramIt = agentNode.getNodeIterator("parameter"); paramIt.hasNext();)
+		{
+			XMLNode param = paramIt.next();
+			AgentParameterName parName = AgentParameterName.getName(param.getAttributeValue("name"));
+			if(parName != null)
+				parameters.add(parName, param.getAttributeValue("value"));
+			else
+			{
+				log.trace("adding unregistered parameter [" + param.getAttributeValue("name") + "].");
+				parameters.add(param.getAttributeValue("name"), param.getAttributeValue("value"));
+			}
+		}
+		for(String pack : agentPackages)
+			parameters.add(AgentParameterName.AGENT_PACKAGE, pack);
 		
-		XMLNode timeline = null;
-		if(scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).hasNext())
-			timeline = scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).next();
-		
-		new SimulationManager(platforms, allAgents, timeline);
-		
-		// boot JADE platform
-		// log.info("booting JADE");
-		//
-		// // identify appropriate JadeInterface instance
-		// JadeInterface jade;
-		// try
-		// {
-		// jade = (JadeInterface) PlatformUtils.loadClassInstance(new Object(), PlatformUtils.jadeInterfaceClass()
-		// .getName(), new Object[] {});
-		// } catch(Exception e)
-		// {
-		// log.error("unable to create jade interface: " + e.toString() + ": " + e.getStackTrace().toString());
-		// return;
-		// }
-		// if(jade == null)
-		// {
-		// log.error("unable to create jade interface");
-		// return;
-		// }
-		//
-		// // configure jade
-		// JadeConfig jadeConfig = jade.fillConfig(new JadeConfig());
-		// jadeConfig.setLocalHost(settings.getLocalHost()).setLocalPort(settings.getLocalPort())
-		// .setMainHost(settings.mainHost).setMainPort(settings.mainPort);
-		// if(settings.doCreateMainContainer())
-		// jadeConfig.setPlatformID(settings.getJadePlatformName()).setMainContainerName(
-		// settings.getMainContainerName());
-		// jade.setConfig(jadeConfig);
-		//
-		// boolean isMain = settings.doCreateMainContainer();
-		// String mainContainerName = settings.getMainContainerName();
-		//
-		// // start jade
-		// if(isMain)
-		// {
-		// log.info("booting platform / main container");
-		// jade.startPlatform();
-		// }
-		//
-		// // start containers
-		// for(Map.Entry<String, Boolean> containerData : allContainers.entrySet())
-		// {
-		// if(containerData.getValue().booleanValue() && !containerData.getKey().equals(mainContainerName))
-		// {
-		// log.info("creating container [" + containerData.getKey() + "]...");
-		// jade.startContainer(containerData.getKey());
-		// log.info("container created.");
-		// }
-		// }
-		//
-		// if(isMain)
-		// {
-		// // FIXME visualizer / simulator name should be set by scenario
-		// String vizName = "visualizer";
-		// jade.addAgentToContainer(mainContainerName, vizName, VisualizationAgent.class.getCanonicalName(), null);
-		//
-		// XMLNode timeline = null;
-		// if(scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).hasNext())
-		// timeline = scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).next();
-		//
-		// AgentParameters parameters = new AgentParameters();
-		// parameters.addObject(AgentParameterName.JADE_INTERFACE, jade);
-		// parameters.addObject(AgentParameterName.AGENTS, allAgents.values());
-		// if(timeline != null)
-		// parameters.addObject(AgentParameterName.TIMELINE, timeline);
-		// parameters.add(AgentParameterName.VISUALIZTION_AGENT, vizName);
-		// jade.addAgentToContainer(mainContainerName, "simulator", SimulationAgent.class.getCanonicalName(),
-		// new Object[] { parameters });
-		//
-		// }
-		
-		log.doExit();
+		AgentCreationData agentCreationData = new AgentCreationData(agentName, parameters, containerName,
+				!doCreateContainer, agentNode);
+		AgentManager manager = agentLoaders.get(agentLoaderName).load(agentCreationData);
+		if(manager != null)
+			log.info("Agent [" + agentName + "] loaded.");
+		else
+			log.info("Agent [" + agentName + "] failed to load.");
+		return manager;
 	}
 	
 	/**

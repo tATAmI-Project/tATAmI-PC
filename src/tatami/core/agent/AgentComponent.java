@@ -114,6 +114,11 @@ public abstract class AgentComponent implements Serializable
 		String						componentClass;
 		
 		/**
+		 * The name of the component, as appearing in the scenario file.
+		 */
+		String						componentName;
+		
+		/**
 		 * Specifies the fully qualified class name of the component implementation.
 		 * 
 		 * @param classname
@@ -123,6 +128,7 @@ public abstract class AgentComponent implements Serializable
 		{
 			// FIXME: check that package and class exist
 			componentClass = classname;
+			componentName = this.name().split("_")[0].toLowerCase();
 		}
 		
 		/**
@@ -133,10 +139,10 @@ public abstract class AgentComponent implements Serializable
 		{
 			// FIXME: check that package and class exist
 			// lower case entry name, without "_COMPONENT" suffix.
-			String compName = this.name().split("_")[0].toLowerCase();
-			String componentPackage = AGENT_COMPONENT_PACKAGE_ROOT + "." + compName;
-			componentClass = componentPackage + "." + compName.substring(0, 1).toUpperCase() + compName.substring(1)
-					+ AGENT_COMPONENT_CLASS_SUFFIX;
+			componentName = this.name().split("_")[0].toLowerCase();
+			String componentPackage = AGENT_COMPONENT_PACKAGE_ROOT + "." + componentName;
+			componentClass = componentPackage + "." + componentName.substring(0, 1).toUpperCase()
+					+ componentName.substring(1) + AGENT_COMPONENT_CLASS_SUFFIX;
 		}
 		
 		/**
@@ -149,6 +155,36 @@ public abstract class AgentComponent implements Serializable
 			return componentClass;
 		}
 		
+		/**
+		 * Gets the name of the component, as appearing in the scenario file.
+		 * 
+		 * @return the name of the component.
+		 */
+		public String componentName()
+		{
+			return componentName;
+		}
+		
+		/**
+		 * Returns the {@link AgentComponentName} instance that corresponds to the specified name.
+		 * <p>
+		 * E.g. for the name "parametric" the return value will be the instance named PARAMETRIC_COMPONENT.
+		 * 
+		 * @param componentName
+		 *            - the name of the component, as appearing in the scenario file.
+		 * @return the corresponding {@link AgentComponentName} instance.
+		 */
+		public static AgentComponentName toComponentName(String componentName)
+		{
+			try
+			{
+				return AgentComponentName.valueOf(componentName.toUpperCase() + "_"
+						+ AGENT_COMPONENT_CLASS_SUFFIX.toUpperCase());
+			} catch(Exception e)
+			{
+				return null;
+			}
+		}
 	}
 	
 	/**

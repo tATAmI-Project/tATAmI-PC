@@ -44,7 +44,8 @@ public class TestingMonitorComponent extends AgentComponent
 	{
 		super.componentInitializer();
 		
-		locallog = (UnitComponent) new UnitComponent().setUnitName("monitoring").setLogLevel(Level.ALL);
+		locallog = (UnitComponent) new UnitComponent().setUnitName("monitoring-" + getAgentName()).setLogLevel(
+				Level.ALL);
 		AgentEventHandler allEventHandler = new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)

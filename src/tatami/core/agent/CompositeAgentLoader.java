@@ -85,15 +85,17 @@ public class CompositeAgentLoader implements AgentLoader
 			// get component class
 			String componentClass = componentNode.getAttributeValue(COMPONENT_CLASS_ATTRIBUTE);
 			if(componentClass == null)
-				try
-				{
-					componentClass = AgentComponentName.valueOf(componentName).getClassName();
-				} catch(Exception e)
+			{
+				AgentComponentName component = AgentComponentName.toComponentName(componentName);
+				if(component != null)
+					componentClass = component.getClassName();
+				else
 				{
 					log.error("Component [" + componentName
 							+ "] unknown and component class not specified. Component will not be available.");
 					continue;
 				}
+			}
 			if(componentClass == null)
 			{
 				log.error("Component class not specified for component [" + componentName
@@ -114,7 +116,7 @@ public class CompositeAgentLoader implements AgentLoader
 			try
 			{
 				Object argument = null;
-				if(AgentComponentName.PARAMETRIC_COMPONENT.toString().equals(componentName))
+				if(AgentComponentName.PARAMETRIC_COMPONENT.componentName().equals(componentName))
 					argument = agentCreationData.getParameters();
 				else if(!componentParameters.isEmpty())
 					argument = componentParameters;
@@ -123,12 +125,12 @@ public class CompositeAgentLoader implements AgentLoader
 				else
 					agent.addComponent((AgentComponent) PlatformUtils.loadClassInstance(this, componentClass,
 							new Object[0]));
-				log.trace("component [" + componentName + "] loaded for agent [" + agentCreationData.getAgentName()
-						+ "].");
+				log.trace("component [" + componentName + " | " + componentClass + "] loaded for agent ["
+						+ agentCreationData.getAgentName() + "].");
 			} catch(Exception e)
 			{
-				log.error("Component [" + componentName + "] failed to load; it will not be available:"
-						+ PlatformUtils.printException(e));
+				log.error("Component [" + componentName + " | " + componentClass
+						+ "] failed to load; it will not be available:" + PlatformUtils.printException(e));
 			}
 		}
 		// log.info("agent [" + agentCreationData.getAgentName() + "] loaded.");

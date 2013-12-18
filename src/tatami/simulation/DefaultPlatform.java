@@ -39,4 +39,15 @@ public class DefaultPlatform implements PlatformLoader
 		return true;
 	}
 	
+	/**
+	 * The method does nothing. The agents are ready to start anyway, as they need no platform support.
+	 * <p>
+	 * {@link AgentManager#setPlatformLink()} is not called, as no support will be offered by the platform.
+	 */
+	@Override
+	public boolean loadAgent(String containerName, AgentManager agentManager)
+	{
+		return true;
+	}
+	
 }

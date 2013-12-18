@@ -88,6 +88,23 @@ public interface PlatformLoader
 	}
 	
 	/**
+	 * This interface should be implemented by classes facilitating the link between an agent and a platform (e.g. for
+	 * using specific platform functionalities).
+	 * <p>
+	 * Instances of this interface will be passed to {@link AgentManager}s to be used for calls to the platform.
+	 * <p>
+	 * The implementing instance may be one per platform or there may be a specific instance for each agent.
+	 * <p>
+	 * It is advised that the platform link is used by the agent by beans of compatible agent components.
+	 * 
+	 * @author Andrei Olaru
+	 */
+	public static interface PlatformLink
+	{
+		// TODO
+	}
+	
+	/**
 	 * The default platform to use, if no other is specified.
 	 */
 	static final StandardPlatformType	DEFAULT_PLATFORM	= StandardPlatformType.DEFAULT;
@@ -133,5 +150,19 @@ public interface PlatformLoader
 	 * @return <code>true</code> if the container was created successfully.
 	 */
 	public boolean addContainer(String containerName);
+	
+	/**
+	 * Loads the agent onto the platform. It also calls the method {@link AgentManager#setPlatformLink()} to create a
+	 * link from the agent to the platform. The platform link may be the platform itself or an agent wrapper, depending
+	 * on the specific platform.
+	 * 
+	 * @param containerName
+	 *            - the name of the container in which to create the agent.
+	 * @param agentManager
+	 *            - the {@link AgentManager} handling the agent's lifecycle.
+	 * @return <code>true</code> if the operation is successful (meaning a subsequent call to
+	 *         {@link AgentManager#start()} should be able to start the agent.
+	 */
+	public boolean loadAgent(String containerName, AgentManager agentManager);
 	
 }

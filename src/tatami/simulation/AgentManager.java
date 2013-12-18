@@ -1,8 +1,8 @@
 package tatami.simulation;
 
 /**
- * An instance implementing this interface is a wrapper to an actual agent instance (that may be not yet created).
- * It offers methods for managing the lifecycle of an agent, for instance starting and stopping.
+ * An instance implementing this interface is a wrapper to an actual agent instance (that may be not yet created). It
+ * offers methods for managing the lifecycle of an agent, for instance starting and stopping.
  * 
  * @author Andrei Olaru
  */
@@ -21,4 +21,12 @@ public interface AgentManager
 	 * @return <code>true</code> if the agent was stopped without error. <code>false</code> otherwise.
 	 */
 	public boolean stop();
+	
+	/**
+	 * Creates a link from the agent to the platform, which will facilitate the invocation of specific platform
+	 * functionality.
+	 * 
+	 * @return <code>true</code> if the operation was successful. <code>false</code> otherwise.
+	 */
+	public boolean setPlatformLink();
 }

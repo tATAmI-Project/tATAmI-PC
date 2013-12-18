@@ -15,6 +15,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Vector;
 
 import net.xqhs.util.logging.Log.LoggerType;
 
@@ -143,6 +145,33 @@ public class PlatformUtils
 	}
 	
 	/**
+	 * @return the class for the Simulation Manager GUI.
+	 */
+	public static String getSimulationGuiClass()
+	{
+		switch(getPlatform())
+		{
+		case PC:
+			return "tatami.pc.agent.visualization.PCSimulationGui";
+		default:
+			break;
+		}
+		return null;
+	}
+	
+	/**
+	 * Converts the arguments into a {@link Vector} containing all arguments passed to the method.
+	 * 
+	 * @param arguments
+	 *            the arguments to assemble into the vector.
+	 * @return the vector containing all arguments.
+	 */
+	public static Vector<Object> toVector(Object... arguments)
+	{
+		return new Vector<Object>(Arrays.asList(arguments));
+	}
+	
+	/**
 	 * Method to print an exception as a string.
 	 * 
 	 * @param e
@@ -154,6 +183,17 @@ public class PlatformUtils
 		StringWriter sw = new StringWriter();
 		e.printStackTrace(new PrintWriter(sw));
 		return sw.toString();
+	}
+
+	/**
+	 * Performs system exit, depending on platform.
+	 * 
+	 * @param exitCode
+	 *            - the exit code.
+	 */
+	public static void systemExit(int exitCode)
+	{
+		System.exit(0);
 	}
 	
 }

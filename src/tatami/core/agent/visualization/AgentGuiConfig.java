@@ -53,11 +53,11 @@ public class AgentGuiConfig extends Config implements Serializable
 	 */
 	protected String			guiClassName;
 	/**
-	 * THe name of the window containing the GUI.
+	 * The name of the window containing the GUI.
 	 */
 	protected String			windowName;
 	/**
-	 * THe type of the window containing the GUI.
+	 * The type of the window containing the GUI.
 	 */
 	protected String			windowType;
 	
@@ -169,5 +169,21 @@ public class AgentGuiConfig extends Config implements Serializable
 				guiClassName = defaultGuiPath + "." + platform + DEFAULT_AGENT_GUI;
 		}
 		return this;
+	}
+
+	/**
+	 * @return the windowName
+	 */
+	public String getWindowName()
+	{
+		return windowName;
+	}
+
+	/**
+	 * @return the windowType
+	 */
+	public String getWindowType()
+	{
+		return windowType;
 	}
 }

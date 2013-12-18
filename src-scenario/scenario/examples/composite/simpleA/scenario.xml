@@ -19,12 +19,18 @@
 	<scen:initial>
 		<scen:container name="Container">
 			<scen:agent>
-				<scen:component name="testing" classpath = "scenario.examples.composite.simpleA.TestingMonitorComponent" />
+				<scen:component name="parametric" />
+				<scen:component name="visualization" />
+				<scen:component name="testing"
+					classpath="scenario.examples.composite.simpleA.TestingMonitorComponent" />
 				<scen:parameter name="loader" value="composite" />
 				<scen:parameter name="name" value="AgentA" />
 			</scen:agent>
 			<scen:agent>
-				<scen:component name="testing" classpath = "scenario.examples.composite.simpleA.TestingMonitorComponent" />
+				<scen:component name="parametric" />
+				<scen:component name="visualization" />
+				<scen:component name="testing"
+					classpath="scenario.examples.composite.simpleA.TestingMonitorComponent" />
 				<scen:parameter name="loader" value="composite" />
 				<scen:parameter name="name" value="AgentB" />
 			</scen:agent>
