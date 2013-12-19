@@ -103,7 +103,7 @@ public class Boot
 		Map<String, Set<String>> platformContainers = new HashMap<String, Set<String>>();
 		// platform name -> container name -> agent name -> agent manager
 		// for the agent to be started in the container, on the platform
-		Map<String, Map<String, Map<String, AgentManager>>> platformContainersAgents = new HashMap<String, Map<String, Map<String, AgentManager>>>();
+		Set<AgentCreationData> allAgents = new HashSet<AgentCreationData>();
 		
 		// add agent packages specified in the scenario
 		Iterator<XMLNode> packagePathsIt = scenarioTree.getRoot().getNodeIterator(
@@ -121,8 +121,7 @@ public class Boot
 		
 		// iterate containers and find agents
 		loadContainerAgents(scenarioTree.getRoot().getNodeIterator("initial").next().getNodeIterator("container"),
-				defaultPlatform, platforms, agentLoaders, agentPackages, allContainers, platformContainers,
-				platformContainersAgents);
+				defaultPlatform, platforms, agentLoaders, agentPackages, allContainers, platformContainers, allAgents);
 		
 		// agents prepared, time to start platforms and the containers.
 		if(startPlatforms(platforms, platformContainers) > 0)
@@ -133,53 +132,11 @@ public class Boot
 				timeline = scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).next();
 			
 			// start simulation
-			new SimulationManager(platforms, allContainers, platformContainersAgents, timeline).start();
+			new SimulationManager(platforms, allContainers, allAgents, timeline).start();
 		}
 		else
 			log.error("No agent platforms loaded. Simulation will not start.");
 		log.doExit();
-	}
-	
-	/**
-	 * The method starts the platforms specified in the first parameter and adds to each platform the containers
-	 * corresponding to it, as indicated by the second parameter.
-	 * 
-	 * @param platforms
-	 *            - the {@link Map} of platform names and respective {@link PlatformLoader} instances.
-	 * @param platformContainers
-	 *            - the {@link Map} containing platform name &rarr; {@link Set} of the names of the containers to add to
-	 *            the platform.
-	 * @return the number of platforms successfully started.
-	 */
-	protected int startPlatforms(Map<String, PlatformLoader> platforms, Map<String, Set<String>> platformContainers)
-	{
-		int platformsOK = 0;
-		for(Iterator<PlatformLoader> itP = platforms.values().iterator(); itP.hasNext();)
-		{
-			PlatformLoader platform = itP.next();
-			String platformName = platform.getName();
-			if(!platform.start())
-			{
-				log.error("Platform [" + platformName + "] failed to start.");
-				itP.remove();
-				continue;
-			}
-			log.info("Platform [" + platformName + "] started.");
-			platformsOK++;
-			if(platformContainers.containsKey(platformName))
-				for(Iterator<String> itC = platformContainers.get(platformName).iterator(); itC.hasNext();)
-				{
-					String containerName = itC.next();
-					if(!platform.addContainer(containerName))
-					{
-						log.error("Adding container [" + containerName + "] to [" + platformName + "] has failed.");
-						itC.remove();
-					}
-					else
-						log.info("Container [" + containerName + "] added to [" + platformName + "].");
-				}
-		}
-		return platformsOK;
 	}
 	
 	/**
@@ -349,15 +306,14 @@ public class Boot
 	 * @param platformContainers
 	 *            - the {@link Map} in which the method will fill in the containers to load on the local machine, for
 	 *            each platform (the map contains: platform name &rarr; set of containers to load).
-	 * @param platformContainersAgents
-	 *            - the {@link Map} in which the method will fill in entries of the form: name of the platform &rarr;
-	 *            name of the container &rarr; name of the agent to create in the said container and on the said
-	 *            platform &rarr; {@link AgentManager} instance for said agent.
+	 * @param allAgents
+	 *            - the {@link Set} in which the method will fill in the {@link AgentCreationData} instances for all
+	 *            agents.
 	 */
 	protected void loadContainerAgents(Iterator<XMLNode> containerNodes, String defaultPlatform,
 			Map<String, PlatformLoader> platforms, Map<String, AgentLoader> agentLoaders, Set<String> agentPackages,
 			Map<String, Boolean> allContainers, Map<String, Set<String>> platformContainers,
-			Map<String, Map<String, Map<String, AgentManager>>> platformContainersAgents)
+			Set<AgentCreationData> allAgents)
 	{
 		while(containerNodes.hasNext())
 		{
@@ -402,17 +358,14 @@ public class Boot
 					continue;
 				}
 				
-				AgentManager agentManager = loadAgent(agentNode, agentName, containerName, doCreateContainer,
-						agentLoaders, agentPackages);
-				if(agentManager == null)
+				// load agent
+				AgentCreationData agentCreationData = loadAgent(agentNode, agentName, containerName, doCreateContainer,
+						platformName, agentLoaders, agentPackages);
+				if(agentCreationData == null)
 					continue;
+				allAgents.add(agentCreationData);
 				
-				// associate platform-container-agent
-				if(!platformContainersAgents.containsKey(platformName))
-					platformContainersAgents.put(platformName, new HashMap<String, Map<String, AgentManager>>());
-				if(!platformContainersAgents.get(platformName).containsKey(containerName))
-					platformContainersAgents.get(platformName).put(containerName, new HashMap<String, AgentManager>());
-				platformContainersAgents.get(platformName).get(containerName).put(agentName, agentManager);
+				// associate container with the platform
 				if(doCreateContainer)
 				{
 					if(!platformContainers.containsKey(platformName))
@@ -429,12 +382,10 @@ public class Boot
 	}
 	
 	/**
-	 * Loads agent information from the scenario file and loads the agent using the appropriate {@link AgentLoader}. The
-	 * method uses the already found agent name, together with container information and existing information on
-	 * available agent loaders and existing agent packages.
+	 * Loads agent information from the scenario file and pre-loads the agent using the appropriate {@link AgentLoader}.
 	 * <p>
-	 * If successful, the method returns an {@link AgentManager} instance that can be used to control the lifecycle of
-	 * the agent.
+	 * If successful, the method returns an {@link AgentCreationData} instance that can be subsequently be used in a
+	 * call to {@link AgentLoader#load(AgentCreationData)} to obtain an {@link AgentManager} instance.
 	 * 
 	 * @param agentNode
 	 *            - the {@link XMLNode} containing the information about the agent.
@@ -444,6 +395,8 @@ public class Boot
 	 *            - the name of the container the agent will reside in.
 	 * @param doCreateContainer
 	 *            - <code>true</code> if the container is local, <code>false</code> if remote.
+	 * @param platformName
+	 *            - the name of the platform the agent will execute on.
 	 * @param agentLoaders
 	 *            - the {@link Map} of agent loader names and respective {@link AgentLoader} instances.
 	 * @param agentPackages
@@ -451,8 +404,9 @@ public class Boot
 	 * @return an {@link AgentManager} instance that can be used to control the lifecycle of the just loaded agent, if
 	 *         the loading was successful; <code>null</code> otherwise.
 	 */
-	protected AgentManager loadAgent(XMLNode agentNode, String agentName, String containerName,
-			boolean doCreateContainer, Map<String, AgentLoader> agentLoaders, Set<String> agentPackages)
+	protected AgentCreationData loadAgent(XMLNode agentNode, String agentName, String containerName,
+			boolean doCreateContainer, String platformName, Map<String, AgentLoader> agentLoaders,
+			Set<String> agentPackages)
 	{
 		// loader
 		String agentLoaderName = getParameterValue(agentNode, AgentParameterName.AGENT_LOADER.toString());
@@ -461,6 +415,7 @@ public class Boot
 		if(!agentLoaders.containsKey(agentLoaderName))
 			log.lr(null, "agent loader [" + agentLoaderName + "] is unknown. agent [" + agentName
 					+ "] will not be created.");
+		AgentLoader loader = agentLoaders.get(agentLoaderName);
 		
 		// get all parameters and put them into an AgentParameters instance.
 		AgentParameters parameters = new AgentParameters();
@@ -480,13 +435,55 @@ public class Boot
 			parameters.add(AgentParameterName.AGENT_PACKAGE, pack);
 		
 		AgentCreationData agentCreationData = new AgentCreationData(agentName, parameters, containerName,
-				!doCreateContainer, agentNode);
-		AgentManager manager = agentLoaders.get(agentLoaderName).load(agentCreationData);
-		if(manager != null)
-			log.info("Agent [" + agentName + "] loaded.");
-		else
-			log.info("Agent [" + agentName + "] failed to load.");
-		return manager;
+				!doCreateContainer, platformName, loader, agentNode);
+		if(!loader.preload(agentCreationData, log))
+		{
+			log.error("Agent [" + agentName + "] cannot be loaded.");
+			return null;
+		}
+		return agentCreationData;
+	}
+	
+	/**
+	 * The method starts the platforms specified in the first parameter and adds to each platform the containers
+	 * corresponding to it, as indicated by the second parameter.
+	 * 
+	 * @param platforms
+	 *            - the {@link Map} of platform names and respective {@link PlatformLoader} instances.
+	 * @param platformContainers
+	 *            - the {@link Map} containing platform name &rarr; {@link Set} of the names of the containers to add to
+	 *            the platform.
+	 * @return the number of platforms successfully started.
+	 */
+	protected int startPlatforms(Map<String, PlatformLoader> platforms, Map<String, Set<String>> platformContainers)
+	{
+		int platformsOK = 0;
+		for(Iterator<PlatformLoader> itP = platforms.values().iterator(); itP.hasNext();)
+		{
+			PlatformLoader platform = itP.next();
+			String platformName = platform.getName();
+			if(!platform.start())
+			{
+				log.error("Platform [" + platformName + "] failed to start.");
+				itP.remove();
+				continue;
+			}
+			log.info("Platform [" + platformName + "] started.");
+			platformsOK++;
+			if(platformContainers.containsKey(platformName))
+				for(Iterator<String> itC = platformContainers.get(platformName).iterator(); itC.hasNext();)
+				{
+					String containerName = itC.next();
+					if(!platform.addContainer(containerName))
+					{
+						log.error("Adding container [" + containerName + "] to [" + platformName + "] has failed.");
+						itC.remove();
+					}
+					else
+						log.info("Container [" + containerName + "] added to [" + platformName + "].");
+				}
+		}
+		return platformsOK;
 	}
 	
 	/**

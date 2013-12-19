@@ -20,7 +20,8 @@ import tatami.core.agent.webServices.WebserviceComponent;
  * This class serves as base for agent component. a component is characterized by its functionality, denominated by
  * means of its name -- an instance of {@link AgentComponentName}.
  * <p>
- * A component can belong to at most one {@link CompositeAgent}, which is its parent.
+ * A component can belong to at most one {@link CompositeAgent}, which is its parent. When created, the component does
+ * no have a parent; a parent will be set afterwards.
  * <p>
  * The class also offers direct access to a basic set of components. It is not recommended for components to retain the
  * reference, as it may become null if the component is removed.
@@ -55,7 +56,7 @@ public abstract class AgentComponent implements Serializable
 		/**
 		 * The name of a component extending {@link VisualizableComponent}.
 		 */
-		VISUALIZABLE_COMPONENT,
+		VISUALIZABLE_COMPONENT(AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".visualization.VisualizableComponent"),
 		
 		/**
 		 * The name of a component extending {@link CognitiveComponent}.
@@ -201,7 +202,15 @@ public abstract class AgentComponent implements Serializable
 	private Map<AgentEventType, AgentEventHandler>	eventHandlers	= new HashMap<AgentEventType, AgentEventHandler>();
 	
 	/**
-	 * The constructor assigns the name to the component
+	 * The constructor assigns the name to the component.
+	 * <p>
+	 * IMPORTANT: extending classes should only perform in the constructor initializations that do not depend on the
+	 * parent agent or on other components, as when the component is created, the {@link AgentComponent#parentAgent}
+	 * member is <code>null</code>. The assignment of a parent (as any parent change) is notified to extending classes
+	 * by calling the method {@link AgentComponent#parentChangeNotifier(CompositeAgent)}.
+	 * <p>
+	 * Event registration is not dependent on the parent, so it can be performed in the constructor or in the
+	 * {@link #componentInitializer()} method.
 	 * 
 	 * @param name
 	 *            - the name of the component, as instance of {@link AgentComponentName}.
@@ -209,6 +218,20 @@ public abstract class AgentComponent implements Serializable
 	protected AgentComponent(AgentComponentName name)
 	{
 		componentName = name;
+		componentInitializer();
+	}
+	
+	/**
+	 * Extending anonymous classes can override this method to perform actions when the component is created. The method
+	 * is called at the end of the constructor.
+	 * <p>
+	 * Extending classes should always call super.componentInitializer() first.
+	 * <p>
+	 * IMPORTANT: The note in {@link #AgentComponent(AgentComponentName)} also applies to this method.
+	 */
+	protected void componentInitializer()
+	{
+		// this class does not do anything here.
 	}
 	
 	/**
@@ -226,31 +249,6 @@ public abstract class AgentComponent implements Serializable
 		CompositeAgent oldParent = parentAgent;
 		parentAgent = parent;
 		parentChangeNotifier(oldParent);
-		componentInitializer();
-	}
-	
-	/**
-	 * Extending anonymous classes can override this method to perform actions when the component is created. The method
-	 * is called at the end of the constructor.
-	 * <p>
-	 * Extending classes should always call super.componentInitializer() first.
-	 */
-	protected void componentInitializer()
-	{
-		// this class does not do anything here.
-	}
-	
-	/**
-	 * Extending classes can override this method to perform actions when the parent of the component changes.
-	 * <p>
-	 * Extending classes should always call super.parentChangeNotifier() first.
-	 * 
-	 * @param oldParent
-	 *            - the previous value for the parent, if any.
-	 */
-	protected void parentChangeNotifier(CompositeAgent oldParent)
-	{
-		// this class does not do anything here.
 	}
 	
 	/**
@@ -264,6 +262,24 @@ public abstract class AgentComponent implements Serializable
 		CompositeAgent oldParent = parentAgent;
 		parentAgent = null;
 		parentChangeNotifier(oldParent);
+	}
+	
+	/**
+	 * Extending classes can override this method to perform actions when the parent of the component changes.
+	 * <p>
+	 * The previous reference to the parent can be found in the first parameter. The current parent can be obtained by
+	 * calling {@link #getParent()}.
+	 * <p>
+	 * Such actions may be initializations that depend on the parent or on other components of the same agent.
+	 * <p>
+	 * Extending classes should always call super.parentChangeNotifier() first.
+	 * 
+	 * @param oldParent
+	 *            - the previous value for the parent, if any.
+	 */
+	protected void parentChangeNotifier(CompositeAgent oldParent)
+	{
+		// this class does not do anything here.
 	}
 	
 	/**
@@ -286,6 +302,16 @@ public abstract class AgentComponent implements Serializable
 			oldHandler = eventHandlers.get(event);
 		eventHandlers.put(event, handler);
 		return oldHandler;
+	}
+	
+	/**
+	 * Relay for calls to the method in {@link CompositeAgent}.
+	 * 
+	 * @return the name of the agent.
+	 */
+	protected String getAgentName()
+	{
+		return (parentAgent != null) ? parentAgent.getAgentName() : null;
 	}
 	
 	/**
@@ -315,7 +341,7 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected boolean hasComponent(AgentComponentName name)
 	{
-		return parentAgent.hasComponent(name);
+		return (parentAgent != null) ? parentAgent.hasComponent(name) : false;
 	}
 	
 	/**
@@ -327,7 +353,7 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected AgentComponent getComponent(AgentComponentName name)
 	{
-		return parentAgent.getComponent(name);
+		return (parentAgent != null) ? parentAgent.getComponent(name) : null;
 	}
 	
 	/**
@@ -339,7 +365,7 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected ParametricComponent getParametric()
 	{
-		if(parentAgent.hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
+		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
 			return (ParametricComponent) parentAgent.getComponent(AgentComponentName.PARAMETRIC_COMPONENT);
 		return null;
 	}
@@ -353,7 +379,7 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected MessagingComponent getMessaging()
 	{
-		if(parentAgent.hasComponent(AgentComponentName.MESSAGING_COMPONENT))
+		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.MESSAGING_COMPONENT))
 			return (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
 		return null;
 	}
@@ -366,7 +392,8 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected void postAgentEvent(AgentEvent event)
 	{
-		parentAgent.postAgentEvent(event);
+		if(parentAgent != null)
+			parentAgent.postAgentEvent(event);
 	}
 	
 	/**
@@ -381,16 +408,6 @@ public abstract class AgentComponent implements Serializable
 	{
 		if(eventHandlers.containsKey(event.getType()))
 			eventHandlers.get(event.getType()).handleEvent(event);
-	}
-	
-	/**
-	 * Relay for calls to the method in {@link CompositeAgent}.
-	 * 
-	 * @return the name of the agent.
-	 */
-	protected String getAgentName()
-	{
-		return parentAgent.getAgentName();
 	}
 	
 }

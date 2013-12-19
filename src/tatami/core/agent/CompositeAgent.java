@@ -346,7 +346,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * @return the name of the agent.
 	 */
 	String getAgentName()
-	{
+	{ // TODO name should be cached
 		String agentName = null;
 		if(hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
 			agentName = ((ParametricComponent) getComponent(AgentComponentName.PARAMETRIC_COMPONENT))

@@ -1,14 +1,19 @@
 package tatami.core.agent;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import net.xqhs.util.logging.Logger;
 import net.xqhs.util.logging.Logger.Level;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent.AgentComponentName;
+import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.pc.util.XML.XMLTree.XMLNode;
 import tatami.simulation.AgentCreationData;
@@ -48,6 +53,10 @@ public class CompositeAgentLoader implements AgentLoader
 	 * The name of the attribute of a parameter node holding the value of the parameter.
 	 */
 	private static final String	PARAMETER_VALUE				= "value";
+	/**
+	 * The name of the parameter in the {@link AgentParameters} list that corresponds to a component entry.
+	 */
+	private static final String	COMPONENT_PARAMETER_NAME	= "agent_component";
 	
 	/**
 	 * The constructor does not do any initializations.
@@ -71,12 +80,11 @@ public class CompositeAgentLoader implements AgentLoader
 	}
 	
 	@Override
-	public AgentManager load(AgentCreationData agentCreationData)
+	public boolean preload(AgentCreationData agentCreationData, Logger log)
 	{
-		UnitComponentExt log = (UnitComponentExt) new UnitComponentExt().setUnitName(
-				"agent " + agentCreationData.getAgentName() + " loader").setLogLevel(Level.ALL);
-		CompositeAgent agent = new CompositeAgent();
+		String logPre = agentCreationData.getAgentName() + ":"; // FIXME: use a subordinate log for each preload.
 		Iterator<XMLNode> componentIt = agentCreationData.getNode().getNodeIterator(COMPONENT_NODE_NAME);
+		List<Map.Entry<String, Object>> componentData = new ArrayList<Map.Entry<String, Object>>();
 		while(componentIt.hasNext())
 		{
 			XMLNode componentNode = componentIt.next();
@@ -91,15 +99,25 @@ public class CompositeAgentLoader implements AgentLoader
 					componentClass = component.getClassName();
 				else
 				{
-					log.error("Component [" + componentName
+					log.error(logPre + "Component [" + componentName
 							+ "] unknown and component class not specified. Component will not be available.");
 					continue;
 				}
 			}
 			if(componentClass == null)
 			{
-				log.error("Component class not specified for component [" + componentName
+				log.error(logPre + "Component class not specified for component [" + componentName
 						+ "]. Component will not be available.");
+				continue;
+			}
+			
+			// TODO: also check parameters
+			if(PlatformUtils.classExists(componentClass))
+				log.trace(logPre + "component [" + componentName + "] can be loaded");
+			else
+			{
+				log.error(logPre + "Component class [" + componentName + " | " + componentClass
+						+ "] not found; it will not be loaded.");
 				continue;
 			}
 			
@@ -113,27 +131,52 @@ public class CompositeAgentLoader implements AgentLoader
 						.getAttributeValue(PARAMETER_NAME), param.getAttributeValue(PARAMETER_VALUE)));
 			}
 			
+			Object argument = null;
+			if(AgentComponentName.PARAMETRIC_COMPONENT.componentName().equals(componentName))
+				argument = agentCreationData.getParameters();
+			else if(!componentParameters.isEmpty())
+				argument = componentParameters;
+			
+			componentData.add(new AbstractMap.SimpleEntry<String, Object>(componentClass, argument));
+		}
+		agentCreationData.getParameters().addObject(COMPONENT_PARAMETER_NAME, componentData);
+		return true;
+	}
+	
+	@Override
+	public AgentManager load(AgentCreationData agentCreationData)
+	{
+		UnitComponentExt log = (UnitComponentExt) new UnitComponentExt().setUnitName(
+				"agent " + agentCreationData.getAgentName() + " loader").setLogLevel(Level.ALL);
+		CompositeAgent agent = new CompositeAgent();
+		
+		@SuppressWarnings("unchecked") // FIXME
+		List<Map.Entry<String, Object>> componentData = (List<Entry<String, Object>>) agentCreationData.getParameters()
+				.getObject(COMPONENT_PARAMETER_NAME);
+		for(Object compObj : componentData)
+		{
+			@SuppressWarnings("unchecked")
+			// FIXME
+			Entry<String, Object> compEntry = (Entry<String, Object>) compObj;
+			String componentClass = compEntry.getKey();
+			Object argument = compEntry.getValue();
+			
 			try
 			{
-				Object argument = null;
-				if(AgentComponentName.PARAMETRIC_COMPONENT.componentName().equals(componentName))
-					argument = agentCreationData.getParameters();
-				else if(!componentParameters.isEmpty())
-					argument = componentParameters;
 				if(argument != null)
 					agent.addComponent((AgentComponent) PlatformUtils.loadClassInstance(this, componentClass, argument));
 				else
 					agent.addComponent((AgentComponent) PlatformUtils.loadClassInstance(this, componentClass,
 							new Object[0]));
-				log.trace("component [" + componentName + " | " + componentClass + "] loaded for agent ["
-						+ agentCreationData.getAgentName() + "].");
+				log.trace("component [" + componentClass + "] loaded for agent [" + agentCreationData.getAgentName()
+						+ "].");
 			} catch(Exception e)
 			{
-				log.error("Component [" + componentName + " | " + componentClass
-						+ "] failed to load; it will not be available:" + PlatformUtils.printException(e));
+				log.error("Component [" + componentClass + "] failed to load; it will not be available for agent ["
+						+ agentCreationData.getAgentName() + "]:" + PlatformUtils.printException(e));
 			}
 		}
-		// log.info("agent [" + agentCreationData.getAgentName() + "] loaded.");
+		log.trace("agent [" + agentCreationData.getAgentName() + "] loaded.");
 		log.doExit();
 		
 		return agent;

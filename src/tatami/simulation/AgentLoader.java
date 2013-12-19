@@ -1,5 +1,6 @@
 package tatami.simulation;
 
+import net.xqhs.util.logging.Logger;
 import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.CompositeAgentLoader;
 import tatami.pc.util.XML.XMLTree.XMLNode;
@@ -21,9 +22,9 @@ public interface AgentLoader
 	enum StandardAgentLoaderType {
 		
 		/**
-		 * The agent is described by means of an .adf2 file. The ADF2 agent is a special kind of
-		 * {@link CompositeAgent}, with some pre-configured components. An S-CLAIM agent can be easily loaded as a
-		 * COMPOSITE agent. This enumeration value is kept only for backwards compatibility of scenarios.
+		 * The agent is described by means of an .adf2 file. The ADF2 agent is a special kind of {@link CompositeAgent},
+		 * with some pre-configured components. An S-CLAIM agent can be easily loaded as a COMPOSITE agent. This
+		 * enumeration value is kept only for backwards compatibility of scenarios.
 		 */
 		ADF2(null), // TODO
 		
@@ -121,13 +122,29 @@ public interface AgentLoader
 	public AgentLoader setConfig(XMLNode configuration);
 	
 	/**
-	 * The method loads all the information necessary for the creation of an agent and returns an
-	 * {@link AgentManager} instance used to manage the lifecycle of the loaded agent.
+	 * The method checks potential problems that could appear in the creation of an agent, as specified by the
+	 * information in the argument. Potential problems relate, for example, to inexistent classes.
+	 * <p>
+	 * The method also may add information to the agent creation data, in order to speed up the loading process.
+	 * <p>
+	 * If the agent will surely not be able to load, <code>false</code> will be returned. For any non-fatal issues, the
+	 * method should return <code>true</code> and output warnings in the specified log.
+	 * 
+	 * @param agentCreationData
+	 *            - the {@link AgentCreationData}, as loaded by {@link Boot} from the scenario file.
+	 * @param log
+	 *            - the {@link Logger} in which to output any potential problems (as warnings or errors).
+	 * @return <code>true</code> if no fatal issues were found; <code>false</code> otherwise.
+	 */
+	public boolean preload(AgentCreationData agentCreationData, Logger log);
+	
+	/**
+	 * The method loads all the information necessary for the creation of an agent and returns an {@link AgentManager}
+	 * instance used to manage the lifecycle of the loaded agent.
 	 * 
 	 * @param agentCreationData
 	 *            - the {@link AgentCreationData}, as loaded by {@link Boot} from the scenario file.
 	 * @return an {@link AgentManager} for the loaded agent.
 	 */
 	public AgentManager load(AgentCreationData agentCreationData);
-	
 }

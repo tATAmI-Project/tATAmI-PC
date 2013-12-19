@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -77,56 +78,56 @@ public class SimulationManager implements AgentManager
 	/**
 	 * Window type for the simulation manager window.
 	 */
-	private static final String							WINDOW_TYPE				= "systemSmall";
+	private static final String		WINDOW_TYPE				= "systemSmall";
 	/**
 	 * Window name for the simulation manager window.
 	 */
-	private static final String							WINDOW_NAME				= "simulation";
+	private static final String		WINDOW_NAME				= "simulation";
 	/**
 	 * The name of the attribute indicating the time of the event.
 	 */
-	protected static final String						EVENT_TIME_ATTRIBUTE	= "time";
+	protected static final String	EVENT_TIME_ATTRIBUTE	= "time";
 	/**
 	 * The log.
 	 */
-	UnitComponentExt									log						= null;
+	UnitComponentExt				log						= null;
 	/**
 	 * The GUI.
 	 */
-	AgentGui											gui						= null;
+	AgentGui						gui						= null;
 	
 	/**
 	 * Name and {@link PlatformLoader} for all platforms to be started.
 	 */
-	Map<String, PlatformLoader>							platforms;
+	Map<String, PlatformLoader>		platforms;
 	/**
 	 * Name and locality indication (container is created locally or remotely) for all containers.
 	 */
-	protected Map<String, Boolean>						containers				= null;
+	protected Map<String, Boolean>	containers				= null;
 	/**
-	 * Name and {@link AgentManager} instance for all agents to be started.
+	 * {@link AgentCreationData} instances for all agents to be started.
 	 */
-	Map<String, Map<String, Map<String, AgentManager>>>	agents;
+	Set<AgentCreationData>			agents;
 	/**
 	 * The list of events in the simulation, as specified by the scenario file.
 	 */
-	List<XMLNode>										events					= new LinkedList<XMLNode>();
+	List<XMLNode>					events					= new LinkedList<XMLNode>();
 	/**
 	 * Current time, in 1/10 seconds.
 	 */
-	long												time					= 0;
+	long							time					= 0;
 	/**
 	 * Indicates whether the simulation is currently paused.
 	 */
-	boolean												isPaused				= false;
+	boolean							isPaused				= false;
 	/**
 	 * Indicates whether agents have been created.
 	 */
-	boolean												agentsCreated			= false;
+	boolean							agentsCreated			= false;
 	/**
 	 * The {@link Timer} for simulation time and also the display in the GUI.
 	 */
-	Timer												theTime					= null;
+	Timer							theTime					= null;
 	
 	/**
 	 * Creates a new instance, also starting the GUI, based on the map of platforms and their names, the map of agents
@@ -136,19 +137,18 @@ public class SimulationManager implements AgentManager
 	 *            - the {@link Map} of platform names and {@link PlatformLoader} instances that are currently started.
 	 * @param allContainers
 	 *            - the map of container names and information whether the container is created locally or remotely.
-	 * @param platformContainersAgents
-	 *            - for each platform, the platform name and the list of names and {@link AgentManager} wrappers of
-	 *            agents that will be loaded on the platform.
+	 * @param allAgents
+	 *            - a {@link Set} of {@link AgentCreationData} instances, describing all agents to be loaded.
 	 * @param timeline
 	 *            - the timeline of events, as {@link XMLNode} parsed from the scenario file.
 	 */
 	public SimulationManager(Map<String, PlatformLoader> allPlatforms, Map<String, Boolean> allContainers,
-			Map<String, Map<String, Map<String, AgentManager>>> platformContainersAgents, XMLNode timeline)
+			Set<AgentCreationData> allAgents, XMLNode timeline)
 	{
 		log = (UnitComponentExt) new UnitComponentExt().setUnitName("simulation");
 		platforms = allPlatforms;
 		containers = allContainers;
-		agents = platformContainersAgents;
+		agents = allAgents;
 		if(timeline != null)
 			events = timeline.getNodes();
 		else
@@ -319,33 +319,34 @@ public class SimulationManager implements AgentManager
 	protected void createAgents()
 	{
 		// load agents on their respective platforms
-		Map<String, AgentManager> allAgents = new HashMap<String, AgentManager>();
-		for(Entry<String, Map<String, Map<String, AgentManager>>> platformEntry : agents.entrySet())
+		Map<String, AgentManager> agentManagers = new HashMap<String, AgentManager>();
+		for(AgentCreationData agentData : agents)
 		{
-			// TODO checks
-			PlatformLoader platform = platforms.get(platformEntry.getKey());
-			for(Map.Entry<String, Map<String, AgentManager>> containerEntry : platformEntry.getValue().entrySet())
+			String agentName = agentData.getAgentName();
+			if(!platforms.containsKey(agentData.getPlatform()))
 			{
-				String containerName = containerEntry.getKey();
-				boolean localContainer = containers.get(containerName).booleanValue();
-				if(localContainer)
-					for(Map.Entry<String, AgentManager> agentEntry : containerEntry.getValue().entrySet())
-					{
-						String agentName = agentEntry.getKey();
-						AgentManager agent = agentEntry.getValue();
-						if(platform.loadAgent(containerName, agent))
-						{
-							allAgents.put(agentName, agent);
-						}
-						else
-							log.error("agent [" + agentName + "] failed to load on platform [" + platform.getName()
-									+ "]");
-					}
-				else
-					; // TODO agents in remote containers
+				log.error("Platform [" + agentData.getPlatform() + "] for agent [" + agentName + "] not found.");
+				continue;
 			}
+			PlatformLoader platform = platforms.get(agentData.getPlatform());
+			String containerName = agentData.getDestinationContainer();
+			boolean localContainer = !agentData.isRemote();
+			if(localContainer)
+			{
+				AgentLoader loader = agentData.getAgentLoader();
+				AgentManager manager = loader.load(agentData);
+				if(manager != null)
+					if(platform.loadAgent(containerName, manager))
+						agentManagers.put(agentName, manager);
+					else
+						log.error("agent [" + agentName + "] failed to load on platform [" + platform.getName() + "]");
+				else
+					log.error("agent [" + agentName + "] failed to load");
+			}
+			else
+				; // TODO agents in remote containers
 		}
-		for(Entry<String, AgentManager> agent : allAgents.entrySet())
+		for(Entry<String, AgentManager> agent : agentManagers.entrySet())
 		{
 			if(agent.getValue().start())
 				log.info("agent [" + agent.getKey() + "] started.");

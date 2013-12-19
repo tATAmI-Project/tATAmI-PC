@@ -4,6 +4,7 @@ import net.xqhs.util.logging.Logger.Level;
 import net.xqhs.util.logging.UnitComponent;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
+import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.parametric.AgentParameterName;
@@ -44,8 +45,6 @@ public class TestingMonitorComponent extends AgentComponent
 	{
 		super.componentInitializer();
 		
-		locallog = (UnitComponent) new UnitComponent().setUnitName("monitoring-" + getAgentName()).setLogLevel(
-				Level.ALL);
 		AgentEventHandler allEventHandler = new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)
@@ -62,5 +61,23 @@ public class TestingMonitorComponent extends AgentComponent
 		};
 		for(AgentEventType eventType : AgentEventType.values())
 			registerHandler(eventType, allEventHandler);
+	}
+	
+	@Override
+	protected void parentChangeNotifier(CompositeAgent oldParent)
+	{
+		super.parentChangeNotifier(oldParent);
+		
+		if(getParent() != null)
+		{
+			locallog = (UnitComponent) new UnitComponent().setUnitName("monitoring-" + getAgentName()).setLogLevel(
+					Level.ALL);
+			locallog.lf("testing started.");
+		}
+		else if(locallog != null)
+		{
+			locallog.doExit();
+			locallog = null;
+		}
 	}
 }

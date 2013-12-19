@@ -20,7 +20,7 @@
 		<scen:container name="Container">
 			<scen:agent>
 				<scen:component name="parametric" />
-				<scen:component name="visualization" />
+				<scen:component name="visualizable" />
 				<scen:component name="testing"
 					classpath="scenario.examples.composite.simpleA.TestingMonitorComponent" />
 				<scen:parameter name="loader" value="composite" />
@@ -28,7 +28,7 @@
 			</scen:agent>
 			<scen:agent>
 				<scen:component name="parametric" />
-				<scen:component name="visualization" />
+				<scen:component name="visualizable" />
 				<scen:component name="testing"
 					classpath="scenario.examples.composite.simpleA.TestingMonitorComponent" />
 				<scen:parameter name="loader" value="composite" />

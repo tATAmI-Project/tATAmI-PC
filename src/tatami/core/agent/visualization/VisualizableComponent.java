@@ -19,6 +19,7 @@ import net.xqhs.util.logging.Unit;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
+import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.messaging.MessagingComponent;
@@ -131,48 +132,6 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	{
 		super(AgentComponentName.VISUALIZABLE_COMPONENT);
 		
-		// setup additional GUI configuration
-		guiConfig.setWindowName(getAgentName());
-		ParametricComponent parametric = getParametric();
-		if((parametric != null))
-		{
-			if(parametric.hasPar(AgentParameterName.WINDOW_TYPE))
-				guiConfig.setWindowType(parametric.parVal(AgentParameterName.WINDOW_TYPE));
-			if(parametric.hasPar(AgentParameterName.GUI))
-				guiConfig.setGuiClass(parametric.parVal(AgentParameterName.GUI),
-						parametric.parVals(AgentParameterName.AGENT_PACKAGE));
-		}
-		
-		// creates visualization & log
-		resetVisualization();
-		
-		// registers message receivers: receive the visualization root; receive exit message.
-		final MessagingComponent msgr = getMessaging();
-		if(msgr != null)
-		{
-			msgr.registerMessageReceiver(
-					msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.VISUALIZATION_MONITOR.toString()),
-					new AgentEventHandler() {
-						@Override
-						public void handleEvent(AgentEvent event)
-						{
-							String parent = msgr.extractContent(event);
-							setVisualizationParent(parent);
-							getLog().info("visualization root received: [" + parent + "]");
-						}
-					});
-			msgr.registerMessageReceiver(
-					msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.DO_EXIT.toString()),
-					new AgentEventHandler() {
-						@Override
-						public void handleEvent(AgentEvent event)
-						{
-							getLog().info("exiting...");
-							postAgentEvent(new AgentEvent(AgentEventType.AGENT_EXIT));
-						}
-					});
-		}
-		
 		// registers event handlers
 		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler() {
 			@Override
@@ -209,6 +168,60 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		});
 	}
 	
+	@Override
+	protected void parentChangeNotifier(CompositeAgent oldParent)
+	{
+		super.parentChangeNotifier(oldParent);
+		
+		if(getParent() == null)
+		{ // parent was removed;
+			getLog().trace("parent removed.");
+			removeVisualization();
+		}
+		else
+		{ // setup additional GUI configuration
+			guiConfig.setWindowName(getAgentName());
+			ParametricComponent parametric = getParametric();
+			if((parametric != null))
+			{
+				if(parametric.hasPar(AgentParameterName.WINDOW_TYPE))
+					guiConfig.setWindowType(parametric.parVal(AgentParameterName.WINDOW_TYPE));
+				if(parametric.hasPar(AgentParameterName.GUI))
+					guiConfig.setGuiClass(parametric.parVal(AgentParameterName.GUI),
+							parametric.parVals(AgentParameterName.AGENT_PACKAGE));
+			}
+			// creates visualization & log
+			resetVisualization();
+			
+			// registers message receivers: receive the visualization root; receive exit message.
+			final MessagingComponent msgr = getMessaging();
+			if(msgr != null)
+			{
+				msgr.registerMessageReceiver(
+						msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.VISUALIZATION_MONITOR.toString()),
+						new AgentEventHandler() {
+							@Override
+							public void handleEvent(AgentEvent event)
+							{
+								String parent = msgr.extractContent(event);
+								setVisualizationParent(parent);
+								getLog().info("visualization root received: [" + parent + "]");
+							}
+						});
+				msgr.registerMessageReceiver(
+						msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.DO_EXIT.toString()),
+						new AgentEventHandler() {
+							@Override
+							public void handleEvent(AgentEvent event)
+							{
+								getLog().info("exiting...");
+								postAgentEvent(new AgentEvent(AgentEventType.AGENT_EXIT));
+							}
+						});
+			}
+		}
+	}
+	
 	/**
 	 * Creates the [platform-specific] visualization elements: the GUI and the log.
 	 */
@@ -220,7 +233,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			gui = (AgentGui) PlatformUtils.loadClassInstance(this, guiConfig.guiClassName, guiConfig);
 		} catch(Exception e)
 		{
-			e.printStackTrace(); // there is no log yet
+			e.printStackTrace(); // there is no log yet; try printing to the console / standard output.
 		}
 		
 		// configure log / logging Unit
@@ -243,6 +256,17 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			loggingUnit.doExit();
 		if(gui != null)
 			gui.close();
+	}
+	
+	/**
+	 * Setter for the name of the visualization parent.
+	 * 
+	 * @param parentName
+	 *            - name of the visualization parent.
+	 */
+	protected void setVisualizationParent(String parentName)
+	{
+		visualizationParent = parentName;
 	}
 	
 	/**
@@ -338,6 +362,16 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	}
 	
 	/**
+	 * Getter for <code>currentContainer</code>.
+	 * 
+	 * @return the name of the current container.
+	 */
+	protected String getCurrentContainer()
+	{
+		return currentContainer;
+	}
+	
+	/**
 	 * Relays calls to the underlying {@link AgentComponent} instance in order to avoid synthetic access warnings for
 	 * event handlers.
 	 */
@@ -369,27 +403,6 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	protected void postAgentEvent(AgentEvent event)
 	{
 		super.postAgentEvent(event);
-	}
-	
-	/**
-	 * Setter for the name of the visualization parent.
-	 * 
-	 * @param parentName
-	 *            - name of the visualization parent.
-	 */
-	protected void setVisualizationParent(String parentName)
-	{
-		visualizationParent = parentName;
-	}
-	
-	/**
-	 * Getter for <code>currentContainer</code>.
-	 * 
-	 * @return the name of the current container.
-	 */
-	protected String getCurrentContainer()
-	{
-		return currentContainer;
 	}
 	
 }

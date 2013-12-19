@@ -101,6 +101,25 @@ public class PlatformUtils
 	}
 	
 	/**
+	 * Checks if the specified class exists.
+	 * 
+	 * @param className
+	 *            - the fully qualified name of the class.
+	 * @return <code>true</code> if the class exists, <code>false</code> otherwise.
+	 */
+	public static boolean classExists(String className)
+	{
+		try
+		{
+			Class.forName(className);
+			return true;
+		} catch(ClassNotFoundException e)
+		{
+			return false;
+		}
+	}
+	
+	/**
 	 * Creates a new instance of a class that is now known at compile-time.
 	 * 
 	 * @param loadingClass
@@ -184,7 +203,7 @@ public class PlatformUtils
 		e.printStackTrace(new PrintWriter(sw));
 		return sw.toString();
 	}
-
+	
 	/**
 	 * Performs system exit, depending on platform.
 	 * 

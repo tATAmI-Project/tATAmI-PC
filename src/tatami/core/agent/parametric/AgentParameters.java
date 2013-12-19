@@ -142,7 +142,8 @@ public class AgentParameters implements Serializable
 			{
 				if(entry.getValue() instanceof String)
 					ret.add((String) entry.getValue());
-				throw new IllegalStateException("Value cannot be converted to String");
+				else
+					throw new IllegalStateException("Value cannot be converted to String");
 			}
 		return ret;
 	}
@@ -160,6 +161,23 @@ public class AgentParameters implements Serializable
 			if(entry.getKey().equals(name))
 				return entry.getValue();
 		return null;
+	}
+	
+	/**
+	 * Retrieves all objects matching the given name, as a {@link Set}
+	 * 
+	 * @param name
+	 *            - the name to search for.
+	 * @return a {@link Set} of objects associated with the name.
+	 */
+	public Set<Object> getObjects(String name)
+	{
+		Set<Object> ret = new HashSet<Object>();
+		for(Map.Entry<String, Object> entry : parameterSet)
+			if(entry.getKey().equals(name))
+				ret.add(entry.getValue());
+		return ret;
+		
 	}
 	
 	/**

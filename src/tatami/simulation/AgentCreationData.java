@@ -42,9 +42,18 @@ public class AgentCreationData
 	 */
 	boolean			isRemote;
 	/**
-	 * The name in which the container should be created.
+	 * The name of the container in which the agent should be created. It cannot be <code>null</code>.
 	 */
 	String			destinationContainer	= null;
+	/**
+	 * The name of the platform on which the agent should be loaded. It cannot be <code>null</code>.
+	 */
+	String			platform				= null;
+	/**
+	 * The {@link AgentLoader} instance that will be used to load the agent using this {@link AgentCreationData}
+	 * instance. It cannot be <code>null</code>.
+	 */
+	AgentLoader		loader					= null;
 	
 	/**
 	 * A reference to the actual node resulted from parsing the scenario file. It cannot be <code>null</code>.
@@ -63,16 +72,26 @@ public class AgentCreationData
 	 * @param remote
 	 *            - <code>true</code> if the container is remote (not on the local machine); <code>false</code>
 	 *            otherwise.
+	 * @param agentPlatform
+	 *            - the platform on which the agent will execute.
+	 * @param agentLoader
+	 *            - the {@link AgentLoader} instance to use for loading the agent.
 	 * @param scenarioNode
 	 *            - the {@link XMLNode} instance corresponding to the agent, as resulted from parsing the scenario file.
 	 */
 	public AgentCreationData(String name, AgentParameters agentParameters, String destination, boolean remote,
-			XMLNode scenarioNode)
+			String agentPlatform, AgentLoader agentLoader, XMLNode scenarioNode)
 	{
 		if(name == null)
 			throw new NullPointerException("Agent name cannot be null");
 		if(agentParameters == null)
 			throw new NullPointerException("Agent parameters cannot be null");
+		if(destination == null)
+			throw new NullPointerException("Container cannot be null");
+		if(agentPlatform == null)
+			throw new NullPointerException("Agent platform cannot be null");
+		if(agentLoader == null)
+			throw new NullPointerException("Agent loader cannot be null");
 		if(scenarioNode == null)
 			throw new NullPointerException("XML node cannot be null");
 		
@@ -80,6 +99,8 @@ public class AgentCreationData
 		parameters = agentParameters;
 		destinationContainer = destination;
 		isRemote = remote;
+		platform = agentPlatform;
+		loader = agentLoader;
 		node = scenarioNode;
 	}
 	
@@ -114,6 +135,22 @@ public class AgentCreationData
 	public String getDestinationContainer()
 	{
 		return destinationContainer;
+	}
+	
+	/**
+	 * @return the name of the platform that this agent will execute on.
+	 */
+	public String getPlatform()
+	{
+		return platform;
+	}
+	
+	/**
+	 * @return the {@link AgentLoader} instance to be used for loading this agent.
+	 */
+	public AgentLoader getAgentLoader()
+	{
+		return loader;
 	}
 	
 	/**
