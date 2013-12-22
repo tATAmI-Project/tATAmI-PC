@@ -166,8 +166,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </enumeration>  
-  <class id="19" language="java" name="tatami.pc.agent.visualization.VisualizationAgent" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/pc/agent/visualization/VisualizationAgent.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="19" language="java" name="tatami.simulation.VisualizationManager" project="tATAmI-PC" 
+    file="/tATAmI-PC/src/tatami/simulation/VisualizationManager.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="1084" y="1826"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="true">      

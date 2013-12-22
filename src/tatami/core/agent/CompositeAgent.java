@@ -5,6 +5,7 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -100,9 +101,18 @@ public class CompositeAgent implements Serializable, AgentManager
 				else
 				{
 					AgentEvent event = eventQueue.poll();
-					for(AgentComponent component : componentOrder)
+					switch(event.getType().getSequenceType())
 					{
-						component.signalAgentEvent(event);
+					case CONSTRUCTIVE:
+					case UNORDERED:
+						for(AgentComponent component : componentOrder)
+							component.signalAgentEvent(event);
+						break;
+					case DESTRUCTIVE:
+						for(ListIterator<AgentComponent> it = componentOrder.listIterator(componentOrder.size()); it
+								.hasPrevious();)
+							it.previous().signalAgentEvent(event);
+						break;
 					}
 					switch(event.getType())
 					{
@@ -136,6 +146,11 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * The class UID
 	 */
 	private static final long							serialVersionUID	= -2693230015986527097L;
+	
+	/**
+	 * Time (in milliseconds) to wait for the agent thread to exit.
+	 */
+	// protected static final long EXIT_TIMEOUT = 500;
 	
 	/**
 	 * The {@link Map} that links component names (functionalities) to standard component instances.
@@ -250,7 +265,7 @@ public class CompositeAgent implements Serializable, AgentManager
 			return false;
 		try
 		{
-			agentThread.join();
+			agentThread.join(0);// EXIT_TIMEOUT);
 		} catch(InterruptedException e)
 		{
 			e.printStackTrace();
@@ -267,14 +282,14 @@ public class CompositeAgent implements Serializable, AgentManager
 	{
 		return exit();
 	}
-
+	
 	@Override
 	public boolean setPlatformLink()
 	{
 		// TODO Auto-generated method stub
 		return false;
 	}
-
+	
 	/**
 	 * The method should be called by an agent component (relayed through {@link AgentComponent}) to disseminate a an
 	 * {@link AgentEvent} to the other components.
@@ -288,7 +303,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 *            the event to disseminate.
 	 * @return <code>true</code> if the event has been successfully posted; <code>false</code> otherwise.
 	 */
-	boolean postAgentEvent(AgentEvent event)
+	protected boolean postAgentEvent(AgentEvent event)
 	{
 		if(!(((state == AgentState.STARTING) && (event.getType() == AgentEventType.AGENT_START)) || (state == AgentState.RUNNING)))
 			return false;
@@ -320,7 +335,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 *            - the name of the component to search (as instance of {@link AgentComponentName}.
 	 * @return <code>true</code> if the component exists, false otherwise.
 	 */
-	boolean hasComponent(AgentComponentName name)
+	protected boolean hasComponent(AgentComponentName name)
 	{
 		return components.containsKey(name);
 	}
@@ -334,7 +349,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 *            - the name of the component to retrieve (as instance of {@link AgentComponentName} .
 	 * @return the {@link AgentComponent} instance, if any. <code>null</code> otherwise.
 	 */
-	AgentComponent getComponent(AgentComponentName name)
+	protected AgentComponent getComponent(AgentComponentName name)
 	{
 		return components.get(name);
 	}
@@ -345,7 +360,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * 
 	 * @return the name of the agent.
 	 */
-	String getAgentName()
+	protected String getAgentName()
 	{ // TODO name should be cached
 		String agentName = null;
 		if(hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))

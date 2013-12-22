@@ -227,23 +227,22 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	 */
 	protected void resetVisualization()
 	{
+		// configure log / logging Unit
+		loggingUnit = (UnitComponentExt) new UnitComponentExt().setUnitName(getAgentName()).setLogEnsureNew()
+				.setLogReporter(this).setLogType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL);
+		
 		// load GUI
 		try
 		{
 			gui = (AgentGui) PlatformUtils.loadClassInstance(this, guiConfig.guiClassName, guiConfig);
 		} catch(Exception e)
 		{
-			e.printStackTrace(); // there is no log yet; try printing to the console / standard output.
+			getLog().error("Load GUI failed: " + PlatformUtils.printException(e));
 		}
-		
-		// configure log / logging Unit
-		
-		loggingUnit = (UnitComponentExt) new UnitComponentExt().setUnitName(getAgentName()).setLogEnsureNew()
-				.setLogReporter(this).setLogType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL);
 		if(gui != null)
 			loggingUnit.setLogDisplay(new Log2AgentGui(gui, DefaultComponent.AGENT_LOG.toString()));
 		
-		getLog().trace("visualization on platform " + PlatformUtils.getPlatform());
+		getLog().trace("visualization started on platform " + PlatformUtils.getPlatform());
 	}
 	
 	/**
@@ -252,10 +251,10 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	protected void removeVisualization()
 	{
 		getLog().trace("closing visualization");
-		if(loggingUnit != null)
-			loggingUnit.doExit();
 		if(gui != null)
 			gui.close();
+		if(loggingUnit != null)
+			loggingUnit.doExit();
 	}
 	
 	/**

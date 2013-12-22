@@ -143,6 +143,13 @@ public interface PlatformLoader
 	public boolean start();
 	
 	/**
+	 * Stops the agent platform.
+	 * 
+	 * @return <code>true</code> if the platform was stopped successfully; <code>false</code> otherwise.
+	 */
+	public boolean stop();
+
+	/**
 	 * Creates a new container, on this platform, on this machine.
 	 * 
 	 * @param containerName

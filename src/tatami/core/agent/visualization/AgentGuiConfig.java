@@ -28,7 +28,7 @@ public class AgentGuiConfig extends Config implements Serializable
 	/**
 	 * The default type of the window.
 	 */
-	private static final String	DEFAULT_WINDOW_TYPE	= "agent";
+	public static final String	DEFAULT_WINDOW_TYPE	= "agent";
 	/**
 	 * The name (to be part of the GUI class name) for the default GUI.
 	 */

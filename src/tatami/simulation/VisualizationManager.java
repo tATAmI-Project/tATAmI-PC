@@ -9,11 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package tatami.pc.agent.visualization;
-
-import jade.core.AID;
-import jade.core.behaviours.CyclicBehaviour;
-import jade.lang.acl.ACLMessage;
+package tatami.simulation;
 
 import java.awt.TextArea;
 import java.util.Collection;
@@ -25,36 +21,44 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import tatami.core.agent.visualization.VisualizableComponent;
-import tatami.core.agent.visualization.VisualizationOntology;
-import tatami.core.agent.visualization.Logger.Level;
-import tatami.core.agent.visualization.VisualizationOntology.Vocabulary;
+import net.xqhs.util.logging.Log;
+import net.xqhs.util.logging.Logger.Level;
+import tatami.core.agent.visualization.AgentGui;
+import tatami.core.agent.visualization.VisualizableComponent.Vocabulary;
 import tatami.core.util.graph.Edge;
 import tatami.core.util.graph.Graph;
 import tatami.core.util.graph.Node;
 import tatami.core.util.graph.representation.TextGraphRepresentation;
-import tatami.core.util.logging.Log;
-import tatami.core.util.logging.Unit.UnitConfigData;
+import tatami.pc.agent.visualization.PCDefaultAgentGui;
 import tatami.pc.agent.visualization.PCVisualizationGui.VisualizationComponent;
 
 /**
+ * Singleton class managing the visualization and control of agents residing on a machine or on a set of machines
+ * (possibly all).
+ * <p>
+ * It receives updates from all agents regarding logging messages and parent and location changes.
+ * <p>
+ * Although not an agent of any platform, the {@link SimulationManager} can be viewed as an agent; for convenience, it
+ * implements {@link AgentManager} and it features a GUI based on {@link AgentGui}.
+ * <p>
+ * This implementation presumes that {@link java.util.Timer} and related classes {@link TimerTask} are available on the
+ * execution platform.
  * 
  * @author Andrei Olaru
- * 
  */
-public class VisualizationAgent extends VisualizableComponent
+public class VisualizationManager
 {
-	private static final long serialVersionUID = 5153833693845730328L;
+	private static final long	serialVersionUID	= 5153833693845730328L;
 	
 	// structures for displaying
-	Timer					 updateTimer	  = null;
-	long					  updateDelay	  = 1000;
-	int					   lastUpdateSize   = 0;
+	Timer						updateTimer			= null;
+	long						updateDelay			= 1000;
+	int							lastUpdateSize		= 0;
 	
 	// structure for storing monitor data
-	Set<String>			   centralLog	   = new HashSet<String>();
-	Graph					 agentGraph	   = null;
-	TextGraphRepresentation   grapher		  = null;
+	Set<String>					centralLog			= new HashSet<String>();
+	Graph						agentGraph			= null;
+	TextGraphRepresentation		grapher				= null;
 	
 	/**
 	 * setup
@@ -107,7 +111,7 @@ public class VisualizationAgent extends VisualizableComponent
 		}, 0, updateDelay);
 		
 		addBehaviour(new CyclicBehaviour() {
-			private static final long serialVersionUID = 1L;
+			private static final long	serialVersionUID	= 1L;
 			
 			@Override
 			public void action()

@@ -14,7 +14,7 @@ import tatami.core.agent.CompositeAgent;
 @SuppressWarnings("javadoc")
 public class BareCompositeAgentTest extends Unit
 {
-	static final Level generalLevel = Level.ALL;
+	static final Level	generalLevel	= Level.ALL;
 	
 	@SuppressWarnings("serial")
 	public BareCompositeAgentTest()
@@ -24,7 +24,7 @@ public class BareCompositeAgentTest extends Unit
 		
 		CompositeAgent agent = new CompositeAgent();
 		agent.addComponent(new AgentComponent(AgentComponentName.TESTING_COMPONENT) {
-			UnitComponent	locallog	= null;
+			UnitComponent	locallog;
 			
 			@Override
 			protected void componentInitializer()
@@ -32,11 +32,15 @@ public class BareCompositeAgentTest extends Unit
 				super.componentInitializer();
 				
 				locallog = (UnitComponent) new UnitComponent().setUnitName("monitoring").setLogLevel(generalLevel);
+				
 				AgentEventHandler allEventHandler = new AgentEventHandler() {
 					@Override
 					public void handleEvent(AgentEvent event)
 					{
-						locallog.li("event: [" + event.getType().toString() + "]");
+						if(locallog == null)
+							System.out.println("local log is null");
+						else
+							locallog.li("event: [" + event.getType().toString() + "]");
 						if(event.getType() == AgentEventType.AGENT_EXIT)
 							locallog.doExit();
 					}

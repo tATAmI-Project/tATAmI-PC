@@ -12,12 +12,13 @@ import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.agent.parametric.ParametricComponent;
+import tatami.core.agent.visualization.VisualizableComponent;
 
 @SuppressWarnings("javadoc")
-public class ParametricComponentTest extends Unit
+public class VisualizableComponentTest extends Unit
 {
 	@SuppressWarnings("serial")
-	public ParametricComponentTest()
+	public VisualizableComponentTest()
 	{
 		setUnitName("parametric component tester");
 		li("starting...");
@@ -26,14 +27,27 @@ public class ParametricComponentTest extends Unit
 		AgentParameters agentParameters = new AgentParameters().add(AgentParameterName.AGENT_NAME,
 				"test parametric agent");
 		agent.addComponent(new ParametricComponent(agentParameters));
+		agent.addComponent(new VisualizableComponent());
 		
 		agent.addComponent(new AgentComponent(AgentComponentName.TESTING_COMPONENT) {
 			UnitComponent	locallog;
 			
 			@Override
+			protected String getAgentName()
+			{
+				return super.getAgentName();
+			}
+			
+			@Override
 			protected ParametricComponent getParametric()
 			{
 				return super.getParametric();
+			}
+			
+			@Override
+			protected VisualizableComponent getVisualizable()
+			{
+				return super.getVisualizable();
 			}
 			
 			@Override
@@ -46,13 +60,19 @@ public class ParametricComponentTest extends Unit
 					@Override
 					public void handleEvent(AgentEvent event)
 					{
-						locallog.li("event: [" + event.getType().toString() + "]");
+						String eventMessage = "agent [" + getAgentName() + "] event: [" + event.getType().toString()
+								+ "]";
+						locallog.li(eventMessage);
 						ParametricComponent parametric = getParametric();
-						if(parametric == null)
-							locallog.li("\t parametric component is currently null");
-						else
+						if(parametric != null)
 							locallog.li("\t parameter value: [" + parametric.parVal(AgentParameterName.AGENT_NAME)
 									+ "]");
+						else
+							locallog.li("\t parametric component is currently null");
+						VisualizableComponent vis = getVisualizable();
+						if(vis != null)
+							if(vis.getLog() != null)
+								vis.getLog().info(eventMessage);
 						if(event.getType() == AgentEventType.AGENT_EXIT)
 							locallog.doExit();
 					}
@@ -65,7 +85,7 @@ public class ParametricComponentTest extends Unit
 		agent.start();
 		try
 		{
-			Thread.sleep(200);
+			Thread.sleep(2000);
 		} catch(InterruptedException e)
 		{
 			e.printStackTrace();
@@ -78,6 +98,6 @@ public class ParametricComponentTest extends Unit
 	@SuppressWarnings("unused")
 	public static void main(String args[])
 	{
-		new ParametricComponentTest();
+		new VisualizableComponentTest();
 	}
 }

@@ -13,11 +13,11 @@ package testing.andrei;
 
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.visualization.VisualizableComponent;
-import tatami.pc.agent.visualization.VisualizationAgent;
 import tatami.pc.util.jade.PCJadeInterface;
 import tatami.pc.util.windowLayout.LayoutIndications;
 import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
 import tatami.pc.util.windowLayout.WindowLayout;
+import tatami.simulation.VisualizationManager;
 
 /**
  * 
@@ -49,7 +49,7 @@ public class VisualizationInfrastructureTest
 		jade.startContainer(containerName);
 		for(String name : agentNames)
 			jade.addAgentToContainer(containerName, name, VisualizableComponent.class.getCanonicalName(), null);
-		jade.addAgentToContainer(containerName, visName, VisualizationAgent.class.getCanonicalName(),
+		jade.addAgentToContainer(containerName, visName, VisualizationManager.class.getCanonicalName(),
 				new Object[] { agentNames });
 		
 	}

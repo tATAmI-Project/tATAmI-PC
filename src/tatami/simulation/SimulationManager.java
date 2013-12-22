@@ -14,22 +14,31 @@ import java.util.Vector;
 
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.visualization.AgentGui;
+import tatami.core.agent.visualization.AgentGui.AgentGuiBackgroundTask;
 import tatami.core.agent.visualization.AgentGui.InputListener;
+import tatami.core.agent.visualization.AgentGui.ResultNotificationListener;
 import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.pc.util.XML.XMLTree.XMLNode;
+import tatami.pc.util.windowLayout.WindowLayout;
 
 /**
- * Singleton class managing the simulation on a machine or on a set of machines (possibly all).
+ * Singleton class managing the simulation, visualization and agent control on a machine or on a set of machines
+ * (possibly all).
  * <p>
  * After the initializations in {@link Boot}, it handles the actual starting and management of agents, as well as
  * creating the events in the scenario timeline.
  * <p>
+ * It receives updates from all agents regarding logging messages and parent and location changes.
+ * <p>
+ * The link with agents uses the agent's VisualizationComponent (or equivalent for non-CompositeAgent instances) and
+ * corresponding Vocabulary.
+ * <p>
  * It normally offers a GUI or some other kind of UI for the said operations, that can exist outside of the actual agent
  * platform(s).
  * <p>
- * Although not an agent of any platform, the {@link SimulationManager} can be viewed as an agent> it implements
- * {@link AgentManager} and it features a GUI based on {@link AgentGui}.
+ * Although not an agent of any platform, the {@link SimulationManager} can be viewed as an agent; for convenience, it
+ * implements {@link AgentManager} and it features a GUI based on {@link AgentGui}.
  * <p>
  * This implementation presumes that {@link java.util.Timer} and related classes {@link TimerTask} are available on the
  * execution platform.
@@ -78,56 +87,65 @@ public class SimulationManager implements AgentManager
 	/**
 	 * Window type for the simulation manager window.
 	 */
-	private static final String		WINDOW_TYPE				= "systemSmall";
+	public static final String			WINDOW_TYPE						= "system";
 	/**
 	 * Window name for the simulation manager window.
 	 */
-	private static final String		WINDOW_NAME				= "simulation";
+	public static final String			WINDOW_NAME						= "simulation";
 	/**
 	 * The name of the attribute indicating the time of the event.
 	 */
-	protected static final String	EVENT_TIME_ATTRIBUTE	= "time";
+	protected static final String		EVENT_TIME_ATTRIBUTE			= "time";
+	/**
+	 * The prefix to the name of a simulation agent. The rest of the name will be the name of the platform onto which it
+	 * resides.
+	 */
+	protected static final String		SIMULATION_AGENT_NAME_PREFIX	= "SimAgent-";
 	/**
 	 * The log.
 	 */
-	UnitComponentExt				log						= null;
+	UnitComponentExt					log								= null;
 	/**
 	 * The GUI.
 	 */
-	AgentGui						gui						= null;
+	AgentGui							gui								= null;
 	
 	/**
 	 * Name and {@link PlatformLoader} for all platforms to be started.
 	 */
-	Map<String, PlatformLoader>		platforms;
+	Map<String, PlatformLoader>			platforms;
 	/**
 	 * Name and locality indication (container is created locally or remotely) for all containers.
 	 */
-	protected Map<String, Boolean>	containers				= null;
+	protected Map<String, Boolean>		containers						= null;
 	/**
 	 * {@link AgentCreationData} instances for all agents to be started.
 	 */
-	Set<AgentCreationData>			agents;
+	Set<AgentCreationData>				agents;
+	/**
+	 * A map that holds for each platform (identified by name) a simulation agent.
+	 */
+	Map<String, SimulationLinkAgent>	simulationAgents				= new HashMap<String, SimulationLinkAgent>();
 	/**
 	 * The list of events in the simulation, as specified by the scenario file.
 	 */
-	List<XMLNode>					events					= new LinkedList<XMLNode>();
+	List<XMLNode>						events							= new LinkedList<XMLNode>();
 	/**
 	 * Current time, in 1/10 seconds.
 	 */
-	long							time					= 0;
+	long								time							= 0;
 	/**
 	 * Indicates whether the simulation is currently paused.
 	 */
-	boolean							isPaused				= false;
+	boolean								isPaused						= false;
 	/**
 	 * Indicates whether agents have been created.
 	 */
-	boolean							agentsCreated			= false;
+	boolean								agentsCreated					= false;
 	/**
 	 * The {@link Timer} for simulation time and also the display in the GUI.
 	 */
-	Timer							theTime					= null;
+	Timer								theTime							= null;
 	
 	/**
 	 * Creates a new instance, also starting the GUI, based on the map of platforms and their names, the map of agents
@@ -153,6 +171,7 @@ public class SimulationManager implements AgentManager
 			events = timeline.getNodes();
 		else
 			events = Collections.emptyList();
+		// TODO: add agent graph and corresponding representation
 	}
 	
 	@Override
@@ -172,20 +191,34 @@ public class SimulationManager implements AgentManager
 		if(!setupGui())
 			return false;
 		
+		// starts an agent on each platform
+		if(!startSimulationAgents())
+			return false;
+		
 		return true;
 	}
 	
 	@Override
 	public boolean stop()
 	{
-		// TODO
-		return false;
+		if(theTime != null)
+			theTime.cancel();
+		for(SimulationLinkAgent simAgent : simulationAgents.values())
+			if(!simAgent.stop())
+				log.error("Stopping agent [" + simAgent.getAgentName() + "] failed.");
+		if(gui != null)
+			gui.close();
+		if(WindowLayout.staticLayout != null)
+			WindowLayout.staticLayout.doexit();
+		if(log != null)
+			log.doExit();
+		return true;
 	}
 	
 	/**
 	 * Sets up the functions of the buttons together with functionality related to simulation time.
 	 * 
-	 * @return <code>true</code> if setup is successfull.
+	 * @return <code>true</code> if setup is successful.
 	 */
 	protected boolean setupGui()
 	{
@@ -207,8 +240,20 @@ public class SimulationManager implements AgentManager
 			@Override
 			public void receiveInput(String componentName, Vector<Object> arguments)
 			{
-				// TODO do exit
-				PlatformUtils.systemExit(0);
+				gui.background(new AgentGuiBackgroundTask() {
+					@Override
+					public void execute(Object arg, ResultNotificationListener resultListener)
+					{
+						stop();
+						resultListener.receiveResult(null);
+					}
+				}, null, new ResultNotificationListener() {
+					@Override
+					public void receiveResult(Object result)
+					{
+						PlatformUtils.systemExit(0);
+					}
+				});
 			}
 		});
 		
@@ -314,6 +359,36 @@ public class SimulationManager implements AgentManager
 	}
 	
 	/**
+	 * Starts the {@link SimulationLinkAgent} instances for all platforms.
+	 * 
+	 * @return <code>true</code> if the operation succeeded; <code>false</code> otherwise.
+	 */
+	protected boolean startSimulationAgents()
+	{
+		for(PlatformLoader platform : platforms.values())
+		{
+			String platformName = platform.getName();
+			SimulationLinkAgent agent = new SimulationLinkAgent(SIMULATION_AGENT_NAME_PREFIX + platformName);
+			if(!platform.loadAgent(null, agent))
+			{
+				log.error("Loading simulation agent on platform [" + platformName
+						+ "] failed. Simulation cannot start.");
+				return false;
+			}
+			if(!agent.start())
+			{
+				log.error("Starting simulation agent on platform [" + platformName
+						+ "] failed. Simulation cannot start.");
+				agent.stop();
+				stop();
+				return false;
+			}
+			simulationAgents.put(platformName, agent);
+		}
+		return true;
+	}
+	
+	/**
 	 * Creates all agents in the simulation.
 	 */
 	protected void createAgents()
@@ -343,8 +418,7 @@ public class SimulationManager implements AgentManager
 				else
 					log.error("agent [" + agentName + "] failed to load");
 			}
-			else
-				; // TODO agents in remote containers
+			// TODO else: agents in remote containers
 		}
 		for(Entry<String, AgentManager> agent : agentManagers.entrySet())
 		{
@@ -355,6 +429,10 @@ public class SimulationManager implements AgentManager
 		}
 	}
 	
+	/**
+	 * As this implements {@link AgentManager} only for convenience (abusing), it is not expected to be linked to a
+	 * platform "above" it, therefore the method will have no effect and always fail.
+	 */
 	@Override
 	public boolean setPlatformLink()
 	{

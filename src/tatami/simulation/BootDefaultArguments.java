@@ -11,6 +11,7 @@
  ******************************************************************************/
 package tatami.simulation;
 
+import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.pc.util.windowLayout.LayoutIndications;
 import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
 
@@ -63,20 +64,22 @@ public class BootDefaultArguments
 	 * The layout indications for the PC application.
 	 */
 	static LayoutIndications	layout					= new LayoutIndications(12, 6)
-														
-														// Taskbar on the left (70 pixels)
+																
+																// Taskbar on the left (70 pixels)
 																.indicateBar(BarPosition.LEFT, 200, 0)
 																
 																// .indicateBar(BarPosition.LEFT, 0, 0) // otherwise
 																
-																.indicateWindowType("agent", 5, 2)
+																.indicateWindowType(AgentGuiConfig.DEFAULT_WINDOW_TYPE,
+																		5, 2)
 																
-																.indicateWindowType("system", 6, 3)
+																.indicateWindowType(SimulationManager.WINDOW_TYPE, 6, 4)
 																
-																.indicateWindowType("systemSmall", 6, 1)
+																.indicateReservation(SimulationManager.WINDOW_TYPE,
+																		SimulationManager.WINDOW_NAME, 0, 0)
 																
 																.indicateWindowType("screen", 3, 4)
-																
-																.indicateReservation("system", "visualizer", 0, 0);
+														
+														;
 	
 }

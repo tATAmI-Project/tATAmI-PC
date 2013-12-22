@@ -76,6 +76,47 @@ public interface AgentGui
 	}
 	
 	/**
+	 * The interface enables the GUI to perform long / background tasks.
+	 * <p>
+	 * This also must be used by Java Swing implementations to take control off from the EDT.
+	 * 
+	 * @see <a href="http://docs.oracle.com/javase/tutorial/uiswing/concurrency/dispatch.html">Swing Concurrency
+	 *      Tutorial</a>
+	 * 
+	 * @author Andrei Olaru
+	 */
+	public interface AgentGuiBackgroundTask
+	{
+		/**
+		 * Executes the task.
+		 * 
+		 * @param arg
+		 *            - argument for the task.
+		 * @param resultListener
+		 *            - {@link ResultNotificationListener} instance to receive the result of the task. This may be
+		 *            <code>null</code> if the result is not needed elsewhere.
+		 */
+		public void execute(Object arg, ResultNotificationListener resultListener);
+	}
+	
+	/**
+	 * The interface functions together with {@link AgentGuiBackgroundTask} to receive the result of the task performed
+	 * in background.
+	 * 
+	 * @author Andrei Olaru
+	 */
+	public interface ResultNotificationListener
+	{
+		/**
+		 * The method is invoked when the background task completes, with the result of the task.
+		 * 
+		 * @param result
+		 *            - the result of the task.
+		 */
+		public void receiveResult(Object result);
+	}
+	
+	/**
 	 * Sends information to a component meant to convey that information to the GUI.
 	 * 
 	 * @param componentName
@@ -109,4 +150,22 @@ public interface AgentGui
 	 * Instructs the GUI to unload, effectively closing the GUI.
 	 */
 	public void close();
+	
+	/**
+	 * The method executes a task in the background of the GUI, as specified by the implementation. This is useful, for
+	 * instance, for taking tasks off the Swing EDT.
+	 * <p>
+	 * Implementations are expected to start another thread for executing the work.
+	 * 
+	 * @see AgentGuiBackgroundTask
+	 * 
+	 * @param agentGuiBackgroundTask
+	 *            - the task to perform.
+	 * @param argument
+	 *            - the argument to pass to the task.
+	 * @param resultListener
+	 *            - listener for the result of the task.
+	 */
+	public void background(AgentGuiBackgroundTask agentGuiBackgroundTask, Object argument,
+			ResultNotificationListener resultListener);
 }

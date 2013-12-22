@@ -26,6 +26,7 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.SwingWorker;
 
 import tatami.core.agent.visualization.AgentGui;
 import tatami.core.agent.visualization.AgentGuiConfig;
@@ -81,12 +82,6 @@ public class PCDefaultAgentGui implements AgentGui
 			WindowLayout.staticLayout.dropWindow(config.getWindowType(), config.getWindowName());
 		window.dispose();
 		window = null;
-	}
-	
-	@Deprecated
-	public Component getComponent(String componentName)
-	{
-		return components.get(componentName);
 	}
 	
 	@Override
@@ -174,5 +169,20 @@ public class PCDefaultAgentGui implements AgentGui
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@SuppressWarnings("unused")
+	@Override
+	public void background(final AgentGuiBackgroundTask task, final Object argument,
+			final ResultNotificationListener resultListener)
+	{
+		new SwingWorker<Void, Void>() {
+			@Override
+			protected Void doInBackground() throws Exception
+			{
+				task.execute(argument, resultListener);
+				return null;
+			}
+		}.execute();
 	}
 }

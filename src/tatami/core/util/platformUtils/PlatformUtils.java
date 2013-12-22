@@ -59,7 +59,7 @@ public class PlatformUtils
 		switch(getPlatform())
 		{
 		case PC:
-			return LoggerType.JAVA;
+			return LoggerType.LOG4J;
 		case ANDROID:
 			return LoggerType.JAVA;
 		}
@@ -168,10 +168,12 @@ public class PlatformUtils
 	 */
 	public static String getSimulationGuiClass()
 	{
+		String platformName = getPlatform().toString();
 		switch(getPlatform())
 		{
 		case PC:
-			return "tatami.pc.agent.visualization.PCSimulationGui";
+			return "tatami." + platformName.toLowerCase() + ".agent.visualization." + platformName.toUpperCase()
+					+ "SimulationGui";
 		default:
 			break;
 		}

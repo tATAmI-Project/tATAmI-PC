@@ -13,7 +13,7 @@ public class MessagingComponent extends AgentComponent
 	
 	protected Map<String, AgentEventHandler>	messageHandlers		= new HashMap<String, AgentEventHandler>();
 	
-	protected MessagingComponent(CompositeAgent parent)
+	public MessagingComponent()
 	{
 		super(AgentComponentName.MESSAGING_COMPONENT);
 		

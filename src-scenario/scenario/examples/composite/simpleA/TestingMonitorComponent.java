@@ -4,11 +4,12 @@ import net.xqhs.util.logging.Logger.Level;
 import net.xqhs.util.logging.UnitComponent;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
-import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
+import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
+import tatami.core.agent.visualization.VisualizableComponent;
 
 /**
  * An {@link AgentComponent} implementation that monitors all agent events.
@@ -41,6 +42,18 @@ public class TestingMonitorComponent extends AgentComponent
 	}
 	
 	@Override
+	protected VisualizableComponent getVisualizable()
+	{
+		return super.getVisualizable();
+	}
+	
+	@Override
+	protected String getAgentName()
+	{
+		return super.getAgentName();
+	}
+	
+	@Override
 	protected void componentInitializer()
 	{
 		super.componentInitializer();
@@ -49,12 +62,17 @@ public class TestingMonitorComponent extends AgentComponent
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
-				locallog.li("event: [" + event.getType().toString() + "]");
+				String eventMessage = "agent [" + getAgentName() + "] event: [" + event.getType().toString() + "]";
+				locallog.li(eventMessage);
 				ParametricComponent parametric = getParametric();
-				if(parametric == null)
-					locallog.li("\t parametric component is currently null");
-				else
+				if(parametric != null)
 					locallog.li("\t parameter value: [" + parametric.parVal(AgentParameterName.AGENT_NAME) + "]");
+				else
+					locallog.li("\t parametric component is currently null");
+				VisualizableComponent vis = getVisualizable();
+				if(vis != null)
+					if(vis.getLog() != null)
+						vis.getLog().info(eventMessage);
 				if(event.getType() == AgentEventType.AGENT_EXIT)
 					locallog.doExit();
 			}

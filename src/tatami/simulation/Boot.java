@@ -132,7 +132,15 @@ public class Boot
 				timeline = scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).next();
 			
 			// start simulation
-			new SimulationManager(platforms, allContainers, allAgents, timeline).start();
+			if(!new SimulationManager(platforms, allContainers, allAgents, timeline).start())
+			{
+				log.error("Simulation start failed.");
+				for(PlatformLoader platform : platforms.values())
+					if(!platform.stop())
+						log.error("Stopping platform [" + platform.getName() + "] failed");
+				if(WindowLayout.staticLayout != null)
+					WindowLayout.staticLayout.doexit();
+			}
 		}
 		else
 			log.error("No agent platforms loaded. Simulation will not start.");

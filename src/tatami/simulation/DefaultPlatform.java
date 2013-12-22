@@ -33,6 +33,13 @@ public class DefaultPlatform implements PlatformLoader
 	}
 	
 	@Override
+	public boolean stop()
+	{
+		// does nothing.
+		return true;
+	}
+	
+	@Override
 	public boolean addContainer(String containerName)
 	{
 		// does nothing.

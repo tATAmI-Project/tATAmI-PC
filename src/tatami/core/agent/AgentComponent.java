@@ -24,7 +24,8 @@ import tatami.core.agent.webServices.WebserviceComponent;
  * no have a parent; a parent will be set afterwards.
  * <p>
  * The class also offers direct access to a basic set of components. It is not recommended for components to retain the
- * reference, as it may become null if the component is removed.
+ * reference, as it may become null if the component is removed. // TODO: implement mechanisms to enable caching of
+ * component references, invalidating the cache only at specific agent events; add the event COMPONENT_CHANGE.
  * <p>
  * The class serves as a relay to access some package-accessible functionality from {@link CompositeAgent}.
  * 
@@ -367,6 +368,20 @@ public abstract class AgentComponent implements Serializable
 	{
 		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
 			return (ParametricComponent) parentAgent.getComponent(AgentComponentName.PARAMETRIC_COMPONENT);
+		return null;
+	}
+	
+	/**
+	 * Retrieves a direct reference to the {@link VisualizableComponent} of the agent, if any.
+	 * <p>
+	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be removed without notice.
+	 * 
+	 * @return the component instance, if any. <code>null</code> otherwise.
+	 */
+	protected VisualizableComponent getVisualizable()
+	{
+		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.VISUALIZABLE_COMPONENT))
+			return (VisualizableComponent) parentAgent.getComponent(AgentComponentName.VISUALIZABLE_COMPONENT);
 		return null;
 	}
 	
