@@ -29,4 +29,11 @@ public interface AgentManager
 	 * @return <code>true</code> if the operation was successful. <code>false</code> otherwise.
 	 */
 	public boolean setPlatformLink();
+	
+	/**
+	 * Retrieves the name of the agent managed by this instance.
+	 * 
+	 * @return the name of the agent.
+	 */
+	public String getAgentName();
 }

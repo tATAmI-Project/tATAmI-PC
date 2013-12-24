@@ -2,12 +2,12 @@ package tatami.simulation;
 
 import java.io.File;
 
-import tatami.pc.util.XML.XMLParser;
-import tatami.pc.util.XML.XMLTree;
-import tatami.pc.util.XML.XMLTree.XMLNode;
-import tatami.pc.util.windowLayout.LayoutIndications;
+import net.xqhs.util.XML.XMLParser;
+import net.xqhs.util.XML.XMLTree;
+import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.config.Config;
 import net.xqhs.util.logging.UnitComponentExt;
+import tatami.pc.util.windowLayout.LayoutIndications;
 
 /**
  * This class manages settings for simulations. It handles loading these settings from various sources --

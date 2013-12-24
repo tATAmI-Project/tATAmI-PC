@@ -1,6 +1,6 @@
 package tatami.simulation;
 
-import tatami.pc.util.XML.XMLTree.XMLNode;
+import net.xqhs.util.XML.XMLTree.XMLNode;
 
 /**
  * The platform loader is the interface to the manager of an agent platform. It can load and manage agents. Agents are
@@ -22,13 +22,15 @@ public interface PlatformLoader
 		
 		/**
 		 * Agents will be loaded as Jade agents.
+		 * <p>
+		 * The platform class is inferred, as to avoid referring the class in case it is missing from the build.
 		 */
-		JADE(null), // TODO
+		JADE,
 		
 		/**
 		 * Agents will be created as new instances. This is the default setting.
 		 */
-		DEFAULT(DefaultPlatform.class.getName()), // TODO
+		DEFAULT(DefaultPlatform.class.getName()),
 		
 		;
 		
@@ -42,18 +44,14 @@ public interface PlatformLoader
 		private String	classN	= null;
 		
 		/**
-		 * Creates a new platform type, giving it a name unrelated to the enumeration value.
-		 * 
-		 * @param platformName
-		 *            - the name of the platform.
-		 * @param className
-		 *            - the fully qualified name of the class to instantiate when starting the platform. The class
-		 *            should implement {@link PlatformLoader}.
+		 * Creates a new platform type, giving it a name that is the lower case version of the enumeration value, and
+		 * setting a default class name, considering the platform name as the package name and also as a prefix to the
+		 * class name.
 		 */
-		private StandardPlatformType(String platformName, String className)
+		private StandardPlatformType()
 		{
-			name = platformName;
-			classN = className;
+			name = super.toString().toLowerCase();
+			classN = "tatami." + name + "." + name.substring(0, 1).toUpperCase() + name.substring(1) + "PlatformLoader";
 		}
 		
 		/**
@@ -66,6 +64,21 @@ public interface PlatformLoader
 		private StandardPlatformType(String className)
 		{
 			name = super.toString().toLowerCase();
+			classN = className;
+		}
+		
+		/**
+		 * Creates a new platform type, giving it a name unrelated to the enumeration value.
+		 * 
+		 * @param platformName
+		 *            - the name of the platform.
+		 * @param className
+		 *            - the fully qualified name of the class to instantiate when starting the platform. The class
+		 *            should implement {@link PlatformLoader}.
+		 */
+		private StandardPlatformType(String platformName, String className)
+		{
+			name = platformName;
 			classN = className;
 		}
 		
@@ -130,10 +143,12 @@ public interface PlatformLoader
 	 * method.
 	 * 
 	 * @param configuration
-	 *            the XML node containing the configuration of the platform.
+	 *            - the XML node containing the configuration of the platform.
+	 * @param settings
+	 *            - general application settings specified in the scenario file, program argumetns, etc.
 	 * @return the instance itself.
 	 */
-	public PlatformLoader setConfig(XMLNode configuration);
+	public PlatformLoader setConfig(XMLNode configuration, BootSettingsManager settings);
 	
 	/**
 	 * Starts the agent platform.
@@ -148,7 +163,7 @@ public interface PlatformLoader
 	 * @return <code>true</code> if the platform was stopped successfully; <code>false</code> otherwise.
 	 */
 	public boolean stop();
-
+	
 	/**
 	 * Creates a new container, on this platform, on this machine.
 	 * 

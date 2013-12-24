@@ -12,6 +12,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
+import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.visualization.AgentGui;
 import tatami.core.agent.visualization.AgentGui.AgentGuiBackgroundTask;
@@ -19,7 +20,6 @@ import tatami.core.agent.visualization.AgentGui.InputListener;
 import tatami.core.agent.visualization.AgentGui.ResultNotificationListener;
 import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.core.util.platformUtils.PlatformUtils;
-import tatami.pc.util.XML.XMLTree.XMLNode;
 import tatami.pc.util.windowLayout.WindowLayout;
 
 /**
@@ -189,13 +189,37 @@ public class SimulationManager implements AgentManager
 		log.info("Simulation Manager started.");
 		
 		if(!setupGui())
+		{
+			fullstop();
 			return false;
+		}
 		
 		// starts an agent on each platform
 		if(!startSimulationAgents())
+		{
+			fullstop();
 			return false;
+		}
 		
 		return true;
+	}
+	
+	/**
+	 * Stops the simulation manager and also exists the application.
+	 * 
+	 * @return
+	 */
+	protected boolean fullstop()
+	{
+		boolean result = stop();
+		new Timer().schedule(new TimerTask() {
+			@Override
+			public void run()
+			{
+				PlatformUtils.systemExit(0);
+			}
+		}, 1000);
+		return result;
 	}
 	
 	@Override
@@ -373,6 +397,7 @@ public class SimulationManager implements AgentManager
 			{
 				log.error("Loading simulation agent on platform [" + platformName
 						+ "] failed. Simulation cannot start.");
+				agent.stop();
 				return false;
 			}
 			if(!agent.start())
@@ -380,7 +405,6 @@ public class SimulationManager implements AgentManager
 				log.error("Starting simulation agent on platform [" + platformName
 						+ "] failed. Simulation cannot start.");
 				agent.stop();
-				stop();
 				return false;
 			}
 			simulationAgents.put(platformName, agent);
@@ -430,12 +454,21 @@ public class SimulationManager implements AgentManager
 	}
 	
 	/**
-	 * As this implements {@link AgentManager} only for convenience (abusing), it is not expected to be linked to a
-	 * platform "above" it, therefore the method will have no effect and always fail.
+	 * As this class implements {@link AgentManager} only for convenience (abusing), it is not expected to be linked to
+	 * a platform "above" it, therefore the method will have no effect and always fail.
 	 */
 	@Override
 	public boolean setPlatformLink()
 	{
 		return false;
+	}
+	
+	/**
+	 * As this class implements {@link AgentManager} only for convenience (abusing), it does not have an agent name.
+	 */
+	@Override
+	public String getAgentName()
+	{
+		return null;
 	}
 }

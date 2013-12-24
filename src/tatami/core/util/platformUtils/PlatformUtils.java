@@ -18,7 +18,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Vector;
 
+import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Log.LoggerType;
+import tatami.jade.JadeInterface;
 
 /**
  * Platform-related functionality. All functions should be static.
@@ -29,14 +31,38 @@ import net.xqhs.util.logging.Log.LoggerType;
 public class PlatformUtils
 {
 	/**
+	 * The name of nodes containing parameters.
+	 */
+	private static final String	PARAMETER_NODE_NAME	= "parameter";
+	/**
+	 * The name of the attribute of a parameter node holding the name of the parameter.
+	 */
+	private static final String	PARAMETER_NAME		= "name";
+	/**
+	 * The name of the attribute of a parameter node holding the value of the parameter.
+	 */
+	private static final String	PARAMETER_VALUE		= "value";
+	
+	/**
 	 * This enumeration contains all supported platforms.
 	 * 
 	 * @author Andrei Olaru
 	 */
 	public static enum Platform {
-		PC, ANDROID
+		/**
+		 * The current machine runs an OS that contains a standard Java VM.
+		 */
+		PC,
+		
+		/**
+		 * The current machine runs an OS that uses the Dalvik VM.
+		 */
+		ANDROID,
 	}
 	
+	/**
+	 * @return the current platform, as an instance of {@link Platform}.
+	 */
 	public static Platform getPlatform()
 	{
 		if(System.getProperty("java.vm.name").equals("Dalvik"))
@@ -48,12 +74,19 @@ public class PlatformUtils
 		return Platform.PC;
 	}
 	
-	// FIXME: should be split into WS registration and WS invocation.
+	/**
+	 * FIXME: should be split into WS registration and WS invocation.
+	 * 
+	 * @return <code>true</code> if the current platform supports web service registration and invocation.
+	 */
 	public static boolean platformSupportsWebServices()
 	{
 		return false;
 	}
 	
+	/**
+	 * @return the type of log (on of {@link LoggerType}) approrpiate for the current platform.
+	 */
 	public static LoggerType platformLogType()
 	{
 		switch(getPlatform())
@@ -66,36 +99,18 @@ public class PlatformUtils
 		return null;
 	}
 	
-	public static Class<?> jadeInterfaceClass()
+	/**
+	 * @return the name of the class implementing {@link JadeInterface} that is appropriate to use for the current
+	 *         platform.
+	 */
+	public static String jadeInterfaceClass()
 	{
-		ClassLoader myClassLoader = ClassLoader.getSystemClassLoader();
-		
 		switch(getPlatform())
 		{
 		case PC:
-		{
-			Class<?> clazz = null;
-			try
-			{
-				clazz = myClassLoader.loadClass("tatami.pc.util.jade.PCJadeInterface");
-			} catch(ClassNotFoundException e)
-			{
-				e.printStackTrace();
-			}
-			return clazz;
-		}
+			return "tatami.pc.util.jade.PCJadeInterface";
 		case ANDROID:
-		{
-			Class<?> clazz = null;
-			try
-			{
-				clazz = myClassLoader.loadClass("org.interfaces.AndroidJadeInterface");
-			} catch(ClassNotFoundException e)
-			{
-				e.printStackTrace();
-			}
-			return clazz;
-		}
+			return "org.interfaces.AndroidJadeInterface";
 		}
 		return null;
 	}
@@ -119,8 +134,10 @@ public class PlatformUtils
 		}
 	}
 	
+
+	
 	/**
-	 * Creates a new instance of a class that is now known at compile-time.
+	 * Creates a new instance of a class that is not known at compile-time.
 	 * 
 	 * @param loadingClass
 	 *            - an instance created with the class loader to use to create the new instance. Can be
@@ -204,6 +221,22 @@ public class PlatformUtils
 		StringWriter sw = new StringWriter();
 		e.printStackTrace(new PrintWriter(sw));
 		return sw.toString();
+	}
+	
+	/**
+	 * Method to simplify the access to a parameter of an agent. Having the {@link XMLNode} instance associated with the
+	 * agent, the method retrieves the value associated with the first occurrence of the desired parameter name.
+	 * 
+	 * @param XMLnode
+	 *            - the node containing the configuration information for the agent.
+	 * @param parameterName
+	 *            - the name of the searched parameter.
+	 * @return the value associated with the searched name.
+	 */
+	public static String getParameterValue(XMLNode XMLnode, String parameterName)
+	{
+		return XMLnode.getAttributeOfFirstNodeWithValue(PARAMETER_NODE_NAME, PARAMETER_NAME, parameterName,
+				PARAMETER_VALUE);
 	}
 	
 	/**

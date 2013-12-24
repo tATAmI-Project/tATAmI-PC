@@ -12,9 +12,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.AgentEvent.AgentSequenceType;
-import tatami.core.agent.jade.JadeComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
+import tatami.jade.JadeComponent;
 import tatami.simulation.AgentManager;
 
 /**
@@ -38,6 +38,15 @@ public class CompositeAgent implements Serializable, AgentManager
 {
 	/**
 	 * Values indicating the current state of the agent, especially with respect to processing events.
+	 * <p>
+	 * The normal transition between states is the following: <br/>
+	 * <ul>
+	 * <li> {@link #INITIALIZING} [here components are normally added] &rarr; {@link #STARTING} [starting thread;
+	 * starting components] &rarr; {@link #RUNNING}.
+	 * <li>while in {@link #RUNNING}, components can be added or removed.
+	 * <li> {@link #RUNNING} + {@link AgentEventType#AGENT_EXIT} &rarr; {@link #STOPPING} [no more events accepted; stop
+	 * components; stop thread] &rarr; {@link #STOPPED} (equivalent with {@link #INITIALIZING}).
+	 * </ul>
 	 * 
 	 * @author Andrei Olaru
 	 */
@@ -49,7 +58,7 @@ public class CompositeAgent implements Serializable, AgentManager
 		RUNNING,
 		
 		/**
-		 * State indicating that the agent has been created and that it is waiting to start. THe agent's thread has not
+		 * State indicating that the agent has been created and that it is waiting to start. The agent's thread has not
 		 * yet started.
 		 */
 		INITIALIZING,
@@ -201,6 +210,8 @@ public class CompositeAgent implements Serializable, AgentManager
 	 */
 	public CompositeAgent addComponent(AgentComponent component)
 	{
+		if(!canAddComponents())
+			throw new IllegalStateException("Cannot add components in state [" + state + "].");
 		if(component == null)
 			throw new InvalidParameterException("Component is null");
 		if(hasComponent(component.getComponentName()))
@@ -360,7 +371,8 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * 
 	 * @return the name of the agent.
 	 */
-	protected String getAgentName()
+	@Override
+	public String getAgentName()
 	{ // TODO name should be cached
 		String agentName = null;
 		if(hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
@@ -369,5 +381,28 @@ public class CompositeAgent implements Serializable, AgentManager
 		if((agentName == null) && getComponent(AgentComponentName.JADE_COMPONENT) != null)
 			agentName = ((JadeComponent) getComponent(AgentComponentName.JADE_COMPONENT)).getLocalName();
 		return agentName;
+	}
+	
+	/**
+	 * Checks if the agent is currently in RUNNING state. In case components are added during this state, they must
+	 * consider that the agent is already running and no additional {@link AgentEventType#AGENT_START} events will be
+	 * issued.
+	 * 
+	 * @return <code>true</code> if the agent is currently RUNNING; <code>false</code> otherwise.
+	 */
+	public boolean isRunning()
+	{
+		return state == AgentState.RUNNING;
+	}
+	
+	/**
+	 * Checks if the state of the agent allows adding components. Components should not be added in intermediary states
+	 * in which the agent is starting or stopping.
+	 * 
+	 * @return <code>true</code> if in the current state components can be added.
+	 */
+	public boolean canAddComponents()
+	{
+		return (state == AgentState.INITIALIZING) || (state == AgentState.STOPPED) || (state == AgentState.RUNNING);
 	}
 }

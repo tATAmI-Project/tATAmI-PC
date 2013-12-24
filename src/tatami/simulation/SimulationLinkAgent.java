@@ -37,7 +37,7 @@ public class SimulationLinkAgent extends CompositeAgent
 	}
 	
 	@Override
-	protected String getAgentName()
+	public String getAgentName()
 	{
 		return name;
 	}

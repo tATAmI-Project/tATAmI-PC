@@ -132,6 +132,14 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	{
 		super(AgentComponentName.VISUALIZABLE_COMPONENT);
 		
+		registerHandler(AgentEventType.AGENT_START, new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				resetVisualization();
+			}
+		});
+		
 		// registers event handlers
 		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler() {
 			@Override
@@ -150,7 +158,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			}
 		});
 		
-		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler() {
+		registerHandler(AgentEventType.AFTER_MOVE, new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
@@ -190,8 +198,9 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 					guiConfig.setGuiClass(parametric.parVal(AgentParameterName.GUI),
 							parametric.parVals(AgentParameterName.AGENT_PACKAGE));
 			}
-			// creates visualization & log
-			resetVisualization();
+			if(getParent().isRunning())
+				// creates visualization & log
+				resetVisualization();
 			
 			// registers message receivers: receive the visualization root; receive exit message.
 			final MessagingComponent msgr = getMessaging();

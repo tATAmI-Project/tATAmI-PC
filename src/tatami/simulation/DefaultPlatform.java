@@ -1,6 +1,6 @@
 package tatami.simulation;
 
-import tatami.pc.util.XML.XMLTree.XMLNode;
+import net.xqhs.util.XML.XMLTree.XMLNode;
 
 /**
  * THe default platform for running agents. It is a minimal platform, offering no facilities.
@@ -19,7 +19,7 @@ public class DefaultPlatform implements PlatformLoader
 	}
 	
 	@Override
-	public PlatformLoader setConfig(XMLNode configuration)
+	public PlatformLoader setConfig(XMLNode configuration, BootSettingsManager settings)
 	{
 		// do nothing.
 		return this;

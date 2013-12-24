@@ -11,8 +11,8 @@
  ******************************************************************************/
 package tatami.simulation;
 
+import net.xqhs.util.XML.XMLTree.XMLNode;
 import tatami.core.agent.parametric.AgentParameters;
-import tatami.pc.util.XML.XMLTree.XMLNode;
 
 /**
  * Class containing the data for the creation of an agent.

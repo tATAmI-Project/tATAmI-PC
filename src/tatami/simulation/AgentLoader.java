@@ -1,9 +1,9 @@
 package tatami.simulation;
 
+import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.CompositeAgentLoader;
-import tatami.pc.util.XML.XMLTree.XMLNode;
 
 /**
  * The agent loader is the interface to an instance that uses existing scenario information to completely specify

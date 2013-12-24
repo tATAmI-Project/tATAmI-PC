@@ -17,15 +17,15 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import net.xqhs.util.XML.XMLTree;
+import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.config.Config.ConfigLockedException;
+import net.xqhs.util.logging.Logger.Level;
 import net.xqhs.util.logging.Logging;
 import net.xqhs.util.logging.UnitComponentExt;
-import net.xqhs.util.logging.Logger.Level;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.util.platformUtils.PlatformUtils;
-import tatami.pc.util.XML.XMLTree;
-import tatami.pc.util.XML.XMLTree.XMLNode;
 import tatami.pc.util.windowLayout.WindowLayout;
 import tatami.simulation.AgentLoader.StandardAgentLoaderType;
 import tatami.simulation.PlatformLoader.StandardPlatformType;
@@ -42,19 +42,6 @@ import tatami.simulation.PlatformLoader.StandardPlatformType;
  */
 public class Boot
 {
-	/**
-	 * The name of nodes containing component parameters.
-	 */
-	private static final String	PARAMETER_NODE_NAME	= "parameter";
-	/**
-	 * The name of the attribute of a parameter node holding the name of the parameter.
-	 */
-	private static final String	PARAMETER_NAME		= "name";
-	/**
-	 * The name of the attribute of a parameter node holding the value of the parameter.
-	 */
-	private static final String	PARAMETER_VALUE		= "value";
-	
 	/**
 	 * The log of the class.
 	 */
@@ -113,7 +100,8 @@ public class Boot
 		
 		// iterate over platform entries in the scenario
 		defaultPlatform = loadPlatforms(
-				scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_PLATFORM.toString()), platforms);
+				scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_PLATFORM.toString()), settings,
+				platforms);
 		
 		// iterate over agent loader entries in the scenario
 		loadAgentLoaders(scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_LOADER.toString()),
@@ -167,17 +155,21 @@ public class Boot
 	 * 
 	 * @param platformNodes
 	 *            - {@link Iterator} over the nodes in the scenario file describing platforms.
+	 * @param settings
+	 *            - the {@link BootSettingsManager} containing settings set through application arguments or the
+	 *            <code>config</code> node in the scenario file.
 	 * @param platforms
 	 *            - map in which to fill in the names of the platforms and the respective {@link PlatformLoader}
 	 *            instances.
 	 * @return the name of the default platform loader (which will be present in parameter <code>platforms</code>).
 	 */
-	protected String loadPlatforms(Iterator<XMLNode> platformNodes, Map<String, PlatformLoader> platforms)
+	protected String loadPlatforms(Iterator<XMLNode> platformNodes, BootSettingsManager settings,
+			Map<String, PlatformLoader> platforms)
 	{
 		while(platformNodes.hasNext())
 		{
 			XMLNode platformNode = platformNodes.next();
-			String platformName = getParameterValue(platformNode, PlatformLoader.NAME_ATTRIBUTE);
+			String platformName = PlatformUtils.getParameterValue(platformNode, PlatformLoader.NAME_ATTRIBUTE);
 			if(platformName == null)
 				log.error("Platform name is null.");
 			else if(platforms.containsKey(platformName))
@@ -187,10 +179,10 @@ public class Boot
 				String platformClassPath = null;
 				try
 				{
-					platformClassPath = StandardPlatformType.valueOf(platformName).getClassName();
+					platformClassPath = StandardPlatformType.valueOf(platformName.toUpperCase()).getClassName();
 				} catch(IllegalArgumentException e)
 				{ // platform is not standard
-					platformClassPath = getParameterValue(platformNode, PlatformLoader.CLASSPATH_ATTRIBUTE);
+					platformClassPath = PlatformUtils.getParameterValue(platformNode, PlatformLoader.CLASSPATH_ATTRIBUTE);
 					if(platformClassPath == null)
 						log.error("Class path for platform [" + platformName + "] is not known.");
 				}
@@ -198,7 +190,7 @@ public class Boot
 					try
 					{
 						platforms.put(platformName, ((PlatformLoader) PlatformUtils.loadClassInstance(this,
-								platformClassPath, new Object[0])).setConfig(platformNode));
+								platformClassPath, new Object[0])).setConfig(platformNode, settings));
 						log.info("Platform [" + platformName + "] prepared.");
 					} catch(Exception e)
 					{
@@ -247,7 +239,7 @@ public class Boot
 		while(loaderNodes.hasNext())
 		{
 			XMLNode loaderNode = loaderNodes.next();
-			String loaderName = getParameterValue(loaderNode, AgentLoader.NAME_ATTRIBUTE);
+			String loaderName = PlatformUtils.getParameterValue(loaderNode, AgentLoader.NAME_ATTRIBUTE);
 			if(loaderName == null)
 				log.error("Agent loader name is null.");
 			else if(agentLoaders.containsKey(loaderName))
@@ -257,10 +249,10 @@ public class Boot
 				String loaderClassPath = null;
 				try
 				{
-					loaderClassPath = StandardAgentLoaderType.valueOf(loaderName).getClassName();
+					loaderClassPath = StandardAgentLoaderType.valueOf(loaderName.toUpperCase()).getClassName();
 				} catch(IllegalArgumentException e)
 				{ // platform is not standard
-					loaderClassPath = getParameterValue(loaderNode, AgentLoader.CLASSPATH_ATTRIBUTE);
+					loaderClassPath = PlatformUtils.getParameterValue(loaderNode, AgentLoader.CLASSPATH_ATTRIBUTE);
 					if(loaderClassPath == null)
 						log.error("Class path for agent loader [" + loaderName + "] is not known.");
 				}
@@ -285,7 +277,7 @@ public class Boot
 				try
 				{
 					agentLoaders.put(loader.toString(),
-							(AgentLoader) PlatformUtils.loadClassInstance(this, loader.getClassName(), new Object[0]));
+							(AgentLoader) PlatformUtils.loadClassInstance(this, loader.getClassName()));
 					log.info("Agent loader [" + loader.toString() + "] prepared.");
 				} catch(Exception e)
 				{
@@ -350,14 +342,14 @@ public class Boot
 			{
 				XMLNode agentNode = agentNodes.next();
 				// agent name
-				String agentName = getParameterValue(agentNode, AgentParameterName.AGENT_NAME.toString());
+				String agentName = PlatformUtils.getParameterValue(agentNode, AgentParameterName.AGENT_NAME.toString());
 				if(agentName == null)
 				{
 					log.error("agent has no name; will not be created.");
 					continue;
 				}
 				// platform
-				String platformName = getParameterValue(agentNode, AgentParameterName.AGENT_PLATFORM.toString());
+				String platformName = PlatformUtils.getParameterValue(agentNode, AgentParameterName.AGENT_PLATFORM.toString());
 				if(platformName == null)
 					platformName = defaultPlatform; // no platform specified: go to default
 				if(!platforms.containsKey(platformName))
@@ -417,11 +409,12 @@ public class Boot
 			Set<String> agentPackages)
 	{
 		// loader
-		String agentLoaderName = getParameterValue(agentNode, AgentParameterName.AGENT_LOADER.toString());
+		String agentLoaderName = PlatformUtils.getParameterValue(agentNode, AgentParameterName.AGENT_LOADER.toString());
 		if(agentLoaderName == null)
-			log.lr(null, "no agent loader specified. agent [" + agentName + "] will not be created.");
+			return (AgentCreationData) log.lr(null, "no agent loader specified. agent [" + agentName
+					+ "] will not be created.");
 		if(!agentLoaders.containsKey(agentLoaderName))
-			log.lr(null, "agent loader [" + agentLoaderName + "] is unknown. agent [" + agentName
+			return (AgentCreationData) log.lr(null, "agent loader [" + agentLoaderName + "] is unknown. agent [" + agentName
 					+ "] will not be created.");
 		AgentLoader loader = agentLoaders.get(agentLoaderName);
 		
@@ -492,28 +485,6 @@ public class Boot
 				}
 		}
 		return platformsOK;
-	}
-	
-	/**
-	 * Method to simplify the access to a parameter of an agent. Having the {@link XMLNode} instance associated with the
-	 * agent, the method retrieves the value associated with the first occurrence of the desired parameter name.
-	 * 
-	 * @param agentConfig
-	 *            - the node containing the configuration information for the agent.
-	 * @param parameterName
-	 *            - the name of the searched parameter.
-	 * @return the value associated with the searched name.
-	 */
-	static String getParameterValue(XMLNode agentConfig, String parameterName)
-	{
-		Iterator<XMLNode> paramsIt = agentConfig.getNodeIterator(PARAMETER_NODE_NAME);
-		while(paramsIt.hasNext())
-		{
-			XMLNode param = paramsIt.next();
-			if(param.getAttributeValue(PARAMETER_NAME).equals(parameterName))
-				return param.getAttributeValue(PARAMETER_VALUE);
-		}
-		return null;
 	}
 	
 	/**

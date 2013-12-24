@@ -14,8 +14,6 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.example.org/scenarioSchema3 ../../../../../src-schema/scenarioSchema3.xsd ">
 
-	<scen:agentPackage>scenario/examples/simpleScenarioA</scen:agentPackage>
-
 	<scen:initial>
 		<scen:container name="Container">
 			<scen:agent>
