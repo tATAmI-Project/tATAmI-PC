@@ -40,6 +40,12 @@ public class AgentEvent extends Config
 		 */
 		AFTER_MOVE(AgentSequenceType.CONSTRUCTIVE),
 		
+		/**
+		 * Event occurs when the agent has received a message. Events of this type will only get posted when no
+		 * messaging component exists; otherwise, message routing will be handled by the messaging component.
+		 */
+		AGENT_MESSAGE(AgentSequenceType.UNORDERED),
+		
 		;
 		
 		/**
@@ -171,5 +177,17 @@ public class AgentEvent extends Config
 	{
 		locked();
 		return parameters.put(name, value);
+	}
+	
+	/**
+	 * Retrieves a parameter of the event.
+	 * 
+	 * @param name
+	 *            - the name associated with the parameter.
+	 * @return the value associated with the name.
+	 */
+	public Object getParameter(String name)
+	{
+		return parameters.get(name);
 	}
 }

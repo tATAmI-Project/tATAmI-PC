@@ -23,12 +23,14 @@
 			<scen:agent>
 				<scen:component name="parametric" />
 				<scen:component name="visualizable" />
+				<scen:component name="messaging" />
 				<scen:parameter name="loader" value="composite" />
 				<scen:parameter name="name" value="AgentA" />
 			</scen:agent>
 			<scen:agent>
 				<scen:component name="parametric" />
 				<scen:component name="visualizable" />
+				<scen:component name="messaging" />
 				<scen:parameter name="loader" value="composite" />
 				<scen:parameter name="name" value="AgentB" />
 			</scen:agent>

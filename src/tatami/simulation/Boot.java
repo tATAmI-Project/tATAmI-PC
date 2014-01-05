@@ -360,7 +360,7 @@ public class Boot
 				
 				// load agent
 				AgentCreationData agentCreationData = loadAgent(agentNode, agentName, containerName, doCreateContainer,
-						platformName, agentLoaders, agentPackages);
+						platforms.get(platformName), agentLoaders, agentPackages);
 				if(agentCreationData == null)
 					continue;
 				allAgents.add(agentCreationData);
@@ -395,8 +395,8 @@ public class Boot
 	 *            - the name of the container the agent will reside in.
 	 * @param doCreateContainer
 	 *            - <code>true</code> if the container is local, <code>false</code> if remote.
-	 * @param platformName
-	 *            - the name of the platform the agent will execute on.
+	 * @param platform
+	 *            - the platform loader for the platform the agent will execute on.
 	 * @param agentLoaders
 	 *            - the {@link Map} of agent loader names and respective {@link AgentLoader} instances.
 	 * @param agentPackages
@@ -405,7 +405,7 @@ public class Boot
 	 *         the loading was successful; <code>null</code> otherwise.
 	 */
 	protected AgentCreationData loadAgent(XMLNode agentNode, String agentName, String containerName,
-			boolean doCreateContainer, String platformName, Map<String, AgentLoader> agentLoaders,
+			boolean doCreateContainer, PlatformLoader platform, Map<String, AgentLoader> agentLoaders,
 			Set<String> agentPackages)
 	{
 		// loader
@@ -436,8 +436,8 @@ public class Boot
 			parameters.add(AgentParameterName.AGENT_PACKAGE, pack);
 		
 		AgentCreationData agentCreationData = new AgentCreationData(agentName, parameters, containerName,
-				!doCreateContainer, platformName, loader, agentNode);
-		if(!loader.preload(agentCreationData, log))
+				!doCreateContainer, platform.getName(), loader, agentNode);
+		if(!loader.preload(agentCreationData, platform, log))
 		{
 			log.error("Agent [" + agentName + "] cannot be loaded.");
 			return null;

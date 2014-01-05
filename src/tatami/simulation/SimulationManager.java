@@ -14,6 +14,8 @@ import java.util.Vector;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.UnitComponentExt;
+import tatami.core.agent.AgentComponent.AgentComponentName;
+import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.visualization.AgentGui;
 import tatami.core.agent.visualization.AgentGui.AgentGuiBackgroundTask;
 import tatami.core.agent.visualization.AgentGui.InputListener;
@@ -257,7 +259,7 @@ public class SimulationManager implements AgentManager
 			@Override
 			public void receiveInput(String componentName, Vector<Object> arguments)
 			{
-				// TODO send exit event
+				clearAgents();
 			}
 		});
 		gui.connectInput(SimulationComponent.EXIT.toString(), new InputListener() {
@@ -392,7 +394,19 @@ public class SimulationManager implements AgentManager
 		for(PlatformLoader platform : platforms.values())
 		{
 			String platformName = platform.getName();
-			SimulationLinkAgent agent = new SimulationLinkAgent(SIMULATION_AGENT_NAME_PREFIX + platformName);
+			MessagingComponent msg;
+			try
+			{
+				String msgrClass = platform.getRecommendedComponentClass(AgentComponentName.MESSAGING_COMPONENT);
+				if(msgrClass == null)
+					msgrClass = AgentComponentName.MESSAGING_COMPONENT.getClassName();
+				msg = (MessagingComponent) PlatformUtils.loadClassInstance(this, msgrClass, new Object[0]);
+			} catch(Exception e)
+			{
+				log.error("Failed to create a messaging component for the agent: " + PlatformUtils.printException(e));
+				return false;
+			}
+			SimulationLinkAgent agent = new SimulationLinkAgent(SIMULATION_AGENT_NAME_PREFIX + platformName, msg);
 			if(!platform.loadAgent(null, agent))
 			{
 				log.error("Loading simulation agent on platform [" + platformName
@@ -451,14 +465,30 @@ public class SimulationManager implements AgentManager
 			else
 				log.error("agent [" + agent.getKey() + "] failed to start properly.");
 		}
+		for(String platformName : platforms.keySet())
+		{
+			SimulationLinkAgent simAgent = simulationAgents.get(platformName);
+			for(AgentCreationData agentData : agents)
+				if(agentData.getPlatform().equals(platformName))
+					simAgent.enrol(agentData);
+		}
 	}
 	
+	/**
+	 * Instructs the simulation agents to call an exit on all agents they manage.
+	 */
+	protected void clearAgents()
+	{
+		for(String platformName : platforms.keySet())
+			simulationAgents.get(platformName).broadcastExit();
+	}
+
 	/**
 	 * As this class implements {@link AgentManager} only for convenience (abusing), it is not expected to be linked to
 	 * a platform "above" it, therefore the method will have no effect and always fail.
 	 */
 	@Override
-	public boolean setPlatformLink()
+	public boolean setPlatformLink(Object link)
 	{
 		return false;
 	}

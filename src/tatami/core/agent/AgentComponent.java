@@ -316,6 +316,16 @@ public abstract class AgentComponent implements Serializable
 	}
 	
 	/**
+	 * Relay for calls to the method in {@link CompositeAgent}.
+	 * 
+	 * @return the platform link.
+	 */
+	protected Object getPlatformLink()
+	{
+		return parentAgent.getPlatformLink();
+	}
+
+	/**
 	 * @return the name of the component (instance of {@link AgentComponentName}).
 	 */
 	protected AgentComponentName getComponentName()
@@ -397,6 +407,32 @@ public abstract class AgentComponent implements Serializable
 		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.MESSAGING_COMPONENT))
 			return (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
 		return null;
+	}
+	
+	/**
+	 * Handles the registration of an event handler for messages to a target (inside the agent) with the specified
+	 * prefix.
+	 * <p>
+	 * If a {@link MessagingComponent} exists, the handler will be registered with the messaging component. Otherwise,
+	 * the handler will also be registered directly with the agent.
+	 * 
+	 * @param prefix
+	 *            - the target prefix.
+	 * @param receiver
+	 *            - the receiving {@link AgentEventHandler} instance.
+	 * @return <code>true</code> if the registration was successful; <code>false</code> otherwise.
+	 */
+	protected boolean registerMessageReceiver(String prefix, AgentEventHandler receiver)
+	{
+		// TODO: if the messaging component disappears, register with the agent; if the messaging component appears,
+		// register with that.
+		if(parentAgent == null)
+			return false;
+		if(parentAgent.hasComponent(AgentComponentName.MESSAGING_COMPONENT))
+			return parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT).registerMessageReceiver(prefix,
+					receiver);
+		registerHandler(AgentEventType.AGENT_MESSAGE, receiver);
+		return true;
 	}
 	
 	/**

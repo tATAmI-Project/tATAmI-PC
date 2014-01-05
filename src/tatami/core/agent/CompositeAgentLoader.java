@@ -19,6 +19,7 @@ import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.AgentCreationData;
 import tatami.simulation.AgentLoader;
 import tatami.simulation.AgentManager;
+import tatami.simulation.PlatformLoader;
 
 /**
  * Agent loader for agents based on {@link CompositeAgent}.
@@ -80,7 +81,7 @@ public class CompositeAgentLoader implements AgentLoader
 	}
 	
 	@Override
-	public boolean preload(AgentCreationData agentCreationData, Logger log)
+	public boolean preload(AgentCreationData agentCreationData, PlatformLoader platformLoader, Logger log)
 	{
 		String logPre = agentCreationData.getAgentName() + ":"; // FIXME: use a subordinate log for each preload.
 		Iterator<XMLNode> componentIt = agentCreationData.getNode().getNodeIterator(COMPONENT_NODE_NAME);
@@ -96,7 +97,16 @@ public class CompositeAgentLoader implements AgentLoader
 			{
 				AgentComponentName component = AgentComponentName.toComponentName(componentName);
 				if(component != null)
-					componentClass = component.getClassName();
+				{
+					if(platformLoader != null)
+					{
+						String recommendedClass = platformLoader.getRecommendedComponentClass(component);
+						if(recommendedClass != null)
+							componentClass = recommendedClass;
+					}
+					if(componentClass == null)
+						componentClass = component.getClassName();
+				}
 				else
 				{
 					log.error(logPre + "Component [" + componentName
@@ -150,7 +160,8 @@ public class CompositeAgentLoader implements AgentLoader
 				"agent " + agentCreationData.getAgentName() + " loader").setLogLevel(Level.ALL);
 		CompositeAgent agent = new CompositeAgent();
 		
-		@SuppressWarnings("unchecked") // FIXME
+		@SuppressWarnings("unchecked")
+		// FIXME
 		List<Map.Entry<String, Object>> componentData = (List<Entry<String, Object>>) agentCreationData.getParameters()
 				.getObject(COMPONENT_PARAMETER_NAME);
 		for(Object compObj : componentData)

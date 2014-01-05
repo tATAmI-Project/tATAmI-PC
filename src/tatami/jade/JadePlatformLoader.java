@@ -3,6 +3,7 @@ package tatami.jade;
 import java.lang.reflect.InvocationTargetException;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
+import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.jade.JadeInterface.JadeConfig;
 import tatami.simulation.AgentManager;
@@ -111,8 +112,33 @@ public class JadePlatformLoader implements PlatformLoader
 	@Override
 	public boolean loadAgent(String containerName, AgentManager agentManager)
 	{
-		return jadeInterface.addAgentToContainer(containerName, agentManager.getAgentName(),
-				JadeAgentWrapper.class.getName(), new Object[] { agentManager });
+		Object lock = new Object();
+		boolean ret = false;
+		synchronized(lock)
+		{
+			ret = jadeInterface.addAgentToContainer(containerName, agentManager.getAgentName(),
+					JadeAgentWrapper.class.getName(), new Object[] { agentManager, lock });
+			try
+			{
+				lock.wait(); // wait for setup to be completed.
+			} catch(InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return ret;
 	}
 	
+	@Override
+	public String getRecommendedComponentClass(AgentComponentName componentName)
+	{
+		switch(componentName)
+		{
+		case MESSAGING_COMPONENT:
+			return JadeMessaging.class.getName();
+		default:
+			break;
+		}
+		return null;
+	}
 }

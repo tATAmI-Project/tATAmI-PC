@@ -1,5 +1,6 @@
 package tatami.simulation;
 
+import tatami.core.agent.AgentComponent.AgentComponentName;
 import net.xqhs.util.XML.XMLTree.XMLNode;
 
 /**
@@ -57,4 +58,12 @@ public class DefaultPlatform implements PlatformLoader
 		return true;
 	}
 	
+	/**
+	 * The loader recommends no particular implementation for any component.
+	 */
+	@Override
+	public String getRecommendedComponentClass(AgentComponentName componentName)
+	{
+		return null;
+	}
 }

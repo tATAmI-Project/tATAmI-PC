@@ -1,9 +1,9 @@
 package tatami.jade;
 
+import jade.core.Agent;
 import net.xqhs.util.logging.Logger.Level;
 import net.xqhs.util.logging.Unit;
 import net.xqhs.util.logging.UnitComponentExt;
-import jade.core.Agent;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.AgentManager;
 
@@ -37,9 +37,9 @@ public class JadeAgentWrapper extends Agent
 		log = (UnitComponentExt) new UnitComponentExt().setUnitName(Unit.DEFAULT_UNIT_NAME).setLogLevel(Level.ALL);
 		
 		Object[] args = getArguments();
-		if(args.length < 1)
+		if(args.length < 2)
 		{
-			log.error("Agent argument not present.");
+			log.error("Not enough arguments.");
 			doExit();
 		}
 		try
@@ -50,7 +50,18 @@ public class JadeAgentWrapper extends Agent
 			log.error("Agent argument not correct: " + PlatformUtils.printException(e));
 			doExit();
 		}
+		if(agent.getAgentName() != null)
+			log.setUnitName(agent.getAgentName() + "-JadeWrapper");
 		log.info("Wrapper is up.");
+		// System.out.println("Agent ["+agent.getAgentName()+"] has state ["+((CompositeAgent)agent).state+"].");
+		if(!agent.setPlatformLink(this))
+			log.error("Setting platform link failed");
+		
+		Object lock = args[1];
+		synchronized(lock)
+		{
+			lock.notifyAll(); // notify the setup is completed
+		}
 	}
 	
 	/**

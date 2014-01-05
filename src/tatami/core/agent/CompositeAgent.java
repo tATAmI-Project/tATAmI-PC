@@ -162,6 +162,11 @@ public class CompositeAgent implements Serializable, AgentManager
 	// protected static final long EXIT_TIMEOUT = 500;
 	
 	/**
+	 * This can be used by platform-specific components to contact the platform.
+	 */
+	protected Object									platformLink		= null;
+	
+	/**
 	 * The {@link Map} that links component names (functionalities) to standard component instances.
 	 */
 	protected Map<AgentComponentName, AgentComponent>	components			= new HashMap<AgentComponentName, AgentComponent>();
@@ -295,10 +300,12 @@ public class CompositeAgent implements Serializable, AgentManager
 	}
 	
 	@Override
-	public boolean setPlatformLink()
+	public boolean setPlatformLink(Object link)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		if(!canAddComponents() || isRunning())
+			return false;
+		platformLink = link;
+		return true;
 	}
 	
 	/**
@@ -363,6 +370,16 @@ public class CompositeAgent implements Serializable, AgentManager
 	protected AgentComponent getComponent(AgentComponentName name)
 	{
 		return components.get(name);
+	}
+	
+	/**
+	 * Retrieves the platform link.
+	 * 
+	 * @return the platform link.
+	 */
+	protected Object getPlatformLink()
+	{
+		return platformLink;
 	}
 	
 	/**

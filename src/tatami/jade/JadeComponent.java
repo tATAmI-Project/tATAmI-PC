@@ -1,33 +1,54 @@
 package tatami.jade;
 
-import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
 import tatami.core.agent.AgentComponent;
-import tatami.core.agent.CompositeAgent;
+import tatami.core.util.platformUtils.PlatformUtils;
 
+/**
+ * Component that handles the interaction with the Jade platform.
+ * 
+ * @author Andrei Olaru
+ */
 public class JadeComponent extends AgentComponent
 {
-	Agent	jadeAgent;
+	/**
+	 * The serial UID.
+	 */
+	private static final long	serialVersionUID	= -316069314442844313L;
 	
+	/**
+	 * Default constructor.
+	 */
 	public JadeComponent()
 	{
 		super(AgentComponentName.JADE_COMPONENT);
 	}
 	
-	public void addBehaviour(Behaviour behaviour)
+	/**
+	 * Retrieves the wrapping Jade agent.
+	 * 
+	 * @return the wrapper agent.
+	 */
+	protected JadeAgentWrapper getWrapper()
 	{
-		jadeAgent.addBehaviour(behaviour);
+		JadeAgentWrapper wrapper;
+		try
+		{
+			wrapper = (JadeAgentWrapper) getPlatformLink();
+		} catch(ClassCastException e)
+		{
+			throw new IllegalStateException("Platform link is not a jade agent wrapper:"
+					+ PlatformUtils.printException(e));
+		}
+		return wrapper;
 	}
-	
-	public void doDelete()
-	{
-		jadeAgent.doDelete();
-	}
-	
+
+	/**
+	 * Retrieves the name of the wrapping Jade agent.
+	 * 
+	 * @return the agent local name.
+	 */
 	public String getLocalName()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return getWrapper().getLocalName();
 	}
-	
 }

@@ -1,6 +1,7 @@
 package tatami.simulation;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
+import tatami.core.agent.AgentComponent.AgentComponentName;
 
 /**
  * The platform loader is the interface to the manager of an agent platform. It can load and manage agents. Agents are
@@ -174,9 +175,11 @@ public interface PlatformLoader
 	public boolean addContainer(String containerName);
 	
 	/**
-	 * Loads the agent onto the platform. It also calls the method {@link AgentManager#setPlatformLink()} to create a
-	 * link from the agent to the platform. The platform link may be the platform itself or an agent wrapper, depending
-	 * on the specific platform.
+	 * Loads the agent onto the platform. It also calls the method {@link AgentManager#setPlatformLink(Object)} to
+	 * create a link from the agent to the platform. The platform link may be the platform itself or an agent wrapper,
+	 * depending on the specific platform.
+	 * <p>
+	 * The method must guarantee that when it returns, the agent can be started immediately.
 	 * 
 	 * @param containerName
 	 *            - the name of the container in which to create the agent.
@@ -187,4 +190,19 @@ public interface PlatformLoader
 	 */
 	public boolean loadAgent(String containerName, AgentManager agentManager);
 	
+	/**
+	 * Retrieves the name of the class for a component implementation that is recommended by the platform, for the
+	 * specified component name, if any. If no such recommendation exists, <code>null</code> will be returned.
+	 * <p>
+	 * This is especially appropriate for components that depend strongly on the platform, such as messaging and
+	 * mobility. Using this method, agents can be easily implemented by adding the recommended components of the
+	 * platform.
+	 * <p>
+	 * TODO: use this, if any, for the agent components, instead of the component-specified implementation.
+	 * 
+	 * @param componentName
+	 *            - the type/name of the component to be recommended.
+	 * @return the name of the class of the recommended implementation.
+	 */
+	public String getRecommendedComponentClass(AgentComponentName componentName);
 }

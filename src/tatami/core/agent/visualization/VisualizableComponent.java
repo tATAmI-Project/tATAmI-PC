@@ -137,6 +137,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			public void handleEvent(AgentEvent event)
 			{
 				resetVisualization();
+				registerMessageHandlers();
 			}
 		});
 		
@@ -199,36 +200,46 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 							parametric.parVals(AgentParameterName.AGENT_PACKAGE));
 			}
 			if(getParent().isRunning())
-				// creates visualization & log
+			{ // creates visualization & log
 				resetVisualization();
-			
-			// registers message receivers: receive the visualization root; receive exit message.
-			final MessagingComponent msgr = getMessaging();
-			if(msgr != null)
-			{
-				msgr.registerMessageReceiver(
-						msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.VISUALIZATION_MONITOR.toString()),
-						new AgentEventHandler() {
-							@Override
-							public void handleEvent(AgentEvent event)
-							{
-								String parent = msgr.extractContent(event);
-								setVisualizationParent(parent);
-								getLog().info("visualization root received: [" + parent + "]");
-							}
-						});
-				msgr.registerMessageReceiver(
-						msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.DO_EXIT.toString()),
-						new AgentEventHandler() {
-							@Override
-							public void handleEvent(AgentEvent event)
-							{
-								getLog().info("exiting...");
-								postAgentEvent(new AgentEvent(AgentEventType.AGENT_EXIT));
-							}
-						});
+				registerMessageHandlers();
 			}
 		}
+	}
+	
+	/**
+	 * Registers the message handlers with the messaging component of the agent.
+	 */
+	protected void registerMessageHandlers()
+	{
+		// registers message receivers: receive the visualization root; receive exit message.
+		final MessagingComponent msgr = getMessaging();
+		if(msgr != null)
+		{
+			getLog().trace("Registering message handlers");
+			registerMessageReceiver(
+					msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.VISUALIZATION_MONITOR.toString()),
+					new AgentEventHandler() {
+						@Override
+						public void handleEvent(AgentEvent event)
+						{
+							String parent = msgr.extractContent(event);
+							setVisualizationParent(parent);
+							getLog().info("visualization root received: [" + parent + "]");
+						}
+					});
+			registerMessageReceiver(msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.DO_EXIT.toString()),
+					new AgentEventHandler() {
+						@Override
+						public void handleEvent(AgentEvent event)
+						{
+							getLog().info("exiting...");
+							postAgentEvent(new AgentEvent(AgentEventType.AGENT_EXIT));
+						}
+					});
+		}
+		else
+			getLog().warn("No messaging component present.");
 	}
 	
 	/**
