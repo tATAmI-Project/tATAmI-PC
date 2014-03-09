@@ -1,4 +1,4 @@
-package tatami.core.agent.baseKnowledge;
+package tatami.core.agent.kb;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,9 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sun.corba.se.impl.orbutil.graph.Node;
-
 import net.xqhs.graphs.graph.ConnectedNode;
+import net.xqhs.graphs.graph.Node;
 import net.xqhs.graphs.graph.Edge;
 import net.xqhs.graphs.graph.Graph;
 import net.xqhs.graphs.matcher.GraphMatcherQuick;
@@ -78,7 +77,7 @@ public class ContextComponent extends AgentComponent {
 		}
 		
 		// MAYBE do not delete the nodes that are important (like rooms etc)
-		for (net.xqhs.graphs.graph.Node node : deleteKnowledge.getNodes()) {
+		for (Node node : deleteKnowledge.getNodes()) {
 			if (((ConnectedNode)node).getInEdges().isEmpty() &&
 				((ConnectedNode)node).getOutEdges().isEmpty())
 			knowledgeGraph.removeNode(node);
