@@ -26,5 +26,6 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/net.xqhs.XML.jar!/doc-net.xqhs.XML"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/home/emma/git/tATAmI-PC/libs/Graphs.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
