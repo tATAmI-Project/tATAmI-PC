@@ -1,18 +1,16 @@
 package tatami.core.agent.kb;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Set;
 
-import net.xqhs.graphs.graph.ConnectedNode;
-import net.xqhs.graphs.graph.Node;
+import net.xqhs.graphs.context.CCMImplementation;
+import net.xqhs.graphs.context.ContextGraph;
+import net.xqhs.graphs.context.ContextPattern;
+import net.xqhs.graphs.context.Instant;
+import net.xqhs.graphs.context.ContinuousContextMatchingPlatform.MatchNotificationReceiver;
+import net.xqhs.graphs.context.Instant.Offset;
+import net.xqhs.graphs.context.Instant.TickReceiver;
+import net.xqhs.graphs.context.Instant.TimeKeeper;
 import net.xqhs.graphs.graph.Edge;
 import net.xqhs.graphs.graph.Graph;
 import net.xqhs.graphs.matcher.GraphMatcherQuick;
@@ -20,14 +18,9 @@ import net.xqhs.graphs.matcher.GraphMatchingProcess;
 import net.xqhs.graphs.matcher.Match;
 import net.xqhs.graphs.matcher.MonitorPack;
 import net.xqhs.graphs.pattern.GraphPattern;
-import net.xqhs.util.logging.Logger.Level;
-import net.xqhs.util.logging.LoggerSimple;
-import net.xqhs.util.logging.UnitComponent;
 import tatami.core.agent.AgentComponent;
-import tatami.core.agent.CompositeAgent;
-import tatami.core.agent.AgentComponent.AgentComponentName;
-import tatami.core.agent.kb.CognitiveComponent;
 
+@SuppressWarnings("javadoc")
 public class ContextComponent extends AgentComponent {
 
 	/**
@@ -35,7 +28,8 @@ public class ContextComponent extends AgentComponent {
 	 */
 	private static final long						serialVersionUID		= -7541956453166819418L;
 	
-	private GraphPattern knowledgeGraph;
+	private Graph knowledgeGraph;
+	private CCMImplementation continuousMatching;
 	
 	/**
 	 * Constructs a new instance of context component.
@@ -43,76 +37,69 @@ public class ContextComponent extends AgentComponent {
 	public ContextComponent() {
 		super(AgentComponentName.COGNITIVE_COMPONENT);
 	
-		knowledgeGraph = new GraphPattern();
+		// make ticker
+		IntTimeKeeper ticker = new IntTimeKeeper();
+						
+		// prepare CCM
+		MonitorPack monitor = new MonitorPack();
+		continuousMatching = new CCMImplementation(ticker, monitor);
+		knowledgeGraph = new ContextGraph(continuousMatching);
+		continuousMatching.setContextGraph((ContextGraph) knowledgeGraph);
+		continuousMatching.startContinuousMatching();
 	}
 	
 	/**
-	 * Constructs a new instance of context component.
+	 * Adds new knowledge to knowledgeGraph
+	 * First finds the commune part, then adds the new part
 	 * 
-	 * @param file
-	 * 				- the initial graph
-	 * 				- conference information
-	 * 				- maybe the information provided by the participants
-	 * @throws FileNotFoundException 
+	 * @param newKnowledge
+	 * @return
 	 */
-	public ContextComponent(File file) throws FileNotFoundException {
-		super(AgentComponentName.COGNITIVE_COMPONENT);
-		knowledgeGraph = (GraphPattern) (((GraphPattern) new GraphPattern().setUnitName("graph"))
-				.readFrom(new FileInputStream(file)));
-	}
-	
-	public boolean add(GraphPattern newKnowledge) {
+	public void add(Graph newKnowledge) {
 		
-		/* TODO in net.xqhs.Graphs or here 
-		knowledgeGraph.merge(newKnowledge);
+		/* TODO
+		merge(newKnowledge, knowledgeGraph);
 		*/
 		
-		return true;
+		GraphMatchingProcess GMQ = GraphMatcherQuick.getMatcher(knowledgeGraph, 
+										(GraphPattern)newKnowledge, new MonitorPack());
+		Match match;
+		int k = newKnowledge.getNodes().size();
+		do {
+			GMQ.resetIterator(k);
+			match = GMQ.getNextMatch();
+		}
+		while (match == null);
+		
+		/* getUnsolvedPart() method should be implemented in net.xqhs.graphs.matcher.Matcher
+		 * for (Node node : match.getUnsolvedPart().getNodes()) {
+			knowledgeGraph.addNode(node);
+		}
+		for (Edge edge : match.getUnsolvedPart().getEdges()) {
+			knowledgeGraph.addEdge(edge);
+		}*/
+		
 	}
 	
-	public boolean remove(GraphPattern deleteKnowledge) {
+	public boolean remove(Graph deleteKnowledge) {
 		
 		for (Edge edge : deleteKnowledge.getEdges()) {
 			knowledgeGraph.removeEdge(edge);
 		}
 		
-		// MAYBE do not delete the nodes that are important (like rooms etc)
-		for (Node node : deleteKnowledge.getNodes()) {
-			if (((ConnectedNode)node).getInEdges().isEmpty() &&
-				((ConnectedNode)node).getOutEdges().isEmpty())
-			knowledgeGraph.removeNode(node);
-		}
-		
 		return true;
 	}
 	
-	public GraphPattern getKnowledge() {
+	public Graph getKnowledge() {
 		return knowledgeGraph;
 	}
 	
 	/**
-	 * 
+	 *
 	 * @param pattern
-	 * 
-	 * @return all the matches if not specified otherwise
 	 */
-	public ArrayList<Match> addPattern(GraphPattern pattern) {
-		
-		ArrayList<Match> matches = new ArrayList<Match>();
-		MonitorPack monitoring = new MonitorPack()
-				.setLog((LoggerSimple) new UnitComponent().setUnitName(
-						"matcher").setLogLevel(Level.INFO));
-		GraphMatcherQuick GMQ = GraphMatcherQuick.getMatcher(knowledgeGraph, pattern,
-				monitoring);
-		
-		while (true) {
-			Match m = GMQ.getNextMatch();
-			if (m == null)
-				break;
-			matches.add(m);
-		}
-		
-		return matches;
+	public void addPattern(GraphPattern pattern) {
+		continuousMatching.addContextPattern((ContextPattern) pattern);
 	}
 	
 	/**
@@ -121,8 +108,45 @@ public class ContextComponent extends AgentComponent {
 	 * @param pattern
 	 * @return
 	 */
-	public boolean registerMatchNotificationTarget(GraphPattern pattern) {
-		return true;
+	public void registerMatchNotificationTarget(GraphPattern pattern, MatchNotificationReceiver receiver) {
+		continuousMatching.setMatchNotificationTarget(pattern, receiver);
 	}
 
+	/** TODO 
+	 * maybe move in net.xqhs.Graphs
+	 * copied from testing.testing.ContextGraphsTest.java 
+	 **/
+	public static class IntTimeKeeper implements TimeKeeper
+	{
+		/**
+		 * Tick receivers.
+		 */
+		Set<TickReceiver>	receivers	= new HashSet<TickReceiver>();
+		/**
+		 * Time coordinate.
+		 */
+		long				now			= 0;
+		
+		@Override
+		public void registerTickReceiver(TickReceiver receiver, Offset tickLength)
+		{
+			receivers.add(receiver);
+		}
+		
+		@Override
+		public Instant now()
+		{
+			return new Instant(now);
+		}
+		
+		/**
+		 * Increments the time and notifies receivers (regardless of their tick length preference. //FIXME
+		 */
+		public void tickUp()
+		{
+			now++;
+			for(TickReceiver rcv : receivers)
+				rcv.tick(this, new Instant(now));
+		}
+	}
 }
