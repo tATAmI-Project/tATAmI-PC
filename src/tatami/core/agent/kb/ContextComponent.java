@@ -1,23 +1,26 @@
 package tatami.core.agent.kb;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import net.xqhs.graphs.context.CCMImplementation;
 import net.xqhs.graphs.context.ContextGraph;
 import net.xqhs.graphs.context.ContextPattern;
+import net.xqhs.graphs.context.ContinuousContextMatchingPlatform;
+import net.xqhs.graphs.context.ContinuousMatchingProcess.MatchNotificationReceiver;
 import net.xqhs.graphs.context.Instant;
-import net.xqhs.graphs.context.ContinuousContextMatchingPlatform.MatchNotificationReceiver;
 import net.xqhs.graphs.context.Instant.Offset;
 import net.xqhs.graphs.context.Instant.TickReceiver;
 import net.xqhs.graphs.context.Instant.TimeKeeper;
 import net.xqhs.graphs.graph.Edge;
 import net.xqhs.graphs.graph.Graph;
-import net.xqhs.graphs.matcher.GraphMatcherQuick;
-import net.xqhs.graphs.matcher.GraphMatchingProcess;
-import net.xqhs.graphs.matcher.Match;
+import net.xqhs.graphs.graph.GraphComponent;
+import net.xqhs.graphs.graph.SimpleGraph;
 import net.xqhs.graphs.matcher.MonitorPack;
 import net.xqhs.graphs.pattern.GraphPattern;
+import net.xqhs.graphs.representation.text.TextGraphRepresentation;
+import net.xqhs.graphs.util.ContentHolder;
 import tatami.core.agent.AgentComponent;
 
 @SuppressWarnings("javadoc")
@@ -28,88 +31,115 @@ public class ContextComponent extends AgentComponent {
 	 */
 	private static final long						serialVersionUID		= -7541956453166819418L;
 	
-	private Graph knowledgeGraph;
-	private CCMImplementation continuousMatching;
+	protected Graph knowledgeGraph;
+	protected ContinuousContextMatchingPlatform continuousMatching;
 	
 	/**
 	 * Constructs a new instance of context component.
 	 */
-	public ContextComponent() {
+	public ContextComponent() 
+	{
 		super(AgentComponentName.COGNITIVE_COMPONENT);
 	
 		// make ticker
-		IntTimeKeeper ticker = new IntTimeKeeper();
+		TimeKeeper ticker = new IntTimeKeeper();
 						
 		// prepare CCM
 		MonitorPack monitor = new MonitorPack();
 		continuousMatching = new CCMImplementation(ticker, monitor);
-		knowledgeGraph = new ContextGraph(continuousMatching);
+		
+		knowledgeGraph = new ContextGraph((CCMImplementation) continuousMatching);
 		continuousMatching.setContextGraph((ContextGraph) knowledgeGraph);
 		continuousMatching.startContinuousMatching();
 	}
 	
 	/**
-	 * Adds new knowledge to knowledgeGraph
-	 * First finds the commune part, then adds the new part
-	 * 
-	 * @param newKnowledge
-	 * @return
+	 * Constructs a new instance of context component  
 	 */
-	public void add(Graph newKnowledge) {
+	public ContextComponent(HashSet initialKnowledge) {
+		this();
+				
+		String initial = ((Map.Entry<String, String>)(initialKnowledge.iterator().next())).getValue();
+		ContentHolder<String> input = new ContentHolder<String>(initial);
 		
-		/* TODO
-		merge(newKnowledge, knowledgeGraph);
-		*/
-		
-		GraphMatchingProcess GMQ = GraphMatcherQuick.getMatcher(knowledgeGraph, 
-										(GraphPattern)newKnowledge, new MonitorPack());
-		Match match;
-		int k = newKnowledge.getNodes().size();
-		do {
-			GMQ.resetIterator(k);
-			match = GMQ.getNextMatch();
-		}
-		while (match == null);
-		
-		/* getUnsolvedPart() method should be implemented in net.xqhs.graphs.matcher.Matcher
-		 * for (Node node : match.getUnsolvedPart().getNodes()) {
-			knowledgeGraph.addNode(node);
-		}
-		for (Edge edge : match.getUnsolvedPart().getEdges()) {
-			knowledgeGraph.addEdge(edge);
-		}*/
-		
+		//Graph graph = ((SimpleGraph) new SimpleGraph()).readFrom(new ByteArrayInputStream(initial.getBytes()));
+		Graph g = new TextGraphRepresentation(new SimpleGraph()).readRepresentation(input);
+		add(g);
+
 	}
 	
-	public boolean remove(Graph deleteKnowledge) {
-		
+	/**
+	 * Adds new knowledge to knowledgeGraph
+	 * 
+	 * @param newKnowledge
+	 */
+	public void add(Graph newKnowledge)
+	{	
+		for (GraphComponent component : newKnowledge.getComponents())
+			if (!knowledgeGraph.contains(component))
+				knowledgeGraph.add(component);	
+	}
+	
+	/**
+	 * Removes from knowledge graph the information that it is not needed
+	 * */
+	public boolean remove(Graph deleteKnowledge) 
+	{	
 		for (Edge edge : deleteKnowledge.getEdges()) {
 			knowledgeGraph.removeEdge(edge);
 		}
 		
+		/* TODO MAYBE delete the nodes that are not generic nodes 
+		 * (for example those that are in initialKnowledge) */
 		return true;
 	}
 	
-	public Graph getKnowledge() {
+	/**
+	 * 
+	 * @return the graph that contains the knowledge
+	 * */
+	public Graph getKnowledge() 
+	{
 		return knowledgeGraph;
 	}
 	
 	/**
+	 * 
+	 * @return continuous matching platform
+	 * */
+	public ContinuousContextMatchingPlatform getContinuousMatching() 
+	{
+		return continuousMatching;
+	}
+	
+	/**
+	 * Adds new pattern to continuousMatching
 	 *
 	 * @param pattern
 	 */
-	public void addPattern(GraphPattern pattern) {
+	public void addPattern(GraphPattern pattern) 
+	{
 		continuousMatching.addContextPattern((ContextPattern) pattern);
 	}
 	
 	/**
-	 * 
+	 * Starts continuous matching 
+	 */
+	public void startContinuousMatching() 
+	{
+		continuousMatching.startContinuousMatching();
+	}
+	
+	/**
+	 * Adds a notification target for matches of the specified pattern.
 	 * 
 	 * @param pattern
+	 * @param receiver
 	 * @return
 	 */
-	public void registerMatchNotificationTarget(GraphPattern pattern, MatchNotificationReceiver receiver) {
-		continuousMatching.setMatchNotificationTarget(pattern, receiver);
+	public void registerMatchNotificationTarget(GraphPattern pattern, MatchNotificationReceiver receiver) 
+	{
+		continuousMatching.addMatchNotificationTarget(pattern, receiver);
 	}
 
 	/** TODO 
