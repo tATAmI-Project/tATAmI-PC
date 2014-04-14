@@ -9,12 +9,14 @@ import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.hierarchical.HierarchicalComponent;
 import tatami.core.agent.kb.CognitiveComponent;
+import tatami.core.agent.kb.ContextComponent;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.movement.MovementComponent;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.webServices.WebserviceComponent;
 import tatami.jade.JadeComponent;
+import tatami.core.agent.baseKnowledge.KnowledgeComponent;
 
 /**
  * This class serves as base for agent component. a component is characterized by its functionality, denominated by
@@ -62,7 +64,7 @@ public abstract class AgentComponent implements Serializable
 		/**
 		 * The name of a component extending {@link CognitiveComponent}.
 		 */
-		COGNITIVE_COMPONENT,
+		COGNITIVE_COMPONENT(AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".kb.ContextComponent"),
 		
 		/**
 		 * The name of a component extending {@link MessagingComponent}.
@@ -100,6 +102,8 @@ public abstract class AgentComponent implements Serializable
 		TESTING_COMPONENT,
 		
 		;
+		
+		
 		
 		/**
 		 * Suffix for component classes.
@@ -408,6 +412,21 @@ public abstract class AgentComponent implements Serializable
 			return (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
 		return null;
 	}
+	
+	/**
+	 * Retrieves a direct reference to the {@link CognitiveComponent} of the agent, if any.
+	 * <p>
+	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be removed without notice.
+	 * 
+	 * @return the component instance, if any. <code>null</code> otherwise.
+	 */
+	protected ContextComponent getCognitive()
+	{
+		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.COGNITIVE_COMPONENT))
+			return (ContextComponent) parentAgent.getComponent(AgentComponentName.COGNITIVE_COMPONENT);
+		return null;
+	}
+	
 	
 	/**
 	 * Handles the registration of an event handler for messages to a target (inside the agent) with the specified

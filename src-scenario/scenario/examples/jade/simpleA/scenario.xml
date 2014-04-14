@@ -24,6 +24,9 @@
 				<scen:component name="parametric" />
 				<scen:component name="visualizable" />
 				<scen:component name="messaging" />
+				<scen:component name="cognitive">
+				    <scen:parameter name="knowledge" value="(Ana -isa-> human)"/>
+				</scen:component> 
 				<scen:parameter name="loader" value="composite" />
 				<scen:parameter name="name" value="AgentA" />
 			</scen:agent>
