@@ -181,6 +181,8 @@ public class CompositeAgentLoader implements AgentLoader
 							new Object[0]));
 				log.trace("component [" + componentClass + "] loaded for agent [" + agentCreationData.getAgentName()
 						+ "].");
+				System.out.println("HERE");
+				System.out.flush();
 			} catch(Exception e)
 			{
 				log.error("Component [" + componentClass + "] failed to load; it will not be available for agent ["
@@ -189,7 +191,6 @@ public class CompositeAgentLoader implements AgentLoader
 		}
 		log.trace("agent [" + agentCreationData.getAgentName() + "] loaded.");
 		log.doExit();
-		
 		return agent;
 	}
 }

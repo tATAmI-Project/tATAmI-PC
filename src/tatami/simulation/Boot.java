@@ -20,7 +20,7 @@ import java.util.Set;
 import net.xqhs.util.XML.XMLTree;
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.config.Config.ConfigLockedException;
-import net.xqhs.util.logging.Logging;
+import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponentExt;
 import net.xqhs.util.logging.LoggerSimple.Level;
 import tatami.core.agent.parametric.AgentParameterName;
@@ -495,7 +495,7 @@ public class Boot
 	 */
 	public static void main(String[] args)
 	{
-		Logging.getMasterLogging().setLogLevel(Level.INFO);
+		Logging.getMasterLogging().setLogLevel(Level.ALL);
 		new Boot().boot(args);
 	}
 }
