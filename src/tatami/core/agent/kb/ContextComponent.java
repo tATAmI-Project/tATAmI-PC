@@ -1,7 +1,7 @@
 package tatami.core.agent.kb;
 
 import java.util.HashSet;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import net.xqhs.graphs.context.CCMImplementation;
@@ -59,11 +59,8 @@ public class ContextComponent extends AgentComponent {
 	public ContextComponent(HashSet initialKnowledge) {
 		this();
 				
-		String initial = ((Map.Entry<String, String>)(initialKnowledge.iterator().next())).getValue();
-		ContentHolder<String> input = new ContentHolder<String>(initial);
-		
-		//Graph graph = ((SimpleGraph) new SimpleGraph()).readFrom(new ByteArrayInputStream(initial.getBytes()));
-		Graph g = new TextGraphRepresentation(new SimpleGraph()).readRepresentation(input);
+		String initial = ((Entry<String, String>) initialKnowledge.iterator().next()).getValue();
+		Graph g = new TextGraphRepresentation(new SimpleGraph()).readRepresentation(new ContentHolder<String>(initial));
 		add(g);
 
 	}

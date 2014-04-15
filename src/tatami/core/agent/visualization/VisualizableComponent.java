@@ -13,15 +13,15 @@ package tatami.core.agent.visualization;
 
 import net.xqhs.util.config.Config;
 import net.xqhs.util.logging.Logger;
-import net.xqhs.util.logging.Logger.Level;
-import net.xqhs.util.logging.Logging.ReportingEntity;
+import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.Unit;
 import net.xqhs.util.logging.UnitComponentExt;
+import net.xqhs.util.logging.logging.Logging.ReportingEntity;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
-import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
+import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.movement.MovementComponent;
 import tatami.core.agent.parametric.AgentParameterName;
@@ -249,7 +249,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	{
 		// configure log / logging Unit
 		loggingUnit = (UnitComponentExt) new UnitComponentExt().setUnitName(getAgentName()).setLogEnsureNew()
-				.setLogReporter(this).setLogType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL);
+				.setLogReporter(this).setLoggerType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL);
 		
 		// load GUI
 		try

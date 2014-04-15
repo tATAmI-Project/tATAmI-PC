@@ -1,14 +1,14 @@
 package tatami.core.agent.kb;
 
+import net.xqhs.graphs.graph.Edge;
+import net.xqhs.graphs.graph.Graph;
+import net.xqhs.graphs.representation.text.TextGraphRepresentation;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.kb.simple.SimpleKB;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
-import tatami.core.util.graph.Edge;
-import tatami.core.util.graph.Graph;
-import tatami.core.util.graph.representation.TextGraphRepresentation;
 
 public class CognitiveComponent extends AgentComponent
 {

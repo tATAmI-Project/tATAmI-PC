@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.Vector;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
-import net.xqhs.util.logging.Log.LoggerType;
+import net.xqhs.util.logging.logging.LogWrapper.LoggerType;
 import tatami.jade.JadeInterface;
 
 /**

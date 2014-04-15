@@ -1,6 +1,6 @@
 package scenario.examples.composite.simpleA;
 
-import net.xqhs.util.logging.Logger.Level;
+import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponent;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;

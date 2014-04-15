@@ -13,7 +13,7 @@ package tatami.core.agent.visualization;
 
 import java.util.Vector;
 
-import net.xqhs.util.logging.Logging.DisplayEntity;
+import net.xqhs.util.logging.logging.Logging.DisplayEntity;
 
 /**
  * The class makes the link between a log (needing a {@link DisplayEntity} instance) and the appropriate component in an

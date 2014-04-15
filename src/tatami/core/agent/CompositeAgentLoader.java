@@ -11,7 +11,7 @@ import java.util.Set;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
-import net.xqhs.util.logging.Logger.Level;
+import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.parametric.AgentParameters;

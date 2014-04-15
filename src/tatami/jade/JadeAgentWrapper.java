@@ -1,7 +1,7 @@
 package tatami.jade;
 
 import jade.core.Agent;
-import net.xqhs.util.logging.Logger.Level;
+import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.Unit;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.util.platformUtils.PlatformUtils;

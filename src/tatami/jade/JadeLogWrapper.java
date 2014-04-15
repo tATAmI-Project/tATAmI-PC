@@ -13,7 +13,9 @@ package tatami.jade;
 
 import java.io.OutputStream;
 
-import tatami.core.agent.visualization.Logger;
+import net.xqhs.util.logging.LoggerSimple.Level;
+import net.xqhs.util.logging.logging.LogWrapper;
+
 
 /**
  * INCOMPLETE
@@ -21,7 +23,7 @@ import tatami.core.agent.visualization.Logger;
  * @author Andrei Olaru
  * 
  */
-public class JadeLogWrapper extends Logger
+public class JadeLogWrapper extends LogWrapper
 {
 	
 	protected jade.util.Logger	theLog	= null;
@@ -52,53 +54,31 @@ public class JadeLogWrapper extends Logger
 	}
 	
 	@Override
-	public void error(String message)
+	public void l(Level level, String message)
 	{
-		
-		theLog.log(jade.util.Logger.INFO, message);
+		switch(level)
+		{
+		case ERROR:
+			theLog.log(jade.util.Logger.SEVERE, message);
+			break;
+		case INFO:
+			theLog.log(jade.util.Logger.INFO, message);
+			break;
+		case TRACE:
+			theLog.log(jade.util.Logger.FINER, message);
+			break;
+		case WARN:
+			theLog.log(jade.util.Logger.WARNING, message);
+			break;
+		default:
+			// should not get here
+			break;
+		}
 		
 	}
-	
+
 	@Override
-	public void warn(String message)
-	{
-		
-		theLog.log(jade.util.Logger.WARNING, message);
-		
-	}
-	
-	@Override
-	public void info(String message)
-	{
-		
-		theLog.log(jade.util.Logger.INFO, message);
-		
-	}
-	
-	@Override
-	public void trace(String message)
-	{
-		
-		theLog.log(jade.util.Logger.FINER, message);
-		
-	}
-	
-	@Override
-	public void addLocalDestination(OutputStream destination)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	public void addConsoleDestination(OutputStream destination)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	public void addReportDestination(OutputStream destination, Character separator)
+	public void exit()
 	{
 		// TODO Auto-generated method stub
 		

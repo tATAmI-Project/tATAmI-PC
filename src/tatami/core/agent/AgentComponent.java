@@ -16,7 +16,6 @@ import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.webServices.WebserviceComponent;
 import tatami.jade.JadeComponent;
-import tatami.core.agent.baseKnowledge.KnowledgeComponent;
 
 /**
  * This class serves as base for agent component. a component is characterized by its functionality, denominated by

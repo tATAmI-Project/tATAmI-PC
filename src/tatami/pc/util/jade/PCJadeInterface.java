@@ -22,8 +22,8 @@ import jade.wrapper.ControllerException;
 
 import java.util.HashMap;
 
+import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponentExt;
-import net.xqhs.util.logging.Logger.Level;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.jade.JadeInterface;
 
