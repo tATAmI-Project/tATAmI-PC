@@ -56,10 +56,10 @@ public class ContextComponent extends AgentComponent {
 	/**
 	 * Constructs a new instance of context component  
 	 */
-	public ContextComponent(HashSet initialKnowledge) {
+	public ContextComponent(HashSet<Entry<String, String>> initialKnowledge) {
 		this();
 				
-		String initial = ((Entry<String, String>) initialKnowledge.iterator().next()).getValue();
+		String initial = initialKnowledge.iterator().next().getValue();
 		Graph g = new TextGraphRepresentation(new SimpleGraph()).readRepresentation(new ContentHolder<String>(initial));
 		add(g);
 
