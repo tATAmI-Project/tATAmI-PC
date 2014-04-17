@@ -22,7 +22,7 @@ import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponentExt;
-import net.xqhs.util.logging.LoggerSimple.Level;
+import net.xqhs.util.logging.logging.Logging;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.util.platformUtils.PlatformUtils;
@@ -45,7 +45,8 @@ public class Boot
 	/**
 	 * The log of the class.
 	 */
-	protected UnitComponentExt	log					= (UnitComponentExt) new UnitComponentExt().setUnitName("boot");
+	protected UnitComponentExt	log	= (UnitComponentExt) new UnitComponentExt().setUnitName("boot").setLoggerType(
+											PlatformUtils.platformLogType());
 	
 	/**
 	 * The method handling main functionality of {@link Boot}.
@@ -182,7 +183,8 @@ public class Boot
 					platformClassPath = StandardPlatformType.valueOf(platformName.toUpperCase()).getClassName();
 				} catch(IllegalArgumentException e)
 				{ // platform is not standard
-					platformClassPath = PlatformUtils.getParameterValue(platformNode, PlatformLoader.CLASSPATH_ATTRIBUTE);
+					platformClassPath = PlatformUtils.getParameterValue(platformNode,
+							PlatformLoader.CLASSPATH_ATTRIBUTE);
 					if(platformClassPath == null)
 						log.error("Class path for platform [" + platformName + "] is not known.");
 				}
@@ -349,7 +351,8 @@ public class Boot
 					continue;
 				}
 				// platform
-				String platformName = PlatformUtils.getParameterValue(agentNode, AgentParameterName.AGENT_PLATFORM.toString());
+				String platformName = PlatformUtils.getParameterValue(agentNode,
+						AgentParameterName.AGENT_PLATFORM.toString());
 				if(platformName == null)
 					platformName = defaultPlatform; // no platform specified: go to default
 				if(!platforms.containsKey(platformName))
@@ -414,8 +417,8 @@ public class Boot
 			return (AgentCreationData) log.lr(null, "no agent loader specified. agent [" + agentName
 					+ "] will not be created.");
 		if(!agentLoaders.containsKey(agentLoaderName))
-			return (AgentCreationData) log.lr(null, "agent loader [" + agentLoaderName + "] is unknown. agent [" + agentName
-					+ "] will not be created.");
+			return (AgentCreationData) log.lr(null, "agent loader [" + agentLoaderName + "] is unknown. agent ["
+					+ agentName + "] will not be created.");
 		AgentLoader loader = agentLoaders.get(agentLoaderName);
 		
 		// get all parameters and put them into an AgentParameters instance.

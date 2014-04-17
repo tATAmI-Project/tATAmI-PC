@@ -156,8 +156,9 @@ public class CompositeAgentLoader implements AgentLoader
 	@Override
 	public AgentManager load(AgentCreationData agentCreationData)
 	{
-		UnitComponentExt log = (UnitComponentExt) new UnitComponentExt().setUnitName(
-				"agent " + agentCreationData.getAgentName() + " loader").setLogLevel(Level.ALL);
+		UnitComponentExt log = (UnitComponentExt) new UnitComponentExt()
+				.setUnitName("agent " + agentCreationData.getAgentName() + " loader").setLogLevel(Level.ALL)
+				.setLoggerType(PlatformUtils.platformLogType());
 		CompositeAgent agent = new CompositeAgent();
 		
 		@SuppressWarnings("unchecked")
@@ -181,8 +182,6 @@ public class CompositeAgentLoader implements AgentLoader
 							new Object[0]));
 				log.trace("component [" + componentClass + "] loaded for agent [" + agentCreationData.getAgentName()
 						+ "].");
-				System.out.println("HERE");
-				System.out.flush();
 			} catch(Exception e)
 			{
 				log.error("Component [" + componentClass + "] failed to load; it will not be available for agent ["

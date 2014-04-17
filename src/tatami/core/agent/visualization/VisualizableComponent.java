@@ -249,7 +249,8 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	{
 		// configure log / logging Unit
 		loggingUnit = (UnitComponentExt) new UnitComponentExt().setUnitName(getAgentName()).setLogEnsureNew()
-				.setLogReporter(this).setLoggerType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL);
+				.setLogReporter(this).setLoggerType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL)
+				.setLoggerType(PlatformUtils.platformLogType());
 		
 		// load GUI
 		try

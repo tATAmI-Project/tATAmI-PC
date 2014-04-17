@@ -34,7 +34,8 @@ public class JadeAgentWrapper extends Agent
 	{
 		super.setup();
 		
-		log = (UnitComponentExt) new UnitComponentExt().setUnitName(Unit.DEFAULT_UNIT_NAME).setLogLevel(Level.ALL);
+		log = (UnitComponentExt) new UnitComponentExt().setUnitName(Unit.DEFAULT_UNIT_NAME).setLogLevel(Level.ALL)
+				.setLoggerType(PlatformUtils.platformLogType());
 		
 		Object[] args = getArguments();
 		if(args.length < 2)

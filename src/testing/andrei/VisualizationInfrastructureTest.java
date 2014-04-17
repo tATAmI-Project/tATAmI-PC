@@ -13,6 +13,7 @@ package testing.andrei;
 
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.visualization.VisualizableComponent;
+import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.pc.util.jade.PCJadeInterface;
 import tatami.pc.util.windowLayout.LayoutIndications;
 import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
@@ -27,7 +28,8 @@ import tatami.simulation.VisualizationManager;
 public class VisualizationInfrastructureTest
 {
 	private static String		unitName	= "visTestMain";
-	protected UnitComponentExt	log			= (UnitComponentExt) new UnitComponentExt().setUnitName(unitName);
+	protected UnitComponentExt	log			= (UnitComponentExt) new UnitComponentExt().setUnitName(unitName)
+													.setLoggerType(PlatformUtils.platformLogType());
 	
 	public static void main(String args[])
 	{

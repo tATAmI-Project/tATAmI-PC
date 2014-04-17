@@ -165,7 +165,8 @@ public class SimulationManager implements AgentManager
 	public SimulationManager(Map<String, PlatformLoader> allPlatforms, Map<String, Boolean> allContainers,
 			Set<AgentCreationData> allAgents, XMLNode timeline)
 	{
-		log = (UnitComponentExt) new UnitComponentExt().setUnitName("simulation");
+		log = (UnitComponentExt) new UnitComponentExt().setUnitName("simulation").setLoggerType(
+				PlatformUtils.platformLogType());
 		platforms = allPlatforms;
 		containers = allContainers;
 		agents = allAgents;
@@ -482,7 +483,7 @@ public class SimulationManager implements AgentManager
 		for(String platformName : platforms.keySet())
 			simulationAgents.get(platformName).broadcastExit();
 	}
-
+	
 	/**
 	 * As this class implements {@link AgentManager} only for convenience (abusing), it is not expected to be linked to
 	 * a platform "above" it, therefore the method will have no effect and always fail.

@@ -85,13 +85,14 @@ public class PlatformUtils
 	}
 	
 	/**
-	 * @return the type of log (on of {@link LoggerType}) approrpiate for the current platform.
+	 * @return the type of log (on of {@link LoggerType}) appropriate for the current platform.
 	 */
 	public static LoggerType platformLogType()
 	{
 		switch(getPlatform())
 		{
 		case PC:
+//			return LoggerType.CONSOLE;
 			return LoggerType.LOG4J;
 		case ANDROID:
 			return LoggerType.JAVA;

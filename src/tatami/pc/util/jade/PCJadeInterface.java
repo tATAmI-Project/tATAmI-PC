@@ -86,7 +86,8 @@ public class PCJadeInterface implements JadeInterface
 	@Override
 	public boolean startPlatform()
 	{
-		log = (UnitComponentExt) new UnitComponentExt().setUnitName("PCJadeInterface").setLogLevel(Level.ALL);
+		log = (UnitComponentExt) new UnitComponentExt().setUnitName("PCJadeInterface").setLogLevel(Level.ALL)
+				.setLoggerType(PlatformUtils.platformLogType());
 		ProfileImpl profile;
 		Properties props = new ExtendedProperties();
 		

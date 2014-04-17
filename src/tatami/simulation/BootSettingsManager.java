@@ -7,6 +7,7 @@ import net.xqhs.util.XML.XMLTree;
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.config.Config;
 import net.xqhs.util.logging.UnitComponentExt;
+import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.pc.util.windowLayout.LayoutIndications;
 
 /**
@@ -134,7 +135,8 @@ public class BootSettingsManager extends Config
 	{
 		locked();
 		
-		UnitComponentExt log = (UnitComponentExt) new UnitComponentExt().setUnitName("settings load");
+		UnitComponentExt log = (UnitComponentExt) new UnitComponentExt().setUnitName("settings load").setLoggerType(
+				PlatformUtils.platformLogType());
 		
 		switch(programArguments.length)
 		{
