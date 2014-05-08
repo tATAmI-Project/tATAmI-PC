@@ -245,7 +245,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	/**
 	 * Creates the [platform-specific] visualization elements: the GUI and the log.
 	 */
-	protected void resetVisualization()
+	public void resetVisualization()
 	{
 		// configure log / logging Unit
 		loggingUnit = (UnitComponentExt) new UnitComponentExt().setUnitName(getAgentName()).setLogEnsureNew()
@@ -396,7 +396,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	 * event handlers.
 	 */
 	@Override
-	protected MessagingComponent getMessaging()
+	public MessagingComponent getMessaging()
 	{
 		return super.getMessaging();
 	}

@@ -13,6 +13,9 @@ package tatami.core.agent.webServices;
 
 import java.lang.reflect.Constructor;
 
+import net.xqhs.util.logging.Logger;
+import net.xqhs.util.logging.UnitComponentExt;
+
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.util.platformUtils.PlatformUtils;
@@ -42,11 +45,10 @@ public class WebserviceComponent extends AgentComponent
 	 * The implementation of the WS-related operations.
 	 */
 	WSAgentImplementationInterface	implementation			= null;
+	protected Logger log;
 	
-	@Override
-	public void setup()
-	{
-		super.setup();
+	protected WebserviceComponent(AgentComponentName name) {
+		super(name);
 		
 		if(PlatformUtils.platformSupportsWebServices())
 		{
@@ -63,12 +65,14 @@ public class WebserviceComponent extends AgentComponent
 				log.error("constructing a WS implementation failed: ", e);
 			}
 		}
+		
+		log = (UnitComponentExt) new UnitComponentExt().setUnitName("webservice").setLogLevel(Logger.Level.ALL);
 	}
 	
 	/**
 	 * Registers the agent as a web service.
 	 */
-	protected void registerWSBehavior()
+	public void registerWSBehavior()
 	{
 		if(implementation == null)
 			return;
@@ -76,7 +80,7 @@ public class WebserviceComponent extends AgentComponent
 		if(!serviceRegistered)
 		{
 			if(implementation.registerService(this, getAgentName(),
-					parVal(AgentParameterName.AGENT_CLASS)))
+					getParametric().parVal(AgentParameterName.AGENT_CLASS)))
 			{
 				log.info(getAgentName() + " has registered service " + getAgentName());
 				serviceRegistered = true;
@@ -86,14 +90,13 @@ public class WebserviceComponent extends AgentComponent
 		}
 	}
 	
-	@Override
 	protected void takeDown()
 	{
 		// Unregister from the DF
 		if(serviceRegistered)
-			if(!implementation.unregisterWS(this))
+			if(!implementation.unregisterWS(this));
 				log.error("Error in unregistering from DF");
-		super.takeDown();
+		//super.takeDown();
 	}
 	
 	/**
@@ -112,7 +115,7 @@ public class WebserviceComponent extends AgentComponent
 		if(implementation != null)
 		{
 			String result = implementation.doAccess(uri, serviceName, message);
-			getLog().info("returned value: [" + result + "]");
+			//getLog().info("returned value: [" + result + "]");
 			return result;
 		}
 		
@@ -133,7 +136,7 @@ public class WebserviceComponent extends AgentComponent
 		if(implementation != null)
 		{
 			String result = implementation.doSimpleAccess(uri, request);
-			getLog().info("simple access returned value: [" + result + "]");
+			//getLog().info("simple access returned value: [" + result + "]");
 			return result;
 		}
 		return null;
