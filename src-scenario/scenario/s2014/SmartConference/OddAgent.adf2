@@ -1,0 +1,12 @@
+(agent Odd
+	(behavior
+		(initial register
+			(send parent (struct message counting 0))
+		)
+		(reactive increase
+			(receive (message counting ?number))
+			(increment ?number ?newNo)
+			(send parent (struct message counting ?newNo))
+		)
+	)
+)

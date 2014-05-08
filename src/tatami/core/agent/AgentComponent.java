@@ -88,7 +88,7 @@ public abstract class AgentComponent implements Serializable
 		/**
 		 * The name of a component extending {@link ClaimComponent}.
 		 */
-		S_CLAIM_COMPONENT,
+		S_CLAIM_COMPONENT(AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".claim.ClaimComponent"),
 		
 		/**
 		 * The name of a component extending {@link JadeComponent}.
@@ -377,7 +377,7 @@ public abstract class AgentComponent implements Serializable
 	 * 
 	 * @return the component instance, if any. <code>null</code> otherwise.
 	 */
-	protected ParametricComponent getParametric()
+	public ParametricComponent getParametric()
 	{
 		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
 			return (ParametricComponent) parentAgent.getComponent(AgentComponentName.PARAMETRIC_COMPONENT);
@@ -391,7 +391,7 @@ public abstract class AgentComponent implements Serializable
 	 * 
 	 * @return the component instance, if any. <code>null</code> otherwise.
 	 */
-	protected VisualizableComponent getVisualizable()
+	public VisualizableComponent getVisualizable()
 	{
 		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.VISUALIZABLE_COMPONENT))
 			return (VisualizableComponent) parentAgent.getComponent(AgentComponentName.VISUALIZABLE_COMPONENT);
@@ -405,7 +405,8 @@ public abstract class AgentComponent implements Serializable
 	 * 
 	 * @return the component instance, if any. <code>null</code> otherwise.
 	 */
-	protected MessagingComponent getMessaging()
+	// TODO emma
+	public MessagingComponent getMessaging()
 	{
 		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.MESSAGING_COMPONENT))
 			return (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
@@ -426,6 +427,34 @@ public abstract class AgentComponent implements Serializable
 		return null;
 	}
 	
+	/**
+	 * Retrieves a direct reference to the {@link ClaimComponent} of the agent, if any.
+	 * <p>
+	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be removed without notice.
+	 * 
+	 * @return the component instance, if any. <code>null</code> otherwise.
+	 */
+	protected ClaimComponent getClaim()
+	{
+		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.S_CLAIM_COMPONENT))
+			return (ClaimComponent) parentAgent.getComponent(AgentComponentName.S_CLAIM_COMPONENT);
+		return null;
+	}
+	
+	/**
+	 * Retrieves a direct reference to the {@link WebServiceComponent} of the agent, if any.
+	 * <p>
+	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be removed without notice.
+	 * 
+	 * @return the component instance, if any. <code>null</code> otherwise.
+	 */
+	
+	public WebserviceComponent getWebService()
+	{
+		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.WEBSERVICE_COMPONENT))
+			return (WebserviceComponent) parentAgent.getComponent(AgentComponentName.WEBSERVICE_COMPONENT);
+		return null;
+	}
 	
 	/**
 	 * Handles the registration of an event handler for messages to a target (inside the agent) with the specified
@@ -478,5 +507,4 @@ public abstract class AgentComponent implements Serializable
 		if(eventHandlers.containsKey(event.getType()))
 			eventHandlers.get(event.getType()).handleEvent(event);
 	}
-	
 }

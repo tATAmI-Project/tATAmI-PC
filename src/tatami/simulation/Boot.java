@@ -27,6 +27,7 @@ import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.pc.util.windowLayout.WindowLayout;
+import tatami.sclaim.constructs.basic.ClaimAgentDefinition;
 import tatami.simulation.AgentLoader.StandardAgentLoaderType;
 import tatami.simulation.PlatformLoader.StandardPlatformType;
 
@@ -83,8 +84,10 @@ public class Boot
 		Map<String, PlatformLoader> platforms = new HashMap<String, PlatformLoader>();
 		// agent loader name -> agent loader
 		Map<String, AgentLoader> agentLoaders = new HashMap<String, AgentLoader>();
-		// package names where agent code (adf & java) may be located
+		// package names where agent code (java) may be located
 		Set<String> agentPackages = new HashSet<String>();
+		// package names where agent code (java) may be located
+		Set<String> adfPackages = new HashSet<String>();
 		// container name -> do create (true for local containers, false for remote)
 		Map<String, Boolean> allContainers = new HashMap<String, Boolean>();
 		// platform name -> names of containers to be present in the platform
@@ -96,9 +99,19 @@ public class Boot
 		// add agent packages specified in the scenario
 		Iterator<XMLNode> packagePathsIt = scenarioTree.getRoot().getNodeIterator(
 				AgentParameterName.AGENT_PACKAGE.toString());
-		while(packagePathsIt.hasNext())
-			agentPackages.add((String) packagePathsIt.next().getValue());
+		while(packagePathsIt.hasNext()) {
+			String value = (String) packagePathsIt.next().getValue();
+			agentPackages.add(value);
+		}
 		
+		// add adf paths specified in the scenario
+		Iterator<XMLNode> adfPackagePathsIt = scenarioTree.getRoot().getNodeIterator(
+				AgentParameterName.ADF_PACKAGE.toString());
+		while(adfPackagePathsIt.hasNext()) {
+				String value = (String) adfPackagePathsIt.next().getValue();
+				adfPackages.add(value);
+		}
+				
 		// iterate over platform entries in the scenario
 		defaultPlatform = loadPlatforms(
 				scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_PLATFORM.toString()), settings,
@@ -110,7 +123,7 @@ public class Boot
 		
 		// iterate containers and find agents
 		loadContainerAgents(scenarioTree.getRoot().getNodeIterator("initial").next().getNodeIterator("container"),
-				defaultPlatform, platforms, agentLoaders, agentPackages, allContainers, platformContainers, allAgents);
+				defaultPlatform, platforms, agentLoaders, agentPackages, adfPackages, allContainers, platformContainers, allAgents);
 		
 		// agents prepared, time to start platforms and the containers.
 		if(startPlatforms(platforms, platformContainers) > 0)
@@ -314,7 +327,7 @@ public class Boot
 	 */
 	protected void loadContainerAgents(Iterator<XMLNode> containerNodes, String defaultPlatform,
 			Map<String, PlatformLoader> platforms, Map<String, AgentLoader> agentLoaders, Set<String> agentPackages,
-			Map<String, Boolean> allContainers, Map<String, Set<String>> platformContainers,
+			Set<String> adfPackages, Map<String, Boolean> allContainers, Map<String, Set<String>> platformContainers,
 			Set<AgentCreationData> allAgents)
 	{
 		while(containerNodes.hasNext())
@@ -363,7 +376,7 @@ public class Boot
 				
 				// load agent
 				AgentCreationData agentCreationData = loadAgent(agentNode, agentName, containerName, doCreateContainer,
-						platforms.get(platformName), agentLoaders, agentPackages);
+						platforms.get(platformName), agentLoaders, agentPackages, adfPackages);
 				if(agentCreationData == null)
 					continue;
 				allAgents.add(agentCreationData);
@@ -409,7 +422,7 @@ public class Boot
 	 */
 	protected AgentCreationData loadAgent(XMLNode agentNode, String agentName, String containerName,
 			boolean doCreateContainer, PlatformLoader platform, Map<String, AgentLoader> agentLoaders,
-			Set<String> agentPackages)
+			Set<String> agentPackages, Set<String> adfPackages)
 	{
 		// loader
 		String agentLoaderName = PlatformUtils.getParameterValue(agentNode, AgentParameterName.AGENT_LOADER.toString());
@@ -435,8 +448,13 @@ public class Boot
 				parameters.add(param.getAttributeValue("name"), param.getAttributeValue("value"));
 			}
 		}
-		for(String pack : agentPackages)
+		for(String pack : agentPackages) {
 			parameters.add(AgentParameterName.AGENT_PACKAGE, pack);
+		}
+		
+		for(String pack : adfPackages) {
+			parameters.add(AgentParameterName.ADF_PACKAGE, pack);
+		}
 		
 		AgentCreationData agentCreationData = new AgentCreationData(agentName, parameters, containerName,
 				!doCreateContainer, platform.getName(), loader, agentNode);

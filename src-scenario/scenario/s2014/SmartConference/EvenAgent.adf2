@@ -1,0 +1,9 @@
+(agent Even
+	(behavior
+		(reactive increase
+			(receive ?agentName (message counting ?number))
+			(increment ?number ?newNo)
+			(send ?agentName (struct message counting ?newNo))
+		)
+	)
+)

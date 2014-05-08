@@ -46,6 +46,13 @@ public enum AgentParameterName {
 	AGENT_PACKAGE("agentPackage"),
 	
 	/**
+	 * Adf Agent packages with classes that are relevant to this agent.
+	 * 
+	 * Used by {@link ClaimAgent} (for sclaim code).
+	 */
+	ADF_PACKAGE("adfPath"),
+	
+	/**
 	 * Specifies the classes with java code to attach to the agent definition.
 	 * 
 	 * Used by <code>simulation.Boot</code> / <code>claim.ClaimComponent</code>.

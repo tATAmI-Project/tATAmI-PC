@@ -67,7 +67,7 @@ public class ClaimBehaviorDefinition extends ClaimConstruct implements Serializa
 	}
 
 	public Vector<ClaimConstruct> getStatements() {
-		return statements;
+		return statements; 
 	}
 
 	public void setBehaviorType(ClaimBehaviorType behaviorType) {

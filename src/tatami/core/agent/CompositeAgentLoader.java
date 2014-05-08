@@ -12,13 +12,19 @@ import java.util.Set;
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
 import net.xqhs.util.logging.LoggerSimple.Level;
+import net.xqhs.util.logging.UnitComponent;
 import net.xqhs.util.logging.UnitComponentExt;
+import sun.management.resources.agent;
 import tatami.core.agent.AgentComponent.AgentComponentName;
+import tatami.core.agent.claim.ClaimComponent;
+import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.util.platformUtils.PlatformUtils;
+import tatami.sclaim.constructs.basic.ClaimAgentDefinition;
 import tatami.simulation.AgentCreationData;
 import tatami.simulation.AgentLoader;
 import tatami.simulation.AgentManager;
+import tatami.simulation.ClaimUtils;
 import tatami.simulation.PlatformLoader;
 
 /**
@@ -122,8 +128,9 @@ public class CompositeAgentLoader implements AgentLoader
 			}
 			
 			// TODO: also check parameters
-			if(PlatformUtils.classExists(componentClass))
+			if(PlatformUtils.classExists(componentClass)) {
 				log.trace(logPre + "component [" + componentName + "] can be loaded");
+			}
 			else
 			{
 				log.error(logPre + "Component class [" + componentName + " | " + componentClass
@@ -131,14 +138,25 @@ public class CompositeAgentLoader implements AgentLoader
 				continue;
 			}
 			
+			// TODO emma maybe change Object to String as before
 			// get component parameters
-			Set<Map.Entry<String, String>> componentParameters = new HashSet<Map.Entry<String, String>>();
+			Set<Map.Entry<String, Object>> componentParameters = new HashSet<Map.Entry<String, Object>>();
 			Iterator<XMLNode> paramsIt = componentNode.getNodeIterator(PARAMETER_NODE_NAME);
 			while(paramsIt.hasNext())
 			{
 				XMLNode param = paramsIt.next();
-				componentParameters.add(new AbstractMap.SimpleEntry<String, String>(param
+				componentParameters.add(new AbstractMap.SimpleEntry<String, Object>(param
 						.getAttributeValue(PARAMETER_NAME), param.getAttributeValue(PARAMETER_VALUE)));
+			}
+			
+			/* create the associated ClaimAgentDefinition */
+			if (AgentComponentName.S_CLAIM_COMPONENT.toString().toLowerCase().contains(componentName)) {
+				ClaimAgentDefinition cad = ClaimUtils.fillCAD(agentCreationData.getParameters().get(AgentParameterName.AGENT_CLASS.toString()), 
+															  agentCreationData.getParameters().getValues(AgentParameterName.JAVA_CODE.toString()), 
+															  agentCreationData.getParameters().getValues(AgentParameterName.ADF_PACKAGE.toString()), 
+															  agentCreationData.getParameters().getValues(AgentParameterName.AGENT_PACKAGE.toString()), 
+															  (UnitComponentExt)log);
+				componentParameters.add(new AbstractMap.SimpleEntry<String, Object>(AgentParameterName.AGENT_CLASS.toString(), cad));
 			}
 			
 			Object argument = null;
@@ -189,6 +207,11 @@ public class CompositeAgentLoader implements AgentLoader
 			}
 		}
 		log.trace("agent [" + agentCreationData.getAgentName() + "] loaded.");
+		
+		/* start ClaimComponent if any */
+		if (agent.hasComponent(AgentComponentName.S_CLAIM_COMPONENT)) {
+			((ClaimComponent) agent.getComponent(AgentComponentName.S_CLAIM_COMPONENT)).setup();
+		}
 		log.doExit();
 		return agent;
 	}

@@ -28,7 +28,11 @@ public class BootDefaultArguments
 	/**
 	 * The scenario file.
 	 */
-	static final String			scenarioFileName		= "src-scenario/scenario/examples/jade/simpleA/scenario.xml";
+	//static final String			scenarioFileName		= "src-scenario/scenario/examples/jade/simpleA/scenario.xml";
+	//static final String			scenarioFileName		= "src-scenario/scenario/s2014/SmartConference/smart_room_conference.xml";
+	//static final String			scenarioFileName		= "src-scenario/scenario/s2013/SmartRoom_EMAS/smart_room_emas.xml";
+	//static final String			scenarioFileName		= "src-scenario/scenario/s2014/SmartConference/timeline.xml";
+	static final String			scenarioFileName		= "src-scenario/scenario/s2014/SmartConference/even_odd_scenario.xml";
 	
 	/**
 	 * Main (Jade) host.

@@ -47,6 +47,20 @@
 						</sequence>
 					</complexType>
 				</element>
+				<element name="jadeConfig" maxOccurs="1" minOccurs="0">
+					<complexType>
+						<attribute name="isMain" type="boolean" use="optional"
+							default="false" />
+						<attribute name="IPaddress" type="string" use="optional" />
+						<attribute name="port" type="positiveInteger" use="optional" />
+						<attribute name="localIPaddress" type="string" use="optional"/>
+						<attribute name="localPort" type="positiveInteger" use="optional"/>
+						<attribute name="platformID" type="string" use="optional" />
+						<attribute name="mainContainerName" type="string" use="optional" />
+					</complexType>
+				</element>
+				<element name="adfPath" type="string" minOccurs="0"
+					maxOccurs="unbounded" />
 				<element name="agentPackage" type="string" minOccurs="0"
 					maxOccurs="unbounded" />
 				<element name="initial" maxOccurs="1" minOccurs="0">

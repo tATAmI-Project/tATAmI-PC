@@ -10,11 +10,15 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import tatami.core.agent.AgentComponent.AgentComponentName;
+import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.AgentEvent.AgentSequenceType;
+import tatami.core.agent.claim.ClaimBehavior;
+import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.jade.JadeComponent;
+import tatami.sclaim.constructs.basic.ClaimBehaviorType;
 import tatami.simulation.AgentManager;
 
 /**
@@ -129,6 +133,8 @@ public class CompositeAgent implements Serializable, AgentManager
 						synchronized(eventQueue)
 						{
 							state = AgentState.RUNNING;
+							if (getComponent(AgentComponentName.S_CLAIM_COMPONENT) != null)
+								((ClaimComponent) getComponent(AgentComponentName.S_CLAIM_COMPONENT)).registerBehaviors();
 						}
 						break;
 					case AGENT_EXIT:
@@ -177,7 +183,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * <p>
 	 * It is important that this list is managed together with <code>components</code>.
 	 */
-	protected ArrayList<AgentComponent>					componentOrder		= new ArrayList<AgentComponent>();
+	protected ArrayList<AgentComponent>				componentOrder		= new ArrayList<AgentComponent>();
 	
 	// TODO: add support for non-standard components.
 	// /**

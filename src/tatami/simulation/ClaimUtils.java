@@ -18,8 +18,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.xqhs.util.logging.UnitComponentExt;
-import tatami.core.agent.claim.parser.ClaimAgentDefinition;
-import tatami.core.agent.claim.parser.Parser;
+import tatami.sclaim.constructs.basic.ClaimAgentDefinition;
+import tatami.sclaim.parser.Parser;
 
 /**
  * The purpose of this class is to hold functions that are necessary for the simulation, but are related to CLAIM
@@ -71,6 +71,7 @@ public class ClaimUtils
 		if(cad != null)
 		{
 			// attach java code
+			if (javaCodeAttachments != null) {
 			for(String className : javaCodeAttachments)
 			{
 				Class<?> attachment = null;
@@ -113,7 +114,7 @@ public class ClaimUtils
 				}
 				else
 					log.error("code attachment [" + className + "] not found.");
-			}
+			}}
 		}
 		else
 			log.error("agent definition not found for agent class [" + agentClass + "]");

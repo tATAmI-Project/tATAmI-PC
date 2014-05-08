@@ -1,16 +1,23 @@
 package tatami.jade;
 
+import java.util.Vector;
+
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.UnreadableException;
 import net.xqhs.util.config.Config.ConfigLockedException;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.CompositeAgent;
+import tatami.core.agent.claim.ClaimBehavior;
+import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
+import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
+import tatami.sclaim.constructs.basic.ClaimStructure;
 
 /**
  * Implements messaging functionality, using the features offered by Jade.
@@ -76,7 +83,14 @@ public class JadeMessaging extends MessagingComponent
 						getVisualizable().getLog().trace(
 								"Received message from [" + source + "] to [" + destination + "] with content ["
 										+ content + "].");
-					postAgentEvent(event);
+					
+					/* check with which behavior does the message corresponde (if it does) */
+					if (content.startsWith("(") && getClaim() != null)
+					{
+						((ClaimComponent) getClaim()).matchStatement(source, content);
+					}
+					if (!content.contains("struct message"))
+						postAgentEvent(event);
 				}
 				else
 					block();
@@ -116,8 +130,9 @@ public class JadeMessaging extends MessagingComponent
 		if(nElements > 3)
 			message.setConversationId(targetElements[3]);
 		message.setContent(content);
-		if(getVisualizable() != null)
-			getVisualizable().getLog().trace("Sending message to [" + target + "] with content [" + content + "].");
+		if(getVisualizable() != null && getVisualizable().getLog() != null) {
+			//getVisualizable().getLog().trace("Sending message to [" + target + "] with content [" + content + "].");
+		}
 		getWrapper().send(message);
 		return true;
 	}
@@ -143,7 +158,7 @@ public class JadeMessaging extends MessagingComponent
 		}
 		if(wrapper == null)
 		{
-			if(getVisualizable() != null)
+			if(getVisualizable() != null && getVisualizable().getLog() != null)
 				getVisualizable().getLog().error("Platform link is null.");
 			throw new IllegalStateException("Platform link is null.");
 		}
@@ -151,7 +166,7 @@ public class JadeMessaging extends MessagingComponent
 	}
 	
 	@Override
-	protected VisualizableComponent getVisualizable()
+	public VisualizableComponent getVisualizable()
 	{
 		return super.getVisualizable();
 	}

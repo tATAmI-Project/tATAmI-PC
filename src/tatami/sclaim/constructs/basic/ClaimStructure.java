@@ -88,10 +88,10 @@ public class ClaimStructure extends ClaimConstruct
 		
 		Logger log = (UnitComponentExt) new UnitComponentExt().setUnitName(unitName).setLoggerType(
 				PlatformUtils.platformLogType());
-		ClaimStructure structure = parseString(str);
+		ClaimStructure structure = parseString(str, log);
 		
 		//Log.exitLogger(unitName);
-		Logging.exitLogger(unitName);
+		//Logging.exitLogger(unitName);
 		return structure;
 	}
 	

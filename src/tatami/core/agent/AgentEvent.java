@@ -46,6 +46,16 @@ public class AgentEvent extends Config
 		 */
 		AGENT_MESSAGE(AgentSequenceType.UNORDERED),
 		
+		/**
+		 * Event occurs after the agent started. 
+		 */
+		AGENT_INITIAL_BEHAVIOR(AgentSequenceType.UNORDERED),
+		
+		/**
+		 * Event occurs after the agent started. 
+		 */
+		AGENT_REACTIVE_BEHAVIOR(AgentSequenceType.UNORDERED),
+		
 		;
 		
 		/**
