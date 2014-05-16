@@ -18,8 +18,7 @@
 		<scen:parameter name="name" value="jade" />
 	</scen:platform>
 	
- 	<scen:adfPath>src-scenario/scenario/s2014/SmartConference</scen:adfPath>
-	<scen:agentPackage>scenario.s2014.SmartConference</scen:agentPackage>
+ 	<scen:agentPackage>scenario/s2014/SmartConference</scen:agentPackage>
 	
  	<scen:initial>
 		<scen:container name="Container">
@@ -30,7 +29,7 @@
 				<!-- <scen:component name="messaging" />  -->
 				<scen:component name="messaging" />
 				<scen:component name="cognitive">
-				    <scen:parameter name="knowledge" value="Ana -isa-> human"/>
+					<scen:parameter name="knowledge" value="Ana -isa-> human"/>
 				</scen:component> 
 				<scen:component name="s_claim" />
 				<scen:parameter name="loader" value="composite" /> 
@@ -44,7 +43,9 @@
 				<scen:component name="visualizable" />
 				<!-- <scen:component name="messaging" />  -->
 				<scen:component name="messaging" />
-				<scen:component name="cognitive" />
+				<scen:component name="cognitive">
+					<scen:parameter name="knowledge" value="Ana -isa-> human"/>
+				</scen:component> 
 				<scen:component name="s_claim" />
 				
 				<scen:parameter name="loader" value="composite" />

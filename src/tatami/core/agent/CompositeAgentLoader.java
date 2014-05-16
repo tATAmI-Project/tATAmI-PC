@@ -140,6 +140,7 @@ public class CompositeAgentLoader implements AgentLoader
 			
 			// TODO emma maybe change Object to String as before
 			// get component parameters
+			// FIXME pentru mutat initializarea componentei
 			Set<Map.Entry<String, Object>> componentParameters = new HashSet<Map.Entry<String, Object>>();
 			Iterator<XMLNode> paramsIt = componentNode.getNodeIterator(PARAMETER_NODE_NAME);
 			while(paramsIt.hasNext())
@@ -153,7 +154,6 @@ public class CompositeAgentLoader implements AgentLoader
 			if (AgentComponentName.S_CLAIM_COMPONENT.toString().toLowerCase().contains(componentName)) {
 				ClaimAgentDefinition cad = ClaimUtils.fillCAD(agentCreationData.getParameters().get(AgentParameterName.AGENT_CLASS.toString()), 
 															  agentCreationData.getParameters().getValues(AgentParameterName.JAVA_CODE.toString()), 
-															  agentCreationData.getParameters().getValues(AgentParameterName.ADF_PACKAGE.toString()), 
 															  agentCreationData.getParameters().getValues(AgentParameterName.AGENT_PACKAGE.toString()), 
 															  (UnitComponentExt)log);
 				componentParameters.add(new AbstractMap.SimpleEntry<String, Object>(AgentParameterName.AGENT_CLASS.toString(), cad));

@@ -32,7 +32,12 @@ import tatami.sclaim.constructs.basic.ClaimValue;
 import tatami.sclaim.constructs.basic.ClaimVariable;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
+import tatami.core.agent.kb.ContextComponent;
+import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.parametric.AgentParameterName;
+import tatami.core.agent.parametric.ParametricComponent;
+import tatami.core.agent.visualization.VisualizableComponent;
+import tatami.core.agent.webServices.WebserviceComponent;
 
 public class ClaimComponent extends AgentComponent
 {
@@ -155,7 +160,9 @@ public class ClaimComponent extends AgentComponent
 					@Override
 					public void handleEvent(AgentEvent event)
 					{
+						System.out.println("aaaaaa");
 						cb.action();
+						System.out.println("bbbbb");
 					}
 				});
 				postAgentEvent(new AgentEvent(AgentEventType.AGENT_INITIAL_BEHAVIOR));
@@ -253,5 +260,35 @@ public class ClaimComponent extends AgentComponent
 	public Logger getLog()
 	{
 		return log;
+	}
+	
+	@Override
+	protected MessagingComponent getMessaging()
+	{
+		return super.getMessaging();
+	}
+	
+	@Override
+	protected ContextComponent getCognitive()
+	{
+		return super.getCognitive();
+	}
+	
+	@Override
+	protected ParametricComponent getParametric()
+	{
+		return super.getParametric();
+	}
+	
+	@Override
+	protected 	WebserviceComponent getWebService()
+	{
+		return super.getWebService();
+	}
+	
+	@Override
+	protected VisualizableComponent getVisualizable()
+	{
+		return super.getVisualizable();
 	}
 }

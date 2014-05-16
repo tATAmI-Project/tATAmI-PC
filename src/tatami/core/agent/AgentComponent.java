@@ -377,7 +377,7 @@ public abstract class AgentComponent implements Serializable
 	 * 
 	 * @return the component instance, if any. <code>null</code> otherwise.
 	 */
-	public ParametricComponent getParametric()
+	protected ParametricComponent getParametric()
 	{
 		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
 			return (ParametricComponent) parentAgent.getComponent(AgentComponentName.PARAMETRIC_COMPONENT);
@@ -391,7 +391,7 @@ public abstract class AgentComponent implements Serializable
 	 * 
 	 * @return the component instance, if any. <code>null</code> otherwise.
 	 */
-	public VisualizableComponent getVisualizable()
+	protected VisualizableComponent getVisualizable()
 	{
 		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.VISUALIZABLE_COMPONENT))
 			return (VisualizableComponent) parentAgent.getComponent(AgentComponentName.VISUALIZABLE_COMPONENT);
@@ -405,8 +405,7 @@ public abstract class AgentComponent implements Serializable
 	 * 
 	 * @return the component instance, if any. <code>null</code> otherwise.
 	 */
-	// TODO emma
-	public MessagingComponent getMessaging()
+	protected MessagingComponent getMessaging()
 	{
 		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.MESSAGING_COMPONENT))
 			return (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
@@ -449,7 +448,7 @@ public abstract class AgentComponent implements Serializable
 	 * @return the component instance, if any. <code>null</code> otherwise.
 	 */
 	
-	public WebserviceComponent getWebService()
+	protected WebserviceComponent getWebService()
 	{
 		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.WEBSERVICE_COMPONENT))
 			return (WebserviceComponent) parentAgent.getComponent(AgentComponentName.WEBSERVICE_COMPONENT);
