@@ -1,8 +1,11 @@
 package tatami.core.agent.kb;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 
 import net.xqhs.graphs.context.CCMImplementation;
 import net.xqhs.graphs.context.ContextGraph;
@@ -17,6 +20,9 @@ import net.xqhs.graphs.graph.Edge;
 import net.xqhs.graphs.graph.Graph;
 import net.xqhs.graphs.graph.GraphComponent;
 import net.xqhs.graphs.graph.SimpleGraph;
+import net.xqhs.graphs.matcher.GraphMatcherQuick;
+import net.xqhs.graphs.matcher.GraphMatchingProcess;
+import net.xqhs.graphs.matcher.Match;
 import net.xqhs.graphs.matcher.MonitorPack;
 import net.xqhs.graphs.pattern.GraphPattern;
 import net.xqhs.graphs.representation.text.TextGraphRepresentation;
@@ -54,7 +60,9 @@ public class ContextComponent extends AgentComponent {
 	}
 	
 	/**
-	 * Constructs a new instance of context component  
+	 * Constructs a new instance of context component
+	 * 
+	 * @param initialKnowledge
 	 */
 	public ContextComponent(HashSet<Entry<String, String>> initialKnowledge) {
 		this();
@@ -80,15 +88,20 @@ public class ContextComponent extends AgentComponent {
 	/**
 	 * Removes from knowledge graph the information that it is not needed
 	 * */
-	public boolean remove(Graph deleteKnowledge) 
+	public void remove(Graph deleteKnowledge) 
 	{	
 		for (Edge edge : deleteKnowledge.getEdges()) {
 			knowledgeGraph.removeEdge(edge);
 		}
+	}
+	
+	public Match read(GraphPattern pattern)
+	{
+		GraphMatchingProcess GMQ = GraphMatcherQuick.getMatcher(knowledgeGraph, pattern, new MonitorPack());
+		GMQ.resetIterator(0);
 		
-		/* TODO MAYBE delete the nodes that are not generic nodes 
-		 * (for example those that are in initialKnowledge) */
-		return true;
+		Match m = GMQ.getNextMatch();
+		return m;
 	}
 	
 	/**
@@ -132,13 +145,12 @@ public class ContextComponent extends AgentComponent {
 	 * 
 	 * @param pattern
 	 * @param receiver
-	 * @return
 	 */
-	public void registerMatchNotificationTarget(GraphPattern pattern, MatchNotificationReceiver receiver) 
+	public void registerMatchNotificationTarget(ContextPattern pattern, MatchNotificationReceiver receiver) 
 	{
 		continuousMatching.addMatchNotificationTarget(pattern, receiver);
 	}
-
+	
 	/** TODO 
 	 * maybe move in net.xqhs.Graphs
 	 * copied from testing.testing.ContextGraphsTest.java 

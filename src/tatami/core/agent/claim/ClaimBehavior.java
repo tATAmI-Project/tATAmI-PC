@@ -28,6 +28,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Vector;
 
+import sun.java2d.pipe.SpanShapeRenderer.Simple;
 import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
 import tatami.sclaim.constructs.basic.ClaimBehaviorType;
 import tatami.sclaim.constructs.basic.ClaimCondition;
@@ -46,7 +47,17 @@ import tatami.core.agent.kb.KnowledgeBase.KnowledgeDescription;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.visualization.AgentGui;
+import net.xqhs.graphs.context.ContextGraph;
+import net.xqhs.graphs.context.ContextPattern;
 import net.xqhs.graphs.graph.Graph;
+import net.xqhs.graphs.graph.Node;
+import net.xqhs.graphs.graph.SimpleGraph;
+import net.xqhs.graphs.graph.SimpleNode;
+import net.xqhs.graphs.matcher.Match;
+import net.xqhs.graphs.pattern.GraphPattern;
+import net.xqhs.graphs.pattern.NodeP;
+import net.xqhs.graphs.representation.text.TextGraphRepresentation;
+import net.xqhs.graphs.util.ContentHolder;
 import net.xqhs.util.logging.Logger;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.visualization.AgentGui.InputListener;
@@ -65,12 +76,16 @@ public class ClaimBehavior implements InputListener
 	private long			wakeUpAtTime;		// used by the primitive wait
 											
 	private int			currentStatement;	// the current statement being processed
-	private final int		numberOfStatements; // the number of statements of the behavior
+	private int		numberOfStatements; // the number of statements of the behavior
 											
 	private boolean		initialized;		// tells if this behavior was initialized
 	private ClaimComponent	myAgent;			// instance of ClaimComponent
 	
 	private boolean 		isReceive;			// true when the currentStatement is a receive statement
+	
+	// used for if branches detection TODO emma modify
+	private int			sizeIfStatement;			
+	private int			pozIfStatement;
 	
 	/**
 	 * TODO
@@ -135,6 +150,8 @@ public class ClaimBehavior implements InputListener
 		initialized = false;
 		isReceive = false;
 		log = myAgent.getLog();
+		sizeIfStatement = 0;
+		pozIfStatement = 0;
 	}
 	
 	public void actionOnReceive(String source, String content) {
@@ -145,6 +162,19 @@ public class ClaimBehavior implements InputListener
 	
 	public void action()
 	{
+		if (sizeIfStatement != 0)
+			pozIfStatement++;
+		
+		if (pozIfStatement > sizeIfStatement) {
+			Vector<ClaimConstruct> struct = cbd.getStatements();
+			
+			int startPoint = currentStatement - 1;
+			while (startPoint > currentStatement - sizeIfStatement)
+				struct.remove(startPoint--);
+			sizeIfStatement = 0;
+			pozIfStatement = 0;
+		}
+		
 		if(currentStatement != numberOfStatements)
 		{
 			if(!handleStatement(cbd.getStatements().get(currentStatement++)))
@@ -181,6 +211,7 @@ public class ClaimBehavior implements InputListener
 					break;
 				}
 		}
+		
 	}
 	
 	public boolean done()
@@ -258,19 +289,34 @@ public class ClaimBehavior implements InputListener
 			boolean condition = handleCall(((ClaimIf) statement).getCondition());
 			if(condition)
 			{
-				log.trace("if condition satisfied");
+				log.trace("if condition satisfied " + currentStatement);
+				
 				// after "then" there's a true branch and a false branch
 				Vector<ClaimConstruct> trueBranch = ((ClaimIf) statement).getTrueBranch();
-				for(ClaimConstruct trueBranchStatement : trueBranch)
-					handleStatement(trueBranchStatement);
+				
+				Vector<ClaimConstruct> struct = cbd.getStatements();
+				struct.addAll(currentStatement, trueBranch);
+				numberOfStatements += trueBranch.size();
+				cbd.setStatements(struct);
+				sizeIfStatement = trueBranch.size();
+				return true;
+				
 			}
 			else
 			{
 				log.trace("if condition not satisfied");
 				Vector<ClaimConstruct> falseBranch = ((ClaimIf) statement).getFalseBranch();
-				if(falseBranch != null)
-					for(ClaimConstruct falseBranchStatement : falseBranch)
+				
+				if(falseBranch != null) {
+					Vector<ClaimConstruct> struct = cbd.getStatements();
+					struct.addAll(currentStatement + 1, falseBranch);
+					cbd.setStatements(struct);
+					sizeIfStatement = falseBranch.size();
+				}
+					
+				/*	for(ClaimConstruct falseBranchStatement : falseBranch)
 						handleStatement(falseBranchStatement);
+				*/
 			}
 			break;
 		
@@ -324,6 +370,7 @@ public class ClaimBehavior implements InputListener
 		case NEW:
 			return handleNew(args);
 		case ADDK:
+			System.out.println("de aici eeeeeeeeeeee");
 		case REMOVEK:
 		case READK:
 			return handleKnowledgeManagement(function.getFunctionType(), args);
@@ -874,48 +921,74 @@ public class ClaimBehavior implements InputListener
 	{
 		Graph graph = getKBase();
 		
-		/*
+		String knowledge = constructs2OneStrings(((ClaimStructure) args.get(0)).getFields(), 1);
+		
 		switch(construct)
 		{
 		case ADDK:
 		// function "add knowledge"
 		{
-			// after addK there's always a structure of knowledge
-			SimpleKnowledge newKl = structure2Knowledge((ClaimStructure) args.get(0));
-			
-			// add knowledge to the knowledge base of agent
-			kb.add(newKl);
-			log.info(this.myAgent.getLocalName() + " adds new knowledge " + newKl.printlnKnowledge() + " in behavior "
-					+ this.cbd.getName());
+			// after addK there's always knowledge (pattern condition will be after condition)  
+			// TODO emma move this to condition
+			if (knowledge.substring(0, knowledge.indexOf(" ")).equals("pattern"))
+			{
+				knowledge = knowledge.substring(knowledge.indexOf(" ") + 1);
+				ContextPattern CP = new ContextPattern();
+				myAgent.getCognitive().addPattern(
+						(ContextPattern) new TextGraphRepresentation(CP).readRepresentation(new ContentHolder<String>(knowledge)));
+			}
+			else {
+				myAgent.getCognitive().add(new TextGraphRepresentation(
+						new SimpleGraph()).readRepresentation(new ContentHolder<String>(knowledge)));
+			}
+			log.info(" adds new knowledge " + knowledge + " in behavior " + this.cbd.getName());
 			return true;
 		}
+		
 		case READK:
 		// function "check if agent already has the knowledge"
 		// If yes : return true, also put the value of variable in knowledge pattern into the symbol table
 		{
-			// after readK there's always a structure of knowledge
+			// after readK there's always a pattern
+			@SuppressWarnings("unused")
 			ClaimStructure knowledgeStruct = (ClaimStructure) args.get(0); // struct knowledge <kl type> <kl fields>
-			SimpleKnowledge pattern = structure2Knowledge(knowledgeStruct);
-			KnowledgeDescription result = kb.getFirst(pattern);
-			// FIXME: support multiple types
-			if(result == null)
-				return false; // knowledge was not found
-			return readStructure(knowledge2Structure((SimpleKnowledge) result), knowledgeStruct, 0, true, false);
+			
+			/* replace all ClaimVariables (represented as ?<name>) with an index */
+			HashMap<Integer, ClaimVariable> intToVariable = new HashMap<Integer, ClaimVariable>();
+			knowledge = constructsAndMaps(knowledgeStruct.getFields(), intToVariable, 1);
+			
+			GraphPattern CP = new GraphPattern();
+			TextGraphRepresentation repr = new TextGraphRepresentation(CP);
+			repr.readRepresentation(new ContentHolder<String>(knowledge));
+			Match m = myAgent.getCognitive().read(CP);
+			
+			if (m == null)
+				return false;
+			
+			for (Node node : CP.getNodes())
+				if (node instanceof NodeP) {
+					Node rez = m.getMatchedGraphNode(node); 
+					st.put(intToVariable.get(((NodeP) node).genericIndex()), 
+							new ClaimValue(rez.getLabel()));
+				}
+					
 		}
+		
 		case REMOVEK:
-		// function "remove knowledge"
+		// function "remove knowledge" TODO remove patterns
 		{
-			ClaimStructure knowledgeStruct = (ClaimStructure) args.get(0); // struct knowledge <kl type> <kl fields>
-			SimpleKnowledge pattern = structure2Knowledge(knowledgeStruct);
-			kb.remove(pattern);
+			/*myAgent.getCognitive().remove(new TextGraphRepresentation(
+					new SimpleGraph()).readRepresentation(new ContentHolder<String>(knowledge)));
+			*/
 			return true;
 		}
+		
 		default:
 			// should not be here
 			return true; // unreachable code
 		}
-		*/
-		return true;
+		
+		//return true;
 	}
 	
 	/**
@@ -1345,9 +1418,12 @@ public class ClaimBehavior implements InputListener
 	protected Vector<Object> constructs2Objects(List<ClaimConstruct> constructs, int ignore)
 	{
 		Vector<Object> args = new Vector<Object>();
-		for(ClaimConstruct arg : flattenConstructs(constructs, ignore, KeepVariables.KEEP_NONE))
+		for(ClaimConstruct arg : flattenConstructs(constructs, ignore, KeepVariables.KEEP_ALL))
 			if(arg != null)
-				args.add(((ClaimValue) arg).getValue());
+				if (arg instanceof ClaimValue)
+					args.add(((ClaimValue) arg).getValue());
+				else
+					args.add((ClaimVariable) arg);
 			else
 				args.add(null);
 		return args;
@@ -1359,6 +1435,42 @@ public class ClaimBehavior implements InputListener
 		for(Object arg : constructs2Objects(constructs, ignore))
 			args.add((String) arg);
 		return args;
+	}
+	
+	protected String constructs2OneStrings(List<ClaimConstruct> constructs, int ignore)
+	{
+		String rez = new String();
+		
+		Vector<Object> objects = constructs2Objects(constructs, ignore);
+		
+		for(Object arg : objects) {
+			if (arg instanceof ClaimVariable)
+				rez = rez.concat(((ClaimVariable) arg).toString() + " ");
+			else
+				rez = rez.concat((String) arg + " ");
+		}
+		return rez;
+	}
+	
+	protected String constructsAndMaps(List<ClaimConstruct> constructs, 
+											HashMap<Integer, ClaimVariable> intToVariable, int ignore)
+	{
+		String rez = new String();
+		
+		int no = 1;
+		Vector<Object> objects = constructs2Objects(constructs, ignore);
+		objects.remove(0);
+		
+		for(Object arg : objects) {
+			if (arg instanceof ClaimVariable) {
+				intToVariable.put(no, (ClaimVariable) arg);
+				rez = rez.concat("?#" + no + " ");
+				no++;
+			}
+			else
+				rez = rez.concat((String) arg + " ");
+		}
+		return rez;
 	}
 	
 	/**

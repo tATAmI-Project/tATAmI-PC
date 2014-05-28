@@ -1,7 +1,10 @@
 (agent Odd
 	(behavior
 		(initial register
-			(send parent (struct message counting 0))
+			(if (readK (struct knowledge pattern ?Ana -isa-> ?what))
+			then
+			(send parent (struct message ?Ana -isa-> ?what))
+			)
 		)
 		(reactive increase
 			(receive (message counting ?number))
