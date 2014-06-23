@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
+import java.util.Stack;
 import java.util.Vector;
 
 import sun.java2d.pipe.SpanShapeRenderer.Simple;
@@ -72,20 +73,20 @@ import tatami.core.agent.visualization.AgentGui.InputListener;
  */
 public class ClaimBehavior implements InputListener
 {
-	private boolean		finished;			// used to verify if the behavior is finished
-	private long			wakeUpAtTime;		// used by the primitive wait
+	private boolean			finished;			// used to verify if the behavior is finished
+	private long				wakeUpAtTime;		// used by the primitive wait
 											
-	private int			currentStatement;	// the current statement being processed
-	private int		numberOfStatements; // the number of statements of the behavior
+	private int				currentStatement;	// the current statement being processed
+	private int				numberOfStatements; // the number of statements of the behavior
 											
-	private boolean		initialized;		// tells if this behavior was initialized
-	private ClaimComponent	myAgent;			// instance of ClaimComponent
+	private boolean			initialized;		// tells if this behavior was initialized
+	private ClaimComponent		myAgent;			// instance of ClaimComponent
 	
-	private boolean 		isReceive;			// true when the currentStatement is a receive statement
+	private boolean 			isReceive;			// true when the currentStatement is a receive statement
 	
-	// used for if branches detection TODO emma modify
-	private int			sizeIfStatement;			
-	private int			pozIfStatement;
+	// used for if branches detection
+	private Stack<Integer>		sizeIfStatement;			
+	private Stack<Integer>		pozIfStatement;
 	
 	/**
 	 * TODO
@@ -150,8 +151,8 @@ public class ClaimBehavior implements InputListener
 		initialized = false;
 		isReceive = false;
 		log = myAgent.getLog();
-		sizeIfStatement = 0;
-		pozIfStatement = 0;
+		sizeIfStatement = new Stack<Integer>();
+		pozIfStatement = new Stack<Integer>();
 	}
 	
 	public void actionOnReceive(String source, String content) {
@@ -162,17 +163,21 @@ public class ClaimBehavior implements InputListener
 	
 	public void action()
 	{
-		if (sizeIfStatement != 0)
-			pozIfStatement++;
-		
-		if (pozIfStatement > sizeIfStatement) {
-			Vector<ClaimConstruct> struct = cbd.getStatements();
+		if (!sizeIfStatement.empty()) {
+			Integer nrStatements = pozIfStatement.pop();
+			nrStatements++;
+			pozIfStatement.push(nrStatements);
 			
-			int startPoint = currentStatement - 1;
-			while (startPoint > currentStatement - sizeIfStatement)
-				struct.remove(startPoint--);
-			sizeIfStatement = 0;
-			pozIfStatement = 0;
+			if (pozIfStatement.peek() > sizeIfStatement.peek()) {
+				Vector<ClaimConstruct> struct = cbd.getStatements();
+				
+				int startPoint = currentStatement - 1;
+				while (startPoint > currentStatement - sizeIfStatement.peek())
+					struct.remove(startPoint--);
+				
+				sizeIfStatement.pop();
+				pozIfStatement.pop();
+			}
 		}
 		
 		if(currentStatement != numberOfStatements)
@@ -281,8 +286,15 @@ public class ClaimBehavior implements InputListener
 				return true;
 			}
 			// Type Condition
-		case CONDITION:
-			return handleCall(((ClaimCondition) statement).getCondition());
+		case CONDITION: {
+			while (!handleCall(((ClaimCondition) statement).getCondition()))
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			return true;
+		}
 			
 			// Type IF
 		case IF:
@@ -298,7 +310,9 @@ public class ClaimBehavior implements InputListener
 				struct.addAll(currentStatement, trueBranch);
 				numberOfStatements += trueBranch.size();
 				cbd.setStatements(struct);
-				sizeIfStatement = trueBranch.size();
+				sizeIfStatement.push(trueBranch.size());
+				pozIfStatement.push(0);
+				//sizeIfStatement = trueBranch.size();
 				return true;
 				
 			}
@@ -311,12 +325,10 @@ public class ClaimBehavior implements InputListener
 					Vector<ClaimConstruct> struct = cbd.getStatements();
 					struct.addAll(currentStatement + 1, falseBranch);
 					cbd.setStatements(struct);
-					sizeIfStatement = falseBranch.size();
+					sizeIfStatement.push(falseBranch.size());
+					pozIfStatement.push(0);
 				}
 					
-				/*	for(ClaimConstruct falseBranchStatement : falseBranch)
-						handleStatement(falseBranchStatement);
-				*/
 			}
 			break;
 		
@@ -370,7 +382,6 @@ public class ClaimBehavior implements InputListener
 		case NEW:
 			return handleNew(args);
 		case ADDK:
-			System.out.println("de aici eeeeeeeeeeee");
 		case REMOVEK:
 		case READK:
 			return handleKnowledgeManagement(function.getFunctionType(), args);

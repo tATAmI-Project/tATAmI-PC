@@ -1,9 +1,13 @@
 (agent Odd
 	(behavior
 		(initial register
+			(condition (readK (struct knowledge pattern Ana -isa-> ?roomName)))
 			(if (readK (struct knowledge pattern ?Ana -isa-> ?what))
 			then
-			(send parent (struct message ?Ana -isa-> ?what))
+				(if (readK (struct knowledge pattern ?Maria -isa-> ?something))
+				then
+					(send parent (struct message counting 0))
+				)
 			)
 		)
 		(reactive increase
