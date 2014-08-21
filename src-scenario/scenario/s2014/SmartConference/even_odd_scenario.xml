@@ -29,7 +29,9 @@
 				<!-- <scen:component name="messaging" />  -->
 				<scen:component name="messaging" />
 				<scen:component name="cognitive">
-					<scen:parameter name="knowledge" value="Ana -isa-> human"/>
+					<scen:parameter name="knowledge" value="(Graph  
+					    										(-> Ana -isa-> human)
+					    										(-> Andrei -isa-> robot)))"/>
 				</scen:component> 
 				<scen:component name="s_claim" />
 				<scen:parameter name="loader" value="composite" /> 
@@ -44,7 +46,7 @@
 				<!-- <scen:component name="messaging" />  -->
 				<scen:component name="messaging" />
 				<scen:component name="cognitive">
-					<scen:parameter name="knowledge" value="Ana -isa-> human"/>
+					<scen:parameter name="knowledge" value="Ana (-isa-> human) (-isa-> robot)"/>
 				</scen:component> 
 				<scen:component name="s_claim" />
 				

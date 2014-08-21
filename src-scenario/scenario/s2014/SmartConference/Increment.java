@@ -19,9 +19,25 @@ import tatami.sclaim.constructs.basic.ClaimValue;
 
 public class Increment implements ClaimFunctionLibrary
 {
+	public static boolean justPrintArguments(Vector<ClaimValue> arguments)
+	{
+		System.out.println(" ---- arguments are ----- ");
+		for (int i = 0; i < arguments.size(); ++i) {
+			System.out.println(arguments.get(i));
+		}
+		return true;
+	}
+	
 	public static boolean increment(Vector<ClaimValue> arguments)
 	{
 		arguments.set(1, new ClaimValue(new Integer(Integer.parseInt((String)arguments.get(0).getValue()) + 1).toString()));
 		return true;
 	}
+	
+	public static boolean func(Vector<ClaimValue> arguments)
+	{
+		//arguments.set(0, new ClaimValue(new Boolean(true)));
+		return true;
+	}
+
 }
