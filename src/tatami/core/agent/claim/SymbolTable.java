@@ -96,6 +96,10 @@ public class SymbolTable implements Serializable
 	 */
 	public void put(ClaimVariable variable, ClaimValue value)
 	{
+		if (!table.containsKey(variable)) {
+			table.put(variable, value);
+			return;
+		}
 		SymbolTable st = getSymbolTableContainingKey(variable);
 		if(st == null)
 			table.put(variable, value);

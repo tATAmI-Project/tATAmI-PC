@@ -84,10 +84,6 @@ public class ClaimBehavior implements InputListener
 	
 	private boolean 			isReceive;			// true when the currentStatement is a receive statement
 	
-	// used for if branches detection
-	private Stack<Integer>		sizeIfStatement;			
-	private Stack<Integer>		pozIfStatement;
-	
 	/**
 	 * TODO
 	 * Behavior for agent moving.
@@ -151,8 +147,6 @@ public class ClaimBehavior implements InputListener
 		initialized = false;
 		isReceive = false;
 		log = myAgent.getLog();
-		sizeIfStatement = new Stack<Integer>();
-		pozIfStatement = new Stack<Integer>();
 	}
 	
 	public void actionOnReceive(String source, String content) {
@@ -163,23 +157,6 @@ public class ClaimBehavior implements InputListener
 	
 	public void action()
 	{
-		if (!sizeIfStatement.empty()) {
-			Integer nrStatements = pozIfStatement.pop();
-			nrStatements++;
-			pozIfStatement.push(nrStatements);
-			
-			if (pozIfStatement.peek() > sizeIfStatement.peek()) {
-				Vector<ClaimConstruct> struct = cbd.getStatements();
-				
-				int startPoint = currentStatement - 1;
-				while (startPoint > currentStatement - sizeIfStatement.peek())
-					struct.remove(startPoint--);
-				
-				sizeIfStatement.pop();
-				pozIfStatement.pop();
-			}
-		}
-		
 		if(currentStatement != numberOfStatements)
 		{
 			if(!handleStatement(cbd.getStatements().get(currentStatement++)))
@@ -285,7 +262,8 @@ public class ClaimBehavior implements InputListener
 				handleCall((ClaimFunctionCall) statement);
 				return true;
 			}
-			// Type Condition
+		
+		// Type Condition
 		case CONDITION: {
 			while (!handleCall(((ClaimCondition) statement).getCondition()))
 				try {
@@ -296,7 +274,7 @@ public class ClaimBehavior implements InputListener
 			return true;
 		}
 			
-			// Type IF
+		// Type IF
 		case IF:
 			boolean condition = handleCall(((ClaimIf) statement).getCondition());
 			if(condition)
@@ -305,38 +283,21 @@ public class ClaimBehavior implements InputListener
 				
 				// after "then" there's a true branch and a false branch
 				Vector<ClaimConstruct> trueBranch = ((ClaimIf) statement).getTrueBranch();
-				
-				Vector<ClaimConstruct> struct = cbd.getStatements();
-				struct.addAll(currentStatement, trueBranch);
-				numberOfStatements += trueBranch.size();
-				cbd.setStatements(struct);
-				sizeIfStatement.push(trueBranch.size());
-				pozIfStatement.push(0);
-				//sizeIfStatement = trueBranch.size();
-				return true;
-				
+				for(ClaimConstruct trueBranchStatement : trueBranch)
+					handleStatement(trueBranchStatement);
 			}
 			else
 			{
-				log.trace("if condition not satisfied");
 				Vector<ClaimConstruct> falseBranch = ((ClaimIf) statement).getFalseBranch();
-				
-				if(falseBranch != null) {
-					Vector<ClaimConstruct> struct = cbd.getStatements();
-					struct.addAll(currentStatement + 1, falseBranch);
-					cbd.setStatements(struct);
-					sizeIfStatement.push(falseBranch.size());
-					pozIfStatement.push(0);
-				}
-					
+				if(falseBranch != null)
+					for(ClaimConstruct falseBranchStatement : falseBranch)
+						handleStatement(falseBranchStatement);
 			}
 			break;
 		
 		// Type ForAllK
 		case FORALLK:
-			// structure : struct knowledge v1 v2 ... vn
-			// TODO emma
-			// handleForAllK((ClaimForAllK) statement, getKBase());
+			handleForAllK((ClaimForAllK) statement);
 			break;
 		
 		// Type While
@@ -530,14 +491,6 @@ public class ClaimBehavior implements InputListener
 			break;
 		}
 		
-		/* if((args.size() > 2) && (myAgent instanceof WebserviceComponent))
-		{
-			webServiceInvocationMode = true;
-			if(receiver.equals("null"))// FIXME null value should be handled specially
-				// use simple web service access
-				simpleWebService = true;
-		}*/
-		
 		if(args.size() > 3)
 			// FIXME check if in WS mode
 			expectServiceReturn = true;
@@ -612,16 +565,6 @@ public class ClaimBehavior implements InputListener
 				{ // WS return result 
 					log.trace("sending WS result [" + message.toString() + "]");
 					ContentElement ce = new Result(lastReceivedAction, message.toString());
-					/*try
-					{
-						myAgent.getContentManager().fillContent(reply, ce);
-					} catch(CodecException e)
-					{
-						e.printStackTrace();
-					} catch(OntologyException e)
-					{
-						e.printStackTrace();
-					}*/
 				}
 				else
 					try
@@ -635,8 +578,6 @@ public class ClaimBehavior implements InputListener
 				
 				if (myAgent.getMessaging() != null)
 				{
-					//	receiver = MessagingComponent.makePathHelper(receiver, Vocabulary.VISUALIZATION.toString(),
-					//					Vocabulary.VISUALIZATION_MONITOR.toString());
 					myAgent.getMessaging().sendMessage(receiver, myAgent.getParametric().parVal(AgentParameterName.AGENT_NAME).toString(), message.toString());
 				}
 				log.info("sent " + message.toString());
@@ -971,8 +912,8 @@ public class ClaimBehavior implements InputListener
 			GraphPattern CP = new GraphPattern();
 			TextGraphRepresentation repr = new TextGraphRepresentation(CP);
 			repr.readRepresentation(new ContentHolder<String>(knowledge));
-			Match m = myAgent.getCognitive().read(CP);
 			
+			Match m = myAgent.getCognitive().read(CP);
 			if (m == null)
 				return false;
 			
@@ -988,9 +929,9 @@ public class ClaimBehavior implements InputListener
 		case REMOVEK:
 		// function "remove knowledge" TODO remove patterns
 		{
-			/*myAgent.getCognitive().remove(new TextGraphRepresentation(
-					new SimpleGraph()).readRepresentation(new ContentHolder<String>(knowledge)));
-			*/
+			//myAgent.getCognitive().remove(new TextGraphRepresentation(
+			//		new SimpleGraph()).readRepresentation(new ContentHolder<String>(knowledge)));
+			
 			return true;
 		}
 		
@@ -1004,93 +945,36 @@ public class ClaimBehavior implements InputListener
 	
 	/**
 	 * Read all records of knowledge in the knowledge base that match the pattern. Used in forAllK function.
-	 * <p>
-	 * - First, check if knowledge type matches.
-	 * <p>
-	 * - If matches, bind variable in knowledge pattern that haven't been bound by the value of knowledge in the
-	 * knowledge base that has the same type.
-	 * <p>
-	 * - If there's any field that doesn't match, the pattern doesn't match.
-	 * <p>
-	 * Execute the statements inside the forAllK after binding all variables
-	 * 
-	 * @param construct
-	 *            : the construct of forAllK - Structure of knowledge :
-	 *            <p>
-	 *            "forAllK((struct knowledge &lt;knowledge Type&gt; &lt;knowledge field 1..n &gt;) &lt;statements&gt; )"
-	 * @param knowledge
-	 *            : the knowledge base
 	 */
-	protected void handleForAllK(ClaimForAllK construct, KnowledgeBase knowledgeBase)
+	protected void handleForAllK(ClaimForAllK construct)
 	{
-		ClaimStructure klStructure = construct.getStructure();
+		ClaimStructure knowledgeStruct = construct.getStructure();
 		Vector<ClaimConstruct> statements = construct.getStatements();
 		
-		// map of pairs <Variable, value> used to bind fields in knowledge pattern that haven't been bound (variable)
-		HashMap<ClaimVariable, ClaimValue> map = new HashMap<ClaimVariable, ClaimValue>();
-		boolean matches = false;
+		// replace all ClaimVariables (represented as ?<name>) with an index
+		HashMap<Integer, ClaimVariable> intToVariable = new HashMap<Integer, ClaimVariable>();
+		String knowledge = constructsAndMaps(knowledgeStruct.getFields(), intToVariable, 1);
 		
-		Vector<ClaimConstruct> klStructureFields = klStructure.getFields();
-		Collection<KnowledgeDescription> knowledge = knowledgeBase.getAll(structure2Knowledge(klStructure));
-		// type
-		String knowledgeType = (String) ((ClaimValue) klStructureFields.get(1)).getValue();
-		// fields
-		for(KnowledgeDescription kd : knowledge)
-		{
-			SimpleKnowledge klToMatch = (SimpleKnowledge) kd; // FIXME: support other types
-			// if found knowledge that has the same type
-			if(knowledgeType.equals(klToMatch.getKnowledgeType())) // FIXME: this is currently superfluous
-			{
-				matches = true;
-				// map.clear(); // not needed, in order to be able to make the verification for previously bound
-				// variables in this forAllK, by verifying which variables were unbound at the beginning of the
-				// execution
-				for(int j = 2; j < klStructureFields.size(); j++)
-				{
-					ClaimVariable fieldVariable = ((ClaimVariable) klStructureFields.get(j));
-					ClaimValue value = getVariableValue(fieldVariable);
-					// check if fieldVariable is in the symbol table or not
-					// if variable is bound (value != null) and doesn't match with the knowledge, return false
-					if(value != null)
-					{
-						if(!map.containsKey(fieldVariable))
-						{
-							if(!((String) value.getValue()).equals(klToMatch.getSimpleKnowledge().get(j - 2)))
-							{
-								matches = false;
-								continue;
-							}
-						}
-						else
-						{
-							map.put(fieldVariable, new ClaimValue(klToMatch.getSimpleKnowledge().get(j - 2)));
-						}
-					}
-					// if not, bind with value in the knowledge base
-					else
-					{
-						map.put(fieldVariable, new ClaimValue(klToMatch.getSimpleKnowledge().get(j - 2)));
-					}
+		GraphPattern CP = new GraphPattern();
+		TextGraphRepresentation repr = new TextGraphRepresentation(CP);
+		repr.readRepresentation(new ContentHolder<String>(knowledge));
+		
+		List<Match> matches = myAgent.getCognitive().readAll(CP);
+		for (Match match : matches) {
+			st = new SymbolTable(st);
+			
+			System.out.println(match.toString());
+			for (Node node : CP.getNodes())
+				if (node instanceof NodeP) {
+					Node rez = match.getMatchedGraphNode(node);
+					int genericIndex = ((NodeP) node).genericIndex();
+					st.put(intToVariable.get(genericIndex), 
+							new ClaimValue(rez.toString()));
 				}
-				
-				// if the pattern matches, put into behavior's symbol table all pairs <variable, value> that has been
-				// found
-				if(matches)
-				{
-					Set<Entry<ClaimVariable, ClaimValue>> set = map.entrySet();
-					for(Iterator<Entry<ClaimVariable, ClaimValue>> it = set.iterator(); it.hasNext();)
-					{
-						Map.Entry<ClaimVariable, ClaimValue> entry = it.next();
-						st.put(entry.getKey(), entry.getValue());
-					}
-					for(ClaimConstruct statement : statements)
-						handleStatement(statement);
-					/*
-					 * // reset all variables bound in this procedure to null for(Iterator<Entry<ClaimVariable,
-					 * ClaimValue>> it = set.iterator(); it.hasNext();) { Map.Entry<ClaimVariable, ClaimValue> entry =
-					 * it.next(); cbd.getSymbolTable().put(entry.getKey(), null); }
-					 */}
-			}
+			for (ClaimConstruct claimConstruct : construct.getStatements())
+				handleStatement(claimConstruct);
+			
+			st = st.prev;
 		}
 	}
 	

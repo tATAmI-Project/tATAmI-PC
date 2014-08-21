@@ -2,10 +2,9 @@ package tatami.core.agent.kb;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.List;
 
 import net.xqhs.graphs.context.CCMImplementation;
 import net.xqhs.graphs.context.ContextGraph;
@@ -102,6 +101,20 @@ public class ContextComponent extends AgentComponent {
 		
 		Match m = GMQ.getNextMatch();
 		return m;
+	}
+	
+	public List<Match> readAll(GraphPattern pattern)
+	{
+		ArrayList<Match> matches = new ArrayList<Match>();
+		GraphMatchingProcess GMQ = GraphMatcherQuick.getMatcher(knowledgeGraph, pattern, new MonitorPack());
+		GMQ.resetIterator(0);
+		
+		Match m = GMQ.getNextMatch();
+		while (m != null) {
+			matches.add(m);
+			m = GMQ.getNextMatch();
+		}
+		return matches;
 	}
 	
 	/**
