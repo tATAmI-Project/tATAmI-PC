@@ -1,5 +1,6 @@
 /bin/
-/doc-tATAmI-*/
+/doc-tATAmI-PC/wiki
+/doc-tATAmI-PC/pages
 /output/tATAmI-*.jar
 /APDescription*.txt
 /MTPs-Administration*.txt
