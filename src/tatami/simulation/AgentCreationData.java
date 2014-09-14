@@ -24,8 +24,8 @@ public class AgentCreationData
 {
 	boolean			isRemote;
 	String			agentName;
-	String			classpath;
-	ParametrizedAgent.AgentParameters	parameters;
+	public String			classpath;
+	public ParametrizedAgent.AgentParameters	parameters;
 	String			destinationContainer;
 	
 	public AgentCreationData(String name, String path, ParametrizedAgent.AgentParameters agentParameters, String destination, boolean remote)

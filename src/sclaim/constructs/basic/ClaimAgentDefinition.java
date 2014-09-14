@@ -27,6 +27,7 @@ public class ClaimAgentDefinition extends ClaimConstruct implements Serializable
 	
 	private Vector<ClaimVariable> parameters;
 	private Vector<ClaimBehaviorDefinition> behaviors;
+	private Vector<String> agentClasses; // Classes of agents that are invoked by the new command.
 	private List<Class<?>> codeAttachements = new Vector<Class<?>>();
 	
 	/**
@@ -42,13 +43,14 @@ public class ClaimAgentDefinition extends ClaimConstruct implements Serializable
 		return agentClassName;
 	}
 	
-	public ClaimAgentDefinition(String agentClassName, Vector<ClaimConstruct> parameters, Vector<ClaimBehaviorDefinition> behaviors)
+	public ClaimAgentDefinition(String agentClassName, Vector<ClaimConstruct> parameters, Vector<ClaimBehaviorDefinition> behaviors, Vector<String> agentClasses)
 	{
 		
 		super(ClaimConstructType.AGENT);
 		setClassName(agentClassName);
 		setParameters(parameters);
 		setBehaviors(behaviors);
+		setAgentClasses(agentClasses);
 	}
 
 /*	public ClaimAgentDefinition(String agentClassName, Vector<ClaimVariable> parameters, Vector<ClaimBehaviorDefinition> behaviors, List<Class<?>> codeAttachements)
@@ -75,6 +77,14 @@ public class ClaimAgentDefinition extends ClaimConstruct implements Serializable
 
 	public void setBehaviors(Vector<ClaimBehaviorDefinition> behaviors) {
 		this.behaviors = behaviors;
+	}
+
+	public Vector<String> getAgentClasses() {
+		return agentClasses;
+	}
+
+	public void setAgentClasses(Vector<String> agentClasses) {
+		this.agentClasses = agentClasses;
 	}
 
 	public Vector<ClaimBehaviorDefinition> getBehaviors() {

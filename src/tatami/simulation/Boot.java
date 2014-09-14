@@ -141,6 +141,7 @@ public class Boot
 		
 		// parse scenario; get jade initialization data
 		Map<String, AgentCreationData> allAgents = new HashMap<String, AgentCreationData>();
+		Map<String, AgentCreationData> allSubsequentAgents = new HashMap<String, AgentCreationData>();
 		
 		log.info("loading scenario [" + scenarioFileName + "]");
 		XMLTree scenarioTree = XMLParser.validateParse(schemaName, scenarioFileName);
@@ -305,6 +306,76 @@ public class Boot
 			String vizName = "visualizer";
 			jade.addAgentToContainer(mainContainerName, vizName, VisualizationAgent.class.getCanonicalName(), null);
 			
+			// get general parameters
+			Set<String> adfPaths = new HashSet<String>(), agentPackages = new HashSet<String>();
+			Iterator<XMLNode> adfPathsIt = scenarioTree.getRoot().getNodeIterator("adfPath");
+			while(adfPathsIt.hasNext())
+				adfPaths.add((String)adfPathsIt.next().getValue());
+			Iterator<XMLNode> packagePathsIt = scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_PACKAGE.toString());
+			while(packagePathsIt.hasNext())
+				agentPackages.add((String)packagePathsIt.next().getValue());
+			
+			// Set up creation for all subsequent agents
+			XMLNode subsequent = null;
+			if(scenarioTree.getRoot().getNodeIterator(AgentParameterName.SUBSEQUENT_AGENTS.toString()).hasNext())
+			{
+				subsequent = scenarioTree.getRoot().getNodeIterator(AgentParameterName.SUBSEQUENT_AGENTS.toString()).next();
+				for(Iterator<XMLNode> itS = subsequent.getNodeIterator("agent"); itS.hasNext();)
+				{
+					XMLNode agentConfig = itS.next();
+					// get interesting parameters
+					if(!agentConfig.getNodeIterator("parameter").hasNext())
+					{
+						log.error("agent has no parameters");
+						continue;
+					}
+					
+					String agentLoader = getParameterValue(agentConfig, "loader");
+					Loader loader = null;
+					for(Loader ld : Loader.values())
+						if(ld.toString().equals(agentLoader))
+							loader = ld;
+					if(loader == null)
+					{
+						log.error("unknown agent loader [" + agentLoader + "]; the agent will not be created");
+						continue;
+					}
+					
+					// get parameters and put them into a neat HashMap
+					ParametrizedAgent.AgentParameters parameters = new ParametrizedAgent.AgentParameters();
+					for(Iterator<XMLNode> paramIt = agentConfig.getNodeIterator("parameter"); paramIt.hasNext();)
+					{
+						XMLNode param = paramIt.next();
+						AgentParameterName parName = AgentParameterName.getName(param.getAttributeValue("name"));
+						if(parName != null)
+							parameters.add(parName, param.getAttributeValue("value"));
+						else
+						{
+							log.trace("adding unregistered parameter [" + param.getAttributeValue("name") + "].");
+							parameters.add(param.getAttributeValue("name"), param.getAttributeValue("value"));
+						}
+					}
+					for(String pack : agentPackages)
+						parameters.add(AgentParameterName.AGENT_PACKAGE, pack);
+					
+					switch(loader)
+					{
+						case JAVA:
+							// TODO: to do, if needed; see oldBoot for the code
+							break;
+						case ADF2:
+						{
+							ClaimAgentDefinition cad = ClaimUtils.fillCAD(parameters.get(AgentParameterName.AGENT_CLASS.toString()), parameters.getValues(AgentParameterName.JAVA_CODE.toString()), adfPaths, agentPackages, log);
+							parameters.addObject(AgentParameterName.AGENT_DEFINITION, cad);
+							// register agent
+							allSubsequentAgents.put(null, new AgentCreationData(null, ClaimAgent.class.getCanonicalName(), parameters, null, false));
+							//log.info("configured [" + agentLoader + "] agent [" + agentName + "] in container [" + containerName + "]");
+							break;
+						}
+					}
+				}
+			}
+			
 			XMLNode timeline = null;
 			if(scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).hasNext())
 				timeline = scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).next();
@@ -312,9 +383,11 @@ public class Boot
 			ParametrizedAgent.AgentParameters parameters = new ParametrizedAgent.AgentParameters();
 			parameters.addObject(AgentParameterName.JADE_INTERFACE, jade);
 			parameters.addObject(AgentParameterName.AGENTS, allAgents.values());
+			if(subsequent != null)
+				parameters.addObject(AgentParameterName.SUBSEQUENT_AGENTS, allSubsequentAgents.values());
 			if(timeline != null)
 				parameters.addObject(AgentParameterName.TIMELINE, timeline);
-			parameters.add(AgentParameterName.VISUALIZTION_AGENT, vizName);
+			parameters.add(AgentParameterName.VISUALIZATION_AGENT, vizName);
 			jade.addAgentToContainer(mainContainerName, "simulator", SimulationAgent.class.getCanonicalName(), new Object[] { parameters });
 			
 		}

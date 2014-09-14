@@ -144,9 +144,14 @@ public interface ParametrizedAgent
 		AGENTS("agents"),
 		
 		/**
+		 * Is a {@link Collection} of <code>AgentCreationData</code> for the agents that are not initially created.
+		 */
+		SUBSEQUENT_AGENTS("subsequent"),
+		
+		/**
 		 * Name of the Visualization Agent.
 		 */
-		VISUALIZTION_AGENT("visualizationAgent"),
+		VISUALIZATION_AGENT("visualizationAgent"),
 		
 		/**
 		 * The timeline.
@@ -183,7 +188,21 @@ public interface ParametrizedAgent
 	{
 		private static final long						serialVersionUID	= -6934932321274715286L;
 		
-		private final Set<Map.Entry<String, Object>>	parameterMap		= new HashSet<Map.Entry<String, Object>>();
+		private final Set<Map.Entry<String, Object>>	parameterMap;
+		
+		/**
+		 * Constructor without arguments
+		 */
+		public AgentParameters(){
+			parameterMap		= new HashSet<Map.Entry<String, Object>>();
+		}
+		
+		/**
+		 * @param params - an AgentParameters object meant to be copied.
+		 */
+		public AgentParameters(AgentParameters params){
+			this.parameterMap = params.getCopyOfParameterMap();
+		}
 		
 		public AgentParameters add(String name, String value)
 		{
@@ -258,6 +277,18 @@ public interface ParametrizedAgent
 				if(AgentParameterName.getName(entry.getKey()) == null)
 					ret.put(entry.getKey(), entry.getValue());
 			return ret;
+		}
+		
+		/**
+		 * @return returns a copy of the parameter map
+		 */
+		public Set<Map.Entry<String, Object>> getCopyOfParameterMap(){
+			Set<Map.Entry<String, Object>>	copyOfPM = new HashSet<Map.Entry<String, Object>>();
+			
+			for(Map.Entry<String, Object> entry:parameterMap)
+				copyOfPM.add(entry);
+			
+			return copyOfPM;
 		}
 	}
 	

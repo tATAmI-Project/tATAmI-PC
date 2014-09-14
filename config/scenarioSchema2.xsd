@@ -58,6 +58,25 @@
 						</sequence>
 					</complexType>
 				</element>
+				<!-- The following element allows the parsing and preparing of the agents that will be created in subsequent phases, using the "new" primitive -->
+				<element name="subsequent" maxOccurs="1" minOccurs="0">
+					<complexType>
+						<sequence>
+							<element name="agent" maxOccurs="unbounded" minOccurs="0">
+								<complexType>
+									<sequence>
+										<element name="parameter" minOccurs="0" maxOccurs="unbounded">
+											<complexType>
+												<attribute name="name" type="string" use="required" />
+												<attribute name="value" type="string" use="required" />
+											</complexType>
+										</element>
+									</sequence>
+								</complexType>
+							</element>
+						</sequence>
+					</complexType>
+				</element>
 				<element name="timeline" maxOccurs="1" minOccurs="0">
 					<complexType>
 						<sequence>

@@ -42,6 +42,7 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
+import sclaim.constructs.basic.ClaimAgentDefinition;
 import sclaim.constructs.basic.ClaimConstruct;
 import sclaim.constructs.basic.ClaimStructure;
 import sclaim.constructs.basic.ClaimValue;
@@ -88,6 +89,7 @@ public class SimulationAgent extends VisualizableAgent {
 	PCJadeInterface jadeInterface = null;
 	Map<String, Location> containerLocations = null;
 	Collection<AgentCreationData> agentCreation = null;
+	Collection<AgentCreationData> subsequentAgents = null;
 	boolean agentsCreated = false;
 
 	String visualizer = null;
@@ -108,11 +110,13 @@ public class SimulationAgent extends VisualizableAgent {
 
 		jadeInterface = (PCJadeInterface) parObj(AgentParameterName.JADE_INTERFACE);
 		agentCreation = (Collection<AgentCreationData>) parObj(AgentParameterName.AGENTS);
+		if (hasPar(AgentParameterName.SUBSEQUENT_AGENTS))
+			subsequentAgents = (Collection<AgentCreationData>) parObj(AgentParameterName.SUBSEQUENT_AGENTS);
 		if (hasPar(AgentParameterName.TIMELINE))
 			for (Iterator<XMLNode> it = ((XMLNode) parObj(AgentParameterName.TIMELINE))
 					.getNodeIterator("event"); it.hasNext();)
 				events.add(it.next());
-		visualizer = parVal(AgentParameterName.VISUALIZTION_AGENT);
+		visualizer = parVal(AgentParameterName.VISUALIZATION_AGENT);
 
 		// GUI
 		setupGui();
@@ -184,6 +188,24 @@ public class SimulationAgent extends VisualizableAgent {
 				}
 			} else
 				log.info("starting agent [" + data.agentName + "]");
+			
+
+			//adding the collection of AgentCreationData of the subsequent agents of one agent to the parameters
+			ClaimAgentDefinition cad = (ClaimAgentDefinition) data.parameters.getObject(AgentParameterName.AGENT_DEFINITION.toString());
+			Vector<String> subsequentAgentClassNames = cad.getAgentClasses();
+			if(subsequentAgentClassNames!=null){
+				Map<String, AgentCreationData> currentSubsequentAgents = new HashMap<String, AgentCreationData>();
+				for(AgentCreationData acd:subsequentAgents) {
+					ClaimAgentDefinition currentCad = (ClaimAgentDefinition) acd.parameters.getObject(AgentParameterName.AGENT_DEFINITION.toString());
+					if(subsequentAgentClassNames.contains(currentCad.getClassName()))
+						currentSubsequentAgents.put(null, acd);
+				}
+				
+				data.parameters.addObject(AgentParameterName.SUBSEQUENT_AGENTS, currentSubsequentAgents.values());
+				data.parameters.addObject(AgentParameterName.VISUALIZATION_AGENT, visualizer);
+			}
+			
+			//creating the agent:
 			jadeInterface.addAgentToContainer(
 					(data.isRemote ? jadeInterface.getMainContainerName()
 							: data.destinationContainer), data.agentName,

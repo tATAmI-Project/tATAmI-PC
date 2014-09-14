@@ -542,7 +542,7 @@ final static String yyrule[] = {
 "agent_specification : '(' AGENT name behaviors_declaration ')'",
 };
 
-//#line 760 "parser.y"
+//#line 777 "parser.y"
 private static String unitName = "parser";
 
 /** the logger */
@@ -550,6 +550,9 @@ public Logger log = Log.getLogger(unitName);
 
 /** a reference to the agent structure returned by the parser */
 public ClaimAgentDefinition parsedAgent;
+
+/** the list of agent class names used by the new primitive */
+Vector<String> agentClasses = null;
 
 /** a reference to the lexer object */
 private Yylex lexer;
@@ -652,7 +655,7 @@ public ClaimAgentDefinition parse() {
     return null;
   }
 }
-//#line 592 "ParserSClaim.java"
+//#line 595 "ParserSClaim.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -1150,154 +1153,171 @@ case 44:
 {
 			/*log.info("new_function -> '(' NEW argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.NEW ,new String("new"),val_peek(1).claimConstructVector));
+			
+			if(agentClasses == null)
+				agentClasses = new Vector<String>();
+			
+			if(val_peek(1).claimConstructVector.isEmpty())
+				yyerror("new without arguments");
+			else {
+				ClaimConstruct agentClassClaimConstruct = val_peek(1).claimConstructVector.firstElement();
+				
+				if (agentClassClaimConstruct.getType() != ClaimConstructType.VALUE)
+					yyerror("the first argument of new is not an S-CLAIM constant");
+				else {
+					String agentClass = new String(((ClaimValue) agentClassClaimConstruct).toString());
+					if(!agentClasses.contains(agentClass))	
+						agentClasses.add(agentClass);
+				}
+			}
 		}
 break;
 case 45:
-//#line 374 "parser.y"
+//#line 391 "parser.y"
 {
 			/*log.info("addK_function -> '(' ADDK argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.ADDK ,new String("addK"),val_peek(1).claimConstructVector));
 		}
 break;
 case 46:
-//#line 382 "parser.y"
+//#line 399 "parser.y"
 {
 			/*log.info("readK_function -> '(' READK argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.READK ,new String("readK"),val_peek(1).claimConstructVector));
 		}
 break;
 case 47:
-//#line 390 "parser.y"
+//#line 407 "parser.y"
 {
 			/*log.info("removeK_function -> '(' REMOVEK argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.REMOVEK ,new String("removeK"),val_peek(1).claimConstructVector));
 		}
 break;
 case 48:
-//#line 398 "parser.y"
+//#line 415 "parser.y"
 {
 			/*log.info("wait_function -> '(' WAIT argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.WAIT ,new String("wait"),val_peek(1).claimConstructVector));
 		}
 break;
 case 49:
-//#line 406 "parser.y"
+//#line 423 "parser.y"
 {
 			/*log.info("language_function -> send_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 50:
-//#line 416 "parser.y"
+//#line 433 "parser.y"
 {
 			/*log.info("language_function -> output_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 51:
-//#line 421 "parser.y"
+//#line 438 "parser.y"
 {
 			/*log.info("language_function -> in_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 52:
-//#line 426 "parser.y"
+//#line 443 "parser.y"
 {
 			/*log.info("language_function -> out_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 53:
-//#line 431 "parser.y"
+//#line 448 "parser.y"
 {
 			/*log.info("language_function -> open_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 54:
-//#line 436 "parser.y"
+//#line 453 "parser.y"
 {
 			/*log.info("language_function -> acid_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 55:
-//#line 441 "parser.y"
+//#line 458 "parser.y"
 {
 			/*log.info("language_function -> new_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 56:
-//#line 446 "parser.y"
+//#line 463 "parser.y"
 {
 			/*log.info("language_function -> addk_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 57:
-//#line 451 "parser.y"
+//#line 468 "parser.y"
 {
 			/*log.info("language_function -> readk_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 58:
-//#line 456 "parser.y"
+//#line 473 "parser.y"
 {
 			/*log.info("language_function -> removek_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 59:
-//#line 461 "parser.y"
+//#line 478 "parser.y"
 {
 			/*log.info("language_function -> wait_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 60:
-//#line 469 "parser.y"
+//#line 486 "parser.y"
 {
 			/*log.info("function -> '(' name ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall(ClaimFunctionType.JAVA,val_peek(1).sval,null));
 		}
 break;
 case 61:
-//#line 474 "parser.y"
+//#line 491 "parser.y"
 {
 			/*log.info("function -> '(' name argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall(ClaimFunctionType.JAVA,val_peek(2).sval,val_peek(1).claimConstructVector));
 		}
 break;
 case 62:
-//#line 482 "parser.y"
+//#line 499 "parser.y"
 {
 			/*log.info("goal -> '(' AGOAL name proposition_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimaGoal(ClaimConstructType.AGOAL, val_peek(4).sval, val_peek(1).claimConstructVector, val_peek(3).ival));
 		}
 break;
 case 63:
-//#line 487 "parser.y"
+//#line 504 "parser.y"
 {
 			yyval = new ParserSClaimVal(new ClaimmGoal(ClaimConstructType.MGOAL, val_peek(6).sval, val_peek(3).claimConstructVector, val_peek(1).claimConstructVector, Integer.parseInt(((ClaimValue) val_peek(5).obj).toString())));	
 		}
 break;
 case 64:
-//#line 491 "parser.y"
+//#line 508 "parser.y"
 {
 			yyval = yyval = new ParserSClaimVal(new ClaimmGoal(ClaimConstructType.MGOAL, val_peek(4).sval, val_peek(1).claimConstructVector, null, Integer.parseInt(((ClaimValue) val_peek(3).obj).toString())));
 		}
 break;
 case 65:
-//#line 495 "parser.y"
+//#line 512 "parser.y"
 {
 			yyval = new ParserSClaimVal(new ClaimpGoal(ClaimConstructType.PGOAL, val_peek(4).sval, val_peek(1).claimConstruct, Integer.parseInt(((ClaimValue) val_peek(3).obj).toString())));
 		}
 break;
 case 66:
-//#line 502 "parser.y"
+//#line 519 "parser.y"
 {
 			/*log.info("proposition_list -> proposition");*/
 			yyval = new ParserSClaimVal(new Vector<ClaimConstruct>());
@@ -1305,7 +1325,7 @@ case 66:
 		}
 break;
 case 67:
-//#line 508 "parser.y"
+//#line 525 "parser.y"
 {
 			/*log.info("proposition_list -> proposition_list proposition");*/
 			yyval = val_peek(1);
@@ -1313,56 +1333,56 @@ case 67:
 		}
 break;
 case 68:
-//#line 517 "parser.y"
+//#line 534 "parser.y"
 {
 			/*log.info("proposition -> constant ");*/
 			yyval = val_peek(0);
 		}
 break;
 case 69:
-//#line 525 "parser.y"
+//#line 542 "parser.y"
 {
 			/*log.info("priority -> constant");*/
 			yyval = val_peek(0);
 		}
 break;
 case 70:
-//#line 534 "parser.y"
+//#line 551 "parser.y"
 {
 			/*log.info("valid_condition -> readK_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 71:
-//#line 539 "parser.y"
+//#line 556 "parser.y"
 {
 			/*log.info("valid_condition -> function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 72:
-//#line 547 "parser.y"
+//#line 564 "parser.y"
 {
 			/*log.info("condition -> '(' CONDITION valid_condition ')'");*/
 			yyval = new ParserSClaimVal(new ClaimCondition((ClaimFunctionCall) val_peek(1).claimConstruct));
 		}
 break;
 case 73:
-//#line 555 "parser.y"
+//#line 572 "parser.y"
 {
 			/*log.info("if_stmt -> '(' IF if_valid_condition THEN behavior_content_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimIf((ClaimFunctionCall) val_peek(3).claimConstruct,val_peek(1).claimConstructVector, null));
 		}
 break;
 case 74:
-//#line 560 "parser.y"
+//#line 577 "parser.y"
 {
 			/*log.info("if_stmt -> '(' IF if_valid_condition THEN behavior_content_list ELSE behavior_content_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimIf((ClaimFunctionCall) val_peek(5).claimConstruct,val_peek(3).claimConstructVector,val_peek(1).claimConstructVector));
 		}
 break;
 case 75:
-//#line 568 "parser.y"
+//#line 585 "parser.y"
 {
 			/*log.info("forAllK -> '(' FORALLK structure ')'");*/
 			if (!verifyVariablesInStructure((ClaimStructure) val_peek(1).claimConstruct))
@@ -1371,7 +1391,7 @@ case 75:
 		}
 break;
 case 76:
-//#line 575 "parser.y"
+//#line 592 "parser.y"
 {
 			/*log.info("forAllK -> '(' FORALLK structure behavior_content_list ')'");*/
 			if (!verifyVariablesInStructure((ClaimStructure) val_peek(2).claimConstruct))
@@ -1380,42 +1400,42 @@ case 76:
 		}
 break;
 case 77:
-//#line 585 "parser.y"
+//#line 602 "parser.y"
 {
 			/*log.info("while -> '(' WHILE function ')'");*/
 			yyval = new ParserSClaimVal(new ClaimWhile((ClaimFunctionCall) val_peek(1).claimConstruct, null));
 		}
 break;
 case 78:
-//#line 590 "parser.y"
+//#line 607 "parser.y"
 {
 			/*log.info("while -> '(' WHILE function behavior_content_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimWhile((ClaimFunctionCall) val_peek(2).claimConstruct, val_peek(1).claimConstructVector));
 		}
 break;
 case 79:
-//#line 598 "parser.y"
+//#line 615 "parser.y"
 {
 			/*log.info("behavior_content_header -> receive_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 80:
-//#line 603 "parser.y"
+//#line 620 "parser.y"
 {
 			/*log.info("behavior_content_header -> receive_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 81:
-//#line 608 "parser.y"
+//#line 625 "parser.y"
 {
 			/*log.info("behavior_content_header -> condition");*/
 			yyval = val_peek(0);
 		}
 break;
 case 82:
-//#line 616 "parser.y"
+//#line 633 "parser.y"
 {
 			/*log.info("behavior_content_header_list -> behavior_content_header");*/
 			yyval = new ParserSClaimVal(new Vector<ClaimConstruct>());
@@ -1423,7 +1443,7 @@ case 82:
 		}
 break;
 case 83:
-//#line 622 "parser.y"
+//#line 639 "parser.y"
 {
 			/*log.info("behavior_content_header_list -> behavior_content_header_list behavior_content_header");*/
 			yyval = val_peek(1);
@@ -1431,48 +1451,48 @@ case 83:
 		}
 break;
 case 84:
-//#line 632 "parser.y"
+//#line 649 "parser.y"
 {
 			/*log.info("behavior_content -> language_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 85:
-//#line 637 "parser.y"
+//#line 654 "parser.y"
 {
 			/*log.info("behavior_content -> function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 86:
-//#line 642 "parser.y"
+//#line 659 "parser.y"
 {
 			/*log.info("behavior_content -> if_stmt");*/
 			yyval = val_peek(0);
 		}
 break;
 case 87:
-//#line 647 "parser.y"
+//#line 664 "parser.y"
 {
 			/*log.info("behavior_content -> forAllK");*/
 			yyval = val_peek(0);
 		}
 break;
 case 88:
-//#line 652 "parser.y"
+//#line 669 "parser.y"
 {
 			/*log.info("behavior_content -> while");*/
 			yyval = val_peek(0);
 		}
 break;
 case 89:
-//#line 657 "parser.y"
+//#line 674 "parser.y"
 {
 			yyval = val_peek(0);
 		}
 break;
 case 90:
-//#line 664 "parser.y"
+//#line 681 "parser.y"
 {
 			/*log.info("behavior_content_list -> behavior_content");*/
 			yyval = new ParserSClaimVal(new Vector<ClaimConstruct>());
@@ -1480,7 +1500,7 @@ case 90:
 		}
 break;
 case 91:
-//#line 670 "parser.y"
+//#line 687 "parser.y"
 {
 			/*log.info("behavior_content_list -> behavior_content_list behavior_content");*/
 			yyval = val_peek(1);
@@ -1488,21 +1508,21 @@ case 91:
 		}
 break;
 case 92:
-//#line 684 "parser.y"
+//#line 701 "parser.y"
 {
 			/*log.info("behavior -> '(' behavior_type name behavior_content_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimBehaviorDefinition(val_peek(2).sval, val_peek(3).claimBehaviorType, val_peek(1).claimConstructVector));
 		}
 break;
 case 93:
-//#line 689 "parser.y"
+//#line 706 "parser.y"
 {
 			/*log.info("behavior -> '(' behavior_type name behavior_content_header_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimBehaviorDefinition(val_peek(2).sval, val_peek(3).claimBehaviorType, val_peek(1).claimConstructVector));
 		}
 break;
 case 94:
-//#line 694 "parser.y"
+//#line 711 "parser.y"
 {
 			/*log.info("behavior -> '(' behavior_type name behavior_content_header behavior_content_list ')'");*/
 			Boolean concatenateSucceeded = val_peek(2).claimConstructVector.addAll(val_peek(1).claimConstructVector);
@@ -1513,7 +1533,7 @@ case 94:
 		}
 break;
 case 95:
-//#line 706 "parser.y"
+//#line 723 "parser.y"
 {
 			/*log.info("behavior_list -> behavior");*/
 			yyval = new ParserSClaimVal(new Vector<ClaimConstruct>());
@@ -1521,7 +1541,7 @@ case 95:
 		}
 break;
 case 96:
-//#line 712 "parser.y"
+//#line 729 "parser.y"
 {
 			/*log.info("behavior_list -> behavior_list behavior");*/
 			yyval = val_peek(1);
@@ -1529,28 +1549,28 @@ case 96:
 		}
 break;
 case 97:
-//#line 721 "parser.y"
+//#line 738 "parser.y"
 {
 			/*log.info("behavior_declaration -> '(' BEHAVIOR behavior_list ')'");*/
 			yyval = val_peek(1);
 		}
 break;
 case 98:
-//#line 729 "parser.y"
+//#line 746 "parser.y"
 {
 			/*log.info("agent_specification -> '(' AGENT name agent_argument_list behaviors_declaration ')'");*/
 			parsedAgent = new ClaimAgentDefinition(val_peek(3).sval, 
 					new Vector<ClaimConstruct>(val_peek(2).claimConstructVector),
 					new Vector<ClaimBehaviorDefinition>(
 							Arrays.asList(val_peek(1).claimConstructVector.toArray(new ClaimBehaviorDefinition [0]))
-					));
+					), agentClasses);
 			/*Set the references of the contained behaviors to this agent:*/
 			for(ClaimBehaviorDefinition currentBehavior:parsedAgent.getBehaviors())
 				currentBehavior.setMyAgent(parsedAgent);
 		}
 break;
 case 99:
-//#line 741 "parser.y"
+//#line 758 "parser.y"
 {
 			/*log.info("agent_specification -> '(' AGENT name behaviors_declaration ')'");*/
 			
@@ -1562,13 +1582,13 @@ case 99:
 			parsedAgent = new ClaimAgentDefinition(val_peek(2).sval,languageParameters,
 					new Vector<ClaimBehaviorDefinition>(
 							Arrays.asList(val_peek(1).claimConstructVector.toArray(new ClaimBehaviorDefinition [0]))
-					));
+					), agentClasses);
 			/*Set the references of the contained behaviors to this agent:*/
 			for(ClaimBehaviorDefinition currentBehavior:parsedAgent.getBehaviors())
 				currentBehavior.setMyAgent(parsedAgent);
 		}
 break;
-//#line 1503 "ParserSClaim.java"
+//#line 1523 "ParserSClaim.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

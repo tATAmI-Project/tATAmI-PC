@@ -17,6 +17,7 @@ import jade.content.onto.OntologyException;
 import jade.content.onto.UngroundedException;
 import jade.content.onto.basic.Action;
 import jade.content.onto.basic.Result;
+import jade.core.AID;
 import jade.core.Location;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.SequentialBehaviour;
@@ -52,20 +53,27 @@ import sclaim.constructs.basic.ClaimStructure;
 import sclaim.constructs.basic.ClaimValue;
 import sclaim.constructs.basic.ClaimVariable;
 import sclaim.constructs.basic.ClaimWhile;
+import sun.security.action.GetLongAction;
 import tatami.core.agent.BaseAgent;
 import tatami.core.agent.claim.behavior.AskForBeingChildBehaviour;
 import tatami.core.agent.claim.behavior.AskForLocation;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
 import tatami.core.agent.visualization.VisualizableAgent;
+import tatami.core.agent.visualization.VisualizationOntology;
+import tatami.core.agent.visualization.VisualizationOntology.Vocabulary;
 import tatami.core.agent.webServices.WSAgent;
 import tatami.core.agent.webServices.WebServiceOntology;
 import tatami.core.agent.webServices.WebServiceOntology.ReceiveOperation;
 import tatami.core.interfaces.AgentGui;
+import tatami.core.interfaces.ParametrizedAgent;
 import tatami.core.interfaces.AgentGui.InputListener;
 import tatami.core.interfaces.KnowledgeBase;
 import tatami.core.interfaces.KnowledgeBase.KnowledgeDescription;
+import tatami.core.interfaces.ParametrizedAgent.AgentParameterName;
+import tatami.core.interfaces.ParametrizedAgent.AgentParameters;
 import tatami.core.interfaces.Logger;
 import tatami.core.util.jade.JadeUtil;
+import tatami.simulation.AgentCreationData;
 
 /**
  * 
@@ -342,18 +350,66 @@ public class ClaimBehavior extends Behaviour implements InputListener
 	 */
 	private boolean handleNew(Vector<ClaimConstruct> args)
 	{
-		ClaimValue agentName = (ClaimValue) args.get(0);
-		// ClaimValue agentClassName = (ClaimValue)args.get(1);
-		
-		try
-		{
-			((BaseAgent) this.myAgent).getContainerController().createNewAgent((String) agentName.getValue(),
-					"core.claim.ClaimAgent", args.subList(1, args.size()).toArray());
-		} catch(StaleProxyException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(args.size()<2){
+			log.error("unexpected number of arguments for \"new\"");
 			return false;
+		}
+
+		ClaimValue agentClassName = (ClaimValue)args.get(0);
+		ClaimConstruct agentName = (ClaimConstruct) args.get(1);
+		
+		String agentNameValue = null;
+		ClaimConstructType agentNameType = agentName.getType();
+		
+		switch(agentNameType){
+			case VALUE: agentNameValue = (String) ((ClaimValue) agentName).getValue();
+			break;
+			case VARIABLE: agentNameValue = (String) st.get((ClaimVariable) agentName).getValue();
+			break;
+			default:
+			break;
+		}
+		
+		ParametrizedAgent.AgentParameters newAgentParameters = null;
+		Collection<AgentCreationData> subsequentAgents = (Collection<AgentCreationData>) ((ClaimAgent) myAgent).parObj(AgentParameterName.SUBSEQUENT_AGENTS);
+		
+		for(AgentCreationData acd:subsequentAgents) {
+			if(acd.parameters.getObject(AgentParameterName.AGENT_CLASS.toString()).equals(agentClassName.getValue())) {
+					String visualizer = ((ClaimAgent) myAgent).parVal(AgentParameterName.VISUALIZATION_AGENT);
+					
+					newAgentParameters = new ParametrizedAgent.AgentParameters(acd.parameters);
+					newAgentParameters.add(AgentParameterName.AGENT_NAME, agentNameValue);
+					newAgentParameters.add(AgentParameterName.HIERARCHICAL_PARENT, ((ClaimAgent)myAgent).parVal(AgentParameterName.AGENT_NAME));
+					newAgentParameters.add(AgentParameterName.VISUALIZATION_AGENT,visualizer);
+					
+					try
+					{
+						((ClaimAgent) this.myAgent).getContainerController().createNewAgent(agentNameValue,
+								acd.classpath, new Object[] {newAgentParameters});
+						log.trace("The agent "+agentNameValue+" of class "+agentClassName.getValue()+" was created.");
+						log.info(myAgent.getLocalName()+" created the child agent "+agentNameValue+" of class "+agentClassName.getValue()+".");
+
+						if (visualizer != null){
+								ACLMessage msg = VisualizationOntology
+										.setupMessage(Vocabulary.VISUALIZATION_MONITOR);
+								msg.setContent(visualizer);
+								msg.addReceiver(new AID(agentNameValue, AID.ISLOCALNAME));
+								myAgent.send(msg);
+								log.info("visualization root inform sent to [" + agentNameValue
+										+ "]");
+						}
+						else
+							log.warn("visualizer unknown");
+
+
+					} catch(StaleProxyException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						return false;
+					}
+					break;
+			}
 		}
 		
 		return true;

@@ -366,6 +366,23 @@ new_function
 		{
 			//log.info("new_function -> '(' NEW argument_list ')'");
 			$$ = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.NEW ,new String("new"),$3.claimConstructVector));
+			
+			if(agentClasses == null)
+				agentClasses = new Vector<String>();
+			
+			if($3.claimConstructVector.isEmpty())
+				yyerror("new without arguments");
+			else {
+				ClaimConstruct agentClassClaimConstruct = $3.claimConstructVector.firstElement();
+				
+				if (agentClassClaimConstruct.getType() != ClaimConstructType.VALUE)
+					yyerror("the first argument of new is not an S-CLAIM constant");
+				else {
+					String agentClass = new String(((ClaimValue) agentClassClaimConstruct).toString());
+					if(!agentClasses.contains(agentClass))	
+						agentClasses.add(agentClass);
+				}
+			}
 		}
 	;
 
@@ -732,7 +749,7 @@ agent_specification
 					new Vector<ClaimConstruct>(val_peek(2).claimConstructVector),
 					new Vector<ClaimBehaviorDefinition>(
 							Arrays.asList($5.claimConstructVector.toArray(new ClaimBehaviorDefinition [0]))
-					));
+					), agentClasses);
 			//Set the references of the contained behaviors to this agent:
 			for(ClaimBehaviorDefinition currentBehavior:parsedAgent.getBehaviors())
 				currentBehavior.setMyAgent(parsedAgent);
@@ -749,7 +766,7 @@ agent_specification
 			parsedAgent = new ClaimAgentDefinition($3.sval,languageParameters,
 					new Vector<ClaimBehaviorDefinition>(
 							Arrays.asList($4.claimConstructVector.toArray(new ClaimBehaviorDefinition [0]))
-					));
+					), agentClasses);
 			//Set the references of the contained behaviors to this agent:
 			for(ClaimBehaviorDefinition currentBehavior:parsedAgent.getBehaviors())
 				currentBehavior.setMyAgent(parsedAgent);
@@ -764,6 +781,9 @@ public Logger log = Log.getLogger(unitName);
 
 /** a reference to the agent structure returned by the parser */
 public ClaimAgentDefinition parsedAgent;
+
+/** the list of agent class names used by the new primitive */
+Vector<String> agentClasses = null;
 
 /** a reference to the lexer object */
 private Yylex lexer;
