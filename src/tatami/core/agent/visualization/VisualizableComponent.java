@@ -11,6 +11,15 @@
  ******************************************************************************/
 package tatami.core.agent.visualization;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map.Entry;
+
+import net.xqhs.graphs.graph.Graph;
+import net.xqhs.graphs.graph.SimpleGraph;
+import net.xqhs.graphs.representation.text.TextGraphRepresentation;
+import net.xqhs.graphs.util.ContentHolder;
 import net.xqhs.util.config.Config;
 import net.xqhs.util.logging.Logger;
 import net.xqhs.util.logging.LoggerSimple.Level;
@@ -107,7 +116,9 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	/**
 	 * The GUI implementation. Depends on platform, but implements {@link AgentGui}.
 	 */
-	protected transient AgentGui			gui					= null;
+	protected /*transient*/ AgentGui			gui					= null;
+	protected /*transient*/ AgentGui			interactivGUI					= null;
+	
 	/**
 	 * The name of the entity to which the agent has to report.
 	 */
@@ -175,6 +186,49 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 				removeVisualization();
 			}
 		});
+	}
+	
+	/**
+	 * Constructs a new instance of visualizable component that has another GUI
+	 * 
+	 * @param guiPath
+	 * @throws NoSuchMethodException 
+	 * @throws InvocationTargetException 
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
+	 * @throws SecurityException 
+	 * @throws IllegalArgumentException 
+	 */
+	public VisualizableComponent(HashSet<Entry<String, String>> guiPath)
+		throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException,
+			    InvocationTargetException, NoSuchMethodException {
+		this();
+		
+		Class attachment = null;
+		
+		boolean found = false;
+		String path = guiPath.iterator().next().getValue();
+		try
+		{
+			getLog().trace("trying gui attachment path [" + path + "]");
+			attachment = Class.forName(path);
+			found = true;
+		} catch(ClassNotFoundException e)
+		{
+			// do nothing; go forth
+		}
+			
+		if(!found && path == null)
+		{
+				getLog().trace("no agent gui defined.");
+		}
+		
+		if(attachment != null)
+		{
+			this.interactivGUI = (AgentGui) attachment.getDeclaredConstructor(AgentGuiConfig.class).newInstance(guiConfig);
+		}
+		else
+			getLog().trace("code attachment [" + "] not found.");
 	}
 	
 	@Override
@@ -260,6 +314,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		{
 			getLog().error("Load GUI failed: " + PlatformUtils.printException(e));
 		}
+		
 		if(gui != null)
 			loggingUnit.setLogDisplay(new Log2AgentGui(gui, DefaultComponent.AGENT_LOG.toString()));
 		
@@ -371,6 +426,15 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		return gui;
 	}
 	
+	/**
+	 * Getter for the GUI.
+	 * 
+	 * @return the GUI, as an {@link AgentGui} instance.
+	 */
+	public AgentGui getInteractivGUI()
+	{
+		return interactivGUI;
+	}
 	/**
 	 * Relays calls to the underlying {@link AgentComponent} instance in order to avoid synthetic access warnings for
 	 * event handlers.

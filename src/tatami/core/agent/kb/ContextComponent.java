@@ -18,18 +18,22 @@ import net.xqhs.graphs.context.Instant.TimeKeeper;
 import net.xqhs.graphs.graph.Edge;
 import net.xqhs.graphs.graph.Graph;
 import net.xqhs.graphs.graph.GraphComponent;
+import net.xqhs.graphs.graph.Node;
 import net.xqhs.graphs.graph.SimpleGraph;
 import net.xqhs.graphs.matcher.GraphMatcherQuick;
 import net.xqhs.graphs.matcher.GraphMatchingProcess;
 import net.xqhs.graphs.matcher.Match;
 import net.xqhs.graphs.matcher.MonitorPack;
+import net.xqhs.graphs.pattern.EdgeP;
 import net.xqhs.graphs.pattern.GraphPattern;
+import net.xqhs.graphs.pattern.NodeP;
 import net.xqhs.graphs.representation.text.TextGraphRepresentation;
 import net.xqhs.graphs.util.ContentHolder;
 import tatami.core.agent.AgentComponent;
+import tatami.sclaim.constructs.basic.ClaimValue;
 
 @SuppressWarnings("javadoc")
-public class ContextComponent extends AgentComponent {
+public class ContextComponent extends AgentComponent { // TODO extend Cognitive Component
 
 	/**
 	 * The serial UID.
@@ -69,7 +73,6 @@ public class ContextComponent extends AgentComponent {
 		String initial = initialKnowledge.iterator().next().getValue();
 		Graph g = new TextGraphRepresentation(new SimpleGraph()).readRepresentation(new ContentHolder<String>(initial));
 		add(g);
-
 	}
 	
 	/**
@@ -87,11 +90,24 @@ public class ContextComponent extends AgentComponent {
 	/**
 	 * Removes from knowledge graph the information that it is not needed
 	 * */
-	public void remove(Graph deleteKnowledge) 
-	{	
-		for (Edge edge : deleteKnowledge.getEdges()) {
-			knowledgeGraph.removeEdge(edge);
+	public void remove(String deleteKnowledge) {
+		GraphPattern CP = new GraphPattern();
+		TextGraphRepresentation repr = new TextGraphRepresentation(CP);
+		repr.readRepresentation(new ContentHolder<String>(deleteKnowledge));
+		
+		Match m = read(CP);
+		// there is no information to remove
+		if (m == null) 
+			return;
+		
+		System.out.println(knowledgeGraph);
+		System.out.println(getParent().getAgentName());
+		for (Edge e : CP.getEdges()) {
+			knowledgeGraph.removeEdge(m.getMatchedGraphEdges(e).get(0));
 		}
+		
+		System.out.println(" -------------- removed " + deleteKnowledge);
+		System.out.println(knowledgeGraph.toString());
 	}
 	
 	public Match read(GraphPattern pattern)
@@ -114,7 +130,11 @@ public class ContextComponent extends AgentComponent {
 			matches.add(m);
 			m = GMQ.getNextMatch();
 		}
-		return matches;
+		
+		System.out.println(knowledgeGraph);
+		return GMQ.getAllMatches(0);
+		//return GMQ.getAllCompleteMatches();
+		//return matches;
 	}
 	
 	/**
