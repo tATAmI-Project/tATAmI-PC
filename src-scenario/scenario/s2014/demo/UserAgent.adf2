@@ -1,0 +1,37 @@
+(agent User
+	(behavior
+		(initial register
+		
+			// at initialization send the information regarding what it is attending
+			(forAllK (struct knowledge pattern ?agentName -attends-> ?PresentationName)
+				(send parent (struct message -attends-> ?PresentationName))
+			)
+		)
+		
+		(reactive startedPresentation
+			(condition (readK (struct knowledge pattern ?agentName -chair-of-> ?SessionName)))
+			(input join tip)
+			(send parent (struct message Smart3DTV -has-state-> STARTED))
+		)	
+		
+		(reactive attendsSomePresentation
+			(condition (readK (struct knowledge pattern ?agentName -presenter-of-> Smart3DTV)))
+			(input attend tip)
+			(send parent (struct message -attends-> SmartTV))
+		)
+		
+		// download URI
+		(reactive presentationURI
+			(receive (message ?PresentationName -URI-> ?URI))
+			(output ATTENDS Prezentarea ?PresentationName a inceput)
+			(output ATTENDS * se poate descarca prezentarea de la ?URI)
+		)
+		
+		// mute telephone + other stuff
+		(reactive presentationStarted
+			(receive (message ?PresentationName -state-> STARTED))
+			(output ATTENDS Prezentarea ?PresentationName a inceput)
+			(output ATTENDS * slide-urile nu au fost uploadate)
+		)
+	)
+)

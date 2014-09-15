@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (C) 2014 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+  
+  This file is part of tATAmI-PC.
+  
+  tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+  
+  tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+  
+  You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<scen:scenario xmlns:scen="http://www.example.org/scenarioSchema3"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.example.org/scenarioSchema3 ../../../../src-schema/scenarioSchema3.xsd ">
+ 
+ 	<scen:platform>
+		<scen:parameter name="name" value="jade" />
+	</scen:platform>
+	
+ 	<scen:agentPackage>scenario/s2014/demo</scen:agentPackage>
+	
+ 	<scen:initial>
+		<scen:container name="Container">
+		
+			<scen:agent>
+				<scen:component name="parametric" />
+				<scen:component name="visualizable">
+					<scen:parameter name="GUI" value="scenario.s2014.demo.gui.DemoMainOutputGUI" />
+				</scen:component>
+				<scen:component name="messaging" />
+				<scen:component name="cognitive">
+					<scen:parameter name="knowledge" value="[KnowledgeBase
+					    										(-kbpart-> AmI 
+					    											(-isa-> Room)
+					    											(-isa-> SessionRoom)
+					    										)
+					    										(-kbpart-> AI 
+					    											(-isa-> *Room)
+					    											(-isa-> *SessionRoom)
+					    										)
+					    										(-kbpart-> MeetingRoomNo1
+					    											(-isa-> *Room)
+					    											(-isa-> MeetingRoom)
+					    										)
+					    										(-kbpart-> BreakingBad
+					    											(-isa-> *Room)
+					    											(-isa-> CoffeeBreakRoom)
+					    										)
+					    										(-kbpart-> TVSessions
+					    											(-isa-> Session)
+					    											(-chair-> Chair1)
+					    											(-location-> *AmI)
+					    										)
+					    										(-kbpart-> SmartTV
+					    											(-isa-> Presentation)
+					    											(-speaker-> Speaker1)
+					    											(-partOf-> *TVSessions)
+					    										)
+					    										(-kbpart-> Smart3DTV
+					    											(-isa-> *Presentation)
+					    											(-speaker-> Speaker2)
+					    											(-partOf-> *TVSessions)
+					    										) 
+					    									]"/>
+				</scen:component> 
+				<scen:component name="s_claim" />
+				<scen:parameter name="loader" value="composite" /> 
+				<scen:parameter name="name" value="MainAgent" />
+				<scen:parameter name="class" value="MainAgent" />
+				<scen:parameter name="java-code" value="Agent" />
+			</scen:agent>
+
+			<scen:agent>
+				<scen:component name="parametric" />
+				<scen:component name="visualizable">
+				    <scen:parameter name="GUI" value="scenario.s2014.demo.gui.DemoAgentOutputGUI" />
+				</scen:component>
+				<scen:component name="messaging" />
+				<scen:component name="cognitive">
+					<scen:parameter name="knowledge" value="
+					    										Speaker1 -presenterOf-> SmartTV;
+					    										Speaker1 -attends-> Smart3DTV
+					    									"/>
+				</scen:component> 
+				<scen:component name="s_claim" />
+				
+				<scen:parameter name="loader" value="composite" />
+				<scen:parameter name="name" value="Speaker1" />
+				<scen:parameter name="class" value="UserAgent" />
+				<scen:parameter name="java-code" value="Agent" />
+				<scen:parameter name="parent" value="MainAgent"/>
+			</scen:agent>
+		
+			<scen:agent>
+				<scen:component name="parametric" />
+				<scen:component name="visualizable">
+				    <scen:parameter name="GUI" value="scenario.s2014.demo.gui.DemoAgentOutputInputGUI" />
+				</scen:component>
+				<scen:component name="messaging" />
+				<scen:component name="cognitive">
+					<scen:parameter name="knowledge" value="Speaker2 -presenter-of-> Smart3DTV"/>
+				</scen:component> 
+				<scen:component name="s_claim" />
+				
+				<scen:parameter name="loader" value="composite" />
+				<scen:parameter name="name" value="Speaker2" />
+				<scen:parameter name="class" value="UserAgent" />
+				<scen:parameter name="java-code" value="Agent" />
+				<scen:parameter name="parent" value="MainAgent"/>
+			</scen:agent>
+			
+			<scen:agent>
+				<scen:component name="parametric" />
+				<scen:component name="visualizable">
+				    <scen:parameter name="GUI" value="scenario.s2014.demo.gui.DemoChairGUI" />
+				</scen:component>
+				<scen:component name="messaging" />
+				<scen:component name="cognitive">
+					<scen:parameter name="knowledge" value="Chair1-chair-of->TVSessions;SmartTV-partOf->*TVSessions"/> 
+														<!-- 
+					    									KB
+					    										(->Chair1 -chair-of-> TVSessions)
+					    										-> SmartTV -partOf-> *TVSessions
+					    								"/> -->
+				</scen:component> 
+				<scen:component name="s_claim" />
+				
+				<scen:parameter name="loader" value="composite" />
+				<scen:parameter name="name" value="Chair1" />
+				<scen:parameter name="class" value="UserAgent" />
+				<scen:parameter name="java-code" value="Agent" />
+				<scen:parameter name="parent" value="MainAgent"/>
+			</scen:agent> 
+		</scen:container>
+	</scen:initial>
+	
+</scen:scenario>
