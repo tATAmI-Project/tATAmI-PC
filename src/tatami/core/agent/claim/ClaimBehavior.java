@@ -227,11 +227,9 @@ public class ClaimBehavior implements InputListener
 	@Override
 	public void receiveInput(String componentName, Vector<Object> arguments)
 	{
-		System.out.println(" ---- in receiveInput ---- pentru " + componentName);
 		if (!inputQueues.containsKey(componentName))
 			inputQueues.put(componentName, new ConcurrentLinkedQueue<Vector<Object>>());
 		inputQueues.get(componentName).offer(arguments);
-		System.out.println(" ----- in after receiveInput");
 		// TODO emma
 		// this.restart();
 	}
@@ -277,7 +275,6 @@ public class ClaimBehavior implements InputListener
 		
 		// Type Condition
 		case CONDITION: {
-			System.out.println(" ---------------- from condition");
 			try {
 				Thread.sleep(3000);
 			} catch (InterruptedException e) {
@@ -290,29 +287,6 @@ public class ClaimBehavior implements InputListener
 					e.printStackTrace();
 				}
 			}
-			/*String initial = "[[Ana -isa-> human]]";
-			ContentHolder<String> input = new ContentHolder<String>(initial.toString());
-			ContextPattern pattern = new ContextPattern();
-			TextGraphRepresentation repr = new TextGraphRepresentation(pattern);
-			repr.readRepresentation(input);
-			System.out.println(" ------------ new pattern: []" + repr.toString());
-			isCondition = true;
-			
-			ArrayList<ContextPattern> gps = new ArrayList<ContextPattern>();
-			gps.add(pattern);
-			
-			myAgent.getCognitive().registerMatchNotificationTarget(
-				gps.get(0), 
-				new MatchNotificationReceiver() {
-					@Override
-					public void receiveMatchNotification(ContinuousMatchingProcess platform, Match m)
-					{
-						System.out.println(" ----------- new match for pattern 0: " + m);
-						action();
-					}
-				});
-			myAgent.getCognitive().addPattern(gps.get(0));
-			myAgent.getCognitive().startContinuousMatching();*/
 			return true;
 		}
 			
@@ -781,12 +755,10 @@ public class ClaimBehavior implements InputListener
 		
 		if(!inputQueues.containsKey(inputComponent) && gui != null)
 		{
-			System.out.println(" ----- handle input " + " not connect");
 			gui.connectInput(inputComponent, this);
 			inputQueues.put(inputComponent, new LinkedList<Vector<Object>>());
 			return false;
 		}
-		System.out.println(" ----- handle input " + "after connect");
 		
 		Vector<Object> inputArgs = null;
 		if(inputQueues.get(inputComponent).isEmpty() && gui != null)
@@ -796,15 +768,10 @@ public class ClaimBehavior implements InputListener
 			// input has been activated; get an event from the queue
 			inputArgs = inputQueues.get(inputComponent).poll();
 		
-		System.out.println(" ----------- " + " handle input " + (inputArgs == null));
 		if(inputArgs == null)
 			return false;
 		// match arguments
 		Vector<ClaimConstruct> args2 = new Vector<ClaimConstruct>(args);
-		for (ClaimConstruct cons : args2) 
-			System.out.println(cons.toString() + " ------------- ");
-		for (ClaimConstruct v : objects2values(inputArgs)) 
-			System.out.println(" ------- " + v.toString());
 		
 		args2.remove(0);
 		//return true;
@@ -813,9 +780,6 @@ public class ClaimBehavior implements InputListener
 	
 	protected boolean handleOutput(Vector<ClaimConstruct> args)
 	{
-		System.out.println(" ----- handle Output");
-		for (ClaimConstruct con : args)
-			System.out.println(" ---- output with " + con.toString());
 		ClaimValue outputComponent = (ClaimValue) args.get(0);
 		Vector<ClaimValue> outputV = new Vector<ClaimValue>();
 		
@@ -1052,15 +1016,13 @@ public class ClaimBehavior implements InputListener
 		// replace all ClaimVariables (represented as ?<name>) with an index
 		HashMap<Integer, ClaimVariable> intToVariable = new HashMap<Integer, ClaimVariable>();
 		String knowledge = constructsAndMaps(knowledgeStruct.getFields(), intToVariable, 1);
-		System.out.println(" din forAllK " + knowledge);
-
+		
 		GraphPattern CP = new GraphPattern();
 		TextGraphRepresentation repr = new TextGraphRepresentation(CP);
 		repr.readRepresentation(new ContentHolder<String>(knowledge));
 		
 		List<Match> matches = myAgent.getCognitive().readAll(CP);
 		for (Match match : matches) {
-			System.out.println(" ---- matches are " + match.toString());
 			st = new SymbolTable(st);
 			
 			for (Node node : CP.getNodes())
