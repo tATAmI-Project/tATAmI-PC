@@ -389,7 +389,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 					try
 					{
 						((ClaimAgent) this.myAgent).getContainerController().createNewAgent(agentNameValue,
-								acd.classpath, new Object[] {newAgentParameters});
+								acd.classpath, new Object[] {newAgentParameters}).start();
 						log.trace("The agent "+agentNameValue+" of class "+agentClassName.getValue()+" was created.");
 						log.info(myAgent.getLocalName()+" created the child agent "+agentNameValue+" of class "+agentClassName.getValue()+".");
 

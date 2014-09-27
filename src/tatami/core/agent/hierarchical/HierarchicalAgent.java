@@ -241,8 +241,10 @@ public class HierarchicalAgent extends WSAgent
 	@Override
 	public void doMove(Location dest)
 	{
-		if(parVal(AgentParameterName.FIXED).equals("true"))
-			return;
+		String isFixed = parVal(AgentParameterName.FIXED);
+		if(isFixed!=null)
+			if(isFixed.equals("true"))
+				return;
 		try
 		{
 			if(!dest.getName().equals(this.getContainerController().getContainerName()))
