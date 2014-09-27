@@ -53,6 +53,16 @@ public class HierarchyOntology extends Ontology
 		 * The sending agent demands to the receiving agent to follow him to the container specified in the content
 		 */
 		FOLLOWME,
+		
+		/**
+		 * The sending agent asks for the parent of its parent
+		 */
+		GRANDPARENT,
+		
+		/**
+		 * The sending agent informs about the name of its parent
+		 */
+		MYPARENT,
 	}
 	
 	private static Ontology	theInstance	= new HierarchyOntology();
@@ -79,10 +89,12 @@ public class HierarchyOntology extends Ontology
 		case DEMANDPARENT:
 		case REMOVEME:
 		case FOLLOWME:
+		case GRANDPARENT:
 			return ACLMessage.REQUEST;
 		case AGREEPARENT:
 			return ACLMessage.AGREE;
 		case HELLODAD:
+		case MYPARENT:
 		default:
 			return ACLMessage.INFORM;
 		}

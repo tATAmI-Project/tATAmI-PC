@@ -93,6 +93,8 @@ public interface AgentGui
 					guiClassName = defaultGuiPath + "." + platform + DEFAULT_AGENT_GUI;
 				
 			}
+			else if(className.equals("null"))
+				guiClassName = null; //if the GUI agent parameter was set in the scenario XML file tu "null", then the agent will have no gui and, thus, no guiClassName either.
 			else if(className.indexOf(defaultGuiPath) >= 0)
 				guiClassName = className;
 			else

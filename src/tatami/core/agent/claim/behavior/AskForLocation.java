@@ -11,6 +11,9 @@
  ******************************************************************************/
 package tatami.core.agent.claim.behavior;
 
+import sclaim.constructs.basic.ClaimValue;
+import sclaim.constructs.basic.ClaimVariable;
+import tatami.core.agent.claim.ClaimAgent;
 import tatami.core.agent.claim.ClaimOntology;
 import tatami.core.agent.hierarchical.HierarchicalAgent;
 import tatami.core.agent.visualization.VisualizableAgent;
@@ -33,7 +36,7 @@ public class AskForLocation extends SimpleBehaviour
 	private final MessageTemplate template = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM),
 												   MessageTemplate.MatchSender(myAgent.getAMS()));
 	
-	private final String		  agentName;
+	private String		  agentName = null;
 	private boolean			   finished = false;
 	
 	public AskForLocation(HierarchicalAgent a, String agentName)
@@ -43,9 +46,25 @@ public class AskForLocation extends SimpleBehaviour
 		reset();
 	}
 	
+	public AskForLocation(HierarchicalAgent a)
+	{
+		super(a);
+		reset();
+	}
+	
 	@Override
 	public void action()
 	{
+		if(agentName==null){
+			ClaimValue agentNameValue = ((ClaimAgent) myAgent).getSt().get(new ClaimVariable("parent",true));
+			
+			if(agentNameValue==null) {
+				finished=true;
+				return;
+			}
+			else agentName = agentNameValue.getValue().toString();
+		}
+
 		ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
 		// fills all parameters of the request ACLMessage
 		request.addReceiver(myAgent.getAMS());

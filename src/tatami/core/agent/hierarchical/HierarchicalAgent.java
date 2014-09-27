@@ -21,6 +21,7 @@ import jade.domain.mobility.MobilityOntology;
 import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
 import jade.wrapper.ControllerException;
+import tatami.core.agent.claim.ClaimAgent;
 import tatami.core.agent.hierarchical.HierarchyOntology.Vocabulary;
 import tatami.core.agent.visualization.VisualizableAgent;
 import tatami.core.agent.webServices.WSAgent;
@@ -190,6 +191,33 @@ public class HierarchicalAgent extends WSAgent
 			}
 		});
 		
+		// answer the request for parent name
+		addBehaviour(new CyclicBehaviour() {
+			private static final long	serialVersionUID	= 1L;
+			
+			@Override
+			public void action()
+			{
+				ACLMessage msg = myAgent.receive(HierarchyOntology.template(Vocabulary.GRANDPARENT));
+				if(msg != null)
+				{
+					getLog().info("received request my parent from " + msg.getSender().getLocalName());
+
+					ACLMessage msgAnswer = HierarchyOntology.setupMessage(Vocabulary.MYPARENT);
+					msgAnswer.addReceiver(msg.getSender());
+					if(((HierarchicalAgent) myAgent).getHierRelation().getParent()!=null)
+						msgAnswer.setContent(((HierarchicalAgent) myAgent).getHierRelation().getParent());
+					else
+						msgAnswer.setContent("null");
+					myAgent.send(msgAnswer);
+				}
+				else
+				{
+					block();
+				}
+			}
+		});
+
 		addBehaviour(new CyclicBehaviour() {
 			private static final long	serialVersionUID	= 1L;
 			
@@ -213,6 +241,8 @@ public class HierarchicalAgent extends WSAgent
 	@Override
 	public void doMove(Location dest)
 	{
+		if(parVal(AgentParameterName.FIXED).equals("true"))
+			return;
 		try
 		{
 			if(!dest.getName().equals(this.getContainerController().getContainerName()))

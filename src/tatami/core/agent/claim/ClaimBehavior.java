@@ -56,6 +56,7 @@ import sclaim.constructs.basic.ClaimWhile;
 import sun.security.action.GetLongAction;
 import tatami.core.agent.BaseAgent;
 import tatami.core.agent.claim.behavior.AskForBeingChildBehaviour;
+import tatami.core.agent.claim.behavior.AskForGrandparentBehaviour;
 import tatami.core.agent.claim.behavior.AskForLocation;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
 import tatami.core.agent.visualization.VisualizableAgent;
@@ -116,8 +117,10 @@ public class ClaimBehavior extends Behaviour implements InputListener
 		{
 			Location loc = (Location) getDataStore().get(ClaimOntology.LOC_RTN);
 			
-			((VisualizableAgent) this.myAgent).getLog().info("Move to " + loc);
-			((ClaimAgent) this.myAgent).doMove(loc);
+			if(loc!=null){
+				((VisualizableAgent) this.myAgent).getLog().info("Move to " + loc);
+				((ClaimAgent) this.myAgent).doMove(loc);
+			}
 		}
 	}
 	
@@ -317,6 +320,7 @@ public class ClaimBehavior extends Behaviour implements InputListener
 			handleIn(args);
 			return true;
 		case OUT:
+			return handleOut();
 		case ACID:
 			return handleAcid();
 		case OPEN:
@@ -885,6 +889,35 @@ public class ClaimBehavior extends Behaviour implements InputListener
 			
 			((ClaimAgent) this.myAgent).addBehaviour(sb);
 		}
+		return true;
+	}
+	
+	/**
+	 * This primitive orders the agent to get out of the subhierarchy of its current parent. The new parent will be the parent of its current parent. For the time being it doesn't receive any argument. 
+	 * 
+	 * @return - always true
+	 */
+	protected boolean handleOut()
+	{
+			// find Container of destination
+			SequentialBehaviour sb = new SequentialBehaviour();
+			
+			Behaviour b = new AskForGrandparentBehaviour((ClaimAgent) this.myAgent);
+			sb.addSubBehaviour(b);
+			
+			// find Container of destination
+			b = new AskForLocation((ClaimAgent) this.myAgent);
+			b.setDataStore(sb.getDataStore());
+			sb.addSubBehaviour(b);
+			
+			b = new AskForBeingChildBehaviour((ClaimAgent) this.myAgent);
+			sb.addSubBehaviour(b);
+			
+			b = new MoveToDest((ClaimAgent) this.myAgent);
+			b.setDataStore(sb.getDataStore());
+			sb.addSubBehaviour(b);
+			
+			((ClaimAgent) this.myAgent).addBehaviour(sb);
 		return true;
 	}
 	

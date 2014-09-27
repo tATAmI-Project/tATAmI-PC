@@ -11,6 +11,9 @@
  ******************************************************************************/
 package tatami.core.agent.claim.behavior;
 
+import sclaim.constructs.basic.ClaimValue;
+import sclaim.constructs.basic.ClaimVariable;
+import tatami.core.agent.claim.ClaimAgent;
 import tatami.core.agent.claim.ClaimMessage;
 import tatami.core.agent.hierarchical.HierarchicalAgent;
 import tatami.core.agent.hierarchical.HierarchyOntology;
@@ -37,8 +40,34 @@ public class AskForBeingChildBehaviour extends SimpleBehaviour{
 		this.parent = parent;
 	}
 	
+	public AskForBeingChildBehaviour(HierarchicalAgent agent){
+		super(agent);
+	}
+	
 	@Override
 	public void action() {
+		if(parent==null){
+			ClaimValue parentNameValue = ((ClaimAgent) myAgent).getSt().get(new ClaimVariable("parent",true));
+		
+			if(parentNameValue==null) {
+				String oldParent = ((HierarchicalAgent)myAgent).getHierRelation().getParent();
+				
+				if(oldParent != null){
+					ACLMessage msgRemoveMe = HierarchyOntology.setupMessage(Vocabulary.REMOVEME);
+					msgRemoveMe.addReceiver(new AID(oldParent, AID.ISLOCALNAME));
+					myAgent.send(msgRemoveMe);
+					((VisualizableAgent)myAgent).getLog().info(ClaimMessage.printMessage(msgRemoveMe));
+					((VisualizableAgent)myAgent).reportRemoveParent(oldParent);
+				}
+				
+				//changes knowledge about hierarchical relation
+				((HierarchicalAgent)myAgent).getHierRelation().setParent(null);
+				finish=true;
+				return;
+			}
+			else parent = parentNameValue.getValue().toString();
+		}
+
 		ACLMessage msg = HierarchyOntology.setupMessage(Vocabulary.DEMANDPARENT);
 		
 		msg.addReceiver(new AID(this.parent, AID.ISLOCALNAME));

@@ -338,7 +338,8 @@ in_function
 	;
 
 out_function
-	: '(' OUT argument_list ')'
+	: //'(' OUT argument_list ')'
+	'(' OUT ')'
 		{
 			//log.info("out_function -> '(' OUT argument_list ')'");
 			$$ = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.OUT ,new String("out"),$3.claimConstructVector));

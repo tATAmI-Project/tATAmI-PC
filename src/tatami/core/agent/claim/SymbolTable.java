@@ -163,6 +163,27 @@ public class SymbolTable implements Serializable
 	}
 	
 	/**
+	 * remove the value of the specified variable after a search to find it in the whole hierarchy of symbol
+	 * tables
+	 * 
+	 * @param variable
+	 *            - the variable itself
+	 * @return - true if the variable was found and remove, false otherwise
+	 */
+	public boolean remove(ClaimVariable variable)
+	{
+		for(SymbolTable st = this; st != null; st = st.prev)
+		{
+			ClaimValue found = (st.table.get(variable));
+			if(found != null){
+				table.remove(found);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
 	 * returns true if the specified variable is present in the whole hierarchy of symbol
 	 * tables and false otherwise
 	 * 

@@ -133,41 +133,44 @@ public class VisualizableAgent extends BaseAgent implements ReportingEntity {
 			guiConfig.setGuiClass(parVal(AgentParameterName.GUI),
 					parVals(AgentParameterName.AGENT_PACKAGE)); // overrides any
 		}*/
-
-		guiConfig.setGuiClass(parVal(AgentParameterName.GUI),
-				parVals(AgentParameterName.AGENT_PACKAGE));
 		
-		try {
-			/*if (PlatformUtils.Platform.ANDROID.equals(PlatformUtils
-					.getPlatform()))
-
-				guiConfig.setGuiClass(parVal(AgentParameterName.GUI),
-						parVals(AgentParameterName.AGENT_PACKAGE));*/
-
-			cl = new ClassLoader(getClass().getClassLoader()) {
-				// nothing to extend
-			};
-			Constructor<?> cons = cl.loadClass(guiConfig.guiClassName)
-					.getConstructor(AgentGuiConfig.class);
-			gui = (AgentGui) cons.newInstance(guiConfig);
-		} catch (Exception e) {
-			e.printStackTrace(); // there is no log yet
+			guiConfig.setGuiClass(parVal(AgentParameterName.GUI),
+					parVals(AgentParameterName.AGENT_PACKAGE));
+			
+		if(guiConfig.guiClassName!=null){ ////if guiConfig.guiClassName is null then the agent will have no gui.
+			try {
+				/*if (PlatformUtils.Platform.ANDROID.equals(PlatformUtils
+						.getPlatform()))
+	
+					guiConfig.setGuiClass(parVal(AgentParameterName.GUI),
+							parVals(AgentParameterName.AGENT_PACKAGE));*/
+	
+				cl = new ClassLoader(getClass().getClassLoader()) {
+					// nothing to extend
+				};
+				Constructor<?> cons = cl.loadClass(guiConfig.guiClassName)
+						.getConstructor(AgentGuiConfig.class);
+				gui = (AgentGui) cons.newInstance(guiConfig);
+			} catch (Exception e) {
+				e.printStackTrace(); // there is no log yet
+			}
 		}
-
-		// configure log / logging Unit
-
-		UnitConfigData unitConfig = new UnitConfigData()
-				.setName(getAgentName()).ensureNew().setReporter(this);
-		unitConfig.setType(PlatformUtils.platformLogType());
-		unitConfig.setLevel(Level.ALL);
-		if (gui != null)
-			// unitConfig.setTextArea((TextArea)((PCDefaultAgentGui)gui).getComponent(DefaultComponent.AGENT_LOG.toString()));
-			unitConfig.setDisplay(new Log2AgentGui(gui,
-					DefaultComponent.AGENT_LOG.toString()));
-		loggingUnit = new Unit(unitConfig);
-		log = getLog();
-
-		log.trace("visualization on platform " + PlatformUtils.getPlatform());
+	
+			// configure log / logging Unit
+	
+			UnitConfigData unitConfig = new UnitConfigData()
+					.setName(getAgentName()).ensureNew().setReporter(this);
+			unitConfig.setType(PlatformUtils.platformLogType());
+			unitConfig.setLevel(Level.ALL);
+			if (gui != null)
+				// unitConfig.setTextArea((TextArea)((PCDefaultAgentGui)gui).getComponent(DefaultComponent.AGENT_LOG.toString()));
+				unitConfig.setDisplay(new Log2AgentGui(gui,
+						DefaultComponent.AGENT_LOG.toString()));
+			loggingUnit = new Unit(unitConfig);
+			log = getLog();
+	
+			if (gui != null)
+				log.trace("visualization on platform " + PlatformUtils.getPlatform());
 	}
 
 	protected void removeVisualization() {
