@@ -100,6 +100,7 @@ public class SymbolTable implements Serializable
 			table.put(variable, value);
 			return;
 		}
+		
 		SymbolTable st = getSymbolTableContainingKey(variable);
 		if(st == null)
 			table.put(variable, value);

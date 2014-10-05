@@ -221,7 +221,8 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected AgentComponent(AgentComponentName name)
 	{
-		componentName = name;
+		if (!name.equals(AgentComponentName.TESTING_COMPONENT))
+			componentName = name;
 		componentInitializer();
 	}
 	

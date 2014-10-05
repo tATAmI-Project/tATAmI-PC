@@ -39,7 +39,7 @@ public class DemoAgentOutputInput extends javax.swing.JFrame {
         
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(522, 232));
-        setTitle("Attendee ");
+        setTitle("Speaker2 ");
         setBounds(1100, 700, 522, 232);
         
         jScrollPane1.setAutoscrolls(true);

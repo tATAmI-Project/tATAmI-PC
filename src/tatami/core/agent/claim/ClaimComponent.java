@@ -26,6 +26,7 @@ import tatami.sclaim.constructs.basic.ClaimAgentDefinition;
 import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
 import tatami.sclaim.constructs.basic.ClaimBehaviorType;
 import tatami.sclaim.constructs.basic.ClaimConstruct;
+import tatami.sclaim.constructs.basic.ClaimConstructType;
 import tatami.sclaim.constructs.basic.ClaimFunctionCall;
 import tatami.sclaim.constructs.basic.ClaimFunctionType;
 import tatami.sclaim.constructs.basic.ClaimValue;
@@ -142,9 +143,10 @@ public class ClaimComponent extends AgentComponent
 		{
 			e.printStackTrace();
 		}
-			
+		
+		int nr = 0;
 		for (final ClaimBehavior cb : getBehaviors())
-		{
+		{nr++;
 			if (cb.getBehaviorType().equals(ClaimBehaviorType.INITIAL)) {
 				
 				// FIXME emma
@@ -160,25 +162,34 @@ public class ClaimComponent extends AgentComponent
 					@Override
 					public void handleEvent(AgentEvent event)
 					{
-						System.out.println("aaaaaa");
 						cb.action();
-						System.out.println("bbbbb");
 					}
 				});
 				postAgentEvent(new AgentEvent(AgentEventType.AGENT_INITIAL_BEHAVIOR));
 			}
 			
-			/*else if (cb.getBehaviorType().equals(ClaimBehaviorType.REACTIVE)) {
-				registerHandler(AgentEventType.AGENT_REACTIVE_BEHAVIOR, new AgentEventHandler() {
+			else if (cb.getBehaviorType().equals(ClaimBehaviorType.REACTIVE)) {
+				/*registerHandler(AgentEventType.AGENT_REACTIVE_BEHAVIOR, new AgentEventHandler() {
 					@Override
 					public void handleEvent(AgentEvent event)
 					{
-						cb.action();
+						if (
+								(
+										(ClaimConstruct)cb.getBehaviorDefinition().getStatements().get(0)
+								).getType().equals(ClaimConstructType.CONDITION)
+						&& cb.currentStatement == 0) {*/
+							(new Thread(){
+							    public void run() {
+							      cb.action();
+							    }
+							  }).start();
+						/*}
 					}
-				});
-				postAgentEvent(new AgentEvent(AgentEventType.AGENT_REACTIVE_BEHAVIOR));
-			}*/
+				});*/
+				//postAgentEvent(new AgentEvent(AgentEventType.AGENT_REACTIVE_BEHAVIOR));
+			}
 		}
+		postAgentEvent(new AgentEvent(AgentEventType.AGENT_REACTIVE_BEHAVIOR));
 	}
 	
 	/**
@@ -226,7 +237,6 @@ public class ClaimComponent extends AgentComponent
 						for (String e : elem) {
 							if (!e.contains("?") && !content.contains(e)) {
 								pass = false;
-								System.out.println(e);
 							}
 						}
 						
@@ -243,8 +253,12 @@ public class ClaimComponent extends AgentComponent
 										{
 											e.printStackTrace();
 										}
-										
-										cb.actionOnReceive(source, content);
+
+										(new Thread(){
+										    public void run() {
+										      cb.actionOnReceive(source, content);
+										    }
+										  }).start();
 									}
 								});
 								postAgentEvent(new AgentEvent(AgentEventType.AGENT_REACTIVE_BEHAVIOR));

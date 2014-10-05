@@ -100,14 +100,10 @@ public class ContextComponent extends AgentComponent { // TODO extend Cognitive 
 		if (m == null) 
 			return;
 		
-		System.out.println(knowledgeGraph);
-		System.out.println(getParent().getAgentName());
 		for (Edge e : CP.getEdges()) {
 			knowledgeGraph.removeEdge(m.getMatchedGraphEdges(e).get(0));
 		}
 		
-		System.out.println(" -------------- removed " + deleteKnowledge);
-		System.out.println(knowledgeGraph.toString());
 	}
 	
 	public Match read(GraphPattern pattern)
@@ -131,7 +127,6 @@ public class ContextComponent extends AgentComponent { // TODO extend Cognitive 
 			m = GMQ.getNextMatch();
 		}
 		
-		System.out.println(knowledgeGraph);
 		return GMQ.getAllMatches(0);
 		//return GMQ.getAllCompleteMatches();
 		//return matches;

@@ -96,6 +96,7 @@ public class CompositeAgentLoader implements AgentLoader
 		{
 			XMLNode componentNode = componentIt.next();
 			String componentName = componentNode.getAttributeValue(COMPONENT_NAME_ATTRIBUTE);
+			System.out.println(" ---------- bbb " + componentName);
 			
 			// get component class
 			String componentClass = componentNode.getAttributeValue(COMPONENT_CLASS_ATTRIBUTE);
@@ -160,13 +161,18 @@ public class CompositeAgentLoader implements AgentLoader
 			}
 			
 			Object argument = null;
-			if(AgentComponentName.PARAMETRIC_COMPONENT.componentName().equals(componentName))
+			if(AgentComponentName.PARAMETRIC_COMPONENT.componentName().equals(componentName)) {
 				argument = agentCreationData.getParameters();
-			else if(!componentParameters.isEmpty())
+				System.out.println(" ---- pe prima");
+			}
+			else if(!componentParameters.isEmpty()) {
 				argument = componentParameters;
-			
+				System.out.println(" ------ pe a doua");
+			}
+						 
 			componentData.add(new AbstractMap.SimpleEntry<String, Object>(componentClass, argument));
 		}
+		
 		agentCreationData.getParameters().addObject(COMPONENT_PARAMETER_NAME, componentData);
 		return true;
 	}

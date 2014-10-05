@@ -118,11 +118,7 @@
 				<scen:component name="messaging" />
 				<scen:component name="cognitive">
 					<scen:parameter name="knowledge" value="Chair1-chair-of->TVSessions;SmartTV-partOf->*TVSessions"/> 
-														<!-- 
-					    									KB
-					    										(->Chair1 -chair-of-> TVSessions)
-					    										-> SmartTV -partOf-> *TVSessions
-					    								"/> -->
+														
 				</scen:component> 
 				<scen:component name="s_claim" />
 				

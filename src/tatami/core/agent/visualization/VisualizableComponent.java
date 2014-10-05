@@ -210,7 +210,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		String path = guiPath.iterator().next().getValue();
 		try
 		{
-			getLog().trace("trying gui attachment path [" + path + "]");
+			//getLog().trace("trying gui attachment path [" + path + "]");
 			attachment = Class.forName(path);
 			found = true;
 		} catch(ClassNotFoundException e)
@@ -220,15 +220,15 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			
 		if(!found && path == null)
 		{
-				getLog().trace("no agent gui defined.");
+				//getLog().trace("no agent gui defined.");
 		}
 		
 		if(attachment != null)
 		{
 			this.interactivGUI = (AgentGui) attachment.getDeclaredConstructor(AgentGuiConfig.class).newInstance(guiConfig);
 		}
-		else
-			getLog().trace("code attachment [" + "] not found.");
+		//else
+			//getLog().trace("code attachment [" + "] not found.");
 	}
 	
 	@Override

@@ -10,7 +10,7 @@ import tatami.core.agent.kb.simple.SimpleKnowledge;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 
-public class CognitiveComponent extends AgentComponent
+public class CognitiveComponent extends AgentComponent // TODO implement to be used as ContextComponent parent
 {
 	/**
 	 * The agent's knowledge base. It cannot be changed (i.e. create a different instance)

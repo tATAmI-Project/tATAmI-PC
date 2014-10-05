@@ -25,10 +25,8 @@ import net.xqhs.util.logging.Log;
 import net.xqhs.util.logging.Logger.Level;
 import tatami.core.agent.visualization.AgentGui;
 import tatami.core.agent.visualization.VisualizableComponent.Vocabulary;
-import tatami.core.util.graph.Edge;
-import tatami.core.util.graph.Graph;
-import tatami.core.util.graph.Node;
-import tatami.core.util.graph.representation.TextGraphRepresentation;
+import net.xqhs.graphs.graph.*;
+import net.xqhs.graphs.representation.text.*;
 import tatami.pc.agent.visualization.PCDefaultAgentGui;
 import tatami.pc.agent.visualization.PCVisualizationGui.VisualizationComponent;
 

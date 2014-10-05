@@ -153,7 +153,8 @@ public interface AgentGui
 	
 	/**
 	 * The method executes a task in the background of the GUI, as specified by the implementation. This is useful, for
-	 * instance, for taking tasks off the Swing EDT.
+	 * instance, for taking tasks off the Swing EDT.(DemointeractivGUI.setTitle(getAgentName());
+			
 	 * <p>
 	 * Implementations are expected to start another thread for executing the work.
 	 * 
@@ -168,4 +169,5 @@ public interface AgentGui
 	 */
 	public void background(AgentGuiBackgroundTask agentGuiBackgroundTask, Object argument,
 			ResultNotificationListener resultListener);
+	
 }

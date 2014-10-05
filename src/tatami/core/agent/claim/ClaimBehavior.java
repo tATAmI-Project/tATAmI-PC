@@ -364,7 +364,6 @@ public class ClaimBehavior implements InputListener
 			return handleKnowledgeManagement(function.getFunctionType(), args);
 		case INPUT:
 			while (!handleInput(args)) {
-				System.out.println(" try input");
 				try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e) {
@@ -491,7 +490,6 @@ public class ClaimBehavior implements InputListener
 		boolean expectServiceReturn = false; // if true, wait for a reply (blocking call)
 		
 		// decide upon the receiver(s) of the message
-		System.out.println(" tipul de recev este " + receiverConstructType.toString());
 		switch(receiverConstructType)
 		{
 		case VARIABLE:
@@ -516,7 +514,6 @@ public class ClaimBehavior implements InputListener
 		default:
 			break;
 		}
-		System.out.println(" ------------ receiverul este " + receiver);
 		
 		if(args.size() > 3)
 			// FIXME check if in WS mode
@@ -633,7 +630,6 @@ public class ClaimBehavior implements InputListener
 		int argsSize = args.size();
 		boolean ret = true;
 		
-		System.out.println(" from receive 1 ");
 		/* TODO handle potential web service access to the agent 
 		 MessageTemplate WStemplate = MessageTemplate.MatchOntology(WebServiceOntology.NAME);
 		
@@ -700,14 +696,12 @@ public class ClaimBehavior implements InputListener
 			if(!readMessage(st.bindStructure(received), newArgs))
 			{   // the message does not match the pattern
 
-				System.out.println(" from receive 5 ");
 				log.trace("message not matching pattern [" + content + "]");
 				ret = false;
 			}
 			else
 			{
 
-				System.out.println(" from receive 6 ");
 				log.trace("--------- message received: [" + content + "]");
 				if(argsSize == 2)
 					st.put((ClaimVariable) args.get(0), new ClaimValue(source));
@@ -741,17 +735,14 @@ public class ClaimBehavior implements InputListener
 	 */
 	protected boolean handleInput(Vector<ClaimConstruct> args)
 	{
-		System.out.println("----- handle input");
 		AgentGui gui = myAgent.getVisualizable().getInteractivGUI();
 		
 		// FIXME: variables should be supported
 		String inputComponent = ((ClaimValue) args.get(0)).toString();
-		System.out.println(" ----- handle input " + inputComponent);
 		
 		// FIXME: variables should be supported
 		//@SuppressWarnings("unused")
 		//ClaimValue inputComponentType = (ClaimValue) args.get(1); // unused anymore, for now.
-		//System.out.println(" ----- handle input " + inputComponentType.toString());
 		
 		if(!inputQueues.containsKey(inputComponent) && gui != null)
 		{

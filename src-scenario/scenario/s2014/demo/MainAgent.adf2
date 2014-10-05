@@ -14,8 +14,13 @@
 		
 		(reactive getAttendees
 			(receive ?agentName (message -attends-> ?PresentationName))
-			(addK (struct knowledge ?agentName -attends-> ?PresentationName))
-			(output MAINOUTPUT ?agentName participa la presentarea ?PresentationName)
+			(if (readK (struct knowledge pattern ?agentName -attends-> ?PresentationName))
+			then
+				(output MAINOUTPUT ?agentName a mai zis ca participa)
+			else
+				(addK (struct knowledge ?agentName -attends-> ?PresentationName))
+				(output MAINOUTPUT ?agentName participa la presentarea ?PresentationName)
+			)
 		)
 		
 		// get presentation started
