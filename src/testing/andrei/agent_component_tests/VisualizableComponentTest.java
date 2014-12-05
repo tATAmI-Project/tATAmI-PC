@@ -1,6 +1,6 @@
 package testing.andrei.agent_component_tests;
 
-import net.xqhs.util.logging.Logger.Level;
+import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.Unit;
 import net.xqhs.util.logging.UnitComponent;
 import tatami.core.agent.AgentComponent;

@@ -55,12 +55,19 @@ public class ContextComponentTest extends Unit
 		agent.addComponent(new ContextComponent());
 		
 		agent.addComponent(new AgentComponent(AgentComponentName.TESTING_COMPONENT) {
+			private static final long	serialVersionUID	= 1L;
 			UnitComponent	locallog;
 			
 			@Override
 			protected ContextComponent getCognitive()
 			{
 				return super.getCognitive();
+			}
+			
+			@Override
+			protected AgentComponent getComponent(AgentComponentName name)
+			{
+				return super.getComponent(name);
 			}
 			
 			@Override

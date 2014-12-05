@@ -17,8 +17,8 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
+import net.xqhs.graphical.GCanvas;
 import net.xqhs.util.logging.UnitComponentExt;
-import tatami.pc.util.graphical.GCanvas;
 import tatami.pc.util.logging.TextAreaLogDisplay;
 import tatami.pc.util.windowLayout.LayoutIndications;
 import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;

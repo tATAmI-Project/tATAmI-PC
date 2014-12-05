@@ -9,11 +9,11 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package s2012.debateScenario_android;
+package scenario.s2012.debateScenario_android;
 
 import java.util.Vector;
 
-import tatami.core.agent.claim.parser.ClaimValue;
+import tatami.sclaim.constructs.basic.ClaimValue;
 
 
 public class DebateFunctions {

@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package examples.simpleScenarioE.PC;
+package scenario.examples.sclaim.simpleScenarioE.PC;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -21,6 +21,7 @@ import java.util.Vector;
 
 import javax.swing.JButton;
 
+import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.pc.agent.visualization.PCDefaultAgentGui;
 
 

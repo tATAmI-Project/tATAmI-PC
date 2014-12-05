@@ -9,12 +9,12 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package scenario.examples_sclaim;
+package scenario.examples;
 
 import java.util.Vector;
 
 import tatami.core.agent.claim.ClaimFunctionLibrary;
-import tatami.core.agent.claim.parser.ClaimValue;
+import tatami.sclaim.constructs.basic.ClaimValue;
 
 
 public class StringFunctions implements ClaimFunctionLibrary

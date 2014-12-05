@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package s2012.debateScenario_android.PC;
+package scenario.s2012.debateScenario_android.PC;
 
 import java.awt.Component;
 import java.util.Hashtable;
@@ -18,8 +18,8 @@ import java.util.Vector;
 
 import javax.swing.JTextArea;
 
-
 import tatami.core.agent.visualization.AgentGui;
+import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.pc.util.windowLayout.WindowLayout;
 import tatami.pc.util.windowLayout.WindowParameters;
 
@@ -40,7 +40,7 @@ public class PDAAgentGui implements AgentGui{
 		components = new Hashtable<String, Component>();
 		window = new JFramePDA();
 		
-		window.jLabel4.setText(config.windowName);
+		window.jLabel4.setText(config.getWindowName());
 
 		components.put(PDAComponents.JOIN.toString(), window.jTextField1);
 		components.put(PDAComponents.ADD.toString(), window.jTextField2);
@@ -129,8 +129,16 @@ public class PDAAgentGui implements AgentGui{
 	public void close()
 	{
 		if(WindowLayout.staticLayout != null)
-			WindowLayout.staticLayout.dropWindow(config.windowType, config.windowName);
+			WindowLayout.staticLayout.dropWindow(config.getWindowType(), config.getWindowName());
 		window.dispose();
 		window = null;
+	}
+
+	@Override
+	public void background(AgentGuiBackgroundTask agentGuiBackgroundTask, Object argument,
+			ResultNotificationListener resultListener)
+	{
+		// TODO Auto-generated method stub
+		
 	} 
 }

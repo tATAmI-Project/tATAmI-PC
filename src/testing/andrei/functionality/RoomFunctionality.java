@@ -17,7 +17,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import tatami.core.agent.claim.ClaimFunctionLibrary;
-import tatami.core.agent.claim.parser.ClaimValue;
+import tatami.sclaim.constructs.basic.ClaimValue;
 
 
 public class RoomFunctionality implements ClaimFunctionLibrary

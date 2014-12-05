@@ -16,6 +16,17 @@
 	<!-- the directory where the project is, relative to the parent of the current project -->
 	<property name="import-directory" value="." />
 
+	<target name="Graphs" depends="Logging">
+		<copy file="../${import-directory}/net.xqhs.Graphs/deploy/Graphs.jar" todir="libs/" />
+	</target>
+	
+	<target name="Gel" depends="Logging">
+		<copy file="../${import-directory}/net.xqhs.Gel/deploy/Gel.jar" todir="libs/" />
+	</target>
+	<target name="XML" depends="">
+		<copy file="../${import-directory}/net.xqhs.XML/deploy/java6/net.xqhs.XML.jar" todir="libs/" />
+	</target>
+		
 	<!-- the target for the current project -->
 	<target name="Logging" depends="Log4J,Config">
 		<copy file="../${import-directory}/Logging/deploy/java6/Logging.jar" todir="libs/" />
@@ -28,5 +39,5 @@
 		<copy file="../${import-directory}/Config/deploy/java6/Config.jar" todir="libs/" />
 	</target>
 		
-	<target name="import" depends="Logging" />
+	<target name="import" depends="Logging, Graphs, Gel, XML" />
 </project>

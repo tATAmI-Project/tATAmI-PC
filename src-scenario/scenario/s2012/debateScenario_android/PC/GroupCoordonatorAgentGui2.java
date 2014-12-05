@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package s2012.debateScenario_android.PC;
+package scenario.s2012.debateScenario_android.PC;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -19,6 +19,7 @@ import java.util.Vector;
 
 import javax.swing.JLabel;
 
+import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.pc.agent.visualization.PCDefaultAgentGui;
 
 public class GroupCoordonatorAgentGui2 extends PCDefaultAgentGui{

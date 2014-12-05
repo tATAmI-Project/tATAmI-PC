@@ -1,9 +1,9 @@
 package testing.andrei.agent_component_tests;
 
-import net.xqhs.util.logging.Logger.Level;
-import net.xqhs.util.logging.Logging;
+import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.Unit;
 import net.xqhs.util.logging.UnitComponent;
+import net.xqhs.util.logging.logging.Logging;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent;
@@ -56,7 +56,7 @@ public class BareCompositeAgentTest extends Unit
 			le("start failed");
 		try
 		{
-			Thread.sleep(200);
+			Thread.sleep(2000);
 		} catch(InterruptedException e)
 		{
 			e.printStackTrace();

@@ -22,7 +22,6 @@ import java.util.Properties;
 
 import javax.swing.JFrame;
 
-import net.xqhs.util.logging.Log;
 import net.xqhs.util.logging.Unit;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.pc.util.logging.TextAreaLogDisplay;
