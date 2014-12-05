@@ -140,7 +140,7 @@ public class AgentGuiConfig extends Config implements Serializable
 		String defaultGuiPath = ROOT_PACKAGE + "." + platform.toString().toLowerCase() + "." + DEFAULT_GUI_PATH;
 		guiClassName = null;
 		// if overridden, start from the value of the override; otherwise, from the method argument.
-		String cName = (overrideClassName != null) ? overrideClassName : null;
+		String cName = (overrideClassName != null) ? overrideClassName : className;
 		if(cName == null) // no class name given -> load default. e.g. PCDefaultAgentGui.
 			guiClassName = defaultGuiPath + "." + platform + DEFAULT_AGENT_GUI;
 		else if(cName.indexOf(defaultGuiPath) >= 0)

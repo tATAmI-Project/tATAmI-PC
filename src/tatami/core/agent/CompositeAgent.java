@@ -10,16 +10,14 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import tatami.core.agent.AgentComponent.AgentComponentName;
-import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.AgentEvent.AgentSequenceType;
-import tatami.core.agent.claim.ClaimBehavior;
 import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.jade.JadeComponent;
-import tatami.sclaim.constructs.basic.ClaimBehaviorType;
 import tatami.simulation.AgentManager;
+import tatami.simulation.PlatformLoader.PlatformLink;
 
 /**
  * This class reunites the components of an agent in order for components to be able to call each other and for events
@@ -133,8 +131,10 @@ public class CompositeAgent implements Serializable, AgentManager
 						synchronized(eventQueue)
 						{
 							state = AgentState.RUNNING;
-							if (getComponent(AgentComponentName.S_CLAIM_COMPONENT) != null)
-								((ClaimComponent) getComponent(AgentComponentName.S_CLAIM_COMPONENT)).registerBehaviors();
+							// FIXME this should be done by intercepting AGENT_START
+							if(getComponent(AgentComponentName.S_CLAIM_COMPONENT) != null)
+								((ClaimComponent) getComponent(AgentComponentName.S_CLAIM_COMPONENT))
+										.registerBehaviors();
 						}
 						break;
 					case AGENT_EXIT:
@@ -165,7 +165,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	/**
 	 * Time (in milliseconds) to wait for the agent thread to exit.
 	 */
-	// protected static final long EXIT_TIMEOUT = 500;
+	protected static final long							EXIT_TIMEOUT		= 500;
 	
 	/**
 	 * This can be used by platform-specific components to contact the platform.
@@ -183,7 +183,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * <p>
 	 * It is important that this list is managed together with <code>components</code>.
 	 */
-	protected ArrayList<AgentComponent>				componentOrder		= new ArrayList<AgentComponent>();
+	protected ArrayList<AgentComponent>					componentOrder		= new ArrayList<AgentComponent>();
 	
 	// TODO: add support for non-standard components.
 	// /**
@@ -306,7 +306,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	}
 	
 	@Override
-	public boolean setPlatformLink(Object link)
+	public boolean setPlatformLink(PlatformLink link)
 	{
 		if(!canAddComponents() || isRunning())
 			return false;
@@ -401,6 +401,7 @@ public class CompositeAgent implements Serializable, AgentManager
 		if(hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
 			agentName = ((ParametricComponent) getComponent(AgentComponentName.PARAMETRIC_COMPONENT))
 					.parVal(AgentParameterName.AGENT_NAME);
+		// FIXME jade name should be given by agent name. These lines should be removed
 		if((agentName == null) && getComponent(AgentComponentName.JADE_COMPONENT) != null)
 			agentName = ((JadeComponent) getComponent(AgentComponentName.JADE_COMPONENT)).getLocalName();
 		return agentName;

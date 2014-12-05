@@ -24,8 +24,8 @@ import tatami.core.agent.AgentEvent.AgentEventType;
  * <p>
  * The communication is abstracted as exchanging messages between endpoints, where each endpoint is identified by a
  * {@link String} address composed of multiple elements separated by slashes. This means that an endpoint may be
- * identified by a URI (if the {@link MessagingComponent} implementation supports it, or, for instance, by an address of
- * the type "Agent1/Visualization" (this will work with Jade, where agents are addressable by name).
+ * identified by a URI (if the {@link MessagingComponent} implementation supports it), or, for instance, by an address
+ * of the type "Agent1/Visualization" (this will work with Jade, where agents are addressable by name).
  * <p>
  * Messages are sent from an endpoint to another, and contain a {@link String}. Specific implementations may parse the
  * string for additional structure.

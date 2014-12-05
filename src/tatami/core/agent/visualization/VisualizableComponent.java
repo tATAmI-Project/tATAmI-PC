@@ -11,15 +11,6 @@
  ******************************************************************************/
 package tatami.core.agent.visualization;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map.Entry;
-
-import net.xqhs.graphs.graph.Graph;
-import net.xqhs.graphs.graph.SimpleGraph;
-import net.xqhs.graphs.representation.text.TextGraphRepresentation;
-import net.xqhs.graphs.util.ContentHolder;
 import net.xqhs.util.config.Config;
 import net.xqhs.util.logging.Logger;
 import net.xqhs.util.logging.LoggerSimple.Level;
@@ -42,7 +33,7 @@ import tatami.core.util.platformUtils.PlatformUtils;
  * This component manages all things related to the visualization and remote control of the agent. Namely:
  * <ul>
  * <li>the agent's log
- * <li>reporting the agent's log to the VisualizationAngent (if any)
+ * <li>reporting the agent's log to the (central) VisualizationAngent (if any)
  * <li>reporting information related to the hierarchical structure of agents
  * <li>handling of orderly exit of agents
  * </ul>
@@ -110,14 +101,13 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	protected transient UnitComponentExt	loggingUnit			= null;
 	/**
 	 * The {@link Config} for the GUI. Should remain the same object throughout the agent's lifecycle, although it may
-	 * be changed, and the agent's gui will be recreated.
+	 * be changed, and the agent's GUI will be recreated.
 	 */
 	protected AgentGuiConfig				guiConfig			= new AgentGuiConfig();
 	/**
 	 * The GUI implementation. Depends on platform, but implements {@link AgentGui}.
 	 */
-	protected /*transient*/ AgentGui			gui					= null;
-	protected /*transient*/ AgentGui			interactivGUI					= null;
+	protected transient AgentGui			gui					= null;
 	
 	/**
 	 * The name of the entity to which the agent has to report.
@@ -143,6 +133,8 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	{
 		super(AgentComponentName.VISUALIZABLE_COMPONENT);
 		
+		// register event handlers
+		
 		registerHandler(AgentEventType.AGENT_START, new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)
@@ -152,7 +144,6 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			}
 		});
 		
-		// registers event handlers
 		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)
@@ -164,6 +155,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 					if(!destination.equals(getCurrentContainer()))
 					{
 						getLog().info("moving to [" + destination.toString() + "]");
+						setCurrentContainer(destination.toString());
 						removeVisualization();
 					}
 				}
@@ -186,49 +178,6 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 				removeVisualization();
 			}
 		});
-	}
-	
-	/**
-	 * Constructs a new instance of visualizable component that has another GUI
-	 * 
-	 * @param guiPath
-	 * @throws NoSuchMethodException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
-	 * @throws SecurityException 
-	 * @throws IllegalArgumentException 
-	 */
-	public VisualizableComponent(HashSet<Entry<String, String>> guiPath)
-		throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException,
-			    InvocationTargetException, NoSuchMethodException {
-		this();
-		
-		Class attachment = null;
-		
-		boolean found = false;
-		String path = guiPath.iterator().next().getValue();
-		try
-		{
-			//getLog().trace("trying gui attachment path [" + path + "]");
-			attachment = Class.forName(path);
-			found = true;
-		} catch(ClassNotFoundException e)
-		{
-			// do nothing; go forth
-		}
-			
-		if(!found && path == null)
-		{
-				//getLog().trace("no agent gui defined.");
-		}
-		
-		if(attachment != null)
-		{
-			this.interactivGUI = (AgentGui) attachment.getDeclaredConstructor(AgentGuiConfig.class).newInstance(guiConfig);
-		}
-		//else
-			//getLog().trace("code attachment [" + "] not found.");
 	}
 	
 	@Override
@@ -427,15 +376,6 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	}
 	
 	/**
-	 * Getter for the GUI.
-	 * 
-	 * @return the GUI, as an {@link AgentGui} instance.
-	 */
-	public AgentGui getInteractivGUI()
-	{
-		return interactivGUI;
-	}
-	/**
 	 * Relays calls to the underlying {@link AgentComponent} instance in order to avoid synthetic access warnings for
 	 * event handlers.
 	 */
@@ -455,6 +395,16 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		return currentContainer;
 	}
 	
+	/**
+	 * Setter for <code>currentContainer</code>.
+	 * 
+	 * @param containerName - the name of the container the agent is in or going to move to.
+	 */
+	protected void setCurrentContainer(String containerName)
+	{
+		currentContainer = containerName;
+	}
+
 	/**
 	 * Relays calls to the underlying {@link AgentComponent} instance in order to avoid synthetic access warnings for
 	 * event handlers.
@@ -481,7 +431,6 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	/**
 	 * Relays calls to the underlying {@link AgentComponent} instance in order to avoid synthetic access warnings for
 	 * event handlers.
-	 * 
 	 */
 	@Override
 	protected void postAgentEvent(AgentEvent event)

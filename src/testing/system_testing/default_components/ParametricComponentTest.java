@@ -1,4 +1,4 @@
-package testing.andrei.agent_component_tests;
+package testing.system_testing.default_components;
 
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.Unit;
@@ -12,13 +12,23 @@ import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.agent.parametric.ParametricComponent;
-import tatami.core.agent.visualization.VisualizableComponent;
 
-@SuppressWarnings("javadoc")
-public class VisualizableComponentTest extends Unit
+/**
+ * Tests the parametric component of a {@link CompositeAgent}. Creates a bare composite agent (without a platform), and
+ * adds a parametric and a test component to it. The test component intercepts agent events and prints them. The agent
+ * is asked to exit soon after creation.
+ * <p>
+ * The testing component gets the name of the agent from the {@link ParametricComponent} and prints it out.
+ * 
+ * @author Andrei Olaru
+ *
+ */
+public class ParametricComponentTest extends Unit
 {
-	@SuppressWarnings("serial")
-	public VisualizableComponentTest()
+	/**
+	 * Main testing.
+	 */
+	public ParametricComponentTest()
 	{
 		setUnitName("parametric component tester");
 		li("starting...");
@@ -27,27 +37,15 @@ public class VisualizableComponentTest extends Unit
 		AgentParameters agentParameters = new AgentParameters().add(AgentParameterName.AGENT_NAME,
 				"test parametric agent");
 		agent.addComponent(new ParametricComponent(agentParameters));
-		agent.addComponent(new VisualizableComponent());
 		
 		agent.addComponent(new AgentComponent(AgentComponentName.TESTING_COMPONENT) {
-			UnitComponent	locallog;
-			
-			@Override
-			protected String getAgentName()
-			{
-				return super.getAgentName();
-			}
+			private static final long	serialVersionUID	= 1L;
+			UnitComponent				locallog;
 			
 			@Override
 			protected ParametricComponent getParametric()
 			{
 				return super.getParametric();
-			}
-			
-			@Override
-			protected VisualizableComponent getVisualizable()
-			{
-				return super.getVisualizable();
 			}
 			
 			@Override
@@ -60,19 +58,13 @@ public class VisualizableComponentTest extends Unit
 					@Override
 					public void handleEvent(AgentEvent event)
 					{
-						String eventMessage = "agent [" + getAgentName() + "] event: [" + event.getType().toString()
-								+ "]";
-						locallog.li(eventMessage);
+						locallog.li("event: [" + event.getType().toString() + "]");
 						ParametricComponent parametric = getParametric();
-						if(parametric != null)
+						if(parametric == null)
+							locallog.li("\t parametric component is currently null");
+						else
 							locallog.li("\t parameter value: [" + parametric.parVal(AgentParameterName.AGENT_NAME)
 									+ "]");
-						else
-							locallog.li("\t parametric component is currently null");
-						VisualizableComponent vis = getVisualizable();
-						if(vis != null)
-							if(vis.getLog() != null)
-								vis.getLog().info(eventMessage);
 						if(event.getType() == AgentEventType.AGENT_EXIT)
 							locallog.doExit();
 					}
@@ -85,7 +77,7 @@ public class VisualizableComponentTest extends Unit
 		agent.start();
 		try
 		{
-			Thread.sleep(2000);
+			Thread.sleep(200);
 		} catch(InterruptedException e)
 		{
 			e.printStackTrace();
@@ -95,9 +87,14 @@ public class VisualizableComponentTest extends Unit
 		doExit();
 	}
 	
+	/**
+	 * Main method.
+	 * 
+	 * @param args - not used.
+	 */
 	@SuppressWarnings("unused")
 	public static void main(String args[])
 	{
-		new VisualizableComponentTest();
+		new ParametricComponentTest();
 	}
 }

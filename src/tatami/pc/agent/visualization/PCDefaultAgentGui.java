@@ -33,15 +33,41 @@ import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.pc.util.windowLayout.WindowLayout;
 import tatami.pc.util.windowLayout.WindowParameters;
 
+/**
+ * Default agent GUI for the PC platform.
+ * 
+ * @author Andrei Olaru
+ */
 public class PCDefaultAgentGui implements AgentGui
 {
+	/**
+	 * The configuration for the GUI, containing parameters such as window name and type.
+	 */
 	protected AgentGuiConfig				config				= null;
 	
+	/**
+	 * Parameters for the window, as returned by the {@link WindowLayout}.
+	 */
 	protected WindowParameters				params				= null;
+	/**
+	 * The {@link JFrame} containing the GUI.
+	 */
 	protected JFrame						window				= null;
+	/**
+	 * The components in the gui, identified by their name.
+	 */
 	protected Map<String, Component>		components			= null;
+	/**
+	 * Connections between component names and {@link InputListener} instances responding to that input.
+	 */
 	protected Map<String, InputListener>	inputConnections	= null;
 	
+	/**
+	 * Creates and configures the GUI.
+	 * 
+	 * @param configuration
+	 *            - the {@link AgentGuiConfig} specifying parameters such as window name and type.
+	 */
 	public PCDefaultAgentGui(AgentGuiConfig configuration)
 	{
 		config = configuration;
@@ -49,6 +75,19 @@ public class PCDefaultAgentGui implements AgentGui
 		components = new Hashtable<String, Component>();
 		inputConnections = new HashMap<String, AgentGui.InputListener>();
 		window = new JFrame();
+		
+		buildGUI();
+		
+		placeWindow();
+		
+		window.setVisible(true);
+	}
+	
+	/**
+	 * Builds the default GUI by adding 2 grid elements: a label for the agent name and a text area for the log.
+	 */
+	protected void buildGUI()
+	{
 		window.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.weightx = c.weighty = 1;
@@ -67,14 +106,18 @@ public class PCDefaultAgentGui implements AgentGui
 		window.add(ta, c);
 		ta.setMinimumSize(new Dimension(100, 100));
 		components.put(DefaultComponent.AGENT_LOG.toString(), ta);
-		
+	}
+	
+	/**
+	 * Places the GUI window according to the {@link WindowLayout}.
+	 */
+	protected void placeWindow()
+	{
 		params = (WindowLayout.staticLayout != null) ? WindowLayout.staticLayout.getWindow(config.getWindowType(),
 				config.getWindowName(), null) : WindowParameters.defaultParameters();
 		params.setWindow(window, true);
-		// window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		window.setVisible(true);
 	}
-	
+
 	@Override
 	public void close()
 	{
@@ -171,7 +214,6 @@ public class PCDefaultAgentGui implements AgentGui
 		return null;
 	}
 	
-	@SuppressWarnings("unused")
 	@Override
 	public void background(final AgentGuiBackgroundTask task, final Object argument,
 			final ResultNotificationListener resultListener)

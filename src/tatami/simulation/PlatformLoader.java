@@ -109,7 +109,7 @@ public interface PlatformLoader
 	 * <p>
 	 * The implementing instance may be one per platform or there may be a specific instance for each agent.
 	 * <p>
-	 * It is advised that the platform link is used by the agent by beans of compatible agent components.
+	 * It is advised that the platform link is used by the agent by means of compatible agent components.
 	 * 
 	 * @author Andrei Olaru
 	 */
@@ -175,7 +175,7 @@ public interface PlatformLoader
 	public boolean addContainer(String containerName);
 	
 	/**
-	 * Loads the agent onto the platform. It also calls the method {@link AgentManager#setPlatformLink(Object)} to
+	 * Loads the agent onto the platform. It also calls the method {@link AgentManager#setPlatformLink(PlatformLink)} to
 	 * create a link from the agent to the platform. The platform link may be the platform itself or an agent wrapper,
 	 * depending on the specific platform.
 	 * <p>

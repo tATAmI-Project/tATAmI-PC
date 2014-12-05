@@ -1,4 +1,4 @@
-package testing.andrei.agent_component_tests;
+package testing.system_testing.composite_agent;
 
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.Unit;
@@ -11,12 +11,31 @@ import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.CompositeAgent;
 
-@SuppressWarnings("javadoc")
+/**
+ * Creates a bare composite agent (without a platform), and adds a test component to it. The test component intercepts agent events and prints them.
+ * The agent is asked to exit soon after creation.
+ * <p>
+ * Expected output:
+ * <ul>
+ * <li> start successful
+ * <li> interception of AGENT_START
+ * <li> delay
+ * <li> interception of AGENT_EXIT
+ * <li> system exit
+ * </ul>
+ * 
+ * @author Andrei Olaru
+ */
 public class BareCompositeAgentTest extends Unit
 {
+	/**
+	 * General level for logs.
+	 */
 	static final Level	generalLevel	= Level.ALL;
 	
-	@SuppressWarnings("serial")
+	/**
+	 * Main testing method.
+	 */
 	public BareCompositeAgentTest()
 	{
 		setUnitName("parametric component tester").setLogLevel(generalLevel);
@@ -24,6 +43,7 @@ public class BareCompositeAgentTest extends Unit
 		
 		CompositeAgent agent = new CompositeAgent();
 		agent.addComponent(new AgentComponent(AgentComponentName.TESTING_COMPONENT) {
+			private static final long	serialVersionUID	= 1L;
 			UnitComponent	locallog;
 			
 			@Override
@@ -73,6 +93,11 @@ public class BareCompositeAgentTest extends Unit
 		doExit();
 	}
 	
+	/**
+	 * main
+	 * 
+	 * @param args - not used
+	 */
 	@SuppressWarnings("unused")
 	public static void main(String args[])
 	{

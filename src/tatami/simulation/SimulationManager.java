@@ -23,6 +23,7 @@ import tatami.core.agent.visualization.AgentGui.ResultNotificationListener;
 import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.pc.util.windowLayout.WindowLayout;
+import tatami.simulation.PlatformLoader.PlatformLink;
 
 /**
  * Singleton class managing the simulation, visualization and agent control on a machine or on a set of machines
@@ -489,7 +490,7 @@ public class SimulationManager implements AgentManager
 	 * a platform "above" it, therefore the method will have no effect and always fail.
 	 */
 	@Override
-	public boolean setPlatformLink(Object link)
+	public boolean setPlatformLink(PlatformLink link)
 	{
 		return false;
 	}
