@@ -102,8 +102,6 @@ public abstract class AgentComponent implements Serializable
 		
 		;
 		
-		
-		
 		/**
 		 * Suffix for component classes.
 		 */
@@ -221,7 +219,7 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected AgentComponent(AgentComponentName name)
 	{
-		if (!name.equals(AgentComponentName.TESTING_COMPONENT))
+		if(!name.equals(AgentComponentName.TESTING_COMPONENT))
 			componentName = name;
 		componentInitializer();
 	}
@@ -270,7 +268,8 @@ public abstract class AgentComponent implements Serializable
 	}
 	
 	/**
-	 * Extending classes can override this method to perform actions when the parent of the component changes.
+	 * Extending classes can override this method to perform actions when the parent of the component changes, ot when
+	 * the component is effectively integrated (added) in the agent.
 	 * <p>
 	 * The previous reference to the parent can be found in the first parameter. The current parent can be obtained by
 	 * calling {@link #getParent()}.
@@ -328,7 +327,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		return parentAgent.getPlatformLink();
 	}
-
+	
 	/**
 	 * @return the name of the component (instance of {@link AgentComponentName}).
 	 */
