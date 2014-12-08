@@ -65,6 +65,8 @@ public class Boot
 		try
 		{
 			scenarioTree = settings.load(args, true);
+			if(scenarioTree == null)
+				return;
 		} catch(ConfigLockedException e)
 		{
 			log.error("settings were locked (shouldn't ever happen): " + PlatformUtils.printException(e));
@@ -79,6 +81,8 @@ public class Boot
 		
 		// the name of the default platform
 		String defaultPlatform = PlatformLoader.DEFAULT_PLATFORM.toString();
+		// the name of the default agent loader
+		String defaultAgentLoader = AgentLoader.DEFAULT_LOADER.toString();
 		// platform name -> platform loader
 		Map<String, PlatformLoader> platforms = new HashMap<String, PlatformLoader>();
 		// agent loader name -> agent loader
@@ -102,15 +106,18 @@ public class Boot
 		// iterate over platform entries in the scenario
 		defaultPlatform = loadPlatforms(
 				scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_PLATFORM.toString()), settings,
-				platforms);
+				platforms, defaultPlatform);
 		
 		// iterate over agent loader entries in the scenario
-		loadAgentLoaders(scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_LOADER.toString()),
-				agentLoaders);
+		defaultAgentLoader = loadAgentLoaders(
+				scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_LOADER.toString()), agentLoaders,
+				defaultAgentLoader);
 		
-		// iterate containers and find agents
-		loadContainerAgents(scenarioTree.getRoot().getNodeIterator("initial").next().getNodeIterator("container"),
-				defaultPlatform, platforms, agentLoaders, agentPackages, allContainers, platformContainers, allAgents);
+		if(scenarioTree.getRoot().getNodeIterator("initial").hasNext())
+			// iterate containers and find agents
+			loadContainerAgents(scenarioTree.getRoot().getNodeIterator("initial").next().getNodeIterator("container"),
+					defaultPlatform, platforms, defaultAgentLoader, agentLoaders, agentPackages, allContainers,
+					platformContainers, allAgents);
 		
 		// agents prepared, time to start platforms and the containers.
 		if(startPlatforms(platforms, platformContainers) > 0)
@@ -162,10 +169,12 @@ public class Boot
 	 * @param platforms
 	 *            - map in which to fill in the names of the platforms and the respective {@link PlatformLoader}
 	 *            instances.
+	 * @param defaultPlatformSuggested
+	 *            - default platform as suggested by Boot.
 	 * @return the name of the default platform loader (which will be present in parameter <code>platforms</code>).
 	 */
 	protected String loadPlatforms(Iterator<XMLNode> platformNodes, BootSettingsManager settings,
-			Map<String, PlatformLoader> platforms)
+			Map<String, PlatformLoader> platforms, String defaultPlatformSuggested)
 	{
 		while(platformNodes.hasNext())
 		{
@@ -223,7 +232,7 @@ public class Boot
 		if(platforms.size() == 1)
 			defaultPlatform = platforms.values().iterator().next().getName();
 		log.trace("Default platform is [" + defaultPlatform + "].");
-		return defaultPlatform;
+		return (defaultPlatform != null) ? defaultPlatform : defaultPlatformSuggested;
 	}
 	
 	/**
@@ -235,8 +244,12 @@ public class Boot
 	 * @param agentLoaders
 	 *            - map in which to fill in the names of the agent loaders and the respective {@link AgentLoader}
 	 *            instances.
+	 * @param defaultLoaderSuggested
+	 *            - default agent loader as suggested by Boot.
+	 * @return the name of the default agent loader (which will be present in parameter <code>agentLoaders</code>).
 	 */
-	protected void loadAgentLoaders(Iterator<XMLNode> loaderNodes, Map<String, AgentLoader> agentLoaders)
+	protected String loadAgentLoaders(Iterator<XMLNode> loaderNodes, Map<String, AgentLoader> agentLoaders,
+			String defaultLoaderSuggested)
 	{
 		while(loaderNodes.hasNext())
 		{
@@ -253,7 +266,7 @@ public class Boot
 				{
 					loaderClassPath = StandardAgentLoaderType.valueOf(loaderName.toUpperCase()).getClassName();
 				} catch(IllegalArgumentException e)
-				{ // platform is not standard
+				{ // agent loader is not standard
 					loaderClassPath = PlatformUtils.getParameterValue(loaderNode, AgentLoader.CLASSPATH_ATTRIBUTE);
 					if(loaderClassPath == null)
 						log.error("Class path for agent loader [" + loaderName + "] is not known.");
@@ -286,6 +299,11 @@ public class Boot
 					log.error("Loading agent loader [" + loader.toString() + "] failed; loader will not be available: "
 							+ PlatformUtils.printException(e));
 				}
+		String defaultLoader = null;
+		if(agentLoaders.size() == 1)
+			defaultLoader = agentLoaders.values().iterator().next().getName();
+		log.trace("Default agent loader is [" + defaultLoader + "].");
+		return (defaultLoader != null) ? defaultLoader : defaultLoaderSuggested;
 	}
 	
 	/**
@@ -298,6 +316,8 @@ public class Boot
 	 *            - the name of the default platform.
 	 * @param platforms
 	 *            - the {@link Map} of platform names and respective {@link PlatformLoader} instances.
+	 * @param defaultAgentLoader
+	 *            - the name of the default agent loader.
 	 * @param agentLoaders
 	 *            - the {@link Map} of platform names and respective {@link AgentLoader} instances.
 	 * @param agentPackages
@@ -313,8 +333,8 @@ public class Boot
 	 *            agents.
 	 */
 	protected void loadContainerAgents(Iterator<XMLNode> containerNodes, String defaultPlatform,
-			Map<String, PlatformLoader> platforms, Map<String, AgentLoader> agentLoaders, Set<String> agentPackages,
-			Map<String, Boolean> allContainers, Map<String, Set<String>> platformContainers,
+			Map<String, PlatformLoader> platforms, String defaultAgentLoader, Map<String, AgentLoader> agentLoaders,
+			Set<String> agentPackages, Map<String, Boolean> allContainers, Map<String, Set<String>> platformContainers,
 			Set<AgentCreationData> allAgents)
 	{
 		while(containerNodes.hasNext())
@@ -363,7 +383,7 @@ public class Boot
 				
 				// load agent
 				AgentCreationData agentCreationData = loadAgent(agentNode, agentName, containerName, doCreateContainer,
-						platforms.get(platformName), agentLoaders, agentPackages);
+						platforms.get(platformName), defaultAgentLoader, agentLoaders, agentPackages);
 				if(agentCreationData == null)
 					continue;
 				allAgents.add(agentCreationData);
@@ -400,6 +420,8 @@ public class Boot
 	 *            - <code>true</code> if the container is local, <code>false</code> if remote.
 	 * @param platform
 	 *            - the platform loader for the platform the agent will execute on.
+	 * @param defaultAgentLoader
+	 *            - the name of the default agent loader.
 	 * @param agentLoaders
 	 *            - the {@link Map} of agent loader names and respective {@link AgentLoader} instances.
 	 * @param agentPackages
@@ -408,14 +430,13 @@ public class Boot
 	 *         the loading was successful; <code>null</code> otherwise.
 	 */
 	protected AgentCreationData loadAgent(XMLNode agentNode, String agentName, String containerName,
-			boolean doCreateContainer, PlatformLoader platform, Map<String, AgentLoader> agentLoaders,
-			Set<String> agentPackages)
+			boolean doCreateContainer, PlatformLoader platform, String defaultAgentLoader,
+			Map<String, AgentLoader> agentLoaders, Set<String> agentPackages)
 	{
 		// loader
 		String agentLoaderName = PlatformUtils.getParameterValue(agentNode, AgentParameterName.AGENT_LOADER.toString());
 		if(agentLoaderName == null)
-			return (AgentCreationData) log.lr(null, "no agent loader specified. agent [" + agentName
-					+ "] will not be created.");
+			agentLoaderName = defaultAgentLoader;
 		if(!agentLoaders.containsKey(agentLoaderName))
 			return (AgentCreationData) log.lr(null, "agent loader [" + agentLoaderName + "] is unknown. agent ["
 					+ agentName + "] will not be created.");

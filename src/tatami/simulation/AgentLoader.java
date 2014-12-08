@@ -103,6 +103,10 @@ public interface AgentLoader
 	 * The name of the attribute containing the class path of the {@link AgentLoader} class, in the XML file.
 	 */
 	static final String	CLASSPATH_ATTRIBUTE	= "classpath";
+	/**
+	 * The default agent loader to use, if no other is specified.
+	 */
+	static final String	DEFAULT_LOADER	= StandardAgentLoaderType.COMPOSITE.toString();
 	
 	/**
 	 * @return the the name of the agent loader, as used in the scenario file.

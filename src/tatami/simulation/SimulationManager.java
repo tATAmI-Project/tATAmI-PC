@@ -250,20 +250,6 @@ public class SimulationManager implements AgentManager
 	 */
 	protected boolean setupGui()
 	{
-		gui.connectInput(SimulationComponent.CREATE.toString(), new InputListener() {
-			@Override
-			public void receiveInput(String componentName, Vector<Object> arguments)
-			{
-				createAgents();
-			}
-		});
-		gui.connectInput(SimulationComponent.CLEAR.toString(), new InputListener() {
-			@Override
-			public void receiveInput(String componentName, Vector<Object> arguments)
-			{
-				clearAgents();
-			}
-		});
 		gui.connectInput(SimulationComponent.EXIT.toString(), new InputListener() {
 			@Override
 			public void receiveInput(String componentName, Vector<Object> arguments)
@@ -285,6 +271,29 @@ public class SimulationManager implements AgentManager
 			}
 		});
 		
+		if (agents.isEmpty())
+		{
+			gui.doOutput(SimulationComponent.CREATE.toString(), PlatformUtils.toVector((Object) null));
+			gui.doOutput(SimulationComponent.CLEAR.toString(), PlatformUtils.toVector((Object) null));
+		}
+		else
+		{
+		gui.connectInput(SimulationComponent.CREATE.toString(), new InputListener() {
+			@Override
+			public void receiveInput(String componentName, Vector<Object> arguments)
+			{
+				createAgents();
+			}
+		});
+		gui.connectInput(SimulationComponent.CLEAR.toString(), new InputListener() {
+			@Override
+			public void receiveInput(String componentName, Vector<Object> arguments)
+			{
+				clearAgents();
+			}
+		});
+		
+		}
 		if(events.isEmpty())
 		{
 			gui.doOutput(SimulationComponent.START.toString(), PlatformUtils.toVector((Object) null));
@@ -396,7 +405,7 @@ public class SimulationManager implements AgentManager
 		for(PlatformLoader platform : platforms.values())
 		{
 			String platformName = platform.getName();
-			MessagingComponent msg;
+			MessagingComponent msg = null;
 			try
 			{
 				String msgrClass = platform.getRecommendedComponentClass(AgentComponentName.MESSAGING_COMPONENT);
@@ -406,24 +415,26 @@ public class SimulationManager implements AgentManager
 			} catch(Exception e)
 			{
 				log.error("Failed to create a messaging component for the agent: " + PlatformUtils.printException(e));
-				return false;
 			}
-			SimulationLinkAgent agent = new SimulationLinkAgent(SIMULATION_AGENT_NAME_PREFIX + platformName, msg);
-			if(!platform.loadAgent(null, agent))
+			if(msg != null)
 			{
-				log.error("Loading simulation agent on platform [" + platformName
-						+ "] failed. Simulation cannot start.");
-				agent.stop();
-				return false;
+				SimulationLinkAgent agent = new SimulationLinkAgent(SIMULATION_AGENT_NAME_PREFIX + platformName, msg);
+				if(!platform.loadAgent(null, agent))
+				{
+					log.error("Loading simulation agent on platform [" + platformName
+							+ "] failed. Simulation cannot start.");
+					agent.stop();
+					return false;
+				}
+				if(!agent.start())
+				{
+					log.error("Starting simulation agent on platform [" + platformName
+							+ "] failed. Simulation cannot start.");
+					agent.stop();
+					return false;
+				}
+				simulationAgents.put(platformName, agent);
 			}
-			if(!agent.start())
-			{
-				log.error("Starting simulation agent on platform [" + platformName
-						+ "] failed. Simulation cannot start.");
-				agent.stop();
-				return false;
-			}
-			simulationAgents.put(platformName, agent);
 		}
 		return true;
 	}
@@ -470,9 +481,10 @@ public class SimulationManager implements AgentManager
 		for(String platformName : platforms.keySet())
 		{
 			SimulationLinkAgent simAgent = simulationAgents.get(platformName);
-			for(AgentCreationData agentData : agents)
-				if(agentData.getPlatform().equals(platformName))
-					simAgent.enrol(agentData);
+			if(simAgent != null)
+				for(AgentCreationData agentData : agents)
+					if(agentData.getPlatform().equals(platformName))
+						simAgent.enrol(agentData);
 		}
 	}
 	
@@ -482,7 +494,8 @@ public class SimulationManager implements AgentManager
 	protected void clearAgents()
 	{
 		for(String platformName : platforms.keySet())
-			simulationAgents.get(platformName).broadcastExit();
+			if(simulationAgents.containsKey(platformName))
+				simulationAgents.get(platformName).broadcastExit();
 	}
 	
 	/**
