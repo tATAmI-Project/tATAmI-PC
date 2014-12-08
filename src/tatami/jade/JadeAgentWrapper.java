@@ -6,6 +6,7 @@ import net.xqhs.util.logging.Unit;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.AgentManager;
+import tatami.simulation.PlatformLoader.PlatformLink;
 
 /**
  * A wrapper for an {@link AgentManager} instance, that wraps it inside a Jade {@link Agent}.
@@ -14,7 +15,7 @@ import tatami.simulation.AgentManager;
  * 
  * @author Andrei Olaru
  */
-public class JadeAgentWrapper extends Agent
+public class JadeAgentWrapper extends Agent implements PlatformLink
 {
 	/**
 	 * The serial UID.
