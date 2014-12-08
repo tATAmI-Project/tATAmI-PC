@@ -94,7 +94,6 @@ public class CompositeAgentLoader implements AgentLoader
 		{
 			XMLNode componentNode = componentIt.next();
 			String componentName = componentNode.getAttributeValue(COMPONENT_NAME_ATTRIBUTE);
-			System.out.println(" ---------- bbb " + componentName);
 			
 			// get component class
 			String componentClass = componentNode.getAttributeValue(COMPONENT_CLASS_ATTRIBUTE);
@@ -161,11 +160,9 @@ public class CompositeAgentLoader implements AgentLoader
 			Object argument = null;
 			if(AgentComponentName.PARAMETRIC_COMPONENT.componentName().equals(componentName)) {
 				argument = agentCreationData.getParameters();
-				System.out.println(" ---- pe prima");
 			}
 			else if(!componentParameters.isEmpty()) {
 				argument = componentParameters;
-				System.out.println(" ------ pe a doua");
 			}
 						 
 			componentData.add(new AbstractMap.SimpleEntry<String, Object>(componentClass, argument));
@@ -193,12 +190,12 @@ public class CompositeAgentLoader implements AgentLoader
 			// FIXME
 			Entry<String, Object> compEntry = (Entry<String, Object>) compObj;
 			String componentClass = compEntry.getKey();
-			Object argument = compEntry.getValue();
+			Object arguments = compEntry.getValue();
 			
 			try
 			{
-				if(argument != null)
-					agent.addComponent((AgentComponent) PlatformUtils.loadClassInstance(this, componentClass, argument));
+				if(arguments != null)
+					agent.addComponent((AgentComponent) PlatformUtils.loadClassInstance(this, componentClass, arguments));
 				else
 					agent.addComponent((AgentComponent) PlatformUtils.loadClassInstance(this, componentClass,
 							new Object[0]));
@@ -213,6 +210,7 @@ public class CompositeAgentLoader implements AgentLoader
 		log.trace("agent [" + agentCreationData.getAgentName() + "] loaded.");
 		
 		/* start ClaimComponent if any */
+		// FIXME
 		if (agent.hasComponent(AgentComponentName.S_CLAIM_COMPONENT)) {
 			((ClaimComponent) agent.getComponent(AgentComponentName.S_CLAIM_COMPONENT)).setup();
 		}
