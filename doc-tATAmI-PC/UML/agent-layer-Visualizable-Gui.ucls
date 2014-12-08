@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<class-diagram version="1.0.11" icons="true" automaticImage="PNG" always-add-relationships="true" generalizations="true" 
+<class-diagram version="1.1.6" icons="true" automaticImage="PNG" always-add-relationships="true" generalizations="true" 
   realizations="true" associations="true" dependencies="true" nesting-relationships="true">  
   <class id="1" language="java" name="tatami.core.agent.visualization.VisualizableComponent" project="tATAmI-PC" 
     file="/tATAmI-PC/src/tatami/core/agent/visualization/VisualizableComponent.java" binary="false" 
@@ -29,16 +29,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <interface id="4" language="java" name="tatami.core.interfaces.ParametrizedAgent" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/interfaces/ParametrizedAgent.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="526" y="109"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
-      visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </interface>  
-  <class id="5" language="java" name="tatami.core.agent.hierarchical.HierarchicalComponent" project="tATAmI-PC" 
+  <class id="4" language="java" name="tatami.core.agent.hierarchical.HierarchicalComponent" project="tATAmI-PC" 
     file="/tATAmI-PC/src/tatami/core/agent/hierarchical/HierarchicalComponent.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="149" y="1990"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
@@ -47,7 +38,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="6" language="java" name="tatami.core.agent.parametric.ParametricComponent" project="tATAmI-PC" 
+  <class id="5" language="java" name="tatami.core.agent.parametric.ParametricComponent" project="tATAmI-PC" 
     file="/tATAmI-PC/src/tatami/core/agent/parametric/ParametricComponent.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="162" y="197"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
@@ -56,7 +47,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="7" language="java" name="tatami.core.agent.visualization.Log2AgentGui" project="tATAmI-PC" 
+  <class id="6" language="java" name="tatami.core.agent.visualization.Log2AgentGui" project="tATAmI-PC" 
     file="/tATAmI-PC/src/tatami/core/agent/visualization/Log2AgentGui.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="444" y="410"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
@@ -65,25 +56,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <interface id="8" language="java" name="tatami.core.util.logging.Log.DisplayEntity" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/util/logging/Log.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="716" y="375"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
-      visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </interface>  
-  <class id="9" language="java" name="tatami.core.util.logging.Log" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/util/logging/Log.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="1151" y="1296"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
-      visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <interface id="10" language="java" name="tatami.core.agent.visualization.AgentGui" project="tATAmI-PC" 
+  <interface id="7" language="java" name="tatami.core.agent.visualization.AgentGui" project="tATAmI-PC" 
     file="/tATAmI-PC/src/tatami/core/agent/visualization/AgentGui.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="708" y="680"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
@@ -92,16 +65,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <class id="11" language="java" name="tatami.core.agent.visualization.AgentGui.AgentGuiConfig" project="tATAmI-PC" 
-    file="/tATAmI-PC/src/tatami/core/agent/visualization/AgentGui.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="1098" y="711"/>    
-    <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
-      visibility="true">      
-      <attributes public="true" package="true" protected="true" private="true" static="true"/>      
-      <operations public="true" package="true" protected="true" private="true" static="true"/>    
-    </display>  
-  </class>  
-  <enumeration id="12" language="java" name="tatami.core.agent.visualization.AgentGui.DefaultComponent" 
+  <enumeration id="8" language="java" name="tatami.core.agent.visualization.AgentGui.DefaultComponent" 
     project="tATAmI-PC" file="/tATAmI-PC/src/tatami/core/agent/visualization/AgentGui.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="463" y="633"/>    
@@ -111,7 +75,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </enumeration>  
-  <interface id="13" language="java" name="tatami.core.agent.visualization.AgentGui.InputListener" project="tATAmI-PC" 
+  <interface id="9" language="java" name="tatami.core.agent.visualization.AgentGui.InputListener" project="tATAmI-PC" 
     file="/tATAmI-PC/src/tatami/core/agent/visualization/AgentGui.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="459" y="965"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
@@ -120,7 +84,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <class id="14" language="java" name="tatami.core.agent.claim.ClaimBehavior" project="tATAmI-PC" 
+  <class id="10" language="java" name="tatami.core.agent.claim.ClaimBehavior" project="tATAmI-PC" 
     file="/tATAmI-PC/src/tatami/core/agent/claim/ClaimBehavior.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="577" y="2615"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
@@ -129,7 +93,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <enumeration id="15" language="java" name="tatami.core.util.platformUtils.PlatformUtils.Platform" project="tATAmI-PC" 
+  <enumeration id="11" language="java" name="tatami.core.util.platformUtils.PlatformUtils.Platform" project="tATAmI-PC" 
     file="/tATAmI-PC/src/tatami/core/util/platformUtils/PlatformUtils.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="923" y="458"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
@@ -138,7 +102,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </enumeration>  
-  <class id="16" language="java" name="tatami.pc.agent.visualization.PCDefaultAgentGui" project="tATAmI-PC" 
+  <class id="12" language="java" name="tatami.pc.agent.visualization.PCDefaultAgentGui" project="tATAmI-PC" 
     file="/tATAmI-PC/src/tatami/pc/agent/visualization/PCDefaultAgentGui.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="814" y="1093"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
@@ -147,7 +111,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="17" language="java" name="tatami.pc.agent.visualization.PCVisualizationGui" project="tATAmI-PC" 
+  <class id="13" language="java" name="tatami.pc.agent.visualization.PCVisualizationGui" project="tATAmI-PC" 
     file="/tATAmI-PC/src/tatami/pc/agent/visualization/PCVisualizationGui.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="804" y="1634"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
@@ -156,7 +120,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <enumeration id="18" language="java" name="tatami.pc.agent.visualization.PCVisualizationGui.VisualizationComponent" 
+  <enumeration id="14" language="java" name="tatami.pc.agent.visualization.PCVisualizationGui.VisualizationComponent" 
     project="tATAmI-PC" file="/tATAmI-PC/src/tatami/pc/agent/visualization/PCVisualizationGui.java" binary="false" 
     corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="816" y="1769"/>    
@@ -166,7 +130,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </enumeration>  
-  <class id="19" language="java" name="tatami.simulation.VisualizationManager" project="tATAmI-PC" 
+  <class id="15" language="java" name="tatami.simulation.VisualizationManager" project="tATAmI-PC" 
     file="/tATAmI-PC/src/tatami/simulation/VisualizationManager.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="1084" y="1826"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
@@ -175,210 +139,146 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <dependency id="20">    
-    <end type="SOURCE" refId="19"/>    
-    <end type="TARGET" refId="16"/>  
-  </dependency>  
-  <association id="21">    
-    <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="22" name="behaviors"/>      
-      <multiplicity id="23" minimum="0" maximum="2147483647"/>    
-    </end>    
-    <end type="TARGET" refId="14" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <dependency id="24">    
-    <end type="SOURCE" refId="14"/>    
-    <end type="TARGET" refId="2"/>  
-  </dependency>  
-  <generalization id="25">    
-    <end type="SOURCE" refId="2"/>    
-    <end type="TARGET" refId="5"/>  
-  </generalization>  
-  <dependency id="26">    
+  <dependency id="16">    
     <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="7"/>  
+    <end type="TARGET" refId="5"/>  
   </dependency>  
-  <nesting id="27">    
+  <dependency id="17">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <dependency id="18">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="12"/>  
+  </dependency>  
+  <realization id="19">    
     <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="13"/>  
-  </nesting>  
-  <association id="28">    
-    <end type="SOURCE" refId="1" navigable="false">      
-      <attribute id="29" name="gui">        
-        <position height="15" width="23" x="624" y="591"/>      
-      </attribute>      
-      <multiplicity id="30" minimum="0" maximum="1">        
-        <position height="15" width="21" x="621" y="576"/>      
-      </multiplicity>    
-    </end>    
-    <end type="TARGET" refId="10" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <generalization id="31">    
-    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="9"/>  
+  </realization>  
+  <dependency id="20">    
+    <end type="SOURCE" refId="4"/>    
     <end type="TARGET" refId="1"/>  
-  </generalization>  
-  <generalization id="32">    
+  </dependency>  
+  <dependency id="21">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="8"/>  
+  </dependency>  
+  <dependency id="22">    
     <end type="SOURCE" refId="1"/>    
     <end type="TARGET" refId="6"/>  
-  </generalization>  
-  <association id="33">    
-    <end type="SOURCE" refId="9" navigable="false">      
-      <attribute id="34" name="logs"/>      
-      <multiplicity id="35" minimum="0" maximum="2147483647"/>    
+  </dependency>  
+  <association id="23">    
+    <end type="SOURCE" refId="12" navigable="false">      
+      <attribute id="24" name="inputConnections"/>      
+      <multiplicity id="25" minimum="0" maximum="2147483647"/>    
     </end>    
     <end type="TARGET" refId="9" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <generalization id="36">    
-    <end type="SOURCE" refId="19"/>    
-    <end type="TARGET" refId="1"/>  
-  </generalization>  
-  <generalization id="37">    
-    <end type="SOURCE" refId="17"/>    
-    <end type="TARGET" refId="16"/>  
-  </generalization>  
-  <dependency id="38">    
-    <end type="SOURCE" refId="5"/>    
+  <dependency id="26">    
+    <end type="SOURCE" refId="2"/>    
     <end type="TARGET" refId="1"/>  
   </dependency>  
-  <dependency id="39">    
-    <end type="SOURCE" refId="14"/>    
-    <end type="TARGET" refId="3"/>  
-  </dependency>  
-  <dependency id="40">    
-    <end type="SOURCE" refId="19"/>    
-    <end type="TARGET" refId="10"/>  
-  </dependency>  
-  <dependency id="41">    
-    <end type="SOURCE" refId="17"/>    
-    <end type="TARGET" refId="11"/>  
-  </dependency>  
-  <nesting id="42">    
-    <end type="SOURCE" refId="9"/>    
+  <dependency id="27">    
+    <end type="SOURCE" refId="12"/>    
     <end type="TARGET" refId="8"/>  
-  </nesting>  
-  <dependency id="43">    
-    <end type="SOURCE" refId="19"/>    
-    <end type="TARGET" refId="18"/>  
   </dependency>  
-  <dependency id="44">    
-    <end type="SOURCE" refId="14"/>    
-    <end type="TARGET" refId="10"/>  
-  </dependency>  
-  <dependency id="45">    
-    <end type="SOURCE" refId="16"/>    
-    <end type="TARGET" refId="12"/>  
-  </dependency>  
-  <dependency id="46">    
-    <end type="SOURCE" refId="19"/>    
-    <end type="TARGET" refId="11"/>  
-  </dependency>  
-  <realization id="47">    
+  <nesting id="28">    
     <end type="SOURCE" refId="7"/>    
     <end type="TARGET" refId="8"/>  
-  </realization>  
-  <realization id="48">    
-    <end type="SOURCE" refId="16"/>    
-    <end type="TARGET" refId="10"/>  
-  </realization>  
-  <association id="49">    
+  </nesting>  
+  <dependency id="29">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <association id="30">    
     <end type="SOURCE" refId="1" navigable="false">      
-      <attribute id="50" name="guiConfig"/>      
-      <multiplicity id="51" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="11" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="52">    
-    <end type="SOURCE" refId="11" navigable="false">      
-      <attribute id="53" name="DEFAULT_PLATFORM"/>      
-      <multiplicity id="54" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="15" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <dependency id="55">    
-    <end type="SOURCE" refId="14"/>    
-    <end type="TARGET" refId="1"/>  
-  </dependency>  
-  <generalization id="56">    
-    <end type="SOURCE" refId="5"/>    
-    <end type="TARGET" refId="3"/>  
-  </generalization>  
-  <dependency id="57">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="12"/>  
-  </dependency>  
-  <association id="58">    
-    <end type="SOURCE" refId="16" navigable="false">      
-      <attribute id="59" name="config"/>      
-      <multiplicity id="60" minimum="0" maximum="1"/>    
-    </end>    
-    <end type="TARGET" refId="11" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="61">    
-    <end type="SOURCE" refId="16" navigable="false">      
-      <attribute id="62" name="inputConnections"/>      
-      <multiplicity id="63" minimum="0" maximum="2147483647"/>    
-    </end>    
-    <end type="TARGET" refId="13" navigable="true"/>    
-    <display labels="true" multiplicity="true"/>  
-  </association>  
-  <association id="64">    
-    <end type="SOURCE" refId="7" navigable="false">      
-      <attribute id="65" name="gui">        
-        <position height="15" width="23" x="701" y="577"/>      
+      <attribute id="31" name="gui">        
+        <position height="15" width="23" x="624" y="591"/>      
       </attribute>      
-      <multiplicity id="66" minimum="0" maximum="1"/>    
+      <multiplicity id="32" minimum="0" maximum="1">        
+        <position height="15" width="21" x="621" y="576"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="7" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="33">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="12"/>  
+  </generalization>  
+  <dependency id="34">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="2"/>  
+  </dependency>  
+  <association id="35">    
+    <end type="SOURCE" refId="6" navigable="false">      
+      <attribute id="36" name="gui"/>      
+      <multiplicity id="37" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="7" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="38">    
+    <end type="SOURCE" refId="2" navigable="false">      
+      <attribute id="39" name="behaviors"/>      
+      <multiplicity id="40" minimum="0" maximum="2147483647"/>    
     </end>    
     <end type="TARGET" refId="10" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <nesting id="67">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="12"/>  
-  </nesting>  
-  <dependency id="68">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="15"/>  
+  <dependency id="41">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="1"/>  
   </dependency>  
-  <association id="69">    
-    <bendpoint x="1269" y="867"/>    
-    <bendpoint x="1263" y="361"/>    
-    <end type="SOURCE" refId="9" navigable="false">      
-      <attribute id="70" name="logDisplay"/>      
-      <multiplicity id="71" minimum="0" maximum="1"/>    
+  <dependency id="42">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <dependency id="43">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <dependency id="44">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="3"/>  
+  </dependency>  
+  <realization id="45">    
+    <end type="SOURCE" refId="12"/>    
+    <end type="TARGET" refId="7"/>  
+  </realization>  
+  <dependency id="46">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="14"/>  
+  </dependency>  
+  <nesting id="47">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="14"/>  
+  </nesting>  
+  <dependency id="48">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <association id="49">    
+    <end type="SOURCE" refId="10" navigable="false">      
+      <attribute id="50" name="myAgent"/>      
+      <multiplicity id="51" minimum="0" maximum="1"/>    
     </end>    
-    <end type="TARGET" refId="8" navigable="true"/>    
+    <end type="TARGET" refId="2" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <nesting id="72">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="11"/>  
-  </nesting>  
-  <realization id="73">    
-    <end type="SOURCE" refId="6"/>    
-    <end type="TARGET" refId="4"/>  
-  </realization>  
-  <dependency id="74">    
-    <end type="SOURCE" refId="14"/>    
-    <end type="TARGET" refId="6"/>  
+  <dependency id="52">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="5"/>  
   </dependency>  
-  <dependency id="75">    
-    <end type="SOURCE" refId="19"/>    
+  <nesting id="53">    
+    <end type="SOURCE" refId="7"/>    
     <end type="TARGET" refId="9"/>  
-  </dependency>  
-  <nesting id="76">    
-    <end type="SOURCE" refId="17"/>    
-    <end type="TARGET" refId="18"/>  
   </nesting>  
-  <realization id="77">    
-    <end type="SOURCE" refId="14"/>    
-    <end type="TARGET" refId="13"/>  
-  </realization>  
+  <dependency id="54">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
     accessors="true" visibility="true">    
     <attributes public="true" package="true" protected="true" private="true" static="true"/>    
