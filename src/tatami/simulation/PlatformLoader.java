@@ -29,6 +29,11 @@ public interface PlatformLoader
 		JADE,
 		
 		/**
+		 * Same as default, but recommends a messaging component that routes messages based on agent names.
+		 */
+		LOCAL(LocalDeploymentPlatform.class.getName()),
+		
+		/**
 		 * Agents will be created as new instances. This is the default setting.
 		 */
 		DEFAULT(DefaultPlatform.class.getName()),
