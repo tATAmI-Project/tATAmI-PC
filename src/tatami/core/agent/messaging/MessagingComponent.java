@@ -6,12 +6,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.Debug.DebugItem;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
+import tatami.core.agent.claim.ClaimComponent;
+import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
  * The messaging component should handle all communication between the agent and other agents. Note that the existence
@@ -45,15 +48,14 @@ public abstract class MessagingComponent extends AgentComponent
 	 * 
 	 * @author Andrei Olaru
 	 */
-	public static enum MessagingDebug implements DebugItem
-	{
+	public static enum MessagingDebug implements DebugItem {
 		/**
 		 * General messaging debugging switch.
 		 */
 		DEBUG_MESSAGING(false),
 		
 		;
-
+		
 		/**
 		 * Activation state.
 		 */
@@ -74,7 +76,8 @@ public abstract class MessagingComponent extends AgentComponent
 		public boolean toBool()
 		{
 			return isset;
-		}	}
+		}
+	}
 	
 	/**
 	 * An implementation of the interface must be able to receive messages received by the agent.
@@ -150,6 +153,46 @@ public abstract class MessagingComponent extends AgentComponent
 	}
 	
 	/**
+	 * Extending classes should call this method to defer to {@link MessagingComponent} the effort of packing message
+	 * data into an {@link AgentEvent} and posting that event in the agent event queue.
+	 * 
+	 * @param source
+	 *            - the source of the message
+	 * @param destination
+	 *            - the internal destination of the message, not containing the address of the agent
+	 * @param content
+	 *            - the content of the message
+	 */
+	protected void receiveMessage(String source, String destination, String content)
+	{
+		AgentEvent event = new AgentEvent(AgentEventType.AGENT_MESSAGE);
+		try
+		{
+			event.addParameter(MessagingComponent.SOURCE_PARAMETER, source);
+			event.addParameter(MessagingComponent.DESTINATION_PARAMETER, destination);
+			event.addParameter(MessagingComponent.CONTENT_PARAMETER, content);
+		} catch(ConfigLockedException e)
+		{
+			// should never happen.
+			if(getVisualizable() != null)
+				getVisualizable().getLog().error("Config locked:" + PlatformUtils.printException(e));
+		}
+		if(getVisualizable() != null)
+			getVisualizable().getLog().dbg(MessagingDebug.DEBUG_MESSAGING,
+					"Received message from [" + source + "] to [" + destination + "] with content [" + content + "].");
+		
+		/* check with which behavior does the message corresponde (if it does) */
+		// FIXME
+		if(content.startsWith("(") && getClaim() != null)
+		{
+			((ClaimComponent) getClaim()).matchStatement(source, content);
+			return;
+		}
+		
+		postAgentEvent(event);
+	}
+	
+	/**
 	 * Handles a message received by the agent. This method should be overridden for specific implementations.
 	 * 
 	 * @param event
@@ -199,6 +242,7 @@ public abstract class MessagingComponent extends AgentComponent
 	@Override
 	protected boolean registerMessageReceiver(String prefix, AgentEventHandler receiver)
 	{
+		// TODO handle null for arguments
 		if(!messageHandlers.containsKey(prefix))
 			messageHandlers.put(prefix, new HashSet<AgentEventHandler>());
 		messageHandlers.get(prefix).add(receiver);

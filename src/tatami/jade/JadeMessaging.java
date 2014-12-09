@@ -3,12 +3,10 @@ package tatami.jade;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
-import net.xqhs.util.config.Config.ConfigLockedException;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.CompositeAgent;
-import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
@@ -34,7 +32,7 @@ public class JadeMessaging extends MessagingComponent
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
-				initialize();
+				initialize(); // TODO: should this be done on parent change instead of agent start?
 			}
 		});
 	}
@@ -61,32 +59,7 @@ public class JadeMessaging extends MessagingComponent
 					String content = message.getContent();
 					String destination = MessagingComponent.makePathHelper(receiver, ontology, protocol, conversation);
 					
-					AgentEvent event = new AgentEvent(AgentEventType.AGENT_MESSAGE);
-					try
-					{
-						event.addParameter(MessagingComponent.SOURCE_PARAMETER, source);
-						event.addParameter(MessagingComponent.DESTINATION_PARAMETER, destination);
-						event.addParameter(MessagingComponent.CONTENT_PARAMETER, content);
-					} catch(ConfigLockedException e)
-					{
-						// should never happen.
-						if(getVisualizable() != null)
-							getVisualizable().getLog().error("Config locked:" + PlatformUtils.printException(e));
-					}
-					if(getVisualizable() != null)
-						getVisualizable().getLog().dbg(
-								MessagingDebug.DEBUG_MESSAGING,
-								"Received message from [" + source + "] to [" + destination + "] with content ["
-										+ content + "].");
-					
-					/* check with which behavior does the message corresponde (if it does) */
-					// FIXME
-					if(content.startsWith("(") && getClaim() != null)
-					{
-						((ClaimComponent) getClaim()).matchStatement(source, content);
-					}
-					if(!content.contains("struct message"))
-						postAgentEvent(event);
+					receiveMessage(source, destination, content);
 				}
 				else
 					block();
@@ -95,19 +68,19 @@ public class JadeMessaging extends MessagingComponent
 		
 	}
 	
-	@Override
-	public String getAgentAddress(String agentName, String containerName)
-	{
-		return agentName;
-	}
-	
 	/**
 	 * Relay for the overridden method to avoid warning.
 	 */
 	@Override
-	protected void postAgentEvent(AgentEvent event)
+	protected void receiveMessage(String source, String destination, String content)
 	{
-		super.postAgentEvent(event);
+		super.receiveMessage(source, destination, content);
+	}
+	
+	@Override
+	public String getAgentAddress(String agentName, String containerName)
+	{
+		return agentName;
 	}
 	
 	@Override
