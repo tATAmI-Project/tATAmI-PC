@@ -220,7 +220,7 @@ public class Boot
 				platforms
 						.put(platform.toString(), ((PlatformLoader) PlatformUtils.loadClassInstance(this,
 								platform.getClassName(), new Object[0])));
-				log.info("Platform [" + platform.toString() + "] prepared.");
+				log.info("Default platform [" + platform.toString() + "] prepared.");
 			} catch(Exception e)
 			{
 				log.error("Loading platform [" + platform.toString() + "] failed; platform will not be available:"
