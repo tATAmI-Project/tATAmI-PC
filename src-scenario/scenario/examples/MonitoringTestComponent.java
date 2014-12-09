@@ -1,4 +1,4 @@
-package scenario.examples.composite.simpleA;
+package scenario.examples;
 
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponent;
@@ -16,7 +16,7 @@ import tatami.core.agent.visualization.VisualizableComponent;
  * 
  * @author Andrei Olaru
  */
-public class TestingMonitorComponent extends AgentComponent
+public class MonitoringTestComponent extends AgentComponent
 {
 	/**
 	 * The UID.
@@ -30,7 +30,7 @@ public class TestingMonitorComponent extends AgentComponent
 	/**
 	 * Default constructor
 	 */
-	public TestingMonitorComponent()
+	public MonitoringTestComponent()
 	{
 		super(AgentComponentName.TESTING_COMPONENT);
 	}

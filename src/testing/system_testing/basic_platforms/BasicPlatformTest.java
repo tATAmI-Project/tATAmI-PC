@@ -1,4 +1,4 @@
-package testing.system_testing.basic_platform;
+package testing.system_testing.basic_platforms;
 
 import tatami.simulation.Boot;
 

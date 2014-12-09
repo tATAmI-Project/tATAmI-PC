@@ -1,4 +1,4 @@
-package testing.system_testing.composite_agent;
+package testing.system_testing.default_components;
 
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.Unit;

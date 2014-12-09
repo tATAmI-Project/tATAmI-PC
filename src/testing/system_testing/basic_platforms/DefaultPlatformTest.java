@@ -1,14 +1,13 @@
-package testing.system_testing.composite_agent;
+package testing.system_testing.basic_platforms;
 
 import tatami.simulation.Boot;
-import testing.system_testing.basic_platform.BasicPlatformTest;
 
 /**
  * Tests two composite agents on the default platform, with no messaging components.
  * 
  * @author Andrei Olaru
  */
-public class CompositeAgentDefaultPlatformTest
+public class DefaultPlatformTest
 {
 	/**
 	 * The scenario.

@@ -1,4 +1,4 @@
-package scenario.examples.jade.simpleA;
+package scenario.examples;
 
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -18,7 +18,7 @@ import tatami.core.agent.messaging.MessagingComponent;
  * 
  * @author Andrei Olaru
  */
-public class TestingComponent extends AgentComponent
+public class PingTestComponent extends AgentComponent
 {
 	/**
 	 * The instance sends a message to the "other agent".
@@ -81,7 +81,7 @@ public class TestingComponent extends AgentComponent
 	 * 
 	 * @param arguments - component arguments.
 	 */
-	public TestingComponent(HashSet<Entry<String, Object>> arguments)
+	public PingTestComponent(HashSet<Entry<String, Object>> arguments)
 	{
 		super(AgentComponentName.TESTING_COMPONENT);
 		
@@ -112,6 +112,14 @@ public class TestingComponent extends AgentComponent
 				
 				if(event.getType() == AgentEventType.AGENT_START)
 				{
+					registerMessageReceiver("", new AgentEventHandler() {
+						@Override
+						public void handleEvent(AgentEvent messageEvent)
+						{
+							getLog().li("message received: ", messageEvent);
+						}
+					});
+					
 					pingTimer = new Timer();
 					pingTimer.schedule(new Pinger(), PING_INITIAL_DELAY, PING_PERIOD);
 				}
@@ -119,6 +127,12 @@ public class TestingComponent extends AgentComponent
 		};
 		for(AgentEventType eventType : AgentEventType.values())
 			registerHandler(eventType, allEventHandler);
+	}
+	
+	@Override
+	protected boolean registerMessageReceiver(String prefix, AgentEventHandler receiver)
+	{
+		return super.registerMessageReceiver(prefix, receiver);
 	}
 	
 	@Override
