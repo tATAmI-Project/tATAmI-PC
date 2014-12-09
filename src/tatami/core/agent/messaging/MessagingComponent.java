@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.xqhs.util.logging.Debug.DebugItem;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.CompositeAgent;
@@ -39,6 +40,42 @@ import tatami.core.agent.AgentEvent.AgentEventType;
  */
 public abstract class MessagingComponent extends AgentComponent
 {
+	/**
+	 * Debugging settings for messaging components.
+	 * 
+	 * @author Andrei Olaru
+	 */
+	public static enum MessagingDebug implements DebugItem
+	{
+		/**
+		 * General messaging debugging switch.
+		 */
+		DEBUG_MESSAGING(false),
+		
+		;
+
+		/**
+		 * Activation state.
+		 */
+		boolean	isset;
+		
+		/**
+		 * Default constructor.
+		 * 
+		 * @param set
+		 *            - activation state.
+		 */
+		private MessagingDebug(boolean set)
+		{
+			isset = set;
+		}
+		
+		@Override
+		public boolean toBool()
+		{
+			return isset;
+		}	}
+	
 	/**
 	 * An implementation of the interface must be able to receive messages received by the agent.
 	 * 
@@ -125,7 +162,7 @@ public abstract class MessagingComponent extends AgentComponent
 		for(Map.Entry<String, Set<AgentEventHandler>> entry : messageHandlers.entrySet())
 		{
 			if(getVisualizable() != null)
-				getVisualizable().getLog().trace(
+				getVisualizable().getLog().dbg(MessagingDebug.DEBUG_MESSAGING,
 						"Comparing: [" + destination + "] to declared [" + entry.getKey() + "]");
 			if(destination.startsWith(entry.getKey()))
 				// prefix matches
