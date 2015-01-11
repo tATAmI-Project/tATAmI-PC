@@ -68,7 +68,7 @@ public abstract class AgentComponent implements Serializable
 		/**
 		 * The name of a component extending {@link MessagingComponent}.
 		 */
-		MESSAGING_COMPONENT,
+		MESSAGING_COMPONENT("tatami.centralized.WebSocketMessagingComponent"),
 		
 		/**
 		 * The name of a component extending {@link MovementComponent}.

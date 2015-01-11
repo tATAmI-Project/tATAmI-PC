@@ -38,6 +38,11 @@ public interface PlatformLoader
 		 */
 		DEFAULT(DefaultPlatform.class.getName()),
 		
+		/*
+		 * Afgfer
+		 */
+		GENERAL("tatami.communication.WebSocketMessagingPlatform"),
+		
 		;
 		
 		/**
