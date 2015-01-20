@@ -17,7 +17,7 @@ import jade.lang.acl.ACLMessage;
 
 import java.util.Vector;
 
-import tatami.core.agent.claim.ClaimAgent;
+import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.claim.parser.ClaimConstruct;
 import tatami.core.agent.claim.parser.ClaimGoal;
 import tatami.core.agent.claim.parser.ClaimValue;
@@ -36,7 +36,7 @@ import jade.core.behaviours.CyclicBehaviour;
  */
 import jade.core.behaviours.CyclicBehaviour;
 
-public class GoalAgent extends ClaimAgent
+public class GoalAgent extends ClaimComponent
 {
 	private static final long serialVersionUID = -5601603215229059640L;
 	

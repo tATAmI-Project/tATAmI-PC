@@ -11,18 +11,11 @@
  ******************************************************************************/
 package tatami.pc.agent.webService;
 
-import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
-import jade.core.Agent;
-import jade.domain.DFService;
-import jade.domain.FIPAException;
 import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.FIPAManagementOntology;
 import jade.domain.FIPAAgentManagement.Property;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.webservice.dynamicClient.DynamicClient;
-import jade.webservice.dynamicClient.WSData;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,12 +23,14 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.util.StringTokenizer;
 
+import tatami.core.agent.AgentComponent;
 import tatami.core.agent.webServices.WSAgentImplementationInterface;
 import tatami.core.agent.webServices.WebServiceOntology;
+//import jade.webservice.dynamicClient.DynamicClient;
+//import jade.webservice.dynamicClient.WSData;
 
 /**
  * Implements the operation needed for registering the agent as a web service and allowing the agent to access web
@@ -48,11 +43,11 @@ import tatami.core.agent.webServices.WebServiceOntology;
 public class WSAgentImplementation implements WSAgentImplementationInterface
 {
 	@Override
-	public boolean registerService(Agent agent, String agentName, String agentClass)
+	public boolean registerService(AgentComponent agent, String agentName, String agentClass)
 	{
 		// Prepare a DFAgentDescription
 		DFAgentDescription dfad = new DFAgentDescription();
-		dfad.setName(agent.getAID());
+		//dfad.setName(agent.getAID());
 		dfad.addLanguages(WebServiceOntology.LANGUAGE);
 		dfad.addProtocols(FIPANames.InteractionProtocol.FIPA_REQUEST);
 		
@@ -74,14 +69,14 @@ public class WSAgentImplementation implements WSAgentImplementationInterface
 		dfad.addServices(sd);
 		
 		// Register codec/onto
-		agent.getContentManager().registerLanguage(new SLCodec());
-		agent.getContentManager().registerOntology(FIPAManagementOntology.getInstance());
-		agent.getContentManager().registerOntology(onto);
+		//agent.getContentManager().registerLanguage(new SLCodec());
+		//agent.getContentManager().registerOntology(FIPAManagementOntology.getInstance());
+		//agent.getContentManager().registerOntology(onto);
 		
 		// DF registration
 		try
 		{
-			DFService.register(agent, dfad);
+			//DFService.register(agent, dfad);
 			return true;
 		} catch(Exception e)
 		{
@@ -91,15 +86,15 @@ public class WSAgentImplementation implements WSAgentImplementationInterface
 	}
 	
 	@Override
-	public boolean unregisterWS(Agent agent)
+	public boolean unregisterWS(AgentComponent agent)
 	{
-		try
+		/*try
 		{
-			DFService.deregister(agent);
+			//DFService.deregister(agent);
 		} catch(FIPAException e)
 		{
 			return false;
-		}
+		}*/
 		return true;
 	}
 	
@@ -110,22 +105,22 @@ public class WSAgentImplementation implements WSAgentImplementationInterface
 		{
 			String fulladdress = uri;
 			// Get an instance of DynamicClient
-			DynamicClient dc = new DynamicClient();
+			/* DynamicClient dc = new DynamicClient(); */
 			
 			// Initialize DynamicClient for displayService webservice by url
 			// String uri = "http://localhost:8080/wsig/ws/";
 			fulladdress = fulladdress.concat(serviceName);
 			fulladdress = fulladdress.concat("?WSDL");
-			dc.initClient(new URI(fulladdress));
+			//dc.initClient(new URI(fulladdress));
 			
 			// Example of invocation of an operation getAgentInfo
 			// ---------------------------------------------------------------------------------------
-			WSData input = new WSData();
-			input.setParameter(WebServiceOntology.OPERATION_ARGUMENT, message);
+			//WSData input = new WSData();
+			//        input.setParameter(WebServiceOntology.OPERATION_ARGUMENT, message);
 			// Invoke the operation
-			WSData output = dc.invoke(WebServiceOntology.RECEIVE_OPERATION, input);
-			String result = output.getParameterString(WebServiceOntology.RECEIVE_OPERATION + "Return");
-			return result;
+			//        WSData output = dc.invoke(WebServiceOntology.RECEIVE_OPERATION, input);
+			//		  String result = output.getParameterString(WebServiceOntology.RECEIVE_OPERATION + "Return");
+			// 		  return result;
 			
 		} catch(Exception e)
 		{

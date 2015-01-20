@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import tatami.core.interfaces.KnowledgeBase;
-import tatami.core.interfaces.KnowledgeBase.KnowledgeDescription;
+import tatami.core.agent.kb.KnowledgeBase;
+import tatami.core.agent.kb.KnowledgeBase.KnowledgeDescription;
 
 
 /**

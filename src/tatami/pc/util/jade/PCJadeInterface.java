@@ -19,17 +19,13 @@ import jade.util.leap.Properties;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.ContainerController;
 import jade.wrapper.ControllerException;
-import jade.wrapper.StaleProxyException;
 
 import java.util.HashMap;
-import java.util.StringTokenizer;
-import java.util.Vector;
 
-
-import tatami.core.interfaces.JadeInterface;
-import tatami.core.interfaces.Logger;
-import tatami.core.util.logging.Unit;
-import tatami.core.util.logging.Unit.UnitConfigData;
+import net.xqhs.util.logging.LoggerSimple.Level;
+import net.xqhs.util.logging.UnitComponentExt;
+import tatami.core.util.platformUtils.PlatformUtils;
+import tatami.jade.JadeInterface;
 
 /**
  * A class used in order to interact with Jade. One instance of this class corresponds to one JADE Platform.
@@ -40,11 +36,22 @@ import tatami.core.util.logging.Unit.UnitConfigData;
  */
 public class PCJadeInterface implements JadeInterface
 {
+	/**
+	 * The default host name.
+	 */
 	private final static String					DEFAULT_HOST	= "localhost";
+	/**
+	 * The default port.
+	 */
 	private final static String					DEFAULT_PORT	= "1099";
 	
-	private Unit								loggingUnit		= null;
-	protected Logger							log				= null;
+	/**
+	 * The log.
+	 */
+	private UnitComponentExt					log				= null;
+	/**
+	 * The configuration.
+	 */
 	protected JadeConfig						config			= null;
 	/**
 	 * the main agent container, if situated on this machine
@@ -59,26 +66,28 @@ public class PCJadeInterface implements JadeInterface
 	 * Call this before <code>setConfig()</code>.
 	 * 
 	 * @param configuration
-	 * @return the argument.
+	 *            - the {@link tatami.jade.JadeInterface.JadeConfig} instance specifying the parameters for Jade.
+	 * @return the config with the default parameters filled in..
 	 */
 	@Override
 	public JadeConfig fillConfig(JadeConfig configuration)
 	{
-		return configuration.setLocalHost(DEFAULT_HOST).setLocalPort(DEFAULT_PORT).setMainHost(DEFAULT_HOST).setMainPort(DEFAULT_PORT);
+		return configuration.setLocalHost(DEFAULT_HOST).setLocalPort(DEFAULT_PORT).setMainHost(DEFAULT_HOST)
+				.setMainPort(DEFAULT_PORT);
 	}
 	
 	@Override
 	public JadeInterface setConfig(JadeConfig configuration)
 	{
-		loggingUnit = new Unit(new UnitConfigData());
-		log = loggingUnit.getLog();
 		config = configuration;
 		return this;
 	}
 	
 	@Override
-	public JadeInterface startPlatform()
+	public boolean startPlatform()
 	{
+		log = (UnitComponentExt) new UnitComponentExt().setUnitName("PCJadeInterface").setLogLevel(Level.ALL)
+				.setLoggerType(PlatformUtils.platformLogType());
 		ProfileImpl profile;
 		Properties props = new ExtendedProperties();
 		
@@ -98,40 +107,24 @@ public class PCJadeInterface implements JadeInterface
 		
 		profile = new ProfileImpl(props);
 		
-		log.info("Launching [" + (config.getMainContainerName() != null ? config.getMainContainerName() : "unnamed") + "] main container [" + profile + "]");
+		log.info("Launching [" + (config.getMainContainerName() != null ? config.getMainContainerName() : "unnamed")
+				+ "] main container [" + profile + "]");
 		mainContainer = Runtime.instance().createMainContainer(profile);
 		try
 		{
 			containerList.put(mainContainer.getContainerName(), mainContainer);
-		} catch(ControllerException e)
+		} catch(Exception e)
 		{
-			e.printStackTrace();
+			log.error("Failed to start platform (main container [" + config.getMainContainerName() + "]: "
+					+ PlatformUtils.printException(e));
+			return false;
 		}
-		
-		return this;
+		return true;
 	}
 	
 	/**
-	 * Starts a new platform, with the given command line arguments
-	 * 
-	 * @param args
-	 *            - arguments, as specified in the command line
-	 */
-	@Deprecated
-	public void startPlatformWithArguments(String args)
-	{
-		mainContainer = runJadeWithArguments(args);
-		try
-		{
-			containerList.put(mainContainer.getContainerName(), mainContainer);
-		} catch(ControllerException e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Method used by createContainer methods in order to start a container, having the name of the container specified and supporting null arguments.
+	 * Method used by createContainer methods in order to start a container, having the name of the container specified
+	 * and supporting null arguments.
 	 * 
 	 * Not to be used for the main container.
 	 * 
@@ -139,7 +132,7 @@ public class PCJadeInterface implements JadeInterface
 	 *            - the name of the container
 	 */
 	@Override
-	public void startContainer(String containerName)
+	public boolean startContainer(String containerName)
 	{
 		ProfileImpl profile;
 		Properties props = new ExtendedProperties();
@@ -156,68 +149,27 @@ public class PCJadeInterface implements JadeInterface
 		
 		profile = new ProfileImpl(props);
 		
-		log.info("Launching non-main container [" + (containerName != null ? containerName : "unnamed") + "] with options [" + profile + "]");
+		log.info("Launching non-main container [" + (containerName != null ? containerName : "unnamed")
+				+ "] with options [" + profile + "]");
 		AgentContainer container = Runtime.instance().createAgentContainer(profile);
 		try
 		{
 			containerList.put(container.getContainerName(), container);
-		} catch(ControllerException e)
+		} catch(Exception e)
 		{
-			e.printStackTrace();
+			log.error("Failed to start container [" + containerName + "]: " + PlatformUtils.printException(e));
+			return false;
 		}
+		return true;
 	}
 	
-	/**
-	 * Method which creates a new container, with the given command line arguments
-	 * 
-	 * @param _args
-	 *            - arguments, as specified in the command line. The <code>-container</code> option is not mandatory
-	 */
-	@Deprecated
-	public void startContainerWithArguments(String _args)
+	@Override
+	public boolean stopPlatform()
 	{
-		String args = _args;
-		if(_args.indexOf("-container") == -1)
-			args = (new String("-container ")) + _args;
-		
-		AgentContainer container = runJadeWithArguments(args);
-		try
-		{
-			containerList.put(container.getContainerName(), container);
-		} catch(ControllerException e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Method which runs JADE with the specified arguments, which are equivalent to the arguments that JADE receives in the command line.
-	 * 
-	 * @param args
-	 *            - arguments, as specified in the command line.
-	 */
-	@Deprecated
-	public static AgentContainer runJadeWithArguments(String args)
-	{
-		// decompose the args String into tokens:
-		Vector<String> argsVector = new Vector<String>();
-		String[] argsArray = new String[0];
-		StringTokenizer tokenizer = new StringTokenizer(args);
-		
-		while(tokenizer.hasMoreTokens())
-			argsVector.addElement(tokenizer.nextToken());
-		
-		// parse the vector of arguments:
-		Properties props = jade.Boot.parseCmdLineArgs(argsVector.toArray(argsArray));
-		ProfileImpl profile = new ProfileImpl(props);
-		
-		// launch the main container:
-		// System.out.println("Launching a main-container..."+profile);
-		
-		if(argsVector.contains(new String("-container")))
-			return Runtime.instance().createAgentContainer(profile);
-		
-		return Runtime.instance().createMainContainer(profile);
+		Runtime.instance().shutDown();
+		log.doExit();
+		log = null;
+		return true;
 	}
 	
 	/**
@@ -233,18 +185,19 @@ public class PCJadeInterface implements JadeInterface
 	 *            - array of Objects, representing the arguments of the agent
 	 */
 	@Override
-	public void addAgentToContainer(String containerName, String agentName, String agentClassName, Object[] agentArgs)
+	public boolean addAgentToContainer(String containerName, String agentName, String agentClassName, Object[] agentArgs)
 	{
 		try
 		{
-			(containerName != null ? containerList.get(containerName) : getMainContainer()).createNewAgent(agentName, agentClassName, agentArgs).start();
-		} catch(StaleProxyException e)
+			(containerName != null ? containerList.get(containerName) : getMainContainer()).createNewAgent(agentName,
+					agentClassName, agentArgs).start();
+		} catch(Exception e)
 		{
-			e.printStackTrace();
-		} catch(NullPointerException npe)
-		{
-			npe.printStackTrace();
+			log.error("Unable to add agent [" + agentName + "] to container [" + containerName + "]: "
+					+ PlatformUtils.printException(e));
+			return false;
 		}
+		return true;
 	}
 	
 	/**
@@ -264,11 +217,19 @@ public class PCJadeInterface implements JadeInterface
 		return null;
 	}
 	
+	/**
+	 * @return the main agent container.
+	 */
 	public ContainerController getMainContainer()
 	{
 		return mainContainer;
 	}
 	
+	/**
+	 * @param containerName
+	 *            - the name of the searched container.
+	 * @return the container with the specified name.
+	 */
 	public ContainerController getContainer(String containerName)
 	{
 		return containerList.get(containerName);

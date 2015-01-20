@@ -11,6 +11,7 @@
  ******************************************************************************/
 package tatami.core.agent.webServices;
 
+import tatami.core.agent.AgentComponent;
 import jade.core.Agent;
 
 /**
@@ -32,7 +33,7 @@ public interface WSAgentImplementationInterface
 	 *            the type of the agent (e.g. CLAIM agent class);
 	 * @return <code>true</code> if the operation was successful.
 	 */
-	boolean registerService(Agent agent, String agentName, String agentClass);
+	boolean registerService(AgentComponent agent, String agentName, String agentClass);
 	
 	/**
 	 * Unregisters the web service corresponding to the agent.
@@ -41,7 +42,7 @@ public interface WSAgentImplementationInterface
 	 *            the {@link Agent} instance;
 	 * @return <code>true</code> if the operation was successful.
 	 */
-	boolean unregisterWS(Agent agent);
+	boolean unregisterWS(AgentComponent agent);
 	
 	/**
 	 * Invokes a web service with a single, String, parameter, and a String return value.

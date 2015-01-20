@@ -43,15 +43,16 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 
 import tatami.core.agent.claim.ClaimMessage;
-import tatami.core.agent.claim.parser.ClaimConstruct;
-import tatami.core.agent.claim.parser.ClaimStructure;
-import tatami.core.agent.claim.parser.ClaimValue;
-import tatami.core.agent.visualization.VisualizableAgent;
+import tatami.sclaim.constructs.basic.ClaimConstruct;
+import tatami.sclaim.constructs.basic.ClaimStructure;
+import tatami.sclaim.constructs.basic.ClaimValue;
+import tatami.core.agent.parametric.AgentParameterName;
+import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.visualization.VisualizationOntology;
 import tatami.core.agent.visualization.VisualizationOntology.Vocabulary;
 import tatami.pc.agent.visualization.PCDefaultAgentGui;
 import tatami.pc.agent.visualization.PCSimulationGui.SimulationComponent;
-import tatami.pc.util.XML.XMLTree.XMLNode;
+import net.xqhs.util.XML.XMLTree.XMLNode;
 import tatami.pc.util.jade.PCJadeInterface;
 
 /**
@@ -69,7 +70,7 @@ import tatami.pc.util.jade.PCJadeInterface;
  * @author Nguyen Thi Thuy Nga
  * 
  */
-public class SimulationAgent extends VisualizableAgent {
+public class SimulationAgent extends VisualizableComponent {
 	private static final long serialVersionUID = 5153833693845730328L;
 
 	List<XMLNode> events = new LinkedList<XMLNode>();
@@ -112,7 +113,7 @@ public class SimulationAgent extends VisualizableAgent {
 			for (Iterator<XMLNode> it = ((XMLNode) parObj(AgentParameterName.TIMELINE))
 					.getNodeIterator("event"); it.hasNext();)
 				events.add(it.next());
-		visualizer = parVal(AgentParameterName.VISUALIZTION_AGENT);
+		visualizer = parVal(AgentParameterName.VISUALIZATION_AGENT);
 
 		// GUI
 		setupGui();

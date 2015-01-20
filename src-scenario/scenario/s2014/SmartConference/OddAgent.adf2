@@ -1,0 +1,22 @@
+(agent Odd
+	(behavior
+		(initial register
+			(condition (readK (struct knowledge pattern Ana -isa-> ?roomName)))
+			(forAllK (struct knowledge pattern Ana -isa-> ?roomNameA)
+				(justPrintArguments ?roomNameA)
+			)
+			(if (readK (struct knowledge pattern ?Ana -isa-> ?what))
+			then
+				(if (readK (struct knowledge pattern ?Maria -isa-> ?something))
+				then
+					(send parent (struct message counting 0))
+				)
+			)
+		)
+		(reactive increase
+			(receive (message counting ?number))
+			(increment ?number ?newNo)
+			(send parent (struct message counting ?newNo))
+		)
+	)
+)

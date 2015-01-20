@@ -14,10 +14,8 @@ package tatami.pc.util.windowLayout;
 import java.util.HashMap;
 import java.util.Map;
 
-
-
-import tatami.core.interfaces.Logger;
-import tatami.core.util.logging.Log;
+import net.xqhs.util.logging.UnitComponentExt;
+import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.pc.util.windowLayout.LayoutIndications.Bar;
 import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
 
@@ -32,8 +30,8 @@ import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
 public class WindowLayout
 {
 	/**
-	 * Internal class that manages the current allocation, by means of an array of cells, each cell having a pointer to the {@link WindowParameters}
-	 * of the window that resides in the space this cell is part of.
+	 * Internal class that manages the current allocation, by means of an array of cells, each cell having a pointer to
+	 * the {@link WindowParameters} of the window that resides in the space this cell is part of.
 	 * 
 	 * @author Andrei Olaru
 	 * 
@@ -100,7 +98,7 @@ public class WindowLayout
 	
 	public static WindowLayout			staticLayout	= null;
 	
-	protected Logger					log				= null;
+	protected UnitComponentExt			log				= null;
 	
 	Integer								startX			= null;
 	Integer								startY			= null;
@@ -115,8 +113,8 @@ public class WindowLayout
 	HashMap<String, WindowParameters>	reservations	= new HashMap<String, WindowParameters>();
 	
 	/**
-	 * Constructs a new {@link WindowLayout} instance. It will manage the parameters (placement, size) for windows that are created vie getWindow and
-	 * dropWindow.
+	 * Constructs a new {@link WindowLayout} instance. It will manage the parameters (placement, size) for windows that
+	 * are created vie getWindow and dropWindow.
 	 * 
 	 * @param globalWidth
 	 *            : the area allocated to this layout; width.
@@ -125,11 +123,13 @@ public class WindowLayout
 	 * @param ind
 	 *            : a {@link LayoutIndications} structure that gives general indications for the layout (optional).
 	 * @param mds
-	 *            : a {@link MultipleDisplaySupport} structure that gives information on a multiple display setup (optional). Not Implemented.
+	 *            : a {@link MultipleDisplaySupport} structure that gives information on a multiple display setup
+	 *            (optional). Not Implemented.
 	 */
 	public WindowLayout(int globalWidth, int globalHeight, LayoutIndications ind, MultipleDisplaySupport mds)
 	{
-		log = Log.getLogger(this.getClass().getName());
+		log = (UnitComponentExt) new UnitComponentExt().setUnitName(this.getClass().getName()).setLoggerType(
+				PlatformUtils.platformLogType());
 		
 		indications = (ind != null) ? ind : new LayoutIndications();
 		
@@ -142,12 +142,14 @@ public class WindowLayout
 		gridStepX = new Integer(globalWidth / ((indications.cellsX != null) ? indications.cellsX.intValue() : 4));
 		gridStepY = new Integer(globalHeight / ((indications.cellsY != null) ? indications.cellsY.intValue() : 4));
 		
-		grid = new Grid(this.globalWidth.intValue() / gridStepX.intValue(), this.globalHeight.intValue() / gridStepY.intValue());
+		grid = new Grid(this.globalWidth.intValue() / gridStepX.intValue(), this.globalHeight.intValue()
+				/ gridStepY.intValue());
 		
 		for(Map.Entry<String, LayoutIndications> rez : ind.reservations.entrySet())
 		{
-			WindowParameters tentative = new WindowParameters(-1, -1, -1, -1, rez.getValue().positionX.intValue(), rez.getValue().positionY.intValue(), rez.getValue().cellsX.intValue(), rez
-					.getValue().cellsY.intValue());
+			WindowParameters tentative = new WindowParameters(-1, -1, -1, -1, rez.getValue().positionX.intValue(),
+					rez.getValue().positionY.intValue(), rez.getValue().cellsX.intValue(),
+					rez.getValue().cellsY.intValue());
 			tentative.isReservation = true;
 			if(grid.canAllocate(tentative))
 				grid.allocate(tentative);
@@ -163,15 +165,17 @@ public class WindowLayout
 	}
 	
 	/**
-	 * Creates an allocation for a new window. The allocated space will remain associated with the window until dropWindow is called.
+	 * Creates an allocation for a new window. The allocated space will remain associated with the window until
+	 * dropWindow is called.
 	 * 
 	 * <p>
-	 * Window name and type are just String used to identify the window internally, but two allocations with the same type and name cannot be created
-	 * (the same allocation will be returned). Type can also help get indications specified when initializing the layout (via
-	 * {@link LayoutIndications}.indicateWindowType.
+	 * Window name and type are just String used to identify the window internally, but two allocations with the same
+	 * type and name cannot be created (the same allocation will be returned). Type can also help get indications
+	 * specified when initializing the layout (via {@link LayoutIndications}.indicateWindowType.
 	 * 
 	 * <p>
-	 * The function will always return a not-null instance. If no allocation can be made in the layout, a default window is returned.
+	 * The function will always return a not-null instance. If no allocation can be made in the layout, a default window
+	 * is returned.
 	 * 
 	 * @param type
 	 *            the type of the window used to identify potential indications.
@@ -287,6 +291,6 @@ public class WindowLayout
 	{
 		grid = null;
 		windows = null;
-		Log.exitLogger(this.getClass().getName());
+		log.doExit();
 	}
 }

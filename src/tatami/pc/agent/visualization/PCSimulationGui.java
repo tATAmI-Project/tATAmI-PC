@@ -19,12 +19,24 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
+import tatami.core.agent.visualization.AgentGuiConfig;
+import tatami.simulation.SimulationManager;
+import tatami.simulation.SimulationManager.SimulationComponent;
+
+/**
+ * Implementation for the GUI of the {@link SimulationManager}, containing all components in {@link SimulationComponent}
+ * .
+ * 
+ * @author Andrei Olaru
+ */
 public class PCSimulationGui extends PCDefaultAgentGui
 {
-	public enum SimulationComponent {
-		CREATE, START, TIME, PAUSE, CLEAR, EXIT
-	}
-	
+	/**
+	 * Creates a new simulation GUI for the PC.
+	 * 
+	 * @param configuration
+	 *            - the configuration that is passed to the parent, containing the name and type of the window.
+	 */
 	public PCSimulationGui(AgentGuiConfig configuration)
 	{
 		super(configuration);

@@ -32,9 +32,9 @@ public class FollowParentBehaviour extends CyclicBehaviour
 		// try to get the message (if it cross the filter)
 		final ACLMessage msg = this.myAgent.receive(HierarchyOntology.template(Vocabulary.FOLLOWME));
 		
-		if(msg != null && !((HierarchicalAgent)myAgent).fixedAgent)
+		if(msg != null && !((HierarchicalComponent)myAgent).fixedAgent)
 		{
-			((HierarchicalAgent)myAgent).getLog().info(myAgent.getLocalName() + " must migrate to " + msg.getContent());
+			((HierarchicalComponent)myAgent).getLog().info(myAgent.getLocalName() + " must migrate to " + msg.getContent());
 			this.myAgent.doMove(new ContainerID(msg.getContent(), null));
 		}
 		else

@@ -17,9 +17,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import tatami.core.agent.claim.parser.ClaimAgentDefinition;
-import tatami.core.agent.claim.parser.Parser;
-import tatami.core.interfaces.Logger;
+import net.xqhs.util.logging.UnitComponentExt;
+import tatami.sclaim.constructs.basic.ClaimAgentDefinition;
+import tatami.sclaim.parser.Parser;
 
 /**
  * The purpose of this class is to hold functions that are necessary for the simulation, but are related to CLAIM
@@ -31,8 +31,8 @@ public class ClaimUtils
 {
 	
 	protected static Map<String, ClaimAgentDefinition>	claimDefinitions	= new HashMap<String, ClaimAgentDefinition>();
-	protected static boolean							cachingEnabled		= false;
-	
+	protected static boolean								cachingEnabled		= false;
+	final protected static String							SOURCE_FOLDER		= "src-scenario";
 	/**
 	 * //TODO: to document
 	 * 
@@ -44,7 +44,7 @@ public class ClaimUtils
 	 * @return
 	 */
 	public static ClaimAgentDefinition fillCAD(String agentClass, Collection<String> javaCodeAttachments,
-			Collection<String> adfPaths, Collection<String> agentPackages, Logger log)
+				Collection<String> agentPackages, UnitComponentExt log)
 	{
 		ClaimAgentDefinition cad = null;
 		// should not cache for now: some parameters and java code attachments might differ even
@@ -53,9 +53,9 @@ public class ClaimUtils
 			cad = ClaimUtils.claimDefinitions.get(agentClass);
 		else
 		{
-			for(String adfPath : adfPaths)
+			for(String adfPath : agentPackages)
 			{
-				String path = adfPath + "/" + agentClass + ".adf2";
+				String path = SOURCE_FOLDER + "/" + adfPath + "/" + agentClass + ".adf2";
 				log.trace("trying adf path [" + path + "]");
 				File f = new File(path);
 				if(f.exists())
@@ -71,6 +71,7 @@ public class ClaimUtils
 		if(cad != null)
 		{
 			// attach java code
+			if (javaCodeAttachments != null) {
 			for(String className : javaCodeAttachments)
 			{
 				Class<?> attachment = null;
@@ -83,7 +84,7 @@ public class ClaimUtils
 					while(agentPackagesIt.hasNext() && !found)
 						try
 						{
-							path = agentPackagesIt.next() + "." + className;
+							path = agentPackagesIt.next().replace("/", ".") + "." + className;
 							log.trace("trying code attachment path [" + path + "]");
 							attachment = Class.forName(path);
 							found = true;
@@ -113,7 +114,7 @@ public class ClaimUtils
 				}
 				else
 					log.error("code attachment [" + className + "] not found.");
-			}
+			}}
 		}
 		else
 			log.error("agent definition not found for agent class [" + agentClass + "]");

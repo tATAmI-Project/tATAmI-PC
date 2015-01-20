@@ -1,0 +1,119 @@
+package tatami.simulation;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import net.xqhs.util.logging.Logger;
+
+import tatami.core.agent.CompositeAgent;
+import tatami.core.agent.AgentComponent.AgentComponentName;
+import tatami.core.agent.messaging.MessagingComponent;
+import tatami.core.agent.visualization.VisualizableComponent;
+import tatami.core.agent.visualization.VisualizableComponent.Vocabulary;
+
+/**
+ * In order to be able to communicate with other agents in a platform, the {@link SimulationManager} keeps an agent on
+ * each of the available platforms, in order to relay events and control messages to the agents.
+ * 
+ * @author Andrei Olaru
+ */
+public class SimulationLinkAgent extends CompositeAgent
+{
+	/**
+	 * The serial UID.
+	 */
+	private static final long	serialVersionUID	= 9020113598000072111L;
+	
+	/**
+	 * The name of this agent, as set by the owning {@link SimulationManager}.
+	 */
+	String						name				= null;
+	
+	/**
+	 * A {@link Map} of agent names to agent addresses (as provided by the messaging component).
+	 */
+	Map<String, String>			agents				= new HashMap<String, String>();
+	
+	/**
+	 * Creates a new instance, with the specified name. The instance will have two components: a
+	 * {@link VisualizableComponent} and a {@link MessagingComponent}.
+	 * 
+	 * @param agentName
+	 *            - the name of the agent.
+	 * @param messaging
+	 *            - the messaging component to use, if any. If <code>null</code>, no messaging component will be added.
+	 */
+	public SimulationLinkAgent(String agentName, MessagingComponent messaging)
+	{
+		name = agentName;
+		addComponent(new VisualizableComponent());
+		if(messaging != null)
+			addComponent(messaging);
+	}
+	
+	@Override
+	public String getAgentName()
+	{
+		return name;
+	}
+	
+	/**
+	 * Registers the agent specified by the {@link AgentCreationData} instance in the argument as being visualized by
+	 * this {@link SimulationLinkAgent}. The agent's name and address are put in a local map, and the agent is informed
+	 * of the new visualization monitor.
+	 * 
+	 * @param agentData
+	 *            - information about the agent to be enrolled.
+	 * @return <code>true</code> if the operation has succeeded; <code>false</code> otherwise.
+	 */
+	public boolean enrol(AgentCreationData agentData)
+	{
+		Logger log = ((VisualizableComponent) getComponent(AgentComponentName.VISUALIZABLE_COMPONENT)).getLog();
+		MessagingComponent msgComp = (MessagingComponent) getComponent(AgentComponentName.MESSAGING_COMPONENT);
+		if(msgComp == null)
+		{
+			log.error("Messaging component not present");
+			return false;
+		}
+		String agentAddress = msgComp.getAgentAddress(agentData.getAgentName(), agentData.getDestinationContainer());
+		String target = MessagingComponent.makePathHelper(agentAddress, Vocabulary.VISUALIZATION.toString(),
+				Vocabulary.VISUALIZATION_MONITOR.toString());
+		if(!msgComp.sendMessage(target, msgComp.getAgentAddress(), msgComp.getAgentAddress()))
+		{
+			log.error("Sending of enrollment message to agent [" + agentData.getAgentName() + "] failed");
+			return false;
+		}
+		agents.put(agentData.getAgentName(), agentAddress);
+		return true;
+	}
+	
+	/**
+	 * Sends an exit message to all agents that are monitored by this agent.
+	 * 
+	 * @return <code>true</code> if the operation has succeeded; <code>false</code> if any message (possibly all) was
+	 *         not successfully sent.
+	 */
+	public boolean broadcastExit()
+	{
+		Logger log = ((VisualizableComponent) getComponent(AgentComponentName.VISUALIZABLE_COMPONENT)).getLog();
+		MessagingComponent msgComp = (MessagingComponent) getComponent(AgentComponentName.MESSAGING_COMPONENT);
+		if(msgComp == null)
+		{
+			log.error("Messaging component not present");
+			return false;
+		}
+		
+		boolean ret = true;
+		for(String agentAddress : agents.values())
+		{
+			String target = MessagingComponent.makePathHelper(agentAddress, Vocabulary.VISUALIZATION.toString(),
+					Vocabulary.DO_EXIT.toString());
+			if(!msgComp.sendMessage(target, msgComp.getAgentAddress(), msgComp.getAgentAddress()))
+			{
+				log.error("Sending of exit message to [" + target + "] failed");
+				ret = false;
+			}
+		}
+		return ret;
+	}
+}

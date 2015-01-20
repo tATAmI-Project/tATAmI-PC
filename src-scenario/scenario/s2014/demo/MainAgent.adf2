@@ -1,0 +1,43 @@
+(agent Main
+	(behavior
+		(reactive getPresenters
+			(receive ?agentName (message -presenterOf-> ?PresentationName))
+			(addK (struct knowledge ?agentName -presenterOf-> ?PresentationName))
+			(output MAINOUTPUT ?agentName este prezentator al ?PresentationName)
+		)
+		
+		(reactive getChairs
+			(receive ?agentName (message -chair-of-> ?SessionName))
+			(addK (struct knowledge ?agentName -chair-of-> ?SessionName))
+			(output MAINOUTPUT ?agentName este chair al sesiunii ?SessionName)
+		)			
+		
+		(reactive getAttendees
+			(receive ?agentName (message -attends-> ?PresentationName))
+			(if (readK (struct knowledge pattern ?agentName -attends-> ?PresentationName))
+			then
+				(output MAINOUTPUT ?agentName a mai zis ca participa)
+			else
+				(addK (struct knowledge ?agentName -attends-> ?PresentationName))
+				(output MAINOUTPUT ?agentName participa la presentarea ?PresentationName)
+			)
+		)
+		
+		// get presentation started
+		(reactive getPresentationStarted
+			(receive ?agentName (message ?PresentationName -has-state-> STARTED))
+			(addK (struct knowledge ?PresentationName -has-state-> STARTED))
+			(output MAINOUTPUT Prezentarea ?PresentationName a inceput)
+			(if (readK (struct knowledge pattern ?PresentationName -presentationURI-> ?URI))
+			then
+				(forAllK (struct knowledge pattern ?agentName -attends-> ?PresentationName)
+					(send (struct message ?PresentationName -URI-> ?URI))
+				)
+			else
+				(forAllK (struct knowledge pattern ?newAgentName -attends-> ?PresentationName)
+					(send ?newAgentName (struct message ?PresentationName -state-> STARTED))
+				)
+			)
+		)		 
+	)
+)

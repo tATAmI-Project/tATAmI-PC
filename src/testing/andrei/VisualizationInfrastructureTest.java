@@ -11,17 +11,14 @@
  ******************************************************************************/
 package testing.andrei;
 
-
-
-import tatami.core.agent.visualization.VisualizableAgent;
-import tatami.core.interfaces.Logger;
-import tatami.core.interfaces.JadeInterface.JadeConfig;
-import tatami.core.util.logging.Log;
-import tatami.pc.agent.visualization.VisualizationAgent;
+import net.xqhs.util.logging.UnitComponentExt;
+import tatami.core.agent.visualization.VisualizableComponent;
+import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.pc.util.jade.PCJadeInterface;
 import tatami.pc.util.windowLayout.LayoutIndications;
-import tatami.pc.util.windowLayout.WindowLayout;
 import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
+import tatami.pc.util.windowLayout.WindowLayout;
+import tatami.simulation.VisualizationManager;
 
 /**
  * 
@@ -30,8 +27,9 @@ import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
  */
 public class VisualizationInfrastructureTest
 {
-	private static String	unitName		= "visTestMain";
-	protected Logger		log				= Log.getLogger(unitName);
+	private static String		unitName	= "visTestMain";
+	protected UnitComponentExt	log			= (UnitComponentExt) new UnitComponentExt().setUnitName(unitName)
+													.setLoggerType(PlatformUtils.platformLogType());
 	
 	public static void main(String args[])
 	{
@@ -43,19 +41,18 @@ public class VisualizationInfrastructureTest
 		log.trace("Hello Visualizable World");
 		
 		WindowLayout.staticLayout = new WindowLayout(1600, 1000, new LayoutIndications(8, 8)
-												.indicateBar(BarPosition.LEFT, 70, 0)
-												.indicateWindowType("agent", 2, 2)
-												.indicateWindowType("system", 4, 4)
-												, null);
+				.indicateBar(BarPosition.LEFT, 70, 0).indicateWindowType("agent", 2, 2)
+				.indicateWindowType("system", 4, 4), null);
 		
 		PCJadeInterface jade = new PCJadeInterface();
 		String containerName = "test1";
-		String[] agentNames = {"traced1", "traced2"};
+		String[] agentNames = { "traced1", "traced2" };
 		String visName = "visualizer1";
 		jade.startContainer(containerName);
 		for(String name : agentNames)
-			jade.addAgentToContainer(containerName, name, VisualizableAgent.class.getCanonicalName(), null);
-		jade.addAgentToContainer(containerName, visName, VisualizationAgent.class.getCanonicalName(), new Object[] {agentNames});
+			jade.addAgentToContainer(containerName, name, VisualizableComponent.class.getCanonicalName(), null);
+		jade.addAgentToContainer(containerName, visName, VisualizationManager.class.getCanonicalName(),
+				new Object[] { agentNames });
 		
 	}
 	

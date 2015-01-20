@@ -16,29 +16,58 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.TextArea;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.SwingWorker;
 
-
-
-import tatami.core.interfaces.AgentGui;
+import tatami.core.agent.visualization.AgentGui;
+import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.pc.util.windowLayout.WindowLayout;
 import tatami.pc.util.windowLayout.WindowParameters;
 
+/**
+ * Default agent GUI for the PC platform.
+ * 
+ * @author Andrei Olaru
+ */
 public class PCDefaultAgentGui implements AgentGui
 {
+	/**
+	 * The configuration for the GUI, containing parameters such as window name and type.
+	 */
 	protected AgentGuiConfig				config				= null;
 	
+	/**
+	 * Parameters for the window, as returned by the {@link WindowLayout}.
+	 */
 	protected WindowParameters				params				= null;
+	/**
+	 * The {@link JFrame} containing the GUI.
+	 */
 	protected JFrame						window				= null;
+	/**
+	 * The components in the gui, identified by their name.
+	 */
 	protected Map<String, Component>		components			= null;
+	/**
+	 * Connections between component names and {@link InputListener} instances responding to that input.
+	 */
 	protected Map<String, InputListener>	inputConnections	= null;
 	
+	/**
+	 * Creates and configures the GUI.
+	 * 
+	 * @param configuration
+	 *            - the {@link AgentGuiConfig} specifying parameters such as window name and type.
+	 */
 	public PCDefaultAgentGui(AgentGuiConfig configuration)
 	{
 		config = configuration;
@@ -46,13 +75,26 @@ public class PCDefaultAgentGui implements AgentGui
 		components = new Hashtable<String, Component>();
 		inputConnections = new HashMap<String, AgentGui.InputListener>();
 		window = new JFrame();
+		
+		buildGUI();
+		
+		placeWindow();
+		
+		window.setVisible(true);
+	}
+	
+	/**
+	 * Builds the default GUI by adding 2 grid elements: a label for the agent name and a text area for the log.
+	 */
+	protected void buildGUI()
+	{
 		window.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.weightx = c.weighty = 1;
 		
 		c.gridx = 0;
 		c.gridy = 0;
-		Component pic = new JLabel(config.windowName); // future: should be a picture
+		Component pic = new JLabel(config.getWindowName()); // future: should be a picture
 		pic.setPreferredSize(new Dimension(100, 100));
 		window.add(pic, c);
 		components.put(DefaultComponent.AGENT_NAME.toString(), pic);
@@ -64,26 +106,25 @@ public class PCDefaultAgentGui implements AgentGui
 		window.add(ta, c);
 		ta.setMinimumSize(new Dimension(100, 100));
 		components.put(DefaultComponent.AGENT_LOG.toString(), ta);
-		
-		params = (WindowLayout.staticLayout != null) ? WindowLayout.staticLayout.getWindow(config.windowType, config.windowName, null) : WindowParameters.defaultParameters();
-		params.setWindow(window, true);
-		// window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		window.setVisible(true);
 	}
 	
+	/**
+	 * Places the GUI window according to the {@link WindowLayout}.
+	 */
+	protected void placeWindow()
+	{
+		params = (WindowLayout.staticLayout != null) ? WindowLayout.staticLayout.getWindow(config.getWindowType(),
+				config.getWindowName(), null) : WindowParameters.defaultParameters();
+		params.setWindow(window, true);
+	}
+
 	@Override
 	public void close()
 	{
 		if(WindowLayout.staticLayout != null)
-			WindowLayout.staticLayout.dropWindow(config.windowType, config.windowName);
+			WindowLayout.staticLayout.dropWindow(config.getWindowType(), config.getWindowName());
 		window.dispose();
 		window = null;
-	}
-	
-	@Deprecated
-	public Component getComponent(String componentName)
-	{
-		return components.get(componentName);
 	}
 	
 	@Override
@@ -96,15 +137,42 @@ public class PCDefaultAgentGui implements AgentGui
 		}
 		
 		Component component = components.get(componentName);
-		if(component instanceof TextArea)
+		if(arguments.isEmpty())
+			return;
+		Object arg0 = arguments.get(0);
+		Object arg1 = null;
+		if(arguments.size() > 1)
+			arg1 = arguments.get(1);
+		if((component instanceof TextArea) && (arg0 instanceof String))
 		{
-			if(arguments.size() > 0)
+			TextArea ta = (TextArea) component;
+			ta.setText((String) arg0);
+			if((arg1 != null) && (arg1 instanceof Boolean) && ((Boolean) arg1).booleanValue())
+				ta.append(".");
+			ta.repaint();
+		}
+		if((component instanceof JLabel) && (arg0 != null) && (arg0 instanceof String))
+		{
+			JLabel label = (JLabel) component;
+			label.setText((String) arg0);
+			label.repaint();
+		}
+		if(component instanceof JButton)
+		{
+			JButton button = (JButton) component;
+			if((arg0 == null) || ((arg0 instanceof Boolean) && (((Boolean) arg0).booleanValue())))
 			{
-				TextArea ta = (TextArea)component;
-				ta.setText((String)arguments.get(0));
-				if(arguments.size() > 1 && ((Boolean)arguments.get(1)).booleanValue())
-					ta.append(".");
-				ta.repaint();
+				button.setEnabled(false);
+			}
+			if(arguments.get(0) instanceof String)
+			{
+				button.setEnabled(true);
+				button.setText((String) arguments.get(0));
+				button.repaint();
+			}
+			if((arg0 instanceof Boolean) && (((Boolean) arg0).booleanValue()))
+			{
+				button.setEnabled(true);
 			}
 		}
 	}
@@ -118,12 +186,45 @@ public class PCDefaultAgentGui implements AgentGui
 			return;
 		}
 		inputConnections.put(componentName, listener);
+		Component component = components.get(componentName);
+		if(component instanceof JButton)
+			((JButton) component).addActionListener(new ActionListener() {
+				String			comp	= null;
+				InputListener	list	= null;
+				
+				public ActionListener init(String compName, InputListener inputList)
+				{
+					comp = compName;
+					list = inputList;
+					return this;
+				}
+				
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					list.receiveInput(comp, new Vector<Object>(0));
+				}
+			}.init(componentName, listener));
 	}
-
+	
 	@Override
 	public Vector<Object> getinput(String componentName)
 	{
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	@Override
+	public void background(final AgentGuiBackgroundTask task, final Object argument,
+			final ResultNotificationListener resultListener)
+	{
+		new SwingWorker<Void, Void>() {
+			@Override
+			protected Void doInBackground() throws Exception
+			{
+				task.execute(argument, resultListener);
+				return null;
+			}
+		}.execute();
 	}
 }

@@ -22,11 +22,8 @@ import java.util.Properties;
 
 import javax.swing.JFrame;
 
-
-
-import tatami.core.interfaces.Logger;
-import tatami.core.util.logging.Log;
-import tatami.core.util.logging.Unit;
+import net.xqhs.util.logging.Unit;
+import net.xqhs.util.logging.UnitComponentExt;
 import tatami.pc.util.logging.TextAreaLogDisplay;
 import tatami.pc.util.windowLayout.WindowLayout;
 import tatami.pc.util.windowLayout.WindowParameters;
@@ -48,7 +45,7 @@ public class TestServer extends NanoHTTPD
 {
 	protected static final String	schemaFile	= "files/serverSchema.xml";
 	
-	protected Logger				log			= null;
+	protected UnitComponentExt		log			= null;
 	protected WindowLayout			layout		= null;
 	
 	int								nQuery		= 0;
@@ -66,7 +63,8 @@ public class TestServer extends NanoHTTPD
 		super(port);
 		
 		TextArea logText = new TextArea();
-		log = Log.getLogger(getName(), new TextAreaLogDisplay(logText));
+		log = (UnitComponentExt) new UnitComponentExt().setUnitName(getName()).setLogDisplay(
+				new TextAreaLogDisplay(logText));
 		
 		this.layout = layout;
 		createWindow(logText);
@@ -114,7 +112,7 @@ public class TestServer extends NanoHTTPD
 			layout.dropWindow("Server", null);
 			layout.doexit();
 		}
-		Log.exitLogger(getName());
+		log.doExit();
 		System.exit(0);
 	}
 	
@@ -128,17 +126,18 @@ public class TestServer extends NanoHTTPD
 	{
 		@SuppressWarnings("rawtypes")
 		Enumeration e = header.propertyNames();
-		String tolog = "Received [" + method + "] request for [" + uri + "] with" + (e.hasMoreElements() ? "" : " no") + " headers ";
+		String tolog = "Received [" + method + "] request for [" + uri + "] with" + (e.hasMoreElements() ? "" : " no")
+				+ " headers ";
 		while(e.hasMoreElements())
 		{
-			String value = (String)e.nextElement();
+			String value = (String) e.nextElement();
 			tolog += "[ " + value + " | " + header.getProperty(value) + " ]";
 		}
 		e = parms.propertyNames();
 		tolog += " and" + (e.hasMoreElements() ? "" : " no") + " parameters ";
 		while(e.hasMoreElements())
 		{
-			String value = (String)e.nextElement();
+			String value = (String) e.nextElement();
 			tolog += "[ " + value + " | " + parms.getProperty(value) + " ]";
 		}
 		log.trace(tolog);
@@ -149,23 +148,35 @@ public class TestServer extends NanoHTTPD
 			{
 				nQuery2++;
 				if(nQuery2 < 5)
-					return new Response(HTTP_OK, MIME_PLAINTEXT, "<userlocations>\n<userlocation><user>Bob</user><location>screen1</location></userlocation>\n<userlocation><user>Carol</user><location>screen2</location></userlocation>\n<userlocation><user>Alice</user><location>screen2</location></userlocation></userlocations>");
+					return new Response(
+							HTTP_OK,
+							MIME_PLAINTEXT,
+							"<userlocations>\n<userlocation><user>Bob</user><location>screen1</location></userlocation>\n<userlocation><user>Carol</user><location>screen2</location></userlocation>\n<userlocation><user>Alice</user><location>screen2</location></userlocation></userlocations>");
 				else if(nQuery2 < 10)
-					return new Response(HTTP_OK, MIME_PLAINTEXT, "<userlocations>\n<userlocation><user>Bob</user><location>screen1</location></userlocation>\n<userlocation><user>Carol</user><location>screen2</location></userlocation>\n<userlocation><user>Alice</user><location>screen1</location></userlocation></userlocations>");
+					return new Response(
+							HTTP_OK,
+							MIME_PLAINTEXT,
+							"<userlocations>\n<userlocation><user>Bob</user><location>screen1</location></userlocation>\n<userlocation><user>Carol</user><location>screen2</location></userlocation>\n<userlocation><user>Alice</user><location>screen1</location></userlocation></userlocations>");
 				else
-					return new Response(HTTP_OK, MIME_PLAINTEXT, "<userlocations>\n<userlocation><user>Bob</user><location>screen2</location></userlocation>\n<userlocation><user>Carol</user><location>screen2</location></userlocation>\n<userlocation><user>Alice</user><location>screen1</location></userlocation></userlocations>");
+					return new Response(
+							HTTP_OK,
+							MIME_PLAINTEXT,
+							"<userlocations>\n<userlocation><user>Bob</user><location>screen2</location></userlocation>\n<userlocation><user>Carol</user><location>screen2</location></userlocation>\n<userlocation><user>Alice</user><location>screen1</location></userlocation></userlocations>");
 			}
 			else
 			{
-				nQuery ++ ;
+				nQuery++;
 				if(nQuery < 2)
 					return new Response(HTTP_OK, MIME_PLAINTEXT, "<users>\n</users>");
 				else if(nQuery < 3)
-					return new Response(HTTP_OK, MIME_PLAINTEXT, "<users>\n<user>Bob</user>\n<user>Carol</user>\n</users>");
+					return new Response(HTTP_OK, MIME_PLAINTEXT,
+							"<users>\n<user>Bob</user>\n<user>Carol</user>\n</users>");
 				else if(nQuery < 5)
-					return new Response(HTTP_OK, MIME_PLAINTEXT, "<users>\n<user>Bob</user>\n<user>Carol</user>\n<user>Paul</user></users>");
+					return new Response(HTTP_OK, MIME_PLAINTEXT,
+							"<users>\n<user>Bob</user>\n<user>Carol</user>\n<user>Paul</user></users>");
 				else
-					return new Response(HTTP_OK, MIME_PLAINTEXT, "<users>\n<user>Bob</user>\n<user>Carol</user>\n<user>Paul</user><user>Alice</user></users>");
+					return new Response(HTTP_OK, MIME_PLAINTEXT,
+							"<users>\n<user>Bob</user>\n<user>Carol</user>\n<user>Paul</user><user>Alice</user></users>");
 			}
 		}
 		else

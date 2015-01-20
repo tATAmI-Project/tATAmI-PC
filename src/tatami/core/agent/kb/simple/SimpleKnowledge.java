@@ -16,7 +16,7 @@ import jade.util.leap.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import tatami.core.interfaces.KnowledgeBase.KnowledgeDescription;
+import tatami.core.agent.kb.KnowledgeBase.KnowledgeDescription;
 
 
 /**

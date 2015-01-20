@@ -37,7 +37,7 @@ import tatami.core.agent.hierarchical.HierarchyOntology;
 import tatami.core.agent.hierarchical.HierarchyOntology.Vocabulary;
 import tatami.core.agent.kb.Knowledge;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
-import tatami.core.agent.visualization.VisualizableAgent;
+import tatami.core.agent.visualization.VisualizableComponent;
 
 /**
  * Abstract class that extends class GuiAgent. Agent has a hierarchical relationship and a structure of knowledge
@@ -46,7 +46,7 @@ import tatami.core.agent.visualization.VisualizableAgent;
  * @author Andrei Olaru
  * 
  */
-public abstract class WS_AbstractHierarchicalAgent extends VisualizableAgent
+public abstract class WS_AbstractHierarchicalAgent extends VisualizableComponent
 {
 	private static final long	serialVersionUID	= -7984498848330956862L;
 

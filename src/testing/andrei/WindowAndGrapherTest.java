@@ -17,22 +17,19 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
-
-
-import tatami.core.interfaces.Logger;
-import tatami.core.util.logging.Log;
-import tatami.pc.util.graphical.GCanvas;
+import net.xqhs.graphical.GCanvas;
+import net.xqhs.util.logging.UnitComponentExt;
 import tatami.pc.util.logging.TextAreaLogDisplay;
 import tatami.pc.util.windowLayout.LayoutIndications;
+import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
 import tatami.pc.util.windowLayout.WindowLayout;
 import tatami.pc.util.windowLayout.WindowParameters;
-import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
 
 public class WindowAndGrapherTest
 {
 	private static String	unitName	= "window+grapherTestMain";
 	TextArea				logText		= null;
-	Logger					log			= null;
+	UnitComponentExt		log			= null;
 	WindowLayout			layout		= null;
 	
 	@SuppressWarnings("unused")
@@ -44,10 +41,12 @@ public class WindowAndGrapherTest
 	public WindowAndGrapherTest()
 	{
 		logText = new TextArea(".hello.");
-		log = Log.getLogger(unitName, new TextAreaLogDisplay(logText));
+		log = (UnitComponentExt) new UnitComponentExt().setUnitName(unitName).setLogDisplay(
+				new TextAreaLogDisplay(logText));
 		log.trace("Hello World");
 		
-		layout = new WindowLayout(1200, 700, new LayoutIndications(8, 8).indicateBar(BarPosition.LEFT, 70, 0).indicateWindowType("System", 4, 1).indicateWindowType("accessory", 8, 7), null); // example indications
+		layout = new WindowLayout(1200, 700, new LayoutIndications(8, 8).indicateBar(BarPosition.LEFT, 70, 0)
+				.indicateWindowType("System", 4, 1).indicateWindowType("accessory", 8, 7), null); // example indications
 		
 		JFrame window = new JFrame();
 		buildWindow(window, layout);
@@ -57,7 +56,7 @@ public class WindowAndGrapherTest
 	protected void doExit()
 	{
 		layout.doexit();
-		Log.exitLogger(unitName);
+		log.doExit();
 		System.exit(0);
 	}
 	
@@ -84,9 +83,9 @@ public class WindowAndGrapherTest
 		window.setVisible(true);
 		
 		JFrame acc = new JFrame(unitName);
-//		acc.setLayout(new VerticalBagLayout());
+		// acc.setLayout(new VerticalBagLayout());
 		layout.getWindow("accessory", "acc", null).setWindow(acc, true);
-//		acc.add(new Label("hello. i am an accessory window."));
+		// acc.add(new Label("hello. i am an accessory window."));
 		GCanvas canvas = new GCanvas();
 		acc.add(canvas);
 		acc.setVisible(true);
