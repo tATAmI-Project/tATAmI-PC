@@ -7,7 +7,7 @@ import main.java.org.java_websocket.drafts.Draft;
 import main.java.org.java_websocket.handshake.ServerHandshake;
 
 public class AutobahnClient extends WebSocketClient {
-	
+
 	/**
 	 * 
 	 * @param d
@@ -25,7 +25,6 @@ public class AutobahnClient extends WebSocketClient {
 	@Override
 	public void onMessage(String message) {
 		send( message );
-		
 	}
 
 	@Override

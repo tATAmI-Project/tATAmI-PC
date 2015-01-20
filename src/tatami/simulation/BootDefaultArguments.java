@@ -59,7 +59,7 @@ public class BootDefaultArguments
 	/**
 	 * The width of the application space.
 	 */
-	static final int			applicationLayoutWidth	= 1000;
+	static final int			applicationLayoutWidth	= 1400;
 	
 	/**
 	 * The height of the application space.
@@ -72,7 +72,7 @@ public class BootDefaultArguments
 	static LayoutIndications	layout					= new LayoutIndications(12, 6)
 																
 																// Taskbar on the left (70 pixels)
-																.indicateBar(BarPosition.LEFT, 200, 0)
+																.indicateBar(BarPosition.LEFT, 70, 0)
 																
 																// .indicateBar(BarPosition.LEFT, 0, 0) // otherwise
 																

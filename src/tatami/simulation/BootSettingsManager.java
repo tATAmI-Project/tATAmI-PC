@@ -52,11 +52,6 @@ public class BootSettingsManager extends Config
 	 * For Jade-based setups, it is the port of the main container.
 	 */
 	protected String			mainPort;
-	/*
-	 * 
-	 */
-	protected String            networkNodeType;
-	
 	/**
 	 * An indication of the local host.
 	 * <p>
@@ -218,8 +213,7 @@ public class BootSettingsManager extends Config
 			if(configNode != null)
 			{
 				if(configNode.getAttributeValue("mainHost") != null){
-					mainHost = configNode.getAttributeValue("IPaddress");
-					networkNodeType = configNode.getAttributeValue("mainHost".toLowerCase());
+					mainHost = configNode.getAttributeValue("mainHost");
 				}
 				
 				if(configNode.getAttributeValue("mainPort") != null)

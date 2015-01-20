@@ -215,7 +215,7 @@ public class Boot
 		{
 			// load default platform
 			//StandardPlatformType platform = StandardPlatformType.DEFAULT;
-			StandardPlatformType platform = StandardPlatformType.GENERAL;
+			StandardPlatformType platform = StandardPlatformType.DEFAULT;
 			try
 			{
 				platforms
