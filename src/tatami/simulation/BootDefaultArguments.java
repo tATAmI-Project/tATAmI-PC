@@ -11,9 +11,9 @@
  ******************************************************************************/
 package tatami.simulation;
 
+import net.xqhs.windowLayout.LayoutIndications.BarPosition;
+import net.xqhs.windowLayout.grid.GridLayoutIndications;
 import tatami.core.agent.visualization.AgentGuiConfig;
-import tatami.pc.util.windowLayout.LayoutIndications;
-import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
 
 /**
  * This class traditionally contains settings for simulations, in order to decouple it from Boot (making it easy to
@@ -28,7 +28,7 @@ public class BootDefaultArguments
 	/**
 	 * The scenario file.
 	 */
-	static final String			scenarioFileName		= "src-scenario/scenario/examples/composite/simpleA/scenario.xml";
+	static final String				scenarioFileName		= "src-scenario/scenario/examples/composite/simpleA/scenario.xml";
 	// static final String scenarioFileName = "src-scenario/scenario/examples/jade/simpleA/scenario.xml";
 	// static final String scenarioFileName = "src-scenario/scenario/s2014/SmartConference/smart_room_conference.xml";
 	// static final String scenarioFileName = "src-scenario/scenario/s2013/SmartRoom_EMAS/smart_room_emas.xml";
@@ -38,54 +38,58 @@ public class BootDefaultArguments
 	/**
 	 * Main (Jade) host.
 	 */
-	static final String			mainHost				= null;
+	static final String				mainHost				= null;
 	/**
 	 * Main (Jade) port.
 	 */
-	static final String			mainPort				= null;
+	static final String				mainPort				= null;
 	/**
 	 * Local host.
 	 */
-	static final String			localHost				= null;
+	static final String				localHost				= null;
 	/**
 	 * Local port.
 	 */
-	static final String			localPort				= null;
+	static final String				localPort				= null;
 	/**
 	 * Main container name.
 	 */
-	static final String			localContainerName		= null;
+	static final String				localContainerName		= null;
 	
 	/**
 	 * The width of the application space.
 	 */
-	static final int			applicationLayoutWidth	= 1000;
+	static final int				applicationLayoutWidth	= 1000;
 	
 	/**
 	 * The height of the application space.
 	 */
-	static final int			applicationLayoutHeight	= 600;
+	static final int				applicationLayoutHeight	= 600;
 	
 	/**
 	 * The layout indications for the PC application.
 	 */
-	static LayoutIndications	layout					= new LayoutIndications(12, 6)
-																
-																// Taskbar on the left (70 pixels)
-																.indicateBar(BarPosition.LEFT, 200, 0)
-																
-																// .indicateBar(BarPosition.LEFT, 0, 0) // otherwise
-																
-																.indicateWindowType(AgentGuiConfig.DEFAULT_WINDOW_TYPE,
-																		5, 2)
-																
-																.indicateWindowType(SimulationManager.WINDOW_TYPE, 6, 4)
-																
-																.indicateReservation(SimulationManager.WINDOW_TYPE,
-																		SimulationManager.WINDOW_NAME, 0, 0)
-																
-																.indicateWindowType("screen", 3, 4)
-														
-														;
+	static GridLayoutIndications	layout					= (GridLayoutIndications) new GridLayoutIndications(12, 6)
+																	
+																	// .indicateBar(BarPosition.LEFT, 0, 0) // otherwise
+																	
+																	.indicateWindow(AgentGuiConfig.DEFAULT_WINDOW_TYPE,
+																			5, 2)
+																	
+																	.indicateWindow(SimulationManager.WINDOW_TYPE, 8, 4)
+																	
+																	.indicateWindowPosition(
+																			SimulationManager.WINDOW_NAME, 0, 0)
+																			
+																	// Taskbar on the left (70 pixels)
+																	.indicateBar(BarPosition.LEFT, 200, 0)
+																	
+																	.indicatePositionY(100)
+																	
+																	.indicateW(applicationLayoutWidth)
+																	
+																	.indicateH(applicationLayoutHeight)
+															
+															;
 	
 }

@@ -23,10 +23,11 @@ import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponentExt;
 import net.xqhs.util.logging.logging.Logging;
+import net.xqhs.windowLayout.WindowLayout;
+import net.xqhs.windowLayout.grid.GridWindowLayout;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.util.platformUtils.PlatformUtils;
-import tatami.pc.util.windowLayout.WindowLayout;
 import tatami.simulation.AgentLoader.StandardAgentLoaderType;
 import tatami.simulation.PlatformLoader.StandardPlatformType;
 
@@ -74,8 +75,7 @@ public class Boot
 		}
 		
 		// create window layout
-		WindowLayout.staticLayout = new WindowLayout(settings.getApplicationLayoutWidth(),
-				settings.getApplicationLayoutHeight(), settings.getLayout(), null);
+		WindowLayout.staticLayout = new GridWindowLayout(settings.getLayout());
 		
 		// build agent creation data
 		

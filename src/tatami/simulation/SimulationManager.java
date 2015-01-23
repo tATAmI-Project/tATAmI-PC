@@ -14,6 +14,7 @@ import java.util.Vector;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.UnitComponentExt;
+import net.xqhs.windowLayout.WindowLayout;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.visualization.AgentGui;
@@ -22,7 +23,6 @@ import tatami.core.agent.visualization.AgentGui.InputListener;
 import tatami.core.agent.visualization.AgentGui.ResultNotificationListener;
 import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.core.util.platformUtils.PlatformUtils;
-import tatami.pc.util.windowLayout.WindowLayout;
 import tatami.simulation.PlatformLoader.PlatformLink;
 
 /**
