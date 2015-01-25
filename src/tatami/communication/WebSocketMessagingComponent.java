@@ -43,15 +43,22 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 	
 	@Override
 	public String getAgentAddress(String agentName, String containerName) {
-		System.out.println("Get agent address");
-		//platform.
-		
-		return null;
+		System.out.println("Get agent address " + agentName);
+		return agentName;
 	}
 
 	@Override
 	public boolean sendMessage(String target, String source, String content) {
-		System.out.println("Send message");
+		System.out.println("Send message source: " + source + " taget: " + target.substring(0, target.indexOf("/")) + " content: " +  content);
+		try{
+			platform.client.send(source + "::" + target.substring(0, target.indexOf("/")) + "::" + content);
+			return true;
+		}
+		catch(Exception e){
+			System.out.println("Message could not be sent");
+			e.printStackTrace();
+		}
+		
 		return false;
 	}
 

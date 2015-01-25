@@ -36,6 +36,14 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	public int componentType = NONE;
 
 	public int port = -1;
+	
+	
+	public AutobahnServer server;
+	
+	AutobahnClient client;
+	
+	Thread clientThread;
+	
 
 	/**
 	 * 
@@ -60,11 +68,11 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 		String tmpPort = settings.getLocalPort();
 
 		if (tmpComponentType.toLowerCase().indexOf("server") > -1) {
-			componentType = SERVER;
+			componentType |= SERVER;
 		}
 
 		if (tmpComponentType.toLowerCase().indexOf("client") > -1) {
-			componentType = CLIENT;
+			componentType |= CLIENT;
 		}
 
 		port = Integer.parseInt(tmpPort);
@@ -83,7 +91,10 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 		if ((componentType & SERVER) == SERVER) {
 			WebSocketImpl.DEBUG = false;
 			try {
-				new AutobahnServer(port, new Draft_17()).start();
+				System.out.println("Server started on port: " + port);
+				server = new AutobahnServer(port, new Draft_17());
+				server.start();
+				
 			} catch (UnknownHostException e) {
 				System.out.println("Unknown host exception");
 				e.printStackTrace();
@@ -106,19 +117,9 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 			uri = URI.create( serverlocation + "/agent=" + clientname );
 			
 			System.out.println( "//////////////////////Exec: " + uri.getQuery() );
-			AutobahnClient e = new AutobahnClient( d, uri );
-			Thread t = new Thread( e );
-			t.start();
-			try {
-				t.join();
-
-			} catch ( InterruptedException e1 ) {
-				e1.printStackTrace();
-			} finally {
-				e.close();
-			}
-			
-			
+			client = new AutobahnClient( d, uri );
+			clientThread = new Thread( client );
+			clientThread.start();
 		}
 
 		return true;
@@ -126,6 +127,16 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 
 	@Override
 	public boolean stop() {
+		System.out.println("Platform stopped");
+		try {
+			clientThread.join();
+
+		} catch ( InterruptedException e ) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			client.close();
+		}
 		return true;
 	}
 
@@ -139,6 +150,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	public boolean loadAgent(String containerName, AgentManager agentManager) {
 		// TODO Auto-generated method stub
 		agentManager.setPlatformLink(this);
+		client.newAgentNotification(agentManager.getAgentName());
 		return true;
 	}
 

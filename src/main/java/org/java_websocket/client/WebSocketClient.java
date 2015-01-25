@@ -162,8 +162,12 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
 			} else if( socket.isClosed() ) {
 				throw new IOException();
 			}
-			if( !socket.isBound() )
+			if( !socket.isBound() ){
+				System.out.println("" + uri.getHost()+ " " + getPort());
+				
 				socket.connect( new InetSocketAddress( uri.getHost(), getPort() ), connectTimeout );
+				
+			}
 			istream = socket.getInputStream();
 			ostream = socket.getOutputStream();
 

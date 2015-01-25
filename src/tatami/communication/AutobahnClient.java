@@ -19,12 +19,16 @@ public class AutobahnClient extends WebSocketClient {
 
 	@Override
 	public void onOpen(ServerHandshake handshakedata) {
-		
+	}
+	
+	public void newAgentNotification(String agentName){
+		String message = "::" + "internal" + "::" + agentName;
+		send( message );
 	}
 
 	@Override
 	public void onMessage(String message) {
-		send( message );
+		System.out.println("Message received " + message);
 	}
 
 	@Override
