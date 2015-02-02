@@ -26,7 +26,10 @@
 	<target name="XML" depends="">
 		<copy file="../${import-directory}/net.xqhs.XML/deploy/java6/net.xqhs.XML.jar" todir="libs/" />
 	</target>
-		
+	<target name="WindowLayout" depends="Logging">
+		<copy file="../${import-directory}/net.xqhs.WindowLayout/deploy/net.xqhs.WindowLayout.jar" todir="libs/" />
+	</target>
+			
 	<!-- the target for the current project -->
 	<target name="Logging" depends="Log4J,Config">
 		<copy file="../${import-directory}/Logging/deploy/java6/Logging.jar" todir="libs/" />
@@ -39,5 +42,5 @@
 		<copy file="../${import-directory}/Config/deploy/java6/Config.jar" todir="libs/" />
 	</target>
 		
-	<target name="import" depends="Logging, Graphs, Gel, XML" />
+	<target name="import" depends="Logging, Graphs, Gel, XML, WindowLayout" />
 </project>
