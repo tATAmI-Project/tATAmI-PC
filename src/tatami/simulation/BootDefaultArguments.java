@@ -28,13 +28,10 @@ public class BootDefaultArguments
 	/**
 	 * The scenario file.
 	 */
-	static final String				scenarioFileName		= "src-scenario/scenario/examples/composite/simpleA/scenario.xml";
+	// static final String scenarioFileName = "src-scenario/scenario/examples/composite/simpleA/scenario.xml";
 	// static final String scenarioFileName = "src-scenario/scenario/examples/jade/simpleA/scenario.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/s2014/SmartConference/smart_room_conference.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/s2013/SmartRoom_EMAS/smart_room_emas.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/s2014/SmartConference/timeline.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/s2014/demo/smart_conference.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/s2014/SmartConference/even_odd_scenario.xml";
+	static final String				scenarioFileName		= "src-scenario/scenario/examples/sclaim_tatami2/simpleScenarioE/scenarioE-tATAmI2.xml";
+	
 	/**
 	 * Main (Jade) host.
 	 */
@@ -59,7 +56,7 @@ public class BootDefaultArguments
 	/**
 	 * The width of the application space.
 	 */
-	static final int				applicationLayoutWidth	= 1000;
+	static final int				applicationLayoutWidth	= 1200;
 	
 	/**
 	 * The height of the application space.
@@ -69,20 +66,19 @@ public class BootDefaultArguments
 	/**
 	 * The layout indications for the PC application.
 	 */
-	static GridLayoutIndications	layout					= (GridLayoutIndications) new GridLayoutIndications(12, 6)
+	static GridLayoutIndications	layout					= (GridLayoutIndications) new GridLayoutIndications(15, 10)
 																	
 																	// .indicateBar(BarPosition.LEFT, 0, 0) // otherwise
 																	
 																	.indicateWindow(AgentGuiConfig.DEFAULT_WINDOW_TYPE,
-																			5, 2)
+																			5, 3)
 																	
-																	.indicateWindow(SimulationManager.WINDOW_TYPE, 8, 4)
+																	.indicateWindow(SimulationManager.WINDOW_TYPE, 10, 4)
 																	
 																	.indicateWindowPosition(
 																			SimulationManager.WINDOW_NAME, 0, 0)
-																			
-																	// Taskbar on the left (70 pixels)
-																	.indicateBar(BarPosition.LEFT, 200, 0)
+																	
+																	.indicateBar(BarPosition.LEFT, 100, 0)
 																	
 																	.indicatePositionY(100)
 																	
