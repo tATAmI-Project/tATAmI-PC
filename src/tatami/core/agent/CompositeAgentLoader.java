@@ -87,7 +87,7 @@ public class CompositeAgentLoader implements AgentLoader
 	@Override
 	public boolean preload(AgentCreationData agentCreationData, PlatformLoader platformLoader, Logger log)
 	{
-		String logPre = agentCreationData.getAgentName() + ":"; // FIXME: use a subordinate log for each preload.
+		String logPre = agentCreationData.getAgentName() + ":";
 		Iterator<XMLNode> componentIt = agentCreationData.getNode().getNodeIterator(COMPONENT_NODE_NAME);
 		List<Map.Entry<String, Object>> componentData = new ArrayList<Map.Entry<String, Object>>();
 		while(componentIt.hasNext())
