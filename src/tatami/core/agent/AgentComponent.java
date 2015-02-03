@@ -225,8 +225,8 @@ public abstract class AgentComponent implements Serializable
 	}
 	
 	/**
-	 * Extending anonymous classes can override this method to perform actions when the component is created. The method
-	 * is called at the end of the constructor.
+	 * Extending <b>anonymous</b> classes can override this method to perform actions when the component is created. The
+	 * method is called at the end of the constructor.
 	 * <p>
 	 * Extending classes should always call super.componentInitializer() first.
 	 * <p>
@@ -289,6 +289,9 @@ public abstract class AgentComponent implements Serializable
 	/**
 	 * Extending classes should use this method to register {@link AgentEventHandler} instances that would be invoked
 	 * when the specified {@link AgentEventType} appears.
+	 * <p>
+	 * Important note: The registered handler is the handler specific to <b>this</b> component (therefore it is
+	 * sufficient to have only one). All components of the agent may contain (at most) a handler for the same event.
 	 * <p>
 	 * Should a handler for the same event already exist, the old handler will be discarded. A reference to it will be
 	 * returned.
