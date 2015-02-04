@@ -104,6 +104,11 @@ public class SimulationManager implements AgentManager
 	 * resides.
 	 */
 	protected static final String		SIMULATION_AGENT_NAME_PREFIX	= "SimAgent-";
+	
+	/**
+	 * Name of the node in the scenario file that contains the event timeline to simulate.
+	 */
+	protected static final String		TIMELINE_NODE					= "timeline";
 	/**
 	 * The log.
 	 */
@@ -271,28 +276,28 @@ public class SimulationManager implements AgentManager
 			}
 		});
 		
-		if (agents.isEmpty())
+		if(agents.isEmpty())
 		{
 			gui.doOutput(SimulationComponent.CREATE.toString(), PlatformUtils.toVector((Object) null));
 			gui.doOutput(SimulationComponent.CLEAR.toString(), PlatformUtils.toVector((Object) null));
 		}
 		else
 		{
-		gui.connectInput(SimulationComponent.CREATE.toString(), new InputListener() {
-			@Override
-			public void receiveInput(String componentName, Vector<Object> arguments)
-			{
-				createAgents();
-			}
-		});
-		gui.connectInput(SimulationComponent.CLEAR.toString(), new InputListener() {
-			@Override
-			public void receiveInput(String componentName, Vector<Object> arguments)
-			{
-				clearAgents();
-			}
-		});
-		
+			gui.connectInput(SimulationComponent.CREATE.toString(), new InputListener() {
+				@Override
+				public void receiveInput(String componentName, Vector<Object> arguments)
+				{
+					createAgents();
+				}
+			});
+			gui.connectInput(SimulationComponent.CLEAR.toString(), new InputListener() {
+				@Override
+				public void receiveInput(String componentName, Vector<Object> arguments)
+				{
+					clearAgents();
+				}
+			});
+			
 		}
 		if(events.isEmpty())
 		{

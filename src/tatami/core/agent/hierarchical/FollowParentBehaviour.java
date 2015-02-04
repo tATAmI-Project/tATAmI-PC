@@ -34,7 +34,7 @@ public class FollowParentBehaviour extends CyclicBehaviour
 		
 		if(msg != null && !((HierarchicalComponent)myAgent).fixedAgent)
 		{
-			((HierarchicalComponent)myAgent).getLog().info(myAgent.getLocalName() + " must migrate to " + msg.getContent());
+			((HierarchicalComponent)myAgent).getAgentLog().info(myAgent.getLocalName() + " must migrate to " + msg.getContent());
 			this.myAgent.doMove(new ContainerID(msg.getContent(), null));
 		}
 		else

@@ -26,7 +26,7 @@ public class CognitiveComponent extends AgentComponent // TODO implement to be u
 		if(parentAgent.hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
 		{
 			ParametricComponent parametricComponent = (ParametricComponent)parentAgent
-					.getComponent(AgentComponentName.PARAMETRIC_COMPONENT);
+					.getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT);
 			if(parametricComponent.hasPar(AgentParameterName.KNOWLEDGE))
 			{
 				Graph kg = TextGraphRepresentation.readRepresentation(

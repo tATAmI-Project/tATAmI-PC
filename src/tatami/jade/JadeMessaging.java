@@ -4,11 +4,7 @@ import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import tatami.core.agent.AgentEvent;
-import tatami.core.agent.AgentEvent.AgentEventHandler;
-import tatami.core.agent.AgentEvent.AgentEventType;
-import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.messaging.MessagingComponent;
-import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
@@ -24,17 +20,10 @@ public class JadeMessaging extends MessagingComponent
 	private static final long	serialVersionUID	= 6948064285049451164L;
 	
 	@Override
-	protected void parentChangeNotifier(CompositeAgent oldParent)
+	protected void atAgentStart(AgentEvent event)
 	{
-		super.parentChangeNotifier(oldParent);
-		
-		registerHandler(AgentEventType.AGENT_START, new AgentEventHandler() {
-			@Override
-			public void handleEvent(AgentEvent event)
-			{
-				initialize(); // TODO: should this be done on parent change instead of agent start?
-			}
-		});
+		super.atAgentStart(event);
+		initialize();
 	}
 	
 	/**
@@ -99,9 +88,14 @@ public class JadeMessaging extends MessagingComponent
 		if(nElements > 3)
 			message.setConversationId(targetElements[3]);
 		message.setContent(content);
-		if(getVisualizable() != null && getVisualizable().getLog() != null)
-			getVisualizable().getLog().dbg(MessagingDebug.DEBUG_MESSAGING,
+		try
+		{
+			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
 					"Sending message to [" + target + "] with content [" + content + "].");
+		} catch(NullPointerException e1)
+		{
+			// it's ok
+		}
 		getWrapper().send(message);
 		return true;
 	}
@@ -119,25 +113,27 @@ public class JadeMessaging extends MessagingComponent
 			wrapper = (JadeAgentWrapper) getPlatformLink();
 		} catch(ClassCastException e)
 		{
-			if(getVisualizable() != null)
-				getVisualizable().getLog().error(
-						"Platform link is not a jade agent wrapper:" + PlatformUtils.printException(e));
+			try
+			{
+				getAgentLog().error("Platform link is not a jade agent wrapper:" + PlatformUtils.printException(e));
+			} catch(NullPointerException e1)
+			{
+				// it's ok
+			}
 			throw new IllegalStateException("Platform link is not a jade agent wrapper:"
 					+ PlatformUtils.printException(e));
 		}
 		if(wrapper == null)
 		{
-			if(getVisualizable() != null && getVisualizable().getLog() != null)
-				getVisualizable().getLog().error("Platform link is null.");
+			try
+			{
+				getAgentLog().error("Platform link is null.");
+			} catch(NullPointerException e1)
+			{
+				// it's ok
+			}
 			throw new IllegalStateException("Platform link is null.");
 		}
 		return wrapper;
 	}
-	
-	@Override
-	public VisualizableComponent getVisualizable()
-	{
-		return super.getVisualizable();
-	}
-	
 }

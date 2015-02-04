@@ -24,34 +24,38 @@
 		<scen:container name="container-A">
 		    <scen:agent>
 				<scen:component name="parametric" />
-				<scen:component name="visualizable" />
+				<scen:component name="visualizable">
+					<scen:parameter name="GUI" value="ChatAgentGui" />
+			    </scen:component>
 				<scen:component name="messaging" />
 				<scen:component name="cognitive" />
-				<scen:component name="s_claim" />
-				
+				<scen:component name="s_claim">
+					<scen:parameter name="class" value="ChatAgent" />
+					<scen:parameter name="java-code" value="ChatFunctions" />
+					<scen:parameter name="otherAgent" value="agentB" />
+				</scen:component>
+
 				<scen:parameter name="loader" value="composite" /> 
 				<scen:parameter name="name" value="agentA" />
-				<scen:parameter name="class" value="ChatAgent" />
-				<scen:parameter name="java-code" value="ChatFunctions" />
-				<scen:parameter name="otherAgent" value="agentB" />
-				<scen:parameter name="GUI" value="ChatAgentGui" />
 			</scen:agent>
 		</scen:container>
 		<scen:container name="AliceContainer"><!--  create="false" -->
 		    <scen:agent>
 				<scen:component name="parametric" />
-				<scen:component name="visualizable" />
+				<scen:component name="visualizable">
+					<scen:parameter name="GUI" value="ChatAgentGui" />
+			    </scen:component>
 				<scen:component name="messaging" />
 				<scen:component name="cognitive" />
-				<scen:component name="s_claim" />
-				
+				<scen:component name="s_claim">
+					<scen:parameter name="class" value="ChatAgent" />
+					<scen:parameter name="java-code" value="ChatFunctions" />
+					<scen:parameter name="otherAgent" value="agentA" />
+				</scen:component>
+
 				<scen:parameter name="loader" value="composite" /> 
 				<scen:parameter name="name" value="agentB" />
-				<scen:parameter name="class" value="ChatAgent" />
-				<scen:parameter name="java-code" value="ChatFunctions" />
-				<scen:parameter name="otherAgent" value="agentA" />
-				<scen:parameter name="GUI" value="ChatAgentGui" />
-			</scen:agent>
+		    </scen:agent>
 		</scen:container>
 	</scen:initial>
 </scen:scenario>

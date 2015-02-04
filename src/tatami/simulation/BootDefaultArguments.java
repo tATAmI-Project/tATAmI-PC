@@ -28,9 +28,10 @@ public class BootDefaultArguments
 	/**
 	 * The scenario file.
 	 */
-	// static final String scenarioFileName = "src-scenario/scenario/examples/composite/simpleA/scenario.xml";
+	static final String				scenarioFileName		= "src-scenario/scenario/examples/composite/simpleA/scenario.xml";
 	// static final String scenarioFileName = "src-scenario/scenario/examples/jade/simpleA/scenario.xml";
-	static final String				scenarioFileName		= "src-scenario/scenario/examples/sclaim_tatami2/simpleScenarioE/scenarioE-tATAmI2.xml";
+	// static final String scenarioFileName =
+	// "src-scenario/scenario/examples/sclaim_tatami2/simpleScenarioE/scenarioE-tATAmI2.xml";
 	
 	/**
 	 * Main (Jade) host.
@@ -73,7 +74,8 @@ public class BootDefaultArguments
 																	.indicateWindow(AgentGuiConfig.DEFAULT_WINDOW_TYPE,
 																			5, 3)
 																	
-																	.indicateWindow(SimulationManager.WINDOW_TYPE, 10, 4)
+																	.indicateWindow(SimulationManager.WINDOW_TYPE, 10,
+																			4)
 																	
 																	.indicateWindowPosition(
 																			SimulationManager.WINDOW_NAME, 0, 0)

@@ -15,10 +15,11 @@ import net.xqhs.util.XML.XMLTree.XMLNode;
 import tatami.core.agent.parametric.AgentParameters;
 
 /**
- * Class containing the data for the creation of an agent.
+ * Class containing the data for the creation of an agent. This information is all the information needed by (and
+ * provided to) {@link SimulationManager} to create an agent.
  * <p>
  * Some data (agentName and platform) is covered by the enclosed {@link AgentParameters} instance, but it is also added
- * separately so as to guarantee is availability.
+ * separately so as to guarantee its availability.
  * <p>
  * Most of the information available otherwise is also covered by the enclosed {@link XMLNode} reference. The node may
  * however contain additional information. Loaders not needing (or not handling) this information may never use it.

@@ -46,7 +46,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * <li> {@link #INITIALIZING} [here components are normally added] &rarr; {@link #STARTING} [starting thread;
 	 * starting components] &rarr; {@link #RUNNING}.
 	 * <li>while in {@link #RUNNING}, components can be added or removed.
-	 * <li> {@link #RUNNING} + {@link AgentEventType#AGENT_EXIT} &rarr; {@link #STOPPING} [no more events accepted; stop
+	 * <li> {@link #RUNNING} + {@link AgentEventType#AGENT_STOP} &rarr; {@link #STOPPING} [no more events accepted; stop
 	 * components; stop thread] &rarr; {@link #STOPPED} (equivalent with {@link #INITIALIZING}).
 	 * </ul>
 	 * 
@@ -137,7 +137,7 @@ public class CompositeAgent implements Serializable, AgentManager
 										.registerBehaviors();
 						}
 						break;
-					case AGENT_EXIT:
+					case AGENT_STOP:
 						synchronized(eventQueue)
 						{
 							if(!eventQueue.isEmpty())
@@ -283,7 +283,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 */
 	public boolean exit()
 	{
-		if(!postAgentEvent(new AgentEvent(AgentEventType.AGENT_EXIT)))
+		if(!postAgentEvent(new AgentEvent(AgentEventType.AGENT_STOP)))
 			return false;
 		try
 		{
@@ -331,7 +331,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	{
 		if(!(((state == AgentState.STARTING) && (event.getType() == AgentEventType.AGENT_START)) || (state == AgentState.RUNNING)))
 			return false;
-		boolean exiting = (event.getType() == AgentEventType.AGENT_EXIT);
+		boolean exiting = (event.getType() == AgentEventType.AGENT_STOP);
 		try
 		{
 			if(eventQueue != null)

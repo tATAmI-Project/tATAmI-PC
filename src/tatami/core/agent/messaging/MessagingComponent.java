@@ -10,10 +10,10 @@ import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.Debug.DebugItem;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
-import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
-import tatami.core.agent.claim.ClaimComponent;
+import tatami.core.agent.CompositeAgent;
+import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
@@ -174,19 +174,15 @@ public abstract class MessagingComponent extends AgentComponent
 		} catch(ConfigLockedException e)
 		{
 			// should never happen.
-			if(getVisualizable() != null)
-				getVisualizable().getLog().error("Config locked:" + PlatformUtils.printException(e));
+			throw new IllegalStateException("Config locked:" + PlatformUtils.printException(e));
 		}
-		if(getVisualizable() != null)
-			getVisualizable().getLog().dbg(MessagingDebug.DEBUG_MESSAGING,
-					"Received message from [" + source + "] to [" + destination + "] with content [" + content + "].");
-		
-		/* check with which behavior does the message corresponde (if it does) */
-		// FIXME
-		if(content.startsWith("(") && getClaim() != null)
+		try
 		{
-			((ClaimComponent) getClaim()).matchStatement(source, content);
-			return;
+			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
+					"Received message from [" + source + "] to [" + destination + "] with content [" + content + "].");
+		} catch(NullPointerException e)
+		{
+			// it's ok, there was no vis component / no log
 		}
 		
 		postAgentEvent(event);
@@ -204,9 +200,14 @@ public abstract class MessagingComponent extends AgentComponent
 		String destination = (String) event.getParameter(DESTINATION_PARAMETER);
 		for(Map.Entry<String, Set<AgentEventHandler>> entry : messageHandlers.entrySet())
 		{
-			if(getVisualizable() != null)
-				getVisualizable().getLog().dbg(MessagingDebug.DEBUG_MESSAGING,
+			try
+			{
+				getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
 						"Comparing: [" + destination + "] to declared [" + entry.getKey() + "]");
+			} catch(NullPointerException e)
+			{
+				// it's ok, there was no vis component / no log
+			}
 			if(destination.startsWith(entry.getKey()))
 				// prefix matches
 				for(AgentEventHandler receiver : entry.getValue())

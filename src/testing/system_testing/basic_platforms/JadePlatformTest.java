@@ -1,5 +1,7 @@
 package testing.system_testing.basic_platforms;
 
+import net.xqhs.util.logging.LoggerSimple.Level;
+import net.xqhs.util.logging.logging.Logging;
 import tatami.simulation.Boot;
 
 /**
@@ -27,6 +29,7 @@ public class JadePlatformTest
 	 */
 	public static void main(String[] args)
 	{
+		Logging.getMasterLogging().setLogLevel(Level.ALL);
 		Boot.main(new String[] { SCENARIO });
 	}
 }

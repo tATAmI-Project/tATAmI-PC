@@ -47,13 +47,34 @@ public class VisualizableComponentTest extends Unit
 		li("package name ", packageName);
 		
 		CompositeAgent agent = new CompositeAgent();
-		AgentParameters agentParameters = new AgentParameters();
+		final AgentParameters agentParameters = new AgentParameters();
 		agentParameters.add(AgentParameterName.AGENT_NAME, "test agent");
-		agentParameters.add(AgentParameterName.GUI, TestGui.class.getSimpleName());
 		agentParameters.add(AgentParameterName.AGENT_PACKAGE, packageName);
 		
-		agent.addComponent(new ParametricComponent(agentParameters));
-		agent.addComponent(new VisualizableComponent());
+		agent.addComponent(new ParametricComponent() {
+			private static final long	serialVersionUID	= 1L;
+			
+			// pre-loading is only possible from the inside of the component or from the core package
+			@Override
+			protected void componentInitializer()
+			{
+				preload((ComponentCreationData) new ComponentCreationData().addObject(COMPONENT_PARAMETER_NAME,
+						agentParameters), null, null);
+			}
+		});
+		
+		agent.addComponent(new VisualizableComponent() {
+			private static final long	serialVersionUID	= 1L;
+			
+			@Override
+			protected void componentInitializer()
+			{
+				super.componentInitializer();
+				
+				preload((ComponentCreationData) new ComponentCreationData().add(VisualizableComponent.GUI_PARAMETER_NAME,
+						TestGui.class.getSimpleName()), null, null);
+			}
+		});
 		
 		agent.addComponent(new AgentComponent(AgentComponentName.TESTING_COMPONENT) {
 			private static final long	serialVersionUID	= 1L;
@@ -65,10 +86,9 @@ public class VisualizableComponentTest extends Unit
 				return super.getAgentName();
 			}
 			
-			@Override
 			protected VisualizableComponent getVisualizable()
 			{
-				return super.getVisualizable();
+				return (VisualizableComponent) getAgentComponent(AgentComponentName.VISUALIZABLE_COMPONENT);
 			}
 			
 			@Override
@@ -112,7 +132,7 @@ public class VisualizableComponentTest extends Unit
 												{
 													e.printStackTrace();
 												}
-												postAgentEvent(new AgentEvent(AgentEventType.AGENT_EXIT));
+												postAgentEvent(new AgentEvent(AgentEventType.AGENT_STOP));
 												doExit();
 											}
 										}, null, null);
@@ -122,7 +142,7 @@ public class VisualizableComponentTest extends Unit
 						if(vis != null)
 							if(vis.getLog() != null)
 								vis.getLog().info(eventMessage);
-						if(event.getType() == AgentEventType.AGENT_EXIT)
+						if(event.getType() == AgentEventType.AGENT_STOP)
 							locallog.doExit();
 					}
 				};

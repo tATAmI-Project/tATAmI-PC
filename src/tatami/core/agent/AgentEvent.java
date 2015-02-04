@@ -28,7 +28,7 @@ public class AgentEvent extends Config
 		/**
 		 * Event occurs when the agent must be destroyed and components need to close.
 		 */
-		AGENT_EXIT(AgentSequenceType.DESTRUCTIVE),
+		AGENT_STOP(AgentSequenceType.DESTRUCTIVE),
 		
 		/**
 		 * Event occurs when the agent must move to a different machine.
@@ -45,16 +45,6 @@ public class AgentEvent extends Config
 		 * messaging component exists; otherwise, message routing will be handled by the messaging component.
 		 */
 		AGENT_MESSAGE(AgentSequenceType.UNORDERED),
-		
-		/**
-		 * Event occurs after the agent started. 
-		 */
-		AGENT_INITIAL_BEHAVIOR(AgentSequenceType.UNORDERED),
-		
-		/**
-		 * Event occurs after the agent started. 
-		 */
-		AGENT_REACTIVE_BEHAVIOR(AgentSequenceType.UNORDERED),
 		
 		;
 		

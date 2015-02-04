@@ -3,7 +3,7 @@ package testing.system_testing.basic_platforms;
 import tatami.simulation.Boot;
 
 /**
- * Tests composite agents deployed on the Local Platform.
+ * Tests composite agents deployed on the Local Platform. Pings should be sent between the agents.
  * 
  * @author Andrei Olaru
  */

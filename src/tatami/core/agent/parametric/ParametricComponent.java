@@ -12,9 +12,11 @@
 package tatami.core.agent.parametric;
 
 import java.util.Collection;
-import java.util.Map;
 
+import net.xqhs.util.XML.XMLTree.XMLNode;
+import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentComponent;
+import tatami.core.util.ParameterSet;
 
 /**
  * This basic component of the agent handles agent parameters.
@@ -33,24 +35,49 @@ public class ParametricComponent extends AgentComponent
 	/**
 	 * Class UID
 	 */
-	private static final long	serialVersionUID	= -409355822786197494L;
+	private static final long	serialVersionUID			= -409355822786197494L;
+	
+	/**
+	 * The name of the entry in the {@link tatami.core.agent.AgentComponent.ComponentCreationData} structure that
+	 * designates the {@link AgentParameters} instance.
+	 */
+	public static final String	COMPONENT_PARAMETER_NAME	= "agentParameters";
 	
 	/**
 	 * The agent's parameters. They are served to other components by means of specialized methods.
 	 */
-	private AgentParameters		parameters			= null;
+	private AgentParameters		parameters;
 	
 	/**
 	 * Constructs a new instance of parametric component.
-	 * 
-	 * @param agentParameters
-	 *            - the initial parameters of the agent.
 	 */
-	public ParametricComponent(AgentParameters agentParameters)
+	public ParametricComponent()
 	{
 		super(AgentComponentName.PARAMETRIC_COMPONENT);
-		
-		parameters = agentParameters;
+		if(parameters == null)
+			// might have been initialized in a call to componentInitializer.
+			parameters = new AgentParameters();
+	}
+	
+	/**
+	 * It is expected that the first arguments contains a parameter with the name {@value #COMPONENT_PARAMETER_NAME},
+	 * indicating agent parameters.
+	 */
+	@Override
+	protected boolean preload(ComponentCreationData componentParameters, XMLNode scenarioNode, Logger log)
+	{
+		if(!super.preload(componentParameters, scenarioNode, log))
+			return false;
+		parameters = (AgentParameters) getComponentData().getObject(COMPONENT_PARAMETER_NAME);
+		if(parameters == null)
+		{
+			// fallback to a default instance.
+			if(log != null)
+				log.error("Agent parameters entry []. No parameter will be available",
+						getComponentData().isSet(COMPONENT_PARAMETER_NAME) ? "is null" : "not found");
+			return false;
+		}
+		return true;
 	}
 	
 	/**
@@ -104,12 +131,12 @@ public class ParametricComponent extends AgentComponent
 	}
 	
 	/**
-	 * Retrieves a {@link Map} with the 'unregistered' parameters - those parameters whose name does not correspond to a
-	 * {@link AgentParameterName} instance.
+	 * Retrieves a {@link ParameterSet} with the 'unregistered' parameters -- those parameters whose name does not
+	 * correspond to a {@link AgentParameterName} instance.
 	 * 
-	 * @return the map of entries. Multiple entries with the same name will be ignored.
+	 * @return the parameter set.
 	 */
-	public Map<String, Object> getUnregisteredParameters()
+	public ParameterSet getUnregisteredParameters()
 	{
 		return parameters.getUnregisteredParameters();
 	}
