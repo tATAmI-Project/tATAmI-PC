@@ -15,7 +15,6 @@ import tatami.core.agent.AgentEvent.AgentSequenceType;
 import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
-import tatami.jade.JadeComponent;
 import tatami.simulation.AgentManager;
 import tatami.simulation.PlatformLoader.PlatformLink;
 
@@ -389,8 +388,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	}
 	
 	/**
-	 * Returns the name of the agent. It can either be a name that has been set through the <code>AGENT_NAME</code>
-	 * parameter, or the name of the Jade agent underpinning the {@link JadeComponent}, if any.
+	 * Returns the name of the agent. It is the name that has been set through the <code>AGENT_NAME</code> parameter.
 	 * 
 	 * @return the name of the agent.
 	 */
@@ -401,9 +399,6 @@ public class CompositeAgent implements Serializable, AgentManager
 		if(hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
 			agentName = ((ParametricComponent) getComponent(AgentComponentName.PARAMETRIC_COMPONENT))
 					.parVal(AgentParameterName.AGENT_NAME);
-		// FIXME jade name should be given by agent name. These lines should be removed
-		if((agentName == null) && getComponent(AgentComponentName.JADE_COMPONENT) != null)
-			agentName = ((JadeComponent) getComponent(AgentComponentName.JADE_COMPONENT)).getLocalName();
 		return agentName;
 	}
 	

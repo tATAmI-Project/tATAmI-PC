@@ -17,7 +17,6 @@ import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.webServices.WebserviceComponent;
 import tatami.core.util.ParameterSet;
-import tatami.jade.JadeComponent;
 
 /**
  * This class serves as base for agent component. A component is characterized by its functionality, denominated by
@@ -114,11 +113,6 @@ public abstract class AgentComponent implements Serializable
 		 * The name of a component extending {@link ClaimComponent}.
 		 */
 		S_CLAIM_COMPONENT(AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".claim.ClaimComponent"),
-		
-		/**
-		 * The name of a component extending {@link JadeComponent}.
-		 */
-		JADE_COMPONENT,
 		
 		/**
 		 * TEMPORARY type for testing. TODO: remove this type.
