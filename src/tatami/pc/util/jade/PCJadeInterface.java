@@ -166,6 +166,7 @@ public class PCJadeInterface implements JadeInterface
 	@Override
 	public boolean stopPlatform()
 	{
+		// FIXME apparently this is not the correct manner to shut down the platform. Investigate.
 		Runtime.instance().shutDown();
 		log.doExit();
 		log = null;

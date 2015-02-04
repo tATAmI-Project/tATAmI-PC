@@ -114,6 +114,13 @@ public class SimulationManager implements AgentManager
 	 */
 	protected static final int			SYSTEM_ABORT_DELAY				= 1000;
 	/**
+	 * If set, a {@link System#exit(int)} will be called after everything has been theoretically closed (in the case of
+	 * normal termination).
+	 * <p>
+	 * Ideally, this should be set to <code>false</code> and all the threads should exit normally.
+	 */
+	protected static final boolean		FORCE_SYSTEM_EXIT				= true;
+	/**
 	 * The log.
 	 */
 	UnitComponentExt					log								= null;
@@ -281,7 +288,8 @@ public class SimulationManager implements AgentManager
 					@Override
 					public void receiveResult(Object result)
 					{
-						PlatformUtils.systemExit(0);	// FIXME this should not be necessary
+						if(FORCE_SYSTEM_EXIT)
+							PlatformUtils.systemExit(0);
 					}
 				});
 			}
