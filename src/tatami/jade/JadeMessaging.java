@@ -23,14 +23,6 @@ public class JadeMessaging extends MessagingComponent
 	protected void atAgentStart(AgentEvent event)
 	{
 		super.atAgentStart(event);
-		initialize();
-	}
-	
-	/**
-	 * Performs initialization: registers a behavior to receive messages received by the Jade agent.
-	 */
-	protected void initialize()
-	{
 		getWrapper().addBehaviour(new CyclicBehaviour() {
 			private static final long	serialVersionUID	= 7120577948083587188L;
 			
@@ -54,7 +46,13 @@ public class JadeMessaging extends MessagingComponent
 					block();
 			}
 		});
-		
+	}
+	
+	@Override
+	protected void atAgentStop(AgentEvent event)
+	{
+		super.atAgentStop(event);
+		getWrapper().doExit();
 	}
 	
 	/**

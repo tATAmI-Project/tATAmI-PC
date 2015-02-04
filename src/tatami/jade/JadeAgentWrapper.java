@@ -55,7 +55,7 @@ public class JadeAgentWrapper extends Agent implements PlatformLink
 		if(agent.getAgentName() != null)
 			log.setUnitName(agent.getAgentName() + "-JadeWrapper");
 		log.info("Wrapper is up.");
-		// System.out.println("Agent ["+agent.getAgentName()+"] has state ["+((CompositeAgent)agent).state+"].");
+		
 		if(!agent.setPlatformLink(this))
 			log.error("Setting platform link failed");
 		
