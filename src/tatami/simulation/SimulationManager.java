@@ -110,6 +110,10 @@ public class SimulationManager implements AgentManager
 	 */
 	protected static final String		TIMELINE_NODE					= "timeline";
 	/**
+	 * Delay before calling a System exit in case of a failed start.
+	 */
+	protected static final int			SYSTEM_ABORT_DELAY				= 1000;
+	/**
 	 * The log.
 	 */
 	UnitComponentExt					log								= null;
@@ -215,6 +219,10 @@ public class SimulationManager implements AgentManager
 	
 	/**
 	 * Stops the simulation manager and also exists the application.
+	 * <p>
+	 * This method should only be called in case of a failed start.
+	 * <p>
+	 * The system exit is delayed with {@value #SYSTEM_ABORT_DELAY}.
 	 * 
 	 * @return
 	 */
@@ -227,7 +235,7 @@ public class SimulationManager implements AgentManager
 			{
 				PlatformUtils.systemExit(0);
 			}
-		}, 1000);
+		}, SYSTEM_ABORT_DELAY);
 		return result;
 	}
 	
@@ -238,7 +246,10 @@ public class SimulationManager implements AgentManager
 			theTime.cancel();
 		for(SimulationLinkAgent simAgent : simulationAgents.values())
 			if(!simAgent.stop())
-				log.error("Stopping agent [" + simAgent.getAgentName() + "] failed.");
+				log.error("Stopping agent [] failed.", simAgent.getAgentName());
+		for(String platformName : platforms.keySet())
+			if(!platforms.get(platformName).stop())
+				log.error("Stopping platform [] failed.", platformName);
 		if(gui != null)
 			gui.close();
 		if(WindowLayout.staticLayout != null)
@@ -270,7 +281,7 @@ public class SimulationManager implements AgentManager
 					@Override
 					public void receiveResult(Object result)
 					{
-						PlatformUtils.systemExit(0);
+						PlatformUtils.systemExit(0);	// FIXME this should not be necessary
 					}
 				});
 			}
