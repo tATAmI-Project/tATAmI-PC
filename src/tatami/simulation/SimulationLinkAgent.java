@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.xqhs.util.logging.Logger;
-
+import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.messaging.MessagingComponent;
@@ -88,12 +88,14 @@ public class SimulationLinkAgent extends CompositeAgent
 	}
 	
 	/**
-	 * Sends an exit message to all agents that are monitored by this agent.
+	 * Sends an message to all agents that are monitored by this agent, indicating an agent event to be posted.
 	 * 
+	 * @param event
+	 *            - the event to post to the agent's event queue, as {@link AgentEventType}.
 	 * @return <code>true</code> if the operation has succeeded; <code>false</code> if any message (possibly all) was
 	 *         not successfully sent.
 	 */
-	public boolean broadcastExit()
+	public boolean broadcast(AgentEventType event)
 	{
 		Logger log = ((VisualizableComponent) getComponent(AgentComponentName.VISUALIZABLE_COMPONENT)).getLog();
 		MessagingComponent msgComp = (MessagingComponent) getComponent(AgentComponentName.MESSAGING_COMPONENT);
@@ -107,8 +109,8 @@ public class SimulationLinkAgent extends CompositeAgent
 		for(String agentAddress : agents.values())
 		{
 			String target = MessagingComponent.makePathHelper(agentAddress, Vocabulary.VISUALIZATION.toString(),
-					Vocabulary.DO_EXIT.toString());
-			if(!msgComp.sendMessage(target, msgComp.getAgentAddress(), msgComp.getAgentAddress()))
+					Vocabulary.CONTROL.toString());
+			if(!msgComp.sendMessage(target, msgComp.getAgentAddress(), event.toString()))
 			{
 				log.error("Sending of exit message to [" + target + "] failed");
 				ret = false;

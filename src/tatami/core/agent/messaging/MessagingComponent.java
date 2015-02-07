@@ -13,7 +13,6 @@ import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.CompositeAgent;
-import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**

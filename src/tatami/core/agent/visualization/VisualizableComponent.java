@@ -84,15 +84,9 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		VISUALIZATION_MONITOR,
 		
 		/**
-		 * Sent by Simulator to the Visualizer, to instruct all visualized agents to exit, following user request to end
-		 * simulation.
+		 * Posts an event to the agent's event queue, as requested by the simulation agent.
 		 */
-		PREPARE_EXIT,
-		
-		/**
-		 * Instructs immediate exit, indicating the end of the simulation.
-		 */
-		DO_EXIT,
+		CONTROL,
 	}
 	
 	/**
@@ -232,13 +226,14 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 							getLog().info("visualization root received: [" + parent + "]");
 						}
 					});
-			registerMessageReceiver(msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.DO_EXIT.toString()),
+			registerMessageReceiver(msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.CONTROL.toString()),
 					new AgentEventHandler() {
 						@Override
 						public void handleEvent(AgentEvent event)
 						{
-							getLog().info("exiting...");
-							postAgentEvent(new AgentEvent(AgentEventType.AGENT_STOP));
+							String content = (String) event.getParameter(MessagingComponent.CONTENT_PARAMETER);
+							getLog().info("received control event [].", content);
+							postAgentEvent(new AgentEvent(AgentEventType.valueOf(content)));
 						}
 					});
 		}
