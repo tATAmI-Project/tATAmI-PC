@@ -259,6 +259,20 @@ public abstract class AgentComponent implements Serializable
 				atAgentStart(event);
 			}
 		});
+		registerHandler(AgentEventType.SIMULATION_START, new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				atSimulationStart(event);
+			}
+		});
+		registerHandler(AgentEventType.SIMULATION_PAUSE, new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				atSimulationPause(event);
+			}
+		});
 		registerHandler(AgentEventType.AGENT_STOP, new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)
@@ -373,6 +387,39 @@ public abstract class AgentComponent implements Serializable
 	{
 		// this class does not do anything here.
 	}
+	
+	/**
+	 * Method that is called by the default handler for {@link AgentEventType#SIMULATION_START}.
+	 * <p>
+	 * Extending classes should override this method and should consider calling the overridden method first.
+	 * <p>
+	 * Since extending classes may register other handlers for the event, it is not guaranteed that this method will be
+	 * called when the event occurs.
+	 * 
+	 * @param event
+	 *            - the event that occurred.
+	 */
+	protected void atSimulationStart(AgentEvent event)
+	{
+		// this class does not do anything here.
+	}
+
+	/**
+	 * Method that is called by the default handler for {@link AgentEventType#SIMULATION_PAUSE}.
+	 * <p>
+	 * Extending classes should override this method and should consider calling the overridden method first.
+	 * <p>
+	 * Since extending classes may register other handlers for the event, it is not guaranteed that this method will be
+	 * called when the event occurs.
+	 * 
+	 * @param event
+	 *            - the event that occurred.
+	 */
+	protected void atSimulationPause(AgentEvent event)
+	{
+		// this class does not do anything here.
+	}
+
 	
 	/**
 	 * Method that is called by the default handler for {@link AgentEventType#AGENT_STOP}.

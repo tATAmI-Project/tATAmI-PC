@@ -46,6 +46,16 @@ public class AgentEvent extends Config
 		 */
 		AGENT_MESSAGE(AgentSequenceType.UNORDERED),
 		
+		/**
+		 * Event occurs when the start of the simulation is requested by the user.
+		 */
+		SIMULATION_START(AgentSequenceType.UNORDERED),
+		
+		/**
+		 * Event occurs when the simulation is paused by the user.
+		 */
+		SIMULATION_PAUSE(AgentSequenceType.UNORDERED),
+		
 		;
 		
 		/**

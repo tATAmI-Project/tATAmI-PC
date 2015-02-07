@@ -351,7 +351,7 @@ public class SimulationManager implements AgentManager
 						{
 							if(!agentsCreated)
 								createAgents();
-							// signalAllAgents(null);
+							signalAllAgents(AgentEventType.SIMULATION_START);
 							resultListener.receiveResult(null);
 						}
 					}, null, new ResultNotificationListener() {
