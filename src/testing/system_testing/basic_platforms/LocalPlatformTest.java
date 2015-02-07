@@ -10,12 +10,17 @@ import tatami.simulation.Boot;
 public class LocalPlatformTest
 {
 	/**
+	 * The scenario.
+	 */
+	private static final String	SCENARIO	= "../simpleA/scenario-local-platform";
+
+	/**
 	 * The main method.
 	 * 
 	 * @param args - not used.
 	 */
 	public static void main(String[] args)
 	{
-		Boot.main(new String[] {"src-scenario/scenario/examples/composite/simpleA/scenario-local-platform.xml"});
+		Boot.main(new String[] {BasicPlatformTest.DIR + SCENARIO + BasicPlatformTest.EXT});
 	}
 }
