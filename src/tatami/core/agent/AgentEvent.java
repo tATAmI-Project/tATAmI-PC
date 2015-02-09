@@ -200,4 +200,11 @@ public class AgentEvent extends Config
 	{
 		return parameters.get(name);
 	}
+	
+	@Override
+	public String toString()
+	{
+		return type + ":" + parameters.toString();
+	}
+	
 }

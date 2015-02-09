@@ -135,7 +135,7 @@ public class JadePlatformLoader implements PlatformLoader
 		switch(componentName)
 		{
 		case MESSAGING_COMPONENT:
-			return JadeMessaging.class.getName();
+			return JadeMessagingComponent.class.getName();
 		default:
 			break;
 		}

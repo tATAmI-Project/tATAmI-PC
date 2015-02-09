@@ -12,7 +12,7 @@ import tatami.core.util.platformUtils.PlatformUtils;
  * 
  * @author Andrei Olaru
  */
-public class JadeMessaging extends MessagingComponent
+public class JadeMessagingComponent extends MessagingComponent
 {
 	/**
 	 * The serial UID.
@@ -66,6 +66,12 @@ public class JadeMessaging extends MessagingComponent
 	
 	@Override
 	public String getAgentAddress(String agentName, String containerName)
+	{
+		return agentName;
+	}
+	
+	@Override
+	public String getAgentAddress(String agentName)
 	{
 		return agentName;
 	}

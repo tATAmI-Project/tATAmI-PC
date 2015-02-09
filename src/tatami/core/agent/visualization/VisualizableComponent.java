@@ -211,34 +211,32 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	protected void registerMessageHandlers()
 	{
 		// registers message receivers: receive the visualization root; receive exit message.
-		final MessagingComponent msgr = (MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT);
-		if(msgr != null)
-		{
-			getLog().trace("Registering message handlers");
-			registerMessageReceiver(
-					msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.VISUALIZATION_MONITOR.toString()),
-					new AgentEventHandler() {
-						@Override
-						public void handleEvent(AgentEvent event)
-						{
-							String parent = msgr.extractContent(event);
-							setVisualizationParent(parent);
-							getLog().info("visualization root received: [" + parent + "]");
-						}
-					});
-			registerMessageReceiver(msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.CONTROL.toString()),
-					new AgentEventHandler() {
-						@Override
-						public void handleEvent(AgentEvent event)
-						{
-							String content = (String) event.getParameter(MessagingComponent.CONTENT_PARAMETER);
-							getLog().info("received control event [].", content);
-							postAgentEvent(new AgentEvent(AgentEventType.valueOf(content)));
-						}
-					});
-		}
-		else
-			getLog().warn("No messaging component present.");
+		getLog().trace("Registering message handlers");
+		if(!registerMessageReceiver(new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				String parent = ((MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT)).extractContent(event);
+				setVisualizationParent(parent);
+				getLog().info("visualization root received: [" + parent + "]");
+			}
+		}, Vocabulary.VISUALIZATION.toString(), Vocabulary.VISUALIZATION_MONITOR.toString()))
+			getLog().warn("No messaging component present");
+		registerMessageReceiver(new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				String content = (String) event.getParameter(MessagingComponent.CONTENT_PARAMETER);
+				getLog().info("received control event [].", content);
+				postAgentEvent(new AgentEvent(AgentEventType.valueOf(content)));
+			}
+		}, Vocabulary.VISUALIZATION.toString(), Vocabulary.CONTROL.toString());
+	}
+	
+	@Override
+	protected AgentComponent getAgentComponent(AgentComponentName name)
+	{
+		return super.getAgentComponent(name);
 	}
 	
 	/**
@@ -341,9 +339,8 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			if((reportType == Vocabulary.LOGGING_UPDATE) || (reportType == Vocabulary.ADD_PARENT)
 					|| (reportType == Vocabulary.REMOVE_PARENT) || (reportType == Vocabulary.MOVE))
 			{
-				MessagingComponent msgr = (MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT);
-				if(msgr != null)
-					return msgr.sendMessage(visualizationParent, msgr.makePath(reportType.toString()), content);
+				sendMessage(content, getComponentEndpoint(Vocabulary.VISUALIZATION.toString()), visualizationParent,
+						Vocabulary.VISUALIZATION.toString(), reportType.toString());
 			}
 			else
 				throw new IllegalArgumentException("Parameter is not a correct report type:" + reportType);

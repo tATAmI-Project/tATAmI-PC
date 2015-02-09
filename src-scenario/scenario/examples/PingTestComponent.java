@@ -14,6 +14,8 @@ import tatami.core.agent.messaging.MessagingComponent;
 
 /**
  * An {@link AgentComponent} implementation that sends messages to other agents.
+ * <p>
+ * This is a rather older implementation, that starts pinging immediately after agent start.
  * 
  * @author Andrei Olaru
  */
@@ -114,18 +116,7 @@ public class PingTestComponent extends AgentComponent
 				getAgentLog().li(eventMessage);
 				
 				if(event.getType() == AgentEventType.AGENT_START)
-				{
-					registerMessageReceiver("", new AgentEventHandler() {
-						@Override
-						public void handleEvent(AgentEvent messageEvent)
-						{
-							getAgentLog().li("message received: ", messageEvent);
-						}
-					});
-					
-					pingTimer = new Timer();
-					pingTimer.schedule(new Pinger(), PING_INITIAL_DELAY, PING_PERIOD);
-				}
+					atAgentStart(event);
 			}
 		};
 		for(AgentEventType eventType : AgentEventType.values())
@@ -133,9 +124,20 @@ public class PingTestComponent extends AgentComponent
 	}
 	
 	@Override
-	protected boolean registerMessageReceiver(String prefix, AgentEventHandler receiver)
+	protected void atAgentStart(AgentEvent event)
 	{
-		return super.registerMessageReceiver(prefix, receiver);
+		super.atAgentStart(event);
+		
+		registerMessageReceiver(new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent messageEvent)
+			{
+				getAgentLog().li("message received: ", messageEvent);
+			}
+		}, "");
+		
+		pingTimer = new Timer();
+		pingTimer.schedule(new Pinger(), PING_INITIAL_DELAY, PING_PERIOD);
 	}
 	
 	@Override

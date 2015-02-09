@@ -34,6 +34,12 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 		}
 		
 		@Override
+		public String getAgentAddress(String agentName)
+		{
+			return getAgentAddress(agentName, null);
+		}
+
+		@Override
 		public boolean sendMessage(String target, String source, String content)
 		{
 			// FIXME do checks
