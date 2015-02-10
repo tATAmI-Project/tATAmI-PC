@@ -444,6 +444,8 @@ public class SimulationManager implements AgentManager
 	 */
 	protected void createAgents()
 	{
+		agentsCreated = true;
+
 		// load agents on their respective platforms
 		Map<String, AgentManager> agentManagers = new HashMap<String, AgentManager>();
 		for(AgentCreationData agentData : agents)
