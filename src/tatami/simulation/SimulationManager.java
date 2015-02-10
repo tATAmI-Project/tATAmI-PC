@@ -333,71 +333,64 @@ public class SimulationManager implements AgentManager
 			});
 			
 		}
-		if(events.isEmpty())
-		{
-			gui.doOutput(SimulationComponent.START.toString(), PlatformUtils.toVector((Object) null));
-			gui.doOutput(SimulationComponent.PAUSE.toString(), PlatformUtils.toVector((Object) null));
-			gui.doOutput(SimulationComponent.TIME.toString(), PlatformUtils.toVector("no events"));
-		}
-		else
-		{
-			gui.connectInput(SimulationComponent.START.toString(), new InputListener() {
-				@Override
-				public void receiveInput(String componentName, Vector<Object> arguments)
-				{
-					gui.background(new AgentGuiBackgroundTask() {
-						@Override
-						public void execute(Object arg, ResultNotificationListener resultListener)
-						{
-							if(!agentsCreated)
-								createAgents();
-							signalAllAgents(AgentEventType.SIMULATION_START);
-							resultListener.receiveResult(null);
-						}
-					}, null, new ResultNotificationListener() {
-						@Override
-						public void receiveResult(Object result)
-						{
-							if(!events.isEmpty())
-							{
-								log.info("starting simulation. next event at "
-										+ (Integer.parseInt(events.get(0).getAttributeValue("time"))));
-								startTimers();
-							}
-						}
-					});
-				}
-			});
-			
-			gui.connectInput(SimulationComponent.PAUSE.toString(), new InputListener() {
-				@Override
-				public void receiveInput(String componentName, Vector<Object> arguments)
-				{
-					if(events.isEmpty())
+		
+		gui.connectInput(SimulationComponent.START.toString(), new InputListener() {
+			@Override
+			public void receiveInput(String componentName, Vector<Object> arguments)
+			{
+				gui.background(new AgentGuiBackgroundTask() {
+					@Override
+					public void execute(Object arg, ResultNotificationListener resultListener)
 					{
-						gui.doOutput(SimulationComponent.TIME.toString(), PlatformUtils.toVector("no more events"));
-						
-						if(!isPaused)
+						if(!agentsCreated)
+							createAgents();
+						signalAllAgents(AgentEventType.SIMULATION_START);
+						resultListener.receiveResult(null);
+					}
+				}, null, new ResultNotificationListener() {
+					@Override
+					public void receiveResult(Object result)
+					{
+						if(!events.isEmpty())
 						{
-							theTime.cancel();
+							log.info("starting simulation. next event at "
+									+ (Integer.parseInt(events.get(0).getAttributeValue("time"))));
+							startTimers();
 						}
 					}
-					else if(isPaused)
-					{
-						log.info("simulation restarting, next event in "
-								+ (Integer.parseInt(events.get(0).getAttributeValue("time")) - time * 100));
-						startTimers();
-					}
-					else
+				});
+			}
+		});
+		
+		gui.connectInput(SimulationComponent.PAUSE.toString(), new InputListener() {
+			@Override
+			public void receiveInput(String componentName, Vector<Object> arguments)
+			{
+				if(events.isEmpty())
+				{
+					gui.doOutput(SimulationComponent.TIME.toString(), PlatformUtils.toVector("no more events"));
+					
+					if(!isPaused)
 					{
 						theTime.cancel();
-						log.info("simulation stopped at " + time * 100 + ", next event was in "
-								+ (Integer.parseInt(events.get(0).getAttributeValue("time")) - time * 100));
 					}
-					isPaused = !isPaused;
 				}
-			});
-		}
+				else if(isPaused)
+				{
+					log.info("simulation restarting, next event in "
+							+ (Integer.parseInt(events.get(0).getAttributeValue("time")) - time * 100));
+					startTimers();
+				}
+				else
+				{
+					theTime.cancel();
+					log.info("simulation stopped at " + time * 100 + ", next event was in "
+							+ (Integer.parseInt(events.get(0).getAttributeValue("time")) - time * 100));
+				}
+				isPaused = !isPaused;
+			}
+		});
+		
 		return true;
 	}
 	
