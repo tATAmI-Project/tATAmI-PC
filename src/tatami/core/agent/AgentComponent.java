@@ -591,7 +591,16 @@ public abstract class AgentComponent implements Serializable
 	{
 		AgentEventHandler oldHandler = null;
 		if(eventHandlers.containsKey(event))
+		{
 			oldHandler = eventHandlers.get(event);
+			try
+			{
+				getAgentLog().warn("Handler for event [] overwritten with []; was []", event, handler, oldHandler);
+			} catch(NullPointerException e)
+			{
+				// no log, it's ok.
+			}
+		}
 		eventHandlers.put(event, handler);
 		return oldHandler;
 	}

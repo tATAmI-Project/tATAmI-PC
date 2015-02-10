@@ -195,6 +195,9 @@ public abstract class MessagingComponent extends AgentComponent
 	{
 		// FIXME: do checks
 		String destinationInternal = extractInternalAddress(event, "");
+		if(destinationInternal.length() == 0)
+			// if no internal path, make it the root path (a corect internal path).
+			destinationInternal = "/";
 		for(Map.Entry<String, Set<AgentEventHandler>> entry : messageHandlers.entrySet())
 		{
 			try

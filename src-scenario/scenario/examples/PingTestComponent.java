@@ -112,8 +112,7 @@ public class PingTestComponent extends AgentComponent
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
-				String eventMessage = "agent [" + thisAgent + "] event: [" + event.getType().toString() + "]";
-				getAgentLog().li(eventMessage);
+				getAgentLog().li("agent [] event: []", thisAgent, event.getType());
 				
 				if(event.getType() == AgentEventType.AGENT_START)
 					atAgentStart(event);
