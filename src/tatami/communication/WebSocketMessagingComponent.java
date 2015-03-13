@@ -27,6 +27,8 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 				if(!(getPlatformLink() instanceof WebSocketMessagingPlatform))
 					throw new IllegalStateException("Platform Link is not of expected type");
 				platform = (WebSocketMessagingPlatform)getPlatformLink();
+				// TODO register with platform that this component receives messages for this agent - getAgentName()
+				// TODO when receiving a message, call 9from this class): receiveMessage(source, destination, content);
 			}
 		});
 	}
