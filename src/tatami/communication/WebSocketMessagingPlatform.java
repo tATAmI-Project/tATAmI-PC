@@ -148,7 +148,6 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 
 	@Override
 	public boolean loadAgent(String containerName, AgentManager agentManager) {
-		// TODO Auto-generated method stub
 		agentManager.setPlatformLink(this);
 		client.newAgentNotification(agentManager.getAgentName());
 		return true;
@@ -156,7 +155,13 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 
 	@Override
 	public String getRecommendedComponentClass(AgentComponentName componentName) {
-		// TODO Auto-generated method stub
+		switch(componentName)
+		{
+		case MESSAGING_COMPONENT:
+			return WebSocketMessagingComponent.class.getName();
+		default:
+			break;
+		}
 		return null;
 	}
 

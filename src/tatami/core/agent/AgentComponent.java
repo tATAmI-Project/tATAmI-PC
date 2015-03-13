@@ -68,7 +68,7 @@ public abstract class AgentComponent implements Serializable
 		/**
 		 * The name of a component extending {@link MessagingComponent}.
 		 */
-		MESSAGING_COMPONENT("tatami.communication.WebSocketMessagingComponent"),
+		MESSAGING_COMPONENT,
 		
 		/**
 		 * The name of a component extending {@link MovementComponent}.
@@ -94,8 +94,6 @@ public abstract class AgentComponent implements Serializable
 		 * The name of a component extending {@link JadeComponent}.
 		 */
 		JADE_COMPONENT,
-		
-		COMMUNICATION_COMPONENT,
 		
 		/**
 		 * TEMPORARY type for testing. TODO: remove this type.
