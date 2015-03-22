@@ -6,6 +6,8 @@ import tatami.simulation.Boot;
 
 /**
  * Tests composite agents deployed on the Jade Platform.
+ * <p>
+ * Everything is expected to work without error.
  * 
  * @author Andrei Olaru
  */
