@@ -65,62 +65,63 @@ import tatami.sclaim.constructs.basic.ClaimWhile;
  */
 public class ClaimBehavior implements InputListener
 {
-	private boolean			finished;			// used to verify if the behavior is finished
-	private long				wakeUpAtTime;		// used by the primitive wait
-											
-	public int					currentStatement;	// the current statement being processed
-	private int				numberOfStatements; // the number of statements of the behavior
-											
-	private boolean			initialized;		// tells if this behavior was initialized
-	private ClaimComponent		myAgent;			// instance of ClaimComponent
-	
-	private boolean 			isReceive;			// true when the currentStatement is a receive statement
-	private boolean 			isCondition;			// true when the currentStatement is a receive statement
-	
+	private boolean									finished;									// used to verify if the
+																								// behavior is finished
+	private long									wakeUpAtTime;								// used by the primitive
+																								// wait
+																								
+	public int										currentStatement;							// the current statement
+																								// being processed
+	private int										numberOfStatements;						// the number of
+																								// statements of the
+																								// behavior
+																								
+	private boolean									initialized;								// tells if this
+																								// behavior was
+																								// initialized
+	private ClaimComponent							myAgent;									// instance of
+																								// ClaimComponent
+																								
+	private boolean									isReceive;									// true when the
+																								// currentStatement is a
+																								// receive statement
+	private boolean									isCondition;								// true when the
+																								// currentStatement is a
+																								// receive statement
+																								
 	/**
-	 * TODO
-	 * Behavior for agent moving.
+	 * TODO Behavior for agent moving.
 	 * 
 	 * <p>
 	 * Wait for agent to find location of destination. Once agent has found the location, it'll move to this location.
 	 * 
 	 * see <code>handleIn()</code>
-	 
-	private class MoveToDest extends WakerBehaviour
-	{
-		private static final long	serialVersionUID	= -5996155613563560744L;
-		private static final long	findLocTime			= 3000;
-		
-		public MoveToDest(Agent agent)
-		{
-			super(agent, findLocTime);
-		}
-		
-		@Override
-		public void onWake()
-		{
-			Location loc = (Location) getDataStore().get(ClaimOntology.LOC_RTN);
-			
-			((VisualizableComponent) this.myAgent).getLog().info("Move to " + loc);
-			((ClaimComponent) this.myAgent).doMove(loc);
-		}
-	}
-	*/
+	 * 
+	 * private class MoveToDest extends WakerBehaviour { private static final long serialVersionUID =
+	 * -5996155613563560744L; private static final long findLocTime = 3000;
+	 * 
+	 * public MoveToDest(Agent agent) { super(agent, findLocTime); }
+	 * 
+	 * @Override public void onWake() { Location loc = (Location) getDataStore().get(ClaimOntology.LOC_RTN);
+	 * 
+	 *           ((VisualizableComponent) this.myAgent).getLog().info("Move to " + loc); ((ClaimComponent)
+	 *           this.myAgent).doMove(loc); } }
+	 */
 	
-	private static final long					serialVersionUID	= 1212301036264628711L;
+	private static final long						serialVersionUID	= 1212301036264628711L;
 	
-	protected 	ClaimBehaviorDefinition				cbd;
-	private 	SymbolTable	    st;
-	protected  transient Logger					log					= null;
+	protected ClaimBehaviorDefinition				cbd;
+	private SymbolTable								st;
+	protected transient Logger						log					= null;
 	
 	/**
 	 * for WS reply support; the last message that was received and validated by the behavior;
 	 */
-	 protected ACLMessage							lastMessage			= null;
+	protected ACLMessage							lastMessage			= null;
 	/**
-	 *  for WS support (needed to reply)
+	 * for WS support (needed to reply)
 	 */
-	 protected Action								lastReceivedAction	= null;
+	protected Action								lastReceivedAction	= null;
 	
 	/**
 	 * Contains the queues of events for the input(s); the events are registered by <code>receiveInput</code>
@@ -128,7 +129,7 @@ public class ClaimBehavior implements InputListener
 	protected Map<String, Queue<Vector<Object>>>	inputQueues			= null;
 	
 	public ClaimBehavior(ClaimBehaviorDefinition behaviorDefinition, SymbolTable agentSt, ClaimComponent myAgent)
-	{	
+	{
 		this.cbd = behaviorDefinition;
 		this.myAgent = myAgent;
 		st = new SymbolTable(agentSt);
@@ -136,15 +137,17 @@ public class ClaimBehavior implements InputListener
 		finished = false;
 		wakeUpAtTime = -1;
 		numberOfStatements = cbd.getStatements().size();
-		currentStatement = 0; //numberOfStatements;
+		currentStatement = 0; // numberOfStatements;
 		initialized = false;
 		isReceive = false;
 		isCondition = false;
 		log = myAgent.getLog();
 	}
 	
-	public void actionOnReceive(String source, String content) {
-		if (!handleReceive(((ClaimFunctionCall) cbd.getStatements().get(currentStatement++)).getArguments(), source, content))
+	public void actionOnReceive(String source, String content)
+	{
+		if(!handleReceive(((ClaimFunctionCall) cbd.getStatements().get(currentStatement++)).getArguments(), source,
+				content))
 			return;
 		action();
 	}
@@ -155,16 +158,17 @@ public class ClaimBehavior implements InputListener
 		{
 			if(!handleStatement(cbd.getStatements().get(currentStatement++)))
 				currentStatement = 0;
-			else
-				if (isReceive) {
-					isReceive = false;
-					return;
-				}
-				if (isCondition) {
-					isCondition = false;
-					return;
-				}
-				action();
+			else if(isReceive)
+			{
+				isReceive = false;
+				return;
+			}
+			if(isCondition)
+			{
+				isCondition = false;
+				return;
+			}
+			action();
 		}
 		else
 		{
@@ -177,21 +181,21 @@ public class ClaimBehavior implements InputListener
 			if(!initialized)
 				initialized = true;
 			switch(cbd.getBehaviorType())
-				{
-				case INITIAL:
-					finished = true;
-					break;
-				case REACTIVE:
-				case CYCLIC:
-				case PROACTIVE:
-					action();
-				}
+			{
+			case INITIAL:
+				finished = true;
+				break;
+			case REACTIVE:
+			case CYCLIC:
+			case PROACTIVE:
+				action();
+			}
 		}
 		
 	}
 	
 	public boolean done()
-	{	
+	{
 		return finished;
 	}
 	
@@ -213,7 +217,7 @@ public class ClaimBehavior implements InputListener
 	@Override
 	public void receiveInput(String componentName, Vector<Object> arguments)
 	{
-		if (!inputQueues.containsKey(componentName))
+		if(!inputQueues.containsKey(componentName))
 			inputQueues.put(componentName, new ConcurrentLinkedQueue<Vector<Object>>());
 		inputQueues.get(componentName).offer(arguments);
 		// TODO emma
@@ -258,24 +262,30 @@ public class ClaimBehavior implements InputListener
 				handleCall((ClaimFunctionCall) statement);
 				return true;
 			}
-		
-		// Type Condition
-		case CONDITION: {
-			try {
+			
+			// Type Condition
+		case CONDITION:
+		{
+			try
+			{
 				Thread.sleep(3000);
-			} catch (InterruptedException e) {
+			} catch(InterruptedException e)
+			{
 				e.printStackTrace();
 			}
-			while (!handleCall(((ClaimCondition) statement).getCondition())) {
-				try {
+			while(!handleCall(((ClaimCondition) statement).getCondition()))
+			{
+				try
+				{
 					Thread.sleep(5000);
-				} catch (InterruptedException e) {
+				} catch(InterruptedException e)
+				{
 					e.printStackTrace();
 				}
 			}
 			return true;
 		}
-			
+		
 		// Type IF
 		case IF:
 			boolean condition = handleCall(((ClaimIf) statement).getCondition());
@@ -349,10 +359,13 @@ public class ClaimBehavior implements InputListener
 		case READK:
 			return handleKnowledgeManagement(function.getFunctionType(), args);
 		case INPUT:
-			while (!handleInput(args)) {
-				try {
+			while(!handleInput(args))
+			{
+				try
+				{
 					Thread.sleep(5000);
-				} catch (InterruptedException e) {
+				} catch(InterruptedException e)
+				{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -379,19 +392,13 @@ public class ClaimBehavior implements InputListener
 	 */
 	private boolean handleNew(Vector<ClaimConstruct> args)
 	{
-		/* ClaimValue agentName = (ClaimValue) args.get(0);
-		ClaimValue agentClassName = (ClaimValue)args.get(1);
-		
-		/*try
-		{
-			((ParametricComponent) this.myAgent).getContainerController().createNewAgent((String) agentName.getValue(),
-					"core.claim.ClaimAgent", args.subList(1, args.size()).toArray());
-		} catch(StaleProxyException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}*/
+		/*
+		 * ClaimValue agentName = (ClaimValue) args.get(0); ClaimValue agentClassName = (ClaimValue)args.get(1);
+		 * 
+		 * /*try { ((ParametricComponent) this.myAgent).getContainerController().createNewAgent((String)
+		 * agentName.getValue(), "core.claim.ClaimAgent", args.subList(1, args.size()).toArray()); }
+		 * catch(StaleProxyException e) { // TODO Auto-generated catch block e.printStackTrace(); return false; }
+		 */
 		
 		return true;
 	}
@@ -405,7 +412,7 @@ public class ClaimBehavior implements InputListener
 	private boolean handleAcid()
 	{
 		log.trace("Acid command received. I will delete myself!");
-		//this.myAgent.getParametric().doDelete();
+		// this.myAgent.getParametric().doDelete();
 		this.finished = true;
 		
 		return true;
@@ -424,20 +431,12 @@ public class ClaimBehavior implements InputListener
 	{
 		ClaimValue agentName = (ClaimValue) args.get(0);
 		
-		/*try
-		{
-			((ParametricComponent) this.myAgent).getContainerController().getAgent((String) agentName.getValue()).kill();
-		} catch(StaleProxyException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		} catch(ControllerException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		}*/
+		/*
+		 * try { ((ParametricComponent) this.myAgent).getContainerController().getAgent((String)
+		 * agentName.getValue()).kill(); } catch(StaleProxyException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); return false; } catch(ControllerException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); return false; }
+		 */
 		
 		return true;
 	}
@@ -488,9 +487,9 @@ public class ClaimBehavior implements InputListener
 			// there is no receiver information; should reply to the original sender
 			// !! implemented only to make web service exposure of behaviors work; untested for agent replies !!
 			log.trace("replying to message " + lastMessage);
-			//reply = lastMessage.createReply();
-			//reply.setPerformative(ACLMessage.INFORM);
-			//reply.addUserDefinedParameter(ACLMessage.IGNORE_FAILURE, "true");
+			// reply = lastMessage.createReply();
+			// reply.setPerformative(ACLMessage.INFORM);
+			// reply.addUserDefinedParameter(ACLMessage.IGNORE_FAILURE, "true");
 			parametersAdjust = 1;
 			if(lastReceivedAction == null)
 				replyAgentMode = true;
@@ -515,14 +514,13 @@ public class ClaimBehavior implements InputListener
 			else
 			{
 				if(args.get(1 - parametersAdjust).getType() == ClaimConstructType.VARIABLE)
-					simpleMessage = (String) (this.st.get((ClaimVariable) args
-							.get(1 - parametersAdjust))).getValue();
+					simpleMessage = (String) (this.st.get((ClaimVariable) args.get(1 - parametersAdjust))).getValue();
 				else
 					simpleMessage = (String) ((ClaimValue) args.get(1 - parametersAdjust)).getValue();
 			}
 			
 			if(webServiceInvocationMode)
-			{   // Web service invocation
+			{ // Web service invocation
 				if(simpleWebService)
 				{
 					String serviceAddress = (String) ((ClaimValue) args.get(2)).getValue();
@@ -544,7 +542,8 @@ public class ClaimBehavior implements InputListener
 					log.info("accessing service [" + serviceName + "] at [" + serviceAddress + "]...");
 					@SuppressWarnings("null")
 					// it should be ok according to the logic above
-					String result = this.myAgent.getWebService().doAccess(serviceAddress, serviceName, message.toString());
+					String result = this.myAgent.getWebService().doAccess(serviceAddress, serviceName,
+							message.toString());
 					ClaimStructure received = ClaimStructure.parseString(result, log);
 					log.trace("received result " + received);
 					
@@ -552,7 +551,7 @@ public class ClaimBehavior implements InputListener
 					{ // integrate result
 						ClaimStructure pattern = (ClaimStructure) args.get(3);
 						Vector<ClaimConstruct> newArgs = pattern.getFields();
-//						/readMessage(st.bindStructure(received), newArgs);
+						// /readMessage(st.bindStructure(received), newArgs);
 					}
 				}
 			}
@@ -572,7 +571,7 @@ public class ClaimBehavior implements InputListener
 					reply.setProtocol(protocol);
 				
 				if(replyServiceMode)
-				{ // WS return result 
+				{ // WS return result
 					log.trace("sending WS result [" + message.toString() + "]");
 					ContentElement ce = new Result(lastReceivedAction, message.toString());
 				}
@@ -586,9 +585,11 @@ public class ClaimBehavior implements InputListener
 						e.printStackTrace();
 					}
 				
-				if (myAgent.getMessaging() != null)
+				if(myAgent.getMessaging() != null)
 				{
-					myAgent.getMessaging().sendMessage(receiver, myAgent.getParametric().parVal(AgentParameterName.AGENT_NAME).toString(), message.toString());
+					myAgent.getMessaging().sendMessage(receiver,
+							myAgent.getParametric().parVal(AgentParameterName.AGENT_NAME).toString(),
+							message.toString());
 				}
 				log.info("sent " + message.toString());
 			}
@@ -609,85 +610,55 @@ public class ClaimBehavior implements InputListener
 	 *            : the arguments of the construct - the fields
 	 * @return <code>true</code> if the received message matches the pattern (the behavior should continue);
 	 *         <code>false</code> otherwise
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 */
 	protected boolean handleReceive(Vector<ClaimConstruct> args, String source, String content)
 	{
 		int argsSize = args.size();
 		boolean ret = true;
 		
-		/* TODO handle potential web service access to the agent 
-		 MessageTemplate WStemplate = MessageTemplate.MatchOntology(WebServiceOntology.NAME);
-		
-		//msg = this.myAgent.getMessaging().receive(WStemplate);
-		if(msg != null)
-		{ 	// incoming web service access
-			// check if right message
-			
-			log.trace("checking received ws access message [" + msg + "]");
-			String messageContent = content;
-			messageContent = (String)myAgent.getContentManager().extractContent(msg);
-			ContentElement ce = null;
-			try
-			{
-				ce = myAgent.getContentManager().extractContent(msg);
-			} catch(UngroundedException e)
-			{
-				e.printStackTrace();
-			} catch(CodecException e)
-			{
-				e.printStackTrace();
-			} catch(OntologyException e)
-			{
-				e.printStackTrace();
-			}
-			if(ce != null)
-			{
-				log.trace("received content [" + ce + "]");
-				ReceiveOperation op = (ReceiveOperation) ((Action) ce).getAction();
-				messageContent = op.getOperationArgument();
-				log.trace("received content detail [" + messageContent + "]");
-				ClaimStructure messageStruct = ClaimStructure.parseString(messageContent, log);
-				log.trace("received message [" + messageStruct + "]");
-				
-				String messageProtocol = (String) ((ClaimValue) messageStruct.getFields().get(1)).getValue();
-				log.trace("received protocol [" + messageProtocol + "]; waiting for [" + protocol + "]");
-				if(protocol.equals(messageProtocol))
-				{
-					// it's ok, the message should be received by this RECEIVE construct
-					lastMessage = msg;
-					lastReceivedAction = (Action) ce;
-					received = messageStruct;
-					log.info("received / ws access " + ClaimMessage.printMessage(msg));
-				}
-				else
-				{   // put it back; discontinue behavior
-					// myAgent.putBack(msg);
-					ret = false;
-					log.trace("ws access does not match protocol");
-				}
-			}
-		}
-		else */
+		/*
+		 * TODO handle potential web service access to the agent MessageTemplate WStemplate =
+		 * MessageTemplate.MatchOntology(WebServiceOntology.NAME);
+		 * 
+		 * //msg = this.myAgent.getMessaging().receive(WStemplate); if(msg != null) { // incoming web service access //
+		 * check if right message
+		 * 
+		 * log.trace("checking received ws access message [" + msg + "]"); String messageContent = content;
+		 * messageContent = (String)myAgent.getContentManager().extractContent(msg); ContentElement ce = null; try { ce
+		 * = myAgent.getContentManager().extractContent(msg); } catch(UngroundedException e) { e.printStackTrace(); }
+		 * catch(CodecException e) { e.printStackTrace(); } catch(OntologyException e) { e.printStackTrace(); } if(ce !=
+		 * null) { log.trace("received content [" + ce + "]"); ReceiveOperation op = (ReceiveOperation) ((Action)
+		 * ce).getAction(); messageContent = op.getOperationArgument(); log.trace("received content detail [" +
+		 * messageContent + "]"); ClaimStructure messageStruct = ClaimStructure.parseString(messageContent, log);
+		 * log.trace("received message [" + messageStruct + "]");
+		 * 
+		 * String messageProtocol = (String) ((ClaimValue) messageStruct.getFields().get(1)).getValue();
+		 * log.trace("received protocol [" + messageProtocol + "]; waiting for [" + protocol + "]");
+		 * if(protocol.equals(messageProtocol)) { // it's ok, the message should be received by this RECEIVE construct
+		 * lastMessage = msg; lastReceivedAction = (Action) ce; received = messageStruct;
+		 * log.info("received / ws access " + ClaimMessage.printMessage(msg)); } else { // put it back; discontinue
+		 * behavior // myAgent.putBack(msg); ret = false; log.trace("ws access does not match protocol"); } } } else
+		 */
 		// normal JADE message
-				
+		
 		ClaimStructure received = ClaimStructure.parseString(content);
-
+		
 		if(received != null)
 		{
-
+			
 			Vector<ClaimConstruct> newArgs = ((ClaimStructure) args.get(argsSize - 1)).getFields();
 			ClaimStructure cl = st.bindStructure(received);
 			
 			if(!readMessage(st.bindStructure(received), newArgs))
-			{   // the message does not match the pattern
-
+			{ // the message does not match the pattern
+			
 				log.trace("message not matching pattern [" + content + "]");
 				ret = false;
 			}
 			else
 			{
-
+				
 				log.trace("--------- message received: [" + content + "]");
 				if(argsSize == 2)
 					st.put((ClaimVariable) args.get(0), new ClaimValue(source));
@@ -721,14 +692,14 @@ public class ClaimBehavior implements InputListener
 	 */
 	protected boolean handleInput(Vector<ClaimConstruct> args)
 	{
-		AgentGui gui = myAgent.getVisualizable().getInteractivGUI();
+		AgentGui gui = null; // FIXME = myAgent.getVisualizable().getInteractivGUI();
 		
 		// FIXME: variables should be supported
 		String inputComponent = ((ClaimValue) args.get(0)).toString();
 		
 		// FIXME: variables should be supported
-		//@SuppressWarnings("unused")
-		//ClaimValue inputComponentType = (ClaimValue) args.get(1); // unused anymore, for now.
+		// @SuppressWarnings("unused")
+		// ClaimValue inputComponentType = (ClaimValue) args.get(1); // unused anymore, for now.
 		
 		if(!inputQueues.containsKey(inputComponent) && gui != null)
 		{
@@ -751,7 +722,7 @@ public class ClaimBehavior implements InputListener
 		Vector<ClaimConstruct> args2 = new Vector<ClaimConstruct>(args);
 		
 		args2.remove(0);
-		//return true;
+		// return true;
 		return readValues(objects2values(inputArgs), args2, 1, true, false);
 	}
 	
@@ -771,11 +742,12 @@ public class ClaimBehavior implements InputListener
 				outputV.add(this.st.get((ClaimVariable) arg));
 		}
 		
-		AgentGui myAgentGUI = myAgent.getVisualizable().getInteractivGUI();
+		AgentGui myAgentGUI = null; // FIXME: myAgent.getVisualizable().getInteractivGUI();
 		Vector<Object> outV = new Vector<Object>();
 		for(ClaimValue output : outputV)
 			outV.add(output.getValue());
-		myAgentGUI.doOutput((String) outputComponent.getValue(), outV);
+		if(myAgentGUI != null)
+			myAgentGUI.doOutput((String) outputComponent.getValue(), outV);
 		
 		log.trace("The output \"" + outputV + "\" was written on " + (String) outputComponent.getValue());
 		return true;
@@ -784,50 +756,29 @@ public class ClaimBehavior implements InputListener
 	protected boolean handleIn(Vector<ClaimConstruct> args)
 	{
 		/*
-		 *
-		// reading the argument of the function
-		ClaimConstruct goIn = args.get(0);
-		
-		// reading the value of the argument
-		ClaimValue value = null;
-		switch(goIn.getType())
-		{
-		case VARIABLE:
-			value = getVariableValue((ClaimVariable) goIn);
-			break;
-		case VALUE:
-			value = (ClaimValue) goIn;
-			break;
-		default:
-			log.error("Unsupported argument type for the primitive \"in\".");
-			break;
-		}
-		
-		// changing the value of the "parent" parameter of the agent:
-		st.put(new ClaimVariable("parent", true), value);
-		
-		// after IN there's always one variable of destination
-		// check if this variable is bound or not
-		
-		if(value != null)
-		{
-			// name of agent destination
-			String destination = (String) value.getValue();
-			// find Container of destination
-			SequentialBehaviour sb = new SequentialBehaviour();
-			Behaviour b = new AskForLocation((ClaimComponent) this.myAgent, destination);
-			b.setDataStore(sb.getDataStore());
-			sb.addSubBehaviour(b);
-			
-			b = new AskForBeingChildBehaviour((ClaimComponent) this.myAgent, destination);
-			sb.addSubBehaviour(b);
-			
-			b = new MoveToDest((ClaimComponent) this.myAgent);
-			b.setDataStore(sb.getDataStore());
-			sb.addSubBehaviour(b);
-			
-			((ClaimComponent) this.myAgent).addBehaviour(sb);
-		}*/
+		 * 
+		 * // reading the argument of the function ClaimConstruct goIn = args.get(0);
+		 * 
+		 * // reading the value of the argument ClaimValue value = null; switch(goIn.getType()) { case VARIABLE: value =
+		 * getVariableValue((ClaimVariable) goIn); break; case VALUE: value = (ClaimValue) goIn; break; default:
+		 * log.error("Unsupported argument type for the primitive \"in\"."); break; }
+		 * 
+		 * // changing the value of the "parent" parameter of the agent: st.put(new ClaimVariable("parent", true),
+		 * value);
+		 * 
+		 * // after IN there's always one variable of destination // check if this variable is bound or not
+		 * 
+		 * if(value != null) { // name of agent destination String destination = (String) value.getValue(); // find
+		 * Container of destination SequentialBehaviour sb = new SequentialBehaviour(); Behaviour b = new
+		 * AskForLocation((ClaimComponent) this.myAgent, destination); b.setDataStore(sb.getDataStore());
+		 * sb.addSubBehaviour(b);
+		 * 
+		 * b = new AskForBeingChildBehaviour((ClaimComponent) this.myAgent, destination); sb.addSubBehaviour(b);
+		 * 
+		 * b = new MoveToDest((ClaimComponent) this.myAgent); b.setDataStore(sb.getDataStore()); sb.addSubBehaviour(b);
+		 * 
+		 * ((ClaimComponent) this.myAgent).addBehaviour(sb); }
+		 */
 		return true;
 	}
 	
@@ -839,9 +790,11 @@ public class ClaimBehavior implements InputListener
 		long timeout = Integer.parseInt((String) waitTimeConstant.getValue());
 		wakeUpAtTime = System.currentTimeMillis() + timeout;
 		
-		try {
+		try
+		{
 			Thread.sleep(timeout);
-		} catch (InterruptedException e) {
+		} catch(InterruptedException e)
+		{
 			e.printStackTrace();
 		}
 		
@@ -897,30 +850,37 @@ public class ClaimBehavior implements InputListener
 		case ADDK:
 		// function "add knowledge"
 		{
-			// after addK there's always knowledge (pattern condition will be after condition)  
+			// after addK there's always knowledge (pattern condition will be after condition)
 			// TODO emma move this to condition
-			if (knowledge.substring(0, knowledge.indexOf(" ")).equals("pattern"))
+			if(knowledge.substring(0, knowledge.indexOf(" ")).equals("pattern"))
 			{
 				knowledge = knowledge.substring(knowledge.indexOf(" ") + 1);
 				ContextPattern CP = new ContextPattern();
 				myAgent.getCognitive().addPattern(
-						(ContextPattern) new TextGraphRepresentation(CP).readRepresentation(new ContentHolder<String>(knowledge)));
+						(ContextPattern) new TextGraphRepresentation(CP).readRepresentation(new ContentHolder<String>(
+								knowledge)));
 			}
-			else {
-				// since it is not a pattern, it should not contain ?variables -> we should get their value from symbolTable
+			else
+			{
+				// since it is not a pattern, it should not contain ?variables -> we should get their value from
+				// symbolTable
 				String[] elements = knowledge.split(" ");
 				knowledge = "";
-				for (String element : elements) {
-					if (element.startsWith("?") && st.containsSymbol(new ClaimVariable(element.substring(1)))) {
+				for(String element : elements)
+				{
+					if(element.startsWith("?") && st.containsSymbol(new ClaimVariable(element.substring(1))))
+					{
 						knowledge += st.get(new ClaimVariable(element.substring(1))).getValue().toString() + " ";
 					}
-					else {
+					else
+					{
 						knowledge += element + " ";
 					}
-				}	
-
-				myAgent.getCognitive().add(new TextGraphRepresentation(
-						new SimpleGraph()).readRepresentation(new ContentHolder<String>(knowledge)));
+				}
+				
+				myAgent.getCognitive().add(
+						new TextGraphRepresentation(new SimpleGraph()).readRepresentation(new ContentHolder<String>(
+								knowledge)));
 			}
 			log.info(" adds new knowledge " + knowledge + " in behavior " + this.cbd.getName());
 			return true;
@@ -934,7 +894,7 @@ public class ClaimBehavior implements InputListener
 			@SuppressWarnings("unused")
 			ClaimStructure knowledgeStruct = (ClaimStructure) args.get(0); // struct knowledge <kl type> <kl fields>
 			
-			/* replace all ClaimVariables (represented as ?<name>) with an index if they are not already stored*/
+			/* replace all ClaimVariables (represented as ?<name>) with an index if they are not already stored */
 			HashMap<Integer, ClaimVariable> intToVariable = new HashMap<Integer, ClaimVariable>();
 			knowledge = constructsAndMaps(knowledgeStruct.getFields(), intToVariable, 1);
 			
@@ -943,15 +903,16 @@ public class ClaimBehavior implements InputListener
 			repr.readRepresentation(new ContentHolder<String>(knowledge));
 			
 			Match m = myAgent.getCognitive().read(CP);
-			if (m == null)
+			if(m == null)
 				return false;
 			
-			for (Node node : CP.getNodes())
-				if (node instanceof NodeP) {
-					Node rez = m.getMatchedGraphNode(node); 
-					if (!st.containsSymbol(intToVariable.get(((NodeP) node).genericIndex()))) {
-					st.put(intToVariable.get(((NodeP) node).genericIndex()), 
-							new ClaimValue(rez.getLabel()));
+			for(Node node : CP.getNodes())
+				if(node instanceof NodeP)
+				{
+					Node rez = m.getMatchedGraphNode(node);
+					if(!st.containsSymbol(intToVariable.get(((NodeP) node).genericIndex())))
+					{
+						st.put(intToVariable.get(((NodeP) node).genericIndex()), new ClaimValue(rez.getLabel()));
 					}
 				}
 			return true;
@@ -962,14 +923,17 @@ public class ClaimBehavior implements InputListener
 		{
 			String[] elements = knowledge.split(" ");
 			knowledge = "";
-			for (String element : elements) {
-				if (element.startsWith("?") && st.containsSymbol(new ClaimVariable(element.substring(1)))) {
+			for(String element : elements)
+			{
+				if(element.startsWith("?") && st.containsSymbol(new ClaimVariable(element.substring(1))))
+				{
 					knowledge += st.get(new ClaimVariable(element.substring(1))).getValue().toString() + " ";
 				}
-				else {
+				else
+				{
 					knowledge += element + " ";
 				}
-			}	
+			}
 			myAgent.getCognitive().remove(knowledge);
 			return true;
 		}
@@ -979,7 +943,7 @@ public class ClaimBehavior implements InputListener
 			return true; // unreachable code
 		}
 		
-		//return true;
+		// return true;
 	}
 	
 	/**
@@ -999,17 +963,18 @@ public class ClaimBehavior implements InputListener
 		repr.readRepresentation(new ContentHolder<String>(knowledge));
 		
 		List<Match> matches = myAgent.getCognitive().readAll(CP);
-		for (Match match : matches) {
+		for(Match match : matches)
+		{
 			st = new SymbolTable(st);
 			
-			for (Node node : CP.getNodes())
-				if (node instanceof NodeP) {
+			for(Node node : CP.getNodes())
+				if(node instanceof NodeP)
+				{
 					Node rez = match.getMatchedGraphNode(node);
 					int genericIndex = ((NodeP) node).genericIndex();
-					st.put(intToVariable.get(genericIndex), 
-							new ClaimValue(rez.toString()));
+					st.put(intToVariable.get(genericIndex), new ClaimValue(rez.toString()));
 				}
-			for (ClaimConstruct claimConstruct : construct.getStatements())
+			for(ClaimConstruct claimConstruct : construct.getStatements())
 				handleStatement(claimConstruct);
 			
 			st = st.prev;
@@ -1128,7 +1093,7 @@ public class ClaimBehavior implements InputListener
 			ClaimConstruct arg = sourceConstructs.get(i); // source
 			
 			if(field.getType() == ClaimConstructType.VALUE)
-			{   // just check match
+			{ // just check match
 				switch(arg.getType())
 				{
 				case VALUE:
@@ -1224,13 +1189,11 @@ public class ClaimBehavior implements InputListener
 	protected ClaimStructure knowledge2Structure(SimpleKnowledge knowledge)
 	{
 		ClaimStructure ret = new ClaimStructure();
-		/*ClaimStructure ret = new ClaimStructure(cbd);
-		Vector<ClaimConstruct> fields = new Vector<ClaimConstruct>();
-		fields.add(new ClaimValue("knowledge"));
-		fields.add(new ClaimValue(knowledge.getKnowledgeType()));
-		for(Object fieldValue : knowledge.getSimpleKnowledge())
-			fields.add(new ClaimValue(fieldValue));
-		ret.setFields(fields);*/
+		/*
+		 * ClaimStructure ret = new ClaimStructure(cbd); Vector<ClaimConstruct> fields = new Vector<ClaimConstruct>();
+		 * fields.add(new ClaimValue("knowledge")); fields.add(new ClaimValue(knowledge.getKnowledgeType())); for(Object
+		 * fieldValue : knowledge.getSimpleKnowledge()) fields.add(new ClaimValue(fieldValue)); ret.setFields(fields);
+		 */
 		return ret;
 	}
 	
@@ -1352,7 +1315,7 @@ public class ClaimBehavior implements InputListener
 		Vector<Object> args = new Vector<Object>();
 		for(ClaimConstruct arg : flattenConstructs(constructs, ignore, KeepVariables.KEEP_ALL))
 			if(arg != null)
-				if (arg instanceof ClaimValue)
+				if(arg instanceof ClaimValue)
 					args.add(((ClaimValue) arg).getValue());
 				else
 					args.add((ClaimVariable) arg);
@@ -1375,8 +1338,9 @@ public class ClaimBehavior implements InputListener
 		
 		Vector<Object> objects = constructs2Objects(constructs, ignore);
 		
-		for(Object arg : objects) {
-			if (arg instanceof ClaimVariable)
+		for(Object arg : objects)
+		{
+			if(arg instanceof ClaimVariable)
 				rez = rez.concat(((ClaimVariable) arg).toString() + " ");
 			else
 				rez = rez.concat((String) arg + " ");
@@ -1384,8 +1348,8 @@ public class ClaimBehavior implements InputListener
 		return rez;
 	}
 	
-	protected String constructsAndMaps(List<ClaimConstruct> constructs, 
-											HashMap<Integer, ClaimVariable> intToVariable, int ignore)
+	protected String constructsAndMaps(List<ClaimConstruct> constructs, HashMap<Integer, ClaimVariable> intToVariable,
+			int ignore)
 	{
 		String rez = new String("[");
 		
@@ -1393,10 +1357,12 @@ public class ClaimBehavior implements InputListener
 		Vector<Object> objects = constructs2Objects(constructs, ignore);
 		objects.remove(0);
 		
-		for(Object arg : objects) {
-			if (st.containsSymbol(new ClaimVariable(arg.toString().substring(1))))
+		for(Object arg : objects)
+		{
+			if(st.containsSymbol(new ClaimVariable(arg.toString().substring(1))))
 				rez = rez + st.get(new ClaimVariable(arg.toString().substring(1))).getValue().toString() + " ";
-			else if (arg instanceof ClaimVariable) {
+			else if(arg instanceof ClaimVariable)
+			{
 				intToVariable.put(no, (ClaimVariable) arg);
 				rez = rez.concat("?#" + no + " ");
 				no++;
