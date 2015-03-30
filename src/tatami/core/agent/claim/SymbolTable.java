@@ -15,30 +15,49 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Vector;
 
-
 import tatami.sclaim.constructs.basic.ClaimConstruct;
 import tatami.sclaim.constructs.basic.ClaimStructure;
 import tatami.sclaim.constructs.basic.ClaimValue;
 import tatami.sclaim.constructs.basic.ClaimVariable;
 import net.xqhs.util.logging.Logger;
 
-
 /**
  * Symbol table designed to support scopes. The main idea is to have a linked list of symbol tables, with the head being
  * the current scope (in our case, the current behavior) and with the tail (in the direction of 'prev' being the symbol
  * table of the most outer scope (which is the agent's scope).
  * 
- * @author tudor
+ * @author Marius-Tudor Benea
  * @author Andrei Olaru
  * 
  */
 public class SymbolTable implements Serializable
 {
+	/**
+	 * The status of the variable in the symbol table. This is returned by {@link SymbolTable#getStatus(ClaimVariable)}.
+	 * 
+	 * @author Andrei Olaru
+	 */
 	public enum VariableStatus {
-		DOESNT_EXIST, UNBOUND, BOUND
+		/**
+		 * Returned when the name does not exist in the symbol table hierarchy.
+		 */
+		DOESNT_EXIST,
+		
+		/**
+		 * The variable exists in a symbol table, but is not bound to a value.
+		 */
+		UNBOUND,
+		
+		/**
+		 * The variable exists in a symbol table, and is bound to a value.
+		 */
+		BOUND,
 	}
 	
-	private static final long			serialVersionUID	= 8322310088284342473L;
+	/**
+	 * The serial version UID.
+	 */
+	private static final long					serialVersionUID	= 0L;
 	
 	/**
 	 * The correspondence between names of {@link ClaimVariable}s and {@link ClaimValue}s.
@@ -47,22 +66,27 @@ public class SymbolTable implements Serializable
 	/**
 	 * The {@link SymbolTable} instance of broader scope / outer context / higher level
 	 */
-	protected SymbolTable				prev;
+	protected SymbolTable						prev;
 	
 	/** the logger */
-	protected transient Logger log = null;
-
-	public Logger getLog() {
-		return log;
+	protected transient Logger					log					= null;
+	
+	/**
+	 * Gives a reference to a {@link Logger} object that the symbol table can use to log errors.
+	 * 
+	 * @param logLink
+	 *            - the log.
+	 */
+	public void setLogLink(Logger logLink)
+	{
+		log = logLink;
 	}
-
-	public void setLog(Logger log) {
-		this.log = log;
-	}
-
+	
 	/**
 	 * Creates a new symbol table and links it to an upper level symbol table, if any.
-	 * @param link - symbol table to link to or null.
+	 * 
+	 * @param link
+	 *            - symbol table to link to or null.
 	 */
 	public SymbolTable(SymbolTable link)
 	{
@@ -72,15 +96,19 @@ public class SymbolTable implements Serializable
 	
 	/**
 	 * Creates a new symbol table and links it to an upper level symbol table, if any.
-	 * @param link - symbol table to link to or null.
-	 * @param init - the variables found for this symbol table, while parsing.
+	 * 
+	 * @param link
+	 *            - symbol table to link to or null.
+	 * @param init
+	 *            - the variables found for this symbol table, while parsing.
 	 */
 	
 	public SymbolTable(SymbolTable link, Vector<ClaimVariable> init)
 	{
 		table = new HashMap<ClaimVariable, ClaimValue>();
-		for(ClaimVariable currentVariable:init) {
-			table.put(currentVariable,null);
+		for(ClaimVariable currentVariable : init)
+		{
+			table.put(currentVariable, null);
 		}
 		prev = link;
 	}
@@ -96,26 +124,17 @@ public class SymbolTable implements Serializable
 	 */
 	public void put(ClaimVariable variable, ClaimValue value)
 	{
-		if (!table.containsKey(variable)) {
-			table.put(variable, value);
-			return;
-		}
-		
 		SymbolTable st = getSymbolTableContainingKey(variable);
 		if(st == null)
 			table.put(variable, value);
 		else
 		{
-			if (variable.isAffectable() || st.table.get(variable)==null)
+			if(variable.isAffectable() || st.table.get(variable) == null)
 				st.table.put(variable, value);
-			else
-			{
-				log.error("Trying to bind the already bound unaffectable variable "+variable.getName()+
-						". The old value: "+st.table.get(variable).getValue()+" was not replaced by the new one: "+
-						(value==null?"null":value.getValue()));
-				
-				System.exit(1);
-			}
+			else if(log != null)
+				log.error("Trying to bind the already bound variable " + variable.getName() + ". The old value: "
+						+ st.table.get(variable).getValue() + " was not replaced by the new one: "
+						+ (value == null ? "null" : value.getValue()));
 		}
 	}
 	
@@ -135,8 +154,15 @@ public class SymbolTable implements Serializable
 		}
 		return null;
 	}
-
 	
+	/**
+	 * Returns the status of the given variable in the hierarchy of symbol tables.
+	 * 
+	 * @param variable
+	 *            - the variable to search for.
+	 * @return one of the values of {@link VariableStatus} ({@link VariableStatus#DOESNT_EXIST},
+	 *         {@link VariableStatus#UNBOUND} or {@link VariableStatus#BOUND}.
+	 */
 	public VariableStatus getStatus(ClaimVariable variable)
 	{
 		SymbolTable st = getSymbolTableContainingKey(variable);
@@ -148,8 +174,7 @@ public class SymbolTable implements Serializable
 	}
 	
 	/**
-	 * get the value of the specified variable after a search to find it in the whole hierarchy of symbol
-	 * tables
+	 * get the value of the specified variable after a search to find it in the whole hierarchy of symbol tables
 	 * 
 	 * @param variable
 	 *            - the variable itself
@@ -168,13 +193,12 @@ public class SymbolTable implements Serializable
 	}
 	
 	/**
-	 * returns true if the specified variable is present in the whole hierarchy of symbol
-	 * tables and false otherwise
+	 * returns true if the specified variable is present in the whole hierarchy of symbol tables and false otherwise
 	 * 
 	 * @param variable
 	 *            - the name of the variable
-	 * @return - returns true if the specified variable is present in the whole hierarchy of symbol
-	 * tables and false otherwise
+	 * @return - returns true if the specified variable is present in the whole hierarchy of symbol tables and false
+	 *         otherwise
 	 */
 	public boolean containsSymbol(ClaimVariable variable)
 	{
@@ -189,8 +213,10 @@ public class SymbolTable implements Serializable
 	
 	/**
 	 * Binds / replaces the variables in a structure to / with the associated values.
-	 * @param structure the structure to to be bound
-	 * @return
+	 * 
+	 * @param structure
+	 *            the structure to to be bound
+	 * @return a new {@link ClaimStructure} instance that contains only values and no variables.
 	 */
 	public ClaimStructure bindStructure(ClaimStructure structure)
 	{
@@ -211,7 +237,7 @@ public class SymbolTable implements Serializable
 				if(getStatus(variable) == VariableStatus.BOUND)
 				{
 					ClaimValue value = get(variable);
-
+					
 					if(value != null)
 					{
 						fieldsBound.add(value);
@@ -221,7 +247,7 @@ public class SymbolTable implements Serializable
 				}
 				break;
 			case STRUCTURE:
-				fieldsBound.add(bindStructure((ClaimStructure)currentConstruct));
+				fieldsBound.add(bindStructure((ClaimStructure) currentConstruct));
 				break;
 			default:
 				break;
@@ -232,7 +258,8 @@ public class SymbolTable implements Serializable
 	}
 	
 	/**
-	 * Unbinds all the variables in the scope of one behavior. Useful after one execution of the behavior or before the following one. 
+	 * Unbinds all the variables in the scope of one behavior. Useful after one execution of the behavior or before the
+	 * following one.
 	 */
 	public void clearSymbolTable()
 	{

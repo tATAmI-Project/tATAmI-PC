@@ -11,265 +11,247 @@
  ******************************************************************************/
 package tatami.core.agent.claim;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Vector;
 
-import net.xqhs.graphs.graph.Graph;
+import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
-import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
-import tatami.core.agent.AgentEvent.AgentEventType;
-import tatami.core.agent.kb.ContextComponent;
-import tatami.core.agent.messaging.MessagingComponent;
+import tatami.core.agent.kb.KnowledgeBase;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
-import tatami.core.agent.visualization.VisualizableComponent;
-import tatami.core.agent.webServices.WebserviceComponent;
 import tatami.sclaim.constructs.basic.ClaimAgentDefinition;
 import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
 import tatami.sclaim.constructs.basic.ClaimBehaviorType;
-import tatami.sclaim.constructs.basic.ClaimConstruct;
-import tatami.sclaim.constructs.basic.ClaimFunctionCall;
-import tatami.sclaim.constructs.basic.ClaimFunctionType;
 import tatami.sclaim.constructs.basic.ClaimValue;
 import tatami.sclaim.constructs.basic.ClaimVariable;
 
-public class ClaimComponent extends AgentComponent
+/**
+ * The Claim component of an agent ensures that the agent is able to execute behaviors specified in an S-CLAIM agent
+ * description file (.adf2).
+ * 
+ * @author Andrei Olaru
+ */
+public class ClaimComponent extends AgentComponent implements AgentEventHandler
 {
-
-	@SuppressWarnings("javadoc")
-	private static final long		serialVersionUID	= 3562319445295180030L;
+	/**
+	 * The serial version UID.
+	 */
+	private static final long	serialVersionUID	= 0L;
+	
+	/**
+	 * @author Andrei Olaru
+	 */
+	public static enum Vocabulary {
+		
+		/**
+		 * The name of this component, to serve also as name for the endpoint.
+		 */
+		CLAIM,
+		
+		// NAME = "claim-ontology";
+		//
+		// LANGUAGE = "claim-language";
+		//
+		// ASKLOCATION = "ask-for-location";
+		//
+		// LOC_RTN = "location-return";
+	}
 	
 	/**
 	 * The list of behaviors of the agent.
 	 */
-	protected Vector<ClaimBehavior>	behaviors			= null;
-
+	protected Vector<ClaimBehavior>	behaviors	= null;
+	
 	/**
 	 * The agent definition describing this agent.
 	 */
 	protected ClaimAgentDefinition	cad;
-	protected SymbolTable st;
+	/**
+	 * The symbol table hierarchy associated with this instance (and in consequence, with this agent).
+	 */
+	protected SymbolTable			st;
 	
-	protected Logger log;
-	
-	public ClaimComponent() 
+	/**
+	 * Default constructor.
+	 */
+	public ClaimComponent()
 	{
 		super(AgentComponentName.S_CLAIM_COMPONENT);
 	}
 	
-	public ClaimComponent(HashSet<Entry<String, Object>> className) {
-		this();
-
-		log = (UnitComponentExt) new UnitComponentExt().setUnitName("testing").setLogLevel(Logger.Level.ALL);
-			
-		cad = (ClaimAgentDefinition) className.iterator().next().getValue();
-		if(cad == null)
-		{
-			log.error("agent definition not found");
-			throw new IllegalArgumentException("agent definition not found");
-		}
-
-		st = new SymbolTable(null, cad.getParameters());
-		st.setLog(log);
+	@Override
+	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
+	{
+		if(!super.preload(parameters, scenarioNode, log))
+			return false;
 		
-		behaviors = new Vector<ClaimBehavior>();
-	}
-	
-	public void setup() {
+		// TODO preload cad (put it in a static map of cads)
+		// preload parameters in the component creation data
 		
-		// retrieve parameters specified in the claim agent definition
+		// retrieve parameters specified in the agent
 		if(cad.getParameters() != null)
 		{
-			for(ClaimVariable agentParam : cad.getParameters()) 
+			for(ClaimVariable agentParam : cad.getParameters())
+				if(agentParam.getName().equals("parent"))
+					st.put(new ClaimVariable("parent", true), null);
+		}
+		
+		return true;
+	}
+	
+	@Override
+	protected void atAgentStart(AgentEvent event)
+	{
+		super.atAgentStart(event);
+		
+		ParametricComponent parametric = (ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT);
+		
+		// retrieve parameters specified in the agent
+		if(cad.getParameters() != null)
+		{
+			for(ClaimVariable agentParam : cad.getParameters())
 			{
-				AgentParameterName registeredParam = AgentParameterName.getName(agentParam.getName());
-				
-				if(registeredParam != null)
+				if(st.get(agentParam) == null) // not yet added
 				{
-					if (getParametric().hasPar(registeredParam)) {
-						st.put(agentParam, new ClaimValue((String)getParametric().parObj(registeredParam)));
-					}
-					else
-					{
-						if(agentParam.getName().equals("parent"))
-							st.put(new ClaimVariable("parent", true), null);
+					AgentParameterName registeredParam = AgentParameterName.getName(agentParam.getName());
+					
+					if(registeredParam != null) // is a registered agent parameter
+						if(parametric.hasPar(registeredParam))
+							st.put(agentParam, new ClaimValue(parametric.parVal(registeredParam)));
 						else
-							log.error("registered agent parameter [" + agentParam + "] not found");
-					}
-				}
-				else 
-				{
-					if(claimParams.containsKey(agentParam.getName()))
-						st.put(agentParam, new ClaimValue(claimParams.get(agentParam.getName())));
-					else if(!agentParam.getName().equals("this"))
-						log.error("agent parameter [" + agentParam + "] not found");
-					 
+							getAgentLog().error("registered agent parameter [" + agentParam + "] not found");
+					else if(parametric.getUnregisteredParameters().isSet(agentParam.getName()))
+						st.put(agentParam,
+								new ClaimValue(parametric.getUnregisteredParameters().get(agentParam.getName())));
 				}
 			}
 		}
 		
 		// bind value for "this" parameter (agent's local name)
-		st.put(new ClaimVariable("this"), new ClaimValue(getParametric().parObj(AgentParameterName.AGENT_NAME)));
+		st.put(new ClaimVariable("this"), new ClaimValue(parametric.parVal(AgentParameterName.AGENT_NAME)));
 		
-		for(int i = 0; i < this.cad.getBehaviors().size(); i++)
+		// create behaviors
+		for(ClaimBehaviorDefinition cbd : cad.getBehaviors())
 		{
-			ClaimBehaviorDefinition cbd = this.cad.getBehaviors().get(i);
-			ClaimBehavior cb = new ClaimBehavior(cbd, st, this);
+			behaviors.add(new ClaimBehavior(cbd, st, this, getAgentLog()));
 			
-			behaviors.add(cb);
+			if(true)
+				// TODO if behavior is message-activated
+				registerMessageReceiver(this, Vocabulary.CLAIM.toString());
 			
-			if(cbd.getBehaviorType().equals(ClaimBehaviorType.REACTIVE))
-				// register wb service
-				if (getWebService() != null)
-					getWebService().registerWSBehavior();
+			// TODO input-activated behaviors
+			
+			// TODO
+			// if(cbd.getBehaviorType().equals(ClaimBehaviorType.REACTIVE))
+			// // register wb service
+			// if(getWebService() != null)
+			// getWebService().registerWSBehavior();
 		}
-			
 	}
-
-	public void registerBehaviors()
+	
+	@Override
+	protected void atSimulationStart(AgentEvent event)
 	{
-		try	
-		{
-			Thread.sleep(3000);
-		} catch(InterruptedException e)
-		{
-			e.printStackTrace();
-		}
+		super.atSimulationStart(event);
 		
-		int nr = 0;
-		for (final ClaimBehavior cb : getBehaviors())
-		{nr++;
-			if (cb.getBehaviorType().equals(ClaimBehaviorType.INITIAL)) {
-				
-				// FIXME emma
-				try	
-				{
-					Thread.sleep(6000);
-				} catch(InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-				
-				registerHandler(AgentEventType.AGENT_INITIAL_BEHAVIOR, new AgentEventHandler() {
-					@Override
-					public void handleEvent(AgentEvent event)
-					{
-						cb.action();
-					}
-				});
-				postAgentEvent(new AgentEvent(AgentEventType.AGENT_INITIAL_BEHAVIOR));
-			}
-			
-			else if (cb.getBehaviorType().equals(ClaimBehaviorType.REACTIVE)) {
-				/*registerHandler(AgentEventType.AGENT_REACTIVE_BEHAVIOR, new AgentEventHandler() {
-					@Override
-					public void handleEvent(AgentEvent event)
-					{
-						if (
-								(
-										(ClaimConstruct)cb.getBehaviorDefinition().getStatements().get(0)
-								).getType().equals(ClaimConstructType.CONDITION)
-						&& cb.currentStatement == 0) {*/
-							(new Thread(){
-							    public void run() {
-							      cb.action();
-							    }
-							  }).start();
-						/*}
-					}
-				});*/
-				//postAgentEvent(new AgentEvent(AgentEventType.AGENT_REACTIVE_BEHAVIOR));
-			}
-		}
-		postAgentEvent(new AgentEvent(AgentEventType.AGENT_REACTIVE_BEHAVIOR));
+		for(ClaimBehavior cb : behaviors)
+			if(cb.getBehaviorType().equals(ClaimBehaviorType.INITIAL))
+				cb.action();
 	}
 	
 	/**
-	 * Allows access to the agent's knowledge base from this package (e.g. for {@link ClaimBehavior}
-	 * ).
+	 * Allows access to the agent's knowledge base from this package (e.g. for {@link ClaimBehavior} ).
 	 * 
 	 * @return the knowledge base.
 	 */
-	Graph getKBase()
+	KnowledgeBase getKBase()
 	{
-		return getCognitive().getKnowledge();
+		// return getCognitive().getKnowledge();
+		// TODO
+		return null;
 	}
 	
-	protected void resetVisualization()
+	@Override
+	public void handleEvent(AgentEvent event)
 	{
-		getVisualizable().resetVisualization();
-		
-		if(behaviors != null)
-			for(Object cb : behaviors.toArray())
-			{
-				((ClaimBehavior)cb).resetGui();
-			}
-	}
-	
-	public Vector<ClaimBehavior> getBehaviors()
-	{
-		return behaviors;
-	}
-	
-	public void matchStatement(final String source, final String content)
-	{
-		if (!content.contains("struct message"))
-			return;
-		
-		for (final ClaimBehavior cb : behaviors)
-		{
-			if (cb.getBehaviorType().equals(ClaimBehaviorType.REACTIVE)) {
-				if (cb.getCurrentStatement() instanceof ClaimFunctionCall) {
-					ClaimFunctionCall cf = (ClaimFunctionCall) cb.getCurrentStatement();
-					if (cf.getFunctionType().equals(ClaimFunctionType.RECEIVE)) {
-						Vector<ClaimConstruct> cc = cf.getArguments();
-						String[] elem = cc.get(cc.size() - 1).toString().split(" ");
-						
-						boolean pass = true;
-						for (String e : elem) {
-							if (!e.contains("?") && !content.contains(e)) {
-								pass = false;
-							}
-						}
-						
-						if (pass) {
-							if (elem.length == content.split(" ").length) {
-								registerHandler(AgentEventType.AGENT_REACTIVE_BEHAVIOR, new AgentEventHandler() {
-									@Override
-									public void handleEvent(AgentEvent event)
-									{
-										try	
-										{
-											Thread.sleep(6000);
-										} catch(InterruptedException e)
-										{
-											e.printStackTrace();
-										}
-
-										(new Thread(){
-										    public void run() {
-										      cb.actionOnReceive(source, content);
-										    }
-										  }).start();
-									}
-								});
-								postAgentEvent(new AgentEvent(AgentEventType.AGENT_REACTIVE_BEHAVIOR));
-							}
-						}
-					}
-				}
-			}
-		}
+		// TODO receive message
 		
 	}
 	
-	public Logger getLog()
+	/**
+	 * Method for use by ClaimBehavior, calling {@link AgentComponent#sendMessage()}.
+	 * 
+	 * @param content
+	 *            - the content of the message.
+	 * @param targetAgent
+	 *            - the receiver of the message.
+	 * @return an indication of success.
+	 */
+	protected boolean sendMessage(String content, String targetAgent)
 	{
-		return log;
+		return super.sendMessage(content, getComponentEndpoint(Vocabulary.CLAIM.toString()), targetAgent,
+				Vocabulary.CLAIM.toString());
 	}
+	
+	// public void matchStatement(final String source, final String content)
+	// {
+	// if(!content.contains("struct message"))
+	// return;
+	//
+	// for(final ClaimBehavior cb : behaviors)
+	// {
+	// if(cb.getBehaviorType().equals(ClaimBehaviorType.REACTIVE))
+	// {
+	// if(cb.getCurrentStatement() instanceof ClaimFunctionCall)
+	// {
+	// ClaimFunctionCall cf = (ClaimFunctionCall) cb.getCurrentStatement();
+	// if(cf.getFunctionType().equals(ClaimFunctionType.RECEIVE))
+	// {
+	// Vector<ClaimConstruct> cc = cf.getArguments();
+	// String[] elem = cc.get(cc.size() - 1).toString().split(" ");
+	//
+	// boolean pass = true;
+	// for(String e : elem)
+	// {
+	// if(!e.contains("?") && !content.contains(e))
+	// {
+	// pass = false;
+	// }
+	// }
+	//
+	// if(pass)
+	// {
+	// if(elem.length == content.split(" ").length)
+	// {
+	// registerHandler(AgentEventType.AGENT_REACTIVE_BEHAVIOR, new AgentEventHandler() {
+	// @Override
+	// public void handleEvent(AgentEvent event)
+	// {
+	// try
+	// {
+	// Thread.sleep(6000);
+	// } catch(InterruptedException e)
+	// {
+	// e.printStackTrace();
+	// }
+	//
+	// (new Thread() {
+	// public void run()
+	// {
+	// cb.actionOnReceive(source, content);
+	// }
+	// }).start();
+	// }
+	// });
+	// postAgentEvent(new AgentEvent(AgentEventType.AGENT_REACTIVE_BEHAVIOR));
+	// }
+	// }
+	// }
+	// }
+	// }
+	// }
+	//
+	// }
 }

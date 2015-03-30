@@ -8,6 +8,7 @@ import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
+import tatami.core.agent.behavior.BehaviorComponent;
 import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.hierarchical.HierarchicalComponent;
 import tatami.core.agent.kb.CognitiveComponent;
@@ -98,6 +99,11 @@ public abstract class AgentComponent implements Serializable
 		 * The name of a component extending {@link MovementComponent}.
 		 */
 		MOVEMENT_COMPONENT,
+		
+		/**
+		 * The name of a component extending {@link BehaviorComponent}.
+		 */
+		BEHAVIOR_COMPONENT,
 		
 		/**
 		 * The name of a component extending {@link WebserviceComponent}.

@@ -130,10 +130,6 @@ public class CompositeAgent implements Serializable, AgentManager
 						synchronized(eventQueue)
 						{
 							state = AgentState.RUNNING;
-							// FIXME this should be done by intercepting AGENT_START
-							if(getComponent(AgentComponentName.S_CLAIM_COMPONENT) != null)
-								((ClaimComponent) getComponent(AgentComponentName.S_CLAIM_COMPONENT))
-										.registerBehaviors();
 						}
 						break;
 					case AGENT_STOP:
