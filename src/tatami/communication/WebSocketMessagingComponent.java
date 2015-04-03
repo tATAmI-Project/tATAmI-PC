@@ -15,33 +15,15 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 	}
 	
 	@Override
-	protected void parentChangeNotifier(CompositeAgent oldParent) {
-		// TODO Auto-generated method stub
-		super.parentChangeNotifier(oldParent);
+	protected void atAgentStart(AgentEvent event)
+	{
+		super.atAgentStart(event);
 		
-		// vezi JadeMessaging
-		registerHandler(AgentEventType.AGENT_START, new AgentEventHandler() {
-			String agentName;
-			
-			WebSocketMessagingComponent messagingComponent;
-			
-			public AgentEventHandler init(String agentName, WebSocketMessagingComponent messagingComponent){
-				this.agentName = agentName;
-				this.messagingComponent = messagingComponent;
-				return this;
-			}
-			
-			@Override
-			public void handleEvent(AgentEvent event){
-				if(!(getPlatformLink() instanceof WebSocketMessagingPlatform))
-					throw new IllegalStateException("Platform Link is not of expected type");
-				platform = (WebSocketMessagingPlatform)getPlatformLink();
-				platform.register(agentName, messagingComponent);
-				
-				// TODO register with platform that this component receives messages for this agent - getAgentName()
-				// TODO when receiving a message, call 9from this class): receiveMessage(source, destination, content);
-			}
-		}.init(getAgentName(), this));
+		if(!(getPlatformLink() instanceof WebSocketMessagingPlatform))
+			throw new IllegalStateException("Platform Link is not of expected type");
+		platform = (WebSocketMessagingPlatform)getPlatformLink();
+		platform.register(getAgentName(), this);
+
 	}
 	
 	@Override
@@ -49,11 +31,6 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 		return super.getPlatformLink();
 	}
 
-	public WebSocketMessagingComponent(WebSocketMessagingPlatform platform){
-		this.platform = platform;
-		System.out.println("Constructor");
-	}
-	
 	@Override
 	public String getAgentAddress(String agentName, String containerName) {
 		System.out.println("Get agent address " + agentName);
