@@ -28,6 +28,14 @@ public interface AgentManager
 	public boolean stop();
 	
 	/**
+	 * Queries the agent to check if the agent has completed its startup and is fully functional. The agent is running
+	 * after it has fully started and until it is {@link #stop}ed.
+	 * 
+	 * @return <code>true</code> if the agent is currently running.
+	 */
+	public boolean isRunning();
+	
+	/**
 	 * Creates a link from the agent to the platform, which will facilitate the invocation of specific platform
 	 * functionality. The passed instance may be the platform itself, or some agent-specific instance, depending on the
 	 * platform.
