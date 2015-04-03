@@ -445,7 +445,7 @@ public class SimulationManager implements AgentManager
 	protected void createAgents()
 	{
 		agentsCreated = true;
-
+		
 		// load agents on their respective platforms
 		Map<String, AgentManager> agentManagers = new HashMap<String, AgentManager>();
 		for(AgentCreationData agentData : agents)
@@ -480,6 +480,27 @@ public class SimulationManager implements AgentManager
 			else
 				log.error("agent [" + agent.getKey() + "] failed to start properly.");
 		}
+		
+		// FIXME add await timeout
+		// TODO what about agents on other machines?
+		boolean stillStarting = true;
+		while(stillStarting)
+		{
+			stillStarting = false;
+			for(AgentManager agent : agentManagers.values())
+			{
+				if(!agent.isRunning())
+					stillStarting = true;
+			}
+			try
+			{
+				Thread.sleep(50); // FIXME constant timeout in class
+			} catch(InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		// agents started
 		for(String platformName : platforms.keySet())
 		{
 			SimulationLinkAgent simAgent = simulationAgents.get(platformName);
@@ -563,6 +584,16 @@ public class SimulationManager implements AgentManager
 	public boolean setPlatformLink(PlatformLink link)
 	{
 		return false;
+	}
+	
+	/**
+	 * As this class implements {@link AgentManager} only for convenience (abusing), one can consider it is always
+	 * running.
+	 */
+	@Override
+	public boolean isRunning()
+	{
+		return true;
 	}
 	
 	/**

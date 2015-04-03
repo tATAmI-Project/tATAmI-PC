@@ -409,6 +409,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * 
 	 * @return <code>true</code> if the agent is currently RUNNING; <code>false</code> otherwise.
 	 */
+	@Override
 	public boolean isRunning()
 	{
 		return state == AgentState.RUNNING;
