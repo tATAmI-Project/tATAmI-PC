@@ -37,7 +37,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	 */
 	public int componentType = NONE;
 
-	public int port = -1;
+	public int port = 9002;
 	
 	
 	public AutobahnServer server;

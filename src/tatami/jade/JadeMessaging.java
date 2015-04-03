@@ -86,6 +86,12 @@ public class JadeMessaging extends MessagingComponent
 	}
 	
 	@Override
+	public String getAgentAddress(String agentName)
+	{
+		return getAgentAddress(agentName, null);
+	}
+
+	@Override
 	public boolean sendMessage(String target, String source, String content)
 	{
 		String[] targetElements = target.split(ADDRESS_SEPARATOR, 4);
@@ -136,10 +142,9 @@ public class JadeMessaging extends MessagingComponent
 		return wrapper;
 	}
 	
-	@Override
 	public VisualizableComponent getVisualizable()
 	{
-		return super.getVisualizable();
+		return (VisualizableComponent) getAgentComponent(AgentComponentName.VISUALIZABLE_COMPONENT);
 	}
 	
 }

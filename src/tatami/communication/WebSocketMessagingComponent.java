@@ -60,6 +60,12 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 		return agentName;
 	}
 	
+	@Override
+	public String getAgentAddress(String agentName)
+	{
+		return getAgentAddress(agentName, null);
+	}
+	
 	public void onMessage(String message){
 		System.out.println("Agent received message: " + message);
 	}
