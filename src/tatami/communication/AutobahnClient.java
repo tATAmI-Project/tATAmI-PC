@@ -1,12 +1,17 @@
 package tatami.communication;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import main.java.org.java_websocket.client.WebSocketClient;
 import main.java.org.java_websocket.drafts.Draft;
 import main.java.org.java_websocket.handshake.ServerHandshake;
 
 public class AutobahnClient extends WebSocketClient {
+	
+
+	HashMap<String, WebSocketMessagingPlatform> pltformRouting;
 
 	/**
 	 * 
@@ -15,10 +20,15 @@ public class AutobahnClient extends WebSocketClient {
 	 */
 	public AutobahnClient( Draft d , URI uri ) {
 		super( uri, d );
+		pltformRouting = new HashMap<String, WebSocketMessagingPlatform>();
 	}
 
 	@Override
 	public void onOpen(ServerHandshake handshakedata) {
+	}
+	
+	public void registerPlatform(WebSocketMessagingPlatform platform, String agentName){
+		pltformRouting.put(agentName, platform);
 	}
 	
 	public void newAgentNotification(String agentName){
@@ -28,7 +38,10 @@ public class AutobahnClient extends WebSocketClient {
 
 	@Override
 	public void onMessage(String message) {
-		System.out.println("Message received " + message);
+		System.out.println("Message received client: " + message);
+		String[] parts = message.split("::");
+		pltformRouting.get(parts[0]).onMessage(parts[0], parts[1]);
+		
 	}
 
 	@Override

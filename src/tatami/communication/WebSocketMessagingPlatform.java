@@ -1,7 +1,9 @@
 package tatami.communication;
 
+
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 
 import main.java.org.java_websocket.WebSocketImpl;
 import main.java.org.java_websocket.drafts.Draft;
@@ -44,6 +46,8 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	
 	Thread clientThread;
 	
+	HashMap<String, WebSocketMessagingComponent> agents;
+	
 
 	/**
 	 * 
@@ -61,6 +65,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	public WebSocketMessagingPlatform setConfig(XMLNode configuration,
 			BootSettingsManager settings) {
 
+		agents = new HashMap<String, WebSocketMessagingComponent>();
 		System.out.println("Config entered " + settings.getMainHost());
 
 		String tmpComponentType = settings.getMainHost();
@@ -110,7 +115,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 
 			String protocol = "ws";
 			String host = "localhost";
-			int port = 9001;
+			int port = 9002;
 
 			String serverlocation = protocol + "://" + host + ":" + port;
 			URI uri = null;
@@ -145,10 +150,21 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 		// TODO Auto-generated method stub
 		return true;
 	}
+	
+	public void onMessage(String agentName, String message){
+		System.out.println("########################## " + agentName);
+		agents.get(agentName).onMessage(message);
+	}
+	
+	public void register(String agentName, WebSocketMessagingComponent messagingComponent){
+		System.out.println("************************** " + agentName);
+		agents.put(agentName, messagingComponent);
+	}
 
 	@Override
 	public boolean loadAgent(String containerName, AgentManager agentManager) {
 		agentManager.setPlatformLink(this);
+		client.registerPlatform(this, agentManager.getAgentName());
 		client.newAgentNotification(agentManager.getAgentName());
 		return true;
 	}

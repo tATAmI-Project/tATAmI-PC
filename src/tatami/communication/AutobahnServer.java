@@ -51,7 +51,7 @@ public class AutobahnServer extends WebSocketServer {
 		}
 		else{
 			String target = message.substring(message.indexOf("::") + 2, message.lastIndexOf("::"));
-			String content = message.substring(message.lastIndexOf("::") + 2);
+			String content = target + "::" + message.substring(message.lastIndexOf("::") + 2);
 			System.out.println("Message to be sent " + target + " -- " + content);
 			registry.get(target).send(content);
 		}

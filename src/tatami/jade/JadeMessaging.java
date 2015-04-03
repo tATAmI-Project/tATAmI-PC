@@ -28,6 +28,8 @@ public class JadeMessaging extends MessagingComponent
 	{
 		super.parentChangeNotifier(oldParent);
 		
+		
+		
 		registerHandler(AgentEventType.AGENT_START, new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)
