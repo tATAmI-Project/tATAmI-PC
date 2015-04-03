@@ -9,7 +9,6 @@ import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
-import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.messaging.MessagingComponent;
 
 /**
@@ -127,6 +126,12 @@ public class PingTestComponent extends AgentComponent
 	{
 		super.atAgentStart(event);
 		
+		if(getParent() != null)
+		{
+			messenger = (MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT);
+			thisAgent = getAgentName();
+		}
+		
 		registerMessageReceiver(new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent messageEvent)
@@ -136,18 +141,14 @@ public class PingTestComponent extends AgentComponent
 		}, "");
 		
 		pingTimer = new Timer();
-		pingTimer.schedule(new Pinger(), PING_INITIAL_DELAY, PING_PERIOD);
 	}
 	
 	@Override
-	protected void parentChangeNotifier(CompositeAgent oldParent)
+	protected void atSimulationStart(AgentEvent event)
 	{
-		super.parentChangeNotifier(oldParent);
-		
-		if(getParent() != null)
-		{
-			messenger = (MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT);
-			thisAgent = getAgentName();
-		}
+		super.atSimulationStart(event);
+		System.out.println("here");
+		pingTimer.schedule(new Pinger(), PING_INITIAL_DELAY, PING_PERIOD);
 	}
+	
 }
