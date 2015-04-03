@@ -45,6 +45,7 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 	
 	public void onMessage(String message){
 		System.out.println("Agent received message: " + message);
+		receiveMessage(source, destination, content); // TODO
 	}
 
 	@Override
