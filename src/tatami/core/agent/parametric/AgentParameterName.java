@@ -1,10 +1,12 @@
 package tatami.core.agent.parametric;
 
-import java.util.Collection;
+import tatami.simulation.AgentLoader;
+import tatami.simulation.Boot;
+import tatami.simulation.PlatformLoader;
 
 
 /**
- * Here be all names of 'registered' parameters (see {@link AgentParameters}) used by any component of the agent.
+ * Here be all names of 'registered' parameters (see {@link AgentParameters}).
  * <p>
  * Each parameter has an internal name - the constant in the enum - and the name in the scenario file - given in the
  * constructor of the enum constant.
@@ -21,12 +23,11 @@ public enum AgentParameterName {
 	
 	// ///////// Simulation/Boot
 	/**
-	 * The class (for non-CLAIM agents) or the type (adf definition) (for CLAIM agents) of the agent.
+	 * The class of the agent implementation, in case the loader needs it.
 	 * 
-	 * Used by <code>simulation.Boot</code> (to load the agent) and <code>WSAgent</code> (to register the service under
-	 * this type).
+	 * Used by {@link Boot}.
 	 */
-	AGENT_CLASS("class"),
+	AGENT_CLASS("classpath"),
 	
 	/**
 	 * The {@link AgentLoader} to use for this agent.
@@ -41,113 +42,21 @@ public enum AgentParameterName {
 	/**
 	 * Agent packages with classes that are relevant to this agent (GUIs, java functions, etc).
 	 * 
-	 * Used by {@link VisualizableAgent} (for the GUI) and {@link ClaimAgent} (for java function classes).
+	 * Used by VisualizableAgent (for the GUI) and ClaimAgent (for java function classes).
 	 */
 	AGENT_PACKAGE("agentPackage"),
 	
-	/**
-	 * Adf Agent packages with classes that are relevant to this agent.
-	 * 
-	 * Used by {@link ClaimAgent} (for sclaim code).
-	 */
-	ADF_PACKAGE("adfPath"),
-	
-	/**
-	 * Specifies the classes with java code to attach to the agent definition.
-	 * 
-	 * Used by <code>simulation.Boot</code> / <code>claim.ClaimComponent</code>.
-	 */
-	JAVA_CODE("java-code"),
-	
-	// ///////// BaseAgent
+	// ///////// basic functionality
 	/**
 	 * The name of the agent.
-	 * 
-	 * Used by {@link BaseAgent}.
 	 */
 	AGENT_NAME("name"),
 	
-	/**
-	 * Initial agent knowledge, represented as a text representation of the knowledge graph.
-	 * 
-	 * Used by {@link BaseAgent}.
-	 */
-	KNOWLEDGE("knowledge"),
-	
-	// ///////// VisualizableAgent
-	/**
-	 * The type of the window (used for <code>WindowLayout</code>).
-	 * 
-	 * Used by {@link VisualizableAgent}.
-	 */
-	WINDOW_TYPE("windowType"),
-	
-	/**
-	 * The GUI class of the agent. See {@link VisualizableAgent} to see how this works.
-	 * 
-	 * Used by {@link VisualizableAgent}.
-	 */
-	GUI("GUI"),
-	
-	// ///////// HierarchicalAgent
-	/**
-	 * Equals <code>"true"</code> if the agent should not leave its container when the parent moves.
-	 * 
-	 * Used by {@link HierarchicalAgent}.
-	 */
-	FIXED("fixed"),
-	
-	/**
-	 * The hierarchical parent (which the agent follows when the parent moves).
-	 * 
-	 * Used by {@link HierarchicalAgent}.
-	 */
-	HIERARCHICAL_PARENT("parent"),
-	
-	/**
-	 * The initial location of the agent (where the agent should move to immediately after creation).
-	 * 
-	 * Is a {@link Location}.
-	 * 
-	 * Used by {@link HierarchicalAgent}.
-	 */
-	INITIAL_LOCATION("initialLocation"),
-	
-	// ////////// ClaimAgent
-	/**
-	 * The definition of the CLAIM agent.
-	 * 
-	 * Is a {@link ClaimAgentDefinition}.
-	 * 
-	 * Used by {@link ClaimAgent}.
-	 */
-	AGENT_DEFINITION("agentDefinition"),
-	
-	// //////// SimulationAgent
-	/**
-	 * Is a {@link JadeInterface}.
-	 */
-	JADE_INTERFACE("jadeInterface"),
-	
-	/**
-	 * Is a {@link Collection} of <code>AgentCreationData</code>.
-	 */
-	AGENTS("agents"),
-	
-	/**
-	 * Name of the Visualization Agent.
-	 */
-	VISUALIZATION_AGENT("visualizationAgent"),
-	
-	/**
-	 * The timeline.
-	 * 
-	 * Is a <code>XMLNode</code>.
-	 */
-	TIMELINE("timeline"),
-	
 	;
 	
+	/**
+	 * The name of the parameter, as appearing in the scenario file.
+	 */
 	String	name	= null;
 	
 	/**

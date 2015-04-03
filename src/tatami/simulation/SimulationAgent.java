@@ -208,7 +208,7 @@ public class SimulationAgent extends VisualizableComponent {
 
 	protected void setupGui() {
 		((JButton) ((PCDefaultAgentGui) gui)
-				.getComponent(SimulationComponent.CREATE.toString()))
+				.getAgentComponent(SimulationComponent.CREATE.toString()))
 				.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
@@ -221,7 +221,7 @@ public class SimulationAgent extends VisualizableComponent {
 				});
 
 		((JButton) ((PCDefaultAgentGui) gui)
-				.getComponent(SimulationComponent.CLEAR.toString()))
+				.getAgentComponent(SimulationComponent.CLEAR.toString()))
 				.addActionListener(new ActionListener() {
 					@SuppressWarnings("synthetic-access")
 					@Override
@@ -236,7 +236,7 @@ public class SimulationAgent extends VisualizableComponent {
 				});
 
 		((JButton) ((PCDefaultAgentGui) gui)
-				.getComponent(SimulationComponent.EXIT.toString()))
+				.getAgentComponent(SimulationComponent.EXIT.toString()))
 				.addActionListener(new ActionListener() {
 					@SuppressWarnings("synthetic-access")
 					@Override
@@ -254,17 +254,17 @@ public class SimulationAgent extends VisualizableComponent {
 
 		if (events.isEmpty()) {
 			((JButton) ((PCDefaultAgentGui) gui)
-					.getComponent(SimulationComponent.START.toString()))
+					.getAgentComponent(SimulationComponent.START.toString()))
 					.setEnabled(false);
 			((JButton) ((PCDefaultAgentGui) gui)
-					.getComponent(SimulationComponent.PAUSE.toString()))
+					.getAgentComponent(SimulationComponent.PAUSE.toString()))
 					.setEnabled(false);
 			((JLabel) ((PCDefaultAgentGui) gui)
-					.getComponent(SimulationComponent.TIME.toString()))
+					.getAgentComponent(SimulationComponent.TIME.toString()))
 					.setText("no events");
 		} else {
 			((JButton) ((PCDefaultAgentGui) gui)
-					.getComponent(SimulationComponent.START.toString()))
+					.getAgentComponent(SimulationComponent.START.toString()))
 					.addActionListener(new ActionListener() {
 						@SuppressWarnings("synthetic-access")
 						@Override
@@ -287,14 +287,14 @@ public class SimulationAgent extends VisualizableComponent {
 					});
 
 			((JButton) ((PCDefaultAgentGui) gui)
-					.getComponent(SimulationComponent.PAUSE.toString()))
+					.getAgentComponent(SimulationComponent.PAUSE.toString()))
 					.addActionListener(new ActionListener() {
 						@SuppressWarnings("synthetic-access")
 						@Override
 						public void actionPerformed(ActionEvent e) {
 							if (events.isEmpty()) {
 								((JLabel) ((PCDefaultAgentGui) gui)
-										.getComponent(SimulationComponent.TIME
+										.getAgentComponent(SimulationComponent.TIME
 												.toString()))
 										.setText("no more events");
 								if (!isPaused) {
@@ -332,7 +332,7 @@ public class SimulationAgent extends VisualizableComponent {
 			public void run() {
 				time++;
 				((JLabel) ((PCDefaultAgentGui) gui)
-						.getComponent(SimulationComponent.TIME.toString()))
+						.getAgentComponent(SimulationComponent.TIME.toString()))
 						.setText("___" + (int) (time / 600) + ":"
 								+ (int) ((time % 600) / 10) + "." + (time % 10)
 								+ "___");

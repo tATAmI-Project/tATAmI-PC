@@ -28,7 +28,7 @@ public class AgentEvent extends Config
 		/**
 		 * Event occurs when the agent must be destroyed and components need to close.
 		 */
-		AGENT_EXIT(AgentSequenceType.DESTRUCTIVE),
+		AGENT_STOP(AgentSequenceType.DESTRUCTIVE),
 		
 		/**
 		 * Event occurs when the agent must move to a different machine.
@@ -47,14 +47,14 @@ public class AgentEvent extends Config
 		AGENT_MESSAGE(AgentSequenceType.UNORDERED),
 		
 		/**
-		 * Event occurs after the agent started. 
+		 * Event occurs when the start of the simulation is requested by the user.
 		 */
-		AGENT_INITIAL_BEHAVIOR(AgentSequenceType.UNORDERED),
+		SIMULATION_START(AgentSequenceType.UNORDERED),
 		
 		/**
-		 * Event occurs after the agent started. 
+		 * Event occurs when the simulation is paused by the user.
 		 */
-		AGENT_REACTIVE_BEHAVIOR(AgentSequenceType.UNORDERED),
+		SIMULATION_PAUSE(AgentSequenceType.UNORDERED),
 		
 		;
 		
@@ -200,4 +200,11 @@ public class AgentEvent extends Config
 	{
 		return parameters.get(name);
 	}
+	
+	@Override
+	public String toString()
+	{
+		return type + ":" + parameters.toString();
+	}
+	
 }

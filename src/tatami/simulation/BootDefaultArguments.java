@@ -11,9 +11,9 @@
  ******************************************************************************/
 package tatami.simulation;
 
+import net.xqhs.windowLayout.LayoutIndications.BarPosition;
+import net.xqhs.windowLayout.grid.GridLayoutIndications;
 import tatami.core.agent.visualization.AgentGuiConfig;
-import tatami.pc.util.windowLayout.LayoutIndications;
-import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
 
 /**
  * This class traditionally contains settings for simulations, in order to decouple it from Boot (making it easy to
@@ -35,6 +35,7 @@ public class BootDefaultArguments
 	// static final String scenarioFileName = "src-scenario/scenario/s2014/SmartConference/timeline.xml";
 	// static final String scenarioFileName = "src-scenario/scenario/s2014/demo/smart_conference.xml";
 	// static final String scenarioFileName = "src-scenario/scenario/s2014/SmartConference/even_odd_scenario.xml";
+	
 	/**
 	 * Main (Jade) host.
 	 */
@@ -59,7 +60,7 @@ public class BootDefaultArguments
 	/**
 	 * The width of the application space.
 	 */
-	static final int			applicationLayoutWidth	= 1400;
+	static final int			applicationLayoutWidth	= 1200;
 	
 	/**
 	 * The height of the application space.

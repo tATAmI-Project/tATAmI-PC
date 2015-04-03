@@ -84,100 +84,49 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		VISUALIZATION_MONITOR,
 		
 		/**
-		 * Sent by Simulator to the Visualizer, to instruct all visualized agents to exit, following user request to end
-		 * simulation.
+		 * Posts an event to the agent's event queue, as requested by the simulation agent.
 		 */
-		PREPARE_EXIT,
-		
-		/**
-		 * Instructs immediate exit, indicating the end of the simulation.
-		 */
-		DO_EXIT,
+		CONTROL,
 	}
+	
+	/**
+	 * The name of the parameter in the component parameter set that corresponds to the name of the GUI.
+	 */
+	public static final String				GUI_PARAMETER_NAME			= null;
+	/**
+	 * The name of the parameter in the component parameter set that corresponds to the type of the window.
+	 */
+	public static final String				WINDOW_TYPE_PARAMETER_NAME	= null;
 	
 	/**
 	 * The logging {@link Unit}.
 	 */
-	protected transient UnitComponentExt	loggingUnit			= null;
+	protected transient UnitComponentExt	loggingUnit					= null;
 	/**
 	 * The {@link Config} for the GUI. Should remain the same object throughout the agent's lifecycle, although it may
 	 * be changed, and the agent's GUI will be recreated.
 	 */
-	protected AgentGuiConfig				guiConfig			= new AgentGuiConfig();
+	protected AgentGuiConfig				guiConfig					= new AgentGuiConfig();
 	/**
 	 * The GUI implementation. Depends on platform, but implements {@link AgentGui}.
 	 */
-	protected transient AgentGui			gui					= null;
+	protected transient AgentGui			gui							= null;
 	
 	/**
 	 * The name of the entity to which the agent has to report.
 	 */
-	private String							visualizationParent	= null;
+	private String							visualizationParent			= null;
 	/**
 	 * The name of the entity which serves as the current container for the agent.
 	 */
-	private String							currentContainer	= null;
+	private String							currentContainer			= null;
 	
 	/**
 	 * Create a new {@link VisualizableComponent} instance:
-	 * <ul>
-	 * <li>Creates a GUI
-	 * <li>Creates a log, links it to the GUI.
-	 * <li>Registers message receivers with the {@link MessagingComponent} (if any).
-	 * <li>Registers handlers for agent movement.
-	 * </ul>
-	 * 
-	 * windowType should be set before if a special value is needed
 	 */
 	public VisualizableComponent()
 	{
 		super(AgentComponentName.VISUALIZABLE_COMPONENT);
-		
-		// register event handlers
-		
-		registerHandler(AgentEventType.AGENT_START, new AgentEventHandler() {
-			@Override
-			public void handleEvent(AgentEvent event)
-			{
-				resetVisualization();
-				registerMessageHandlers();
-			}
-		});
-		
-		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler() {
-			@Override
-			public void handleEvent(AgentEvent event)
-			{
-				MovementComponent mvmt = getMovement();
-				if(mvmt != null)
-				{
-					String destination = mvmt.extractDestination(event);
-					if(!destination.equals(getCurrentContainer()))
-					{
-						getLog().info("moving to [" + destination.toString() + "]");
-						setCurrentContainer(destination.toString());
-						removeVisualization();
-					}
-				}
-			}
-		});
-		
-		registerHandler(AgentEventType.AFTER_MOVE, new AgentEventHandler() {
-			@Override
-			public void handleEvent(AgentEvent event)
-			{
-				resetVisualization();
-				getLog().info(getAgentName() + ": arrived after move");
-			}
-		});
-		
-		registerHandler(AgentEventType.AGENT_EXIT, new AgentEventHandler() {
-			@Override
-			public void handleEvent(AgentEvent event)
-			{
-				removeVisualization();
-			}
-		});
 	}
 	
 	@Override
@@ -193,15 +142,8 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		else
 		{ // setup additional GUI configuration
 			guiConfig.setWindowName(getAgentName());
-			ParametricComponent parametric = getParametric();
-			if((parametric != null))
-			{
-				if(parametric.hasPar(AgentParameterName.WINDOW_TYPE))
-					guiConfig.setWindowType(parametric.parVal(AgentParameterName.WINDOW_TYPE));
-				if(parametric.hasPar(AgentParameterName.GUI))
-					guiConfig.setGuiClass(parametric.parVal(AgentParameterName.GUI),
-							parametric.parVals(AgentParameterName.AGENT_PACKAGE));
-			}
+			if(getComponentData().isSet(WINDOW_TYPE_PARAMETER_NAME))
+				guiConfig.setWindowType(getComponentData().get(WINDOW_TYPE_PARAMETER_NAME));
 			if(getParent().isRunning())
 			{ // creates visualization & log
 				resetVisualization();
@@ -210,39 +152,91 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		}
 	}
 	
+	@Override
+	protected void atAgentStart(AgentEvent event)
+	{
+		super.atAgentStart(event);
+		
+		try
+		{
+			if(getComponentData().isSet(GUI_PARAMETER_NAME))
+				guiConfig.setGuiClass(getComponentData().get(GUI_PARAMETER_NAME),
+						((ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT))
+								.parVals(AgentParameterName.AGENT_PACKAGE));
+		} catch(NullPointerException e)
+		{
+			// it's ok, no parametric component
+		}
+		resetVisualization();
+		registerMessageHandlers();
+	}
+	
+	@Override
+	protected void atAgentStop(AgentEvent event)
+	{
+		super.atAgentStop(event);
+		removeVisualization();
+	}
+	
+	@Override
+	protected void atBeforeAgentMove(AgentEvent event)
+	{
+		super.atBeforeAgentMove(event);
+		
+		MovementComponent mvmt = (MovementComponent) getAgentComponent(AgentComponentName.MOVEMENT_COMPONENT);
+		if(mvmt != null)
+		{
+			String destination = mvmt.extractDestination(event);
+			if(!destination.equals(getCurrentContainer()))
+			{
+				getLog().info("moving to [" + destination.toString() + "]");
+				setCurrentContainer(destination.toString());
+				removeVisualization();
+			}
+		}
+	}
+	
+	@Override
+	protected void atAfterAgentMove(AgentEvent event)
+	{
+		super.atAfterAgentMove(event);
+		
+		resetVisualization();
+		getLog().info(getAgentName() + ": arrived after move");
+	}
+	
 	/**
 	 * Registers the message handlers with the messaging component of the agent.
 	 */
 	protected void registerMessageHandlers()
 	{
 		// registers message receivers: receive the visualization root; receive exit message.
-		final MessagingComponent msgr = getMessaging();
-		if(msgr != null)
-		{
-			getLog().trace("Registering message handlers");
-			registerMessageReceiver(
-					msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.VISUALIZATION_MONITOR.toString()),
-					new AgentEventHandler() {
-						@Override
-						public void handleEvent(AgentEvent event)
-						{
-							String parent = msgr.extractContent(event);
-							setVisualizationParent(parent);
-							getLog().info("visualization root received: [" + parent + "]");
-						}
-					});
-			registerMessageReceiver(msgr.makePath(Vocabulary.VISUALIZATION.toString(), Vocabulary.DO_EXIT.toString()),
-					new AgentEventHandler() {
-						@Override
-						public void handleEvent(AgentEvent event)
-						{
-							getLog().info("exiting...");
-							postAgentEvent(new AgentEvent(AgentEventType.AGENT_EXIT));
-						}
-					});
-		}
-		else
-			getLog().warn("No messaging component present.");
+		getLog().trace("Registering message handlers");
+		if(!registerMessageReceiver(new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				String parent = ((MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT)).extractContent(event);
+				setVisualizationParent(parent);
+				getLog().info("visualization root received: [" + parent + "]");
+			}
+		}, Vocabulary.VISUALIZATION.toString(), Vocabulary.VISUALIZATION_MONITOR.toString()))
+			getLog().warn("No messaging component present");
+		registerMessageReceiver(new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				String content = (String) event.getParameter(MessagingComponent.CONTENT_PARAMETER);
+				getLog().info("received control event [].", content);
+				postAgentEvent(new AgentEvent(AgentEventType.valueOf(content)));
+			}
+		}, Vocabulary.VISUALIZATION.toString(), Vocabulary.CONTROL.toString());
+	}
+	
+	@Override
+	protected AgentComponent getAgentComponent(AgentComponentName name)
+	{
+		return super.getAgentComponent(name);
 	}
 	
 	/**
@@ -345,9 +339,8 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			if((reportType == Vocabulary.LOGGING_UPDATE) || (reportType == Vocabulary.ADD_PARENT)
 					|| (reportType == Vocabulary.REMOVE_PARENT) || (reportType == Vocabulary.MOVE))
 			{
-				MessagingComponent msgr = (MessagingComponent) getComponent(AgentComponentName.MESSAGING_COMPONENT);
-				if(msgr != null)
-					return msgr.sendMessage(visualizationParent, msgr.makePath(reportType.toString()), content);
+				sendMessage(content, getComponentEndpoint(Vocabulary.VISUALIZATION.toString()), visualizationParent,
+						Vocabulary.VISUALIZATION.toString(), reportType.toString());
 			}
 			else
 				throw new IllegalArgumentException("Parameter is not a correct report type:" + reportType);
@@ -398,34 +391,18 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	/**
 	 * Setter for <code>currentContainer</code>.
 	 * 
-	 * @param containerName - the name of the container the agent is in or going to move to.
+	 * @param containerName
+	 *            - the name of the container the agent is in or going to move to.
 	 */
 	protected void setCurrentContainer(String containerName)
 	{
 		currentContainer = containerName;
 	}
-
-	/**
-	 * Relays calls to the underlying {@link AgentComponent} instance in order to avoid synthetic access warnings for
-	 * event handlers.
-	 */
-	@Override
-	public MessagingComponent getMessaging()
-	{
-		return super.getMessaging();
-	}
 	
-	/**
-	 * Relays calls to the underlying {@link AgentComponent} instance in order to avoid synthetic access warnings for
-	 * event handlers.
-	 * 
-	 * @return the movement component.
-	 */
-	protected MovementComponent getMovement()
+	@Override
+	protected ComponentCreationData getComponentData()
 	{
-		if(super.hasComponent(AgentComponentName.MOVEMENT_COMPONENT))
-			return (MovementComponent) super.getComponent(AgentComponentName.MOVEMENT_COMPONENT);
-		return null;
+		return super.getComponentData();
 	}
 	
 	/**

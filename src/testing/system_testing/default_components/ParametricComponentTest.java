@@ -1,5 +1,7 @@
 package testing.system_testing.default_components;
 
+import java.util.Arrays;
+
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.Unit;
 import net.xqhs.util.logging.UnitComponent;
@@ -34,18 +36,30 @@ public class ParametricComponentTest extends Unit
 		li("starting...");
 		
 		CompositeAgent agent = new CompositeAgent();
-		AgentParameters agentParameters = new AgentParameters().add(AgentParameterName.AGENT_NAME,
-				"test parametric agent");
-		agent.addComponent(new ParametricComponent(agentParameters));
+		final AgentParameters agentParameters = (AgentParameters) new AgentParameters().add(
+				AgentParameterName.AGENT_NAME, "test parametric agent").addObject("test parameter",
+				Arrays.asList("a", "b", "c"));
+		
+		agent.addComponent(new ParametricComponent() {
+			private static final long	serialVersionUID	= 1L;
+			
+			// pre-loading is only possible from the inside of the component or from the core package
+			@Override
+			protected void componentInitializer()
+			{
+				preload((ComponentCreationData) new ComponentCreationData().addObject(COMPONENT_PARAMETER_NAME,
+						agentParameters), null, null);
+			}
+		});
 		
 		agent.addComponent(new AgentComponent(AgentComponentName.TESTING_COMPONENT) {
 			private static final long	serialVersionUID	= 1L;
 			UnitComponent				locallog;
 			
 			@Override
-			protected ParametricComponent getParametric()
+			protected AgentComponent getAgentComponent(AgentComponentName name)
 			{
-				return super.getParametric();
+				return super.getAgentComponent(name);
 			}
 			
 			@Override
@@ -59,13 +73,14 @@ public class ParametricComponentTest extends Unit
 					public void handleEvent(AgentEvent event)
 					{
 						locallog.li("event: [" + event.getType().toString() + "]");
-						ParametricComponent parametric = getParametric();
+						ParametricComponent parametric = (ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT);
 						if(parametric == null)
 							locallog.li("\t parametric component is currently null");
 						else
-							locallog.li("\t parameter value: [" + parametric.parVal(AgentParameterName.AGENT_NAME)
-									+ "]");
-						if(event.getType() == AgentEventType.AGENT_EXIT)
+							locallog.li("\t parameter value: []; unregistered parameters: []",
+									parametric.parVal(AgentParameterName.AGENT_NAME),
+									parametric.getUnregisteredParameters());
+						if(event.getType() == AgentEventType.AGENT_STOP)
 							locallog.doExit();
 					}
 				};
@@ -90,7 +105,8 @@ public class ParametricComponentTest extends Unit
 	/**
 	 * Main method.
 	 * 
-	 * @param args - not used.
+	 * @param args
+	 *            - not used.
 	 */
 	@SuppressWarnings("unused")
 	public static void main(String args[])

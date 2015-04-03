@@ -13,24 +13,14 @@ package tatami.core.agent.claim;
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Vector;
 import java.util.Map.Entry;
+import java.util.Vector;
 
 import net.xqhs.graphs.graph.Graph;
 import net.xqhs.util.logging.Logger;
 import net.xqhs.util.logging.UnitComponentExt;
-
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
-import tatami.sclaim.constructs.basic.ClaimAgentDefinition;
-import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
-import tatami.sclaim.constructs.basic.ClaimBehaviorType;
-import tatami.sclaim.constructs.basic.ClaimConstruct;
-import tatami.sclaim.constructs.basic.ClaimConstructType;
-import tatami.sclaim.constructs.basic.ClaimFunctionCall;
-import tatami.sclaim.constructs.basic.ClaimFunctionType;
-import tatami.sclaim.constructs.basic.ClaimValue;
-import tatami.sclaim.constructs.basic.ClaimVariable;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.kb.ContextComponent;
@@ -39,6 +29,14 @@ import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.webServices.WebserviceComponent;
+import tatami.sclaim.constructs.basic.ClaimAgentDefinition;
+import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
+import tatami.sclaim.constructs.basic.ClaimBehaviorType;
+import tatami.sclaim.constructs.basic.ClaimConstruct;
+import tatami.sclaim.constructs.basic.ClaimFunctionCall;
+import tatami.sclaim.constructs.basic.ClaimFunctionType;
+import tatami.sclaim.constructs.basic.ClaimValue;
+import tatami.sclaim.constructs.basic.ClaimVariable;
 
 public class ClaimComponent extends AgentComponent
 {
@@ -84,10 +82,9 @@ public class ClaimComponent extends AgentComponent
 	
 	public void setup() {
 		
-		// retrieve claim agent definition
+		// retrieve parameters specified in the claim agent definition
 		if(cad.getParameters() != null)
 		{
-			Map<String, Object> claimParams = getParametric().getUnregisteredParameters();
 			for(ClaimVariable agentParam : cad.getParameters()) 
 			{
 				AgentParameterName registeredParam = AgentParameterName.getName(agentParam.getName());
@@ -274,35 +271,5 @@ public class ClaimComponent extends AgentComponent
 	public Logger getLog()
 	{
 		return log;
-	}
-	
-	@Override
-	protected MessagingComponent getMessaging()
-	{
-		return super.getMessaging();
-	}
-	
-	@Override
-	protected ContextComponent getCognitive()
-	{
-		return super.getCognitive();
-	}
-	
-	@Override
-	protected ParametricComponent getParametric()
-	{
-		return super.getParametric();
-	}
-	
-	@Override
-	protected 	WebserviceComponent getWebService()
-	{
-		return super.getWebService();
-	}
-	
-	@Override
-	protected VisualizableComponent getVisualizable()
-	{
-		return super.getVisualizable();
 	}
 }

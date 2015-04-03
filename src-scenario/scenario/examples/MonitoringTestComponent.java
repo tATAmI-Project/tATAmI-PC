@@ -36,21 +36,15 @@ public class MonitoringTestComponent extends AgentComponent
 	}
 	
 	@Override
-	protected ParametricComponent getParametric()
-	{
-		return super.getParametric();
-	}
-	
-	@Override
-	protected VisualizableComponent getVisualizable()
-	{
-		return super.getVisualizable();
-	}
-	
-	@Override
 	protected String getAgentName()
 	{
 		return super.getAgentName();
+	}
+	
+	@Override
+	protected AgentComponent getAgentComponent(AgentComponentName name)
+	{
+		return super.getAgentComponent(name);
 	}
 	
 	@Override
@@ -64,16 +58,16 @@ public class MonitoringTestComponent extends AgentComponent
 			{
 				String eventMessage = "agent [" + getAgentName() + "] event: [" + event.getType().toString() + "]";
 				locallog.li(eventMessage);
-				ParametricComponent parametric = getParametric();
+				ParametricComponent parametric = (ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT);
 				if(parametric != null)
 					locallog.li("\t parameter value: [" + parametric.parVal(AgentParameterName.AGENT_NAME) + "]");
 				else
 					locallog.li("\t parametric component is currently null");
-				VisualizableComponent vis = getVisualizable();
+				VisualizableComponent vis = (VisualizableComponent) getAgentComponent(AgentComponentName.VISUALIZABLE_COMPONENT);
 				if(vis != null)
 					if(vis.getLog() != null)
 						vis.getLog().info(eventMessage);
-				if(event.getType() == AgentEventType.AGENT_EXIT)
+				if(event.getType() == AgentEventType.AGENT_STOP)
 					locallog.doExit();
 			}
 		};

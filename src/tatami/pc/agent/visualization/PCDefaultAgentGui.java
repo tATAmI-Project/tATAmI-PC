@@ -28,10 +28,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingWorker;
 
+import net.xqhs.windowLayout.WindowLayout;
+import net.xqhs.windowLayout.WindowParameters;
 import tatami.core.agent.visualization.AgentGui;
 import tatami.core.agent.visualization.AgentGuiConfig;
-import tatami.pc.util.windowLayout.WindowLayout;
-import tatami.pc.util.windowLayout.WindowParameters;
 
 /**
  * Default agent GUI for the PC platform.

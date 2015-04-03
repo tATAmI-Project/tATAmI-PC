@@ -15,7 +15,6 @@ import tatami.core.agent.AgentEvent.AgentSequenceType;
 import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
-import tatami.jade.JadeComponent;
 import tatami.simulation.AgentManager;
 import tatami.simulation.PlatformLoader.PlatformLink;
 
@@ -46,7 +45,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * <li> {@link #INITIALIZING} [here components are normally added] &rarr; {@link #STARTING} [starting thread;
 	 * starting components] &rarr; {@link #RUNNING}.
 	 * <li>while in {@link #RUNNING}, components can be added or removed.
-	 * <li> {@link #RUNNING} + {@link AgentEventType#AGENT_EXIT} &rarr; {@link #STOPPING} [no more events accepted; stop
+	 * <li> {@link #RUNNING} + {@link AgentEventType#AGENT_STOP} &rarr; {@link #STOPPING} [no more events accepted; stop
 	 * components; stop thread] &rarr; {@link #STOPPED} (equivalent with {@link #INITIALIZING}).
 	 * </ul>
 	 * 
@@ -137,7 +136,7 @@ public class CompositeAgent implements Serializable, AgentManager
 										.registerBehaviors();
 						}
 						break;
-					case AGENT_EXIT:
+					case AGENT_STOP:
 						synchronized(eventQueue)
 						{
 							if(!eventQueue.isEmpty())
@@ -283,7 +282,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 */
 	public boolean exit()
 	{
-		if(!postAgentEvent(new AgentEvent(AgentEventType.AGENT_EXIT)))
+		if(!postAgentEvent(new AgentEvent(AgentEventType.AGENT_STOP)))
 			return false;
 		try
 		{
@@ -331,7 +330,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	{
 		if(!(((state == AgentState.STARTING) && (event.getType() == AgentEventType.AGENT_START)) || (state == AgentState.RUNNING)))
 			return false;
-		boolean exiting = (event.getType() == AgentEventType.AGENT_EXIT);
+		boolean exiting = (event.getType() == AgentEventType.AGENT_STOP);
 		try
 		{
 			if(eventQueue != null)
@@ -389,8 +388,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	}
 	
 	/**
-	 * Returns the name of the agent. It can either be a name that has been set through the <code>AGENT_NAME</code>
-	 * parameter, or the name of the Jade agent underpinning the {@link JadeComponent}, if any.
+	 * Returns the name of the agent. It is the name that has been set through the <code>AGENT_NAME</code> parameter.
 	 * 
 	 * @return the name of the agent.
 	 */
@@ -401,9 +399,6 @@ public class CompositeAgent implements Serializable, AgentManager
 		if(hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
 			agentName = ((ParametricComponent) getComponent(AgentComponentName.PARAMETRIC_COMPONENT))
 					.parVal(AgentParameterName.AGENT_NAME);
-		// FIXME jade name should be given by agent name. These lines should be removed
-		if((agentName == null) && getComponent(AgentComponentName.JADE_COMPONENT) != null)
-			agentName = ((JadeComponent) getComponent(AgentComponentName.JADE_COMPONENT)).getLocalName();
 		return agentName;
 	}
 	

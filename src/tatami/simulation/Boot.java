@@ -23,10 +23,11 @@ import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponentExt;
 import net.xqhs.util.logging.logging.Logging;
+import net.xqhs.windowLayout.WindowLayout;
+import net.xqhs.windowLayout.grid.GridWindowLayout;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.util.platformUtils.PlatformUtils;
-import tatami.pc.util.windowLayout.WindowLayout;
 import tatami.simulation.AgentLoader.StandardAgentLoaderType;
 import tatami.simulation.PlatformLoader.StandardPlatformType;
 
@@ -74,8 +75,7 @@ public class Boot
 		}
 		
 		// create window layout
-		WindowLayout.staticLayout = new WindowLayout(settings.getApplicationLayoutWidth(),
-				settings.getApplicationLayoutHeight(), settings.getLayout(), null);
+		WindowLayout.staticLayout = new GridWindowLayout(settings.getLayout());
 		
 		// build agent creation data
 		
@@ -124,8 +124,8 @@ public class Boot
 		{
 			// load timeline (if any)
 			XMLNode timeline = null;
-			if(scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).hasNext())
-				timeline = scenarioTree.getRoot().getNodeIterator(AgentParameterName.TIMELINE.toString()).next();
+			if(scenarioTree.getRoot().getNodeIterator(SimulationManager.TIMELINE_NODE.toString()).hasNext())
+				timeline = scenarioTree.getRoot().getNodeIterator(SimulationManager.TIMELINE_NODE.toString()).next();
 			
 			// start simulation
 			if(!new SimulationManager(platforms, allContainers, allAgents, timeline).start())
@@ -383,7 +383,7 @@ public class Boot
 				}
 				
 				// load agent
-				AgentCreationData agentCreationData = loadAgent(agentNode, agentName, containerName, doCreateContainer,
+				AgentCreationData agentCreationData = preloadAgent(agentNode, agentName, containerName, doCreateContainer,
 						platforms.get(platformName), defaultAgentLoader, agentLoaders, agentPackages);
 				if(agentCreationData == null)
 					continue;
@@ -430,7 +430,7 @@ public class Boot
 	 * @return an {@link AgentManager} instance that can be used to control the lifecycle of the just loaded agent, if
 	 *         the loading was successful; <code>null</code> otherwise.
 	 */
-	protected AgentCreationData loadAgent(XMLNode agentNode, String agentName, String containerName,
+	protected AgentCreationData preloadAgent(XMLNode agentNode, String agentName, String containerName,
 			boolean doCreateContainer, PlatformLoader platform, String defaultAgentLoader,
 			Map<String, AgentLoader> agentLoaders, Set<String> agentPackages)
 	{

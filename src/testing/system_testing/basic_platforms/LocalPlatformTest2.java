@@ -3,19 +3,18 @@ package testing.system_testing.basic_platforms;
 import tatami.simulation.Boot;
 
 /**
- * Tests composite agents deployed on the Local Platform. Pings should be sent between the agents, immediately after
- * creation.
+ * Tests composite agents deployed on the Local Platform. One agent initiates pinging and the other replies, and so on.
  * <p>
  * Everything is expected to work without error.
  * 
  * @author Andrei Olaru
  */
-public class LocalPlatformTest
+public class LocalPlatformTest2
 {
 	/**
 	 * The scenario.
 	 */
-	private static final String	SCENARIO	= "../simpleA/scenario-local-platform";
+	private static final String	SCENARIO	= "../simpleA/scenario-local-pingback";
 	
 	/**
 	 * The main method.

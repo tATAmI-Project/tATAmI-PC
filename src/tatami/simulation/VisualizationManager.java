@@ -94,14 +94,14 @@ public class VisualizationManager
 					output += entry + "\n";
 				
 				TextArea centralLogDisplay = (TextArea) ((PCDefaultAgentGui) gui)
-						.getComponent(VisualizationComponent.CENTRAL_LOG.toString());
+						.getAgentComponent(VisualizationComponent.CENTRAL_LOG.toString());
 				centralLogDisplay.setText(output);
 				centralLogDisplay.append(".");
 				centralLogDisplay.repaint();
 				
 				grapher.update(); // FIXME
 				TextArea graphDisplay = (TextArea) ((PCDefaultAgentGui) gui)
-						.getComponent(VisualizationComponent.AGENT_GRAPH.toString());
+						.getAgentComponent(VisualizationComponent.AGENT_GRAPH.toString());
 				graphDisplay.setText(grapher.toString());
 				graphDisplay.append("\n\n");
 				graphDisplay.append(agentGraph.toString());
@@ -203,7 +203,7 @@ public class VisualizationManager
 		// do not call super.takeDown() because that will generate a wait and an Interrupted exception; just exit log
 		if(updateTimer != null)
 			updateTimer.cancel();
-		getLog().info("visualization out");
+		getAgentLog().info("visualization out");
 		loggingUnit.exit();
 	}
 	

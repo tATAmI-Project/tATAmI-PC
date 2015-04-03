@@ -14,7 +14,9 @@ import java.util.Vector;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.UnitComponentExt;
+import net.xqhs.windowLayout.WindowLayout;
 import tatami.core.agent.AgentComponent.AgentComponentName;
+import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.visualization.AgentGui;
 import tatami.core.agent.visualization.AgentGui.AgentGuiBackgroundTask;
@@ -22,7 +24,6 @@ import tatami.core.agent.visualization.AgentGui.InputListener;
 import tatami.core.agent.visualization.AgentGui.ResultNotificationListener;
 import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.core.util.platformUtils.PlatformUtils;
-import tatami.pc.util.windowLayout.WindowLayout;
 import tatami.simulation.PlatformLoader.PlatformLink;
 
 /**
@@ -104,6 +105,22 @@ public class SimulationManager implements AgentManager
 	 * resides.
 	 */
 	protected static final String		SIMULATION_AGENT_NAME_PREFIX	= "SimAgent-";
+	
+	/**
+	 * Name of the node in the scenario file that contains the event timeline to simulate.
+	 */
+	protected static final String		TIMELINE_NODE					= "timeline";
+	/**
+	 * Delay before calling a System exit in case of a failed start.
+	 */
+	protected static final int			SYSTEM_ABORT_DELAY				= 1000;
+	/**
+	 * If set, a {@link System#exit(int)} will be called after everything has been theoretically closed (in the case of
+	 * normal termination).
+	 * <p>
+	 * Ideally, this should be set to <code>false</code> and all the threads should exit normally.
+	 */
+	protected static final boolean		FORCE_SYSTEM_EXIT				= true;
 	/**
 	 * The log.
 	 */
@@ -181,6 +198,16 @@ public class SimulationManager implements AgentManager
 	@Override
 	public boolean start()
 	{
+		return startSystem();
+	}
+	
+	/**
+	 * Starts the whole agent system.
+	 * 
+	 * @return <code>true</code> in case of success.
+	 */
+	public boolean startSystem()
+	{
 		try
 		{
 			AgentGuiConfig config = new AgentGuiConfig().setWindowType(WINDOW_TYPE).setWindowName(WINDOW_NAME);
@@ -205,147 +232,6 @@ public class SimulationManager implements AgentManager
 			return false;
 		}
 		
-		return true;
-	}
-	
-	/**
-	 * Stops the simulation manager and also exists the application.
-	 * 
-	 * @return
-	 */
-	protected boolean fullstop()
-	{
-		boolean result = stop();
-		new Timer().schedule(new TimerTask() {
-			@Override
-			public void run()
-			{
-				PlatformUtils.systemExit(0);
-			}
-		}, 1000);
-		return result;
-	}
-	
-	@Override
-	public boolean stop()
-	{
-		if(theTime != null)
-			theTime.cancel();
-		for(SimulationLinkAgent simAgent : simulationAgents.values())
-			if(!simAgent.stop())
-				log.error("Stopping agent [" + simAgent.getAgentName() + "] failed.");
-		if(gui != null)
-			gui.close();
-		if(WindowLayout.staticLayout != null)
-			WindowLayout.staticLayout.doexit();
-		if(log != null)
-			log.doExit();
-		return true;
-	}
-	
-	/**
-	 * Sets up the functions of the buttons together with functionality related to simulation time.
-	 * 
-	 * @return <code>true</code> if setup is successful.
-	 */
-	protected boolean setupGui()
-	{
-		gui.connectInput(SimulationComponent.EXIT.toString(), new InputListener() {
-			@Override
-			public void receiveInput(String componentName, Vector<Object> arguments)
-			{
-				gui.background(new AgentGuiBackgroundTask() {
-					@Override
-					public void execute(Object arg, ResultNotificationListener resultListener)
-					{
-						stop();
-						resultListener.receiveResult(null);
-					}
-				}, null, new ResultNotificationListener() {
-					@Override
-					public void receiveResult(Object result)
-					{
-						PlatformUtils.systemExit(0);
-					}
-				});
-			}
-		});
-		
-		if (agents.isEmpty())
-		{
-			gui.doOutput(SimulationComponent.CREATE.toString(), PlatformUtils.toVector((Object) null));
-			gui.doOutput(SimulationComponent.CLEAR.toString(), PlatformUtils.toVector((Object) null));
-		}
-		else
-		{
-		gui.connectInput(SimulationComponent.CREATE.toString(), new InputListener() {
-			@Override
-			public void receiveInput(String componentName, Vector<Object> arguments)
-			{
-				createAgents();
-			}
-		});
-		gui.connectInput(SimulationComponent.CLEAR.toString(), new InputListener() {
-			@Override
-			public void receiveInput(String componentName, Vector<Object> arguments)
-			{
-				clearAgents();
-			}
-		});
-		
-		}
-		if(events.isEmpty())
-		{
-			gui.doOutput(SimulationComponent.START.toString(), PlatformUtils.toVector((Object) null));
-			gui.doOutput(SimulationComponent.PAUSE.toString(), PlatformUtils.toVector((Object) null));
-			gui.doOutput(SimulationComponent.TIME.toString(), PlatformUtils.toVector("no events"));
-		}
-		else
-		{
-			gui.connectInput(SimulationComponent.START.toString(), new InputListener() {
-				@Override
-				public void receiveInput(String componentName, Vector<Object> arguments)
-				{
-					if(!agentsCreated)
-						createAgents();
-					if(!events.isEmpty())
-					{
-						log.info("starting simulation. next event at "
-								+ (Integer.parseInt(events.get(0).getAttributeValue("time"))));
-						startTimers();
-					}
-				}
-			});
-			
-			gui.connectInput(SimulationComponent.PAUSE.toString(), new InputListener() {
-				@Override
-				public void receiveInput(String componentName, Vector<Object> arguments)
-				{
-					if(events.isEmpty())
-					{
-						gui.doOutput(SimulationComponent.TIME.toString(), PlatformUtils.toVector("no more events"));
-						
-						if(!isPaused)
-						{
-							theTime.cancel();
-						}
-					}
-					else if(isPaused)
-					{
-						log.info("simulation restarting, next event in "
-								+ (Integer.parseInt(events.get(0).getAttributeValue("time")) - time * 100));
-						startTimers();
-					}
-					else
-					{
-						theTime.cancel();
-						log.info("simulation stopped at " + time * 100 + ", next event was in "
-								+ (Integer.parseInt(events.get(0).getAttributeValue("time")) - time * 100));
-					}
-					isPaused = !isPaused;
-				}
-			});
-		}
 		return true;
 	}
 	
@@ -396,6 +282,119 @@ public class SimulationManager implements AgentManager
 	}
 	
 	/**
+	 * Sets up the functions of the buttons together with functionality related to simulation time.
+	 * 
+	 * @return <code>true</code> if setup is successful.
+	 */
+	protected boolean setupGui()
+	{
+		gui.connectInput(SimulationComponent.EXIT.toString(), new InputListener() {
+			@Override
+			public void receiveInput(String componentName, Vector<Object> arguments)
+			{
+				gui.background(new AgentGuiBackgroundTask() {
+					@Override
+					public void execute(Object arg, ResultNotificationListener resultListener)
+					{
+						stop();
+						resultListener.receiveResult(null);
+					}
+				}, null, new ResultNotificationListener() {
+					@Override
+					public void receiveResult(Object result)
+					{
+						if(FORCE_SYSTEM_EXIT)
+							PlatformUtils.systemExit(0);
+					}
+				});
+			}
+		});
+		
+		if(agents.isEmpty())
+		{
+			gui.doOutput(SimulationComponent.CREATE.toString(), PlatformUtils.toVector((Object) null));
+			gui.doOutput(SimulationComponent.CLEAR.toString(), PlatformUtils.toVector((Object) null));
+		}
+		else
+		{
+			gui.connectInput(SimulationComponent.CREATE.toString(), new InputListener() {
+				@Override
+				public void receiveInput(String componentName, Vector<Object> arguments)
+				{
+					createAgents();
+				}
+			});
+			gui.connectInput(SimulationComponent.CLEAR.toString(), new InputListener() {
+				@Override
+				public void receiveInput(String componentName, Vector<Object> arguments)
+				{
+					signalAllAgents(AgentEventType.AGENT_STOP);
+				}
+			});
+			
+		}
+		
+		gui.connectInput(SimulationComponent.START.toString(), new InputListener() {
+			@Override
+			public void receiveInput(String componentName, Vector<Object> arguments)
+			{
+				gui.background(new AgentGuiBackgroundTask() {
+					@Override
+					public void execute(Object arg, ResultNotificationListener resultListener)
+					{
+						if(!agentsCreated)
+							createAgents();
+						signalAllAgents(AgentEventType.SIMULATION_START);
+						resultListener.receiveResult(null);
+					}
+				}, null, new ResultNotificationListener() {
+					@Override
+					public void receiveResult(Object result)
+					{
+						if(!events.isEmpty())
+						{
+							log.info("starting simulation. next event at "
+									+ (Integer.parseInt(events.get(0).getAttributeValue("time"))));
+							startTimers();
+						}
+					}
+				});
+			}
+		});
+		
+		gui.connectInput(SimulationComponent.PAUSE.toString(), new InputListener() {
+			@Override
+			public void receiveInput(String componentName, Vector<Object> arguments)
+			{
+				if(events.isEmpty())
+				{
+					gui.doOutput(SimulationComponent.TIME.toString(), PlatformUtils.toVector("no more events"));
+					
+					if(!isPaused)
+					{
+						theTime.cancel();
+					}
+				}
+				else if(isPaused)
+				{
+					log.info("simulation restarting, next event in "
+							+ (Integer.parseInt(events.get(0).getAttributeValue("time")) - time * 100));
+					startTimers();
+				}
+				else
+				{
+					theTime.cancel();
+					log.info("simulation stopped at " + time * 100 + ", next event was in "
+							+ (Integer.parseInt(events.get(0).getAttributeValue("time")) - time * 100));
+				}
+				isPaused = !isPaused;
+			}
+		});
+		
+		return true;
+	}
+	
+	/**
 	 * Starts the {@link SimulationLinkAgent} instances for all platforms.
 	 * 
 	 * @return <code>true</code> if the operation succeeded; <code>false</code> otherwise.
@@ -414,7 +413,8 @@ public class SimulationManager implements AgentManager
 				msg = (MessagingComponent) PlatformUtils.loadClassInstance(this, msgrClass, new Object[0]);
 			} catch(Exception e)
 			{
-				log.error("Failed to create a messaging component for the agent: " + PlatformUtils.printException(e));
+				log.error("Failed to create a messaging component for the simulation agent on platform []: []",
+						platformName, PlatformUtils.printException(e));
 			}
 			if(msg != null)
 			{
@@ -444,6 +444,8 @@ public class SimulationManager implements AgentManager
 	 */
 	protected void createAgents()
 	{
+		agentsCreated = true;
+
 		// load agents on their respective platforms
 		Map<String, AgentManager> agentManagers = new HashMap<String, AgentManager>();
 		for(AgentCreationData agentData : agents)
@@ -489,13 +491,68 @@ public class SimulationManager implements AgentManager
 	}
 	
 	/**
-	 * Instructs the simulation agents to call an exit on all agents they manage.
+	 * Broadcasts the specified event to all agents, via the simulation agents in the respective platforms.
+	 * 
+	 * @param event
+	 *            - the event to broadcast.
 	 */
-	protected void clearAgents()
+	protected void signalAllAgents(AgentEventType event)
 	{
 		for(String platformName : platforms.keySet())
 			if(simulationAgents.containsKey(platformName))
-				simulationAgents.get(platformName).broadcastExit();
+				simulationAgents.get(platformName).broadcast(event);
+	}
+	
+	@Override
+	public boolean stop()
+	{
+		return stopSystem();
+	}
+	
+	/**
+	 * Stops the entire system.
+	 * 
+	 * @return <code>true</code> in case of success.
+	 */
+	public boolean stopSystem()
+	{
+		if(theTime != null)
+			theTime.cancel();
+		for(SimulationLinkAgent simAgent : simulationAgents.values())
+			if(!simAgent.stop())
+				log.error("Stopping agent [] failed.", simAgent.getAgentName());
+		for(String platformName : platforms.keySet())
+			if(!platforms.get(platformName).stop())
+				log.error("Stopping platform [] failed.", platformName);
+		if(gui != null)
+			gui.close();
+		if(WindowLayout.staticLayout != null)
+			WindowLayout.staticLayout.doexit();
+		if(log != null)
+			log.doExit();
+		return true;
+	}
+	
+	/**
+	 * Stops the simulation manager and also exists the application.
+	 * <p>
+	 * This method should only be called in case of a failed start.
+	 * <p>
+	 * The system exit is delayed with {@value #SYSTEM_ABORT_DELAY}.
+	 * 
+	 * @return
+	 */
+	protected boolean fullstop()
+	{
+		boolean result = stop();
+		new Timer().schedule(new TimerTask() {
+			@Override
+			public void run()
+			{
+				PlatformUtils.systemExit(0);
+			}
+		}, SYSTEM_ABORT_DELAY);
+		return result;
 	}
 	
 	/**

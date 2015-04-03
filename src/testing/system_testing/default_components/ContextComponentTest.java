@@ -1,4 +1,4 @@
-package testing.andrei.agent_component_tests;
+package testing.system_testing.default_components;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -59,15 +59,9 @@ public class ContextComponentTest extends Unit
 			UnitComponent	locallog;
 			
 			@Override
-			protected ContextComponent getCognitive()
+			protected AgentComponent getAgentComponent(AgentComponentName name)
 			{
-				return super.getCognitive();
-			}
-			
-			@Override
-			protected AgentComponent getComponent(AgentComponentName name)
-			{
-				return super.getComponent(name);
+				return super.getAgentComponent(name);
 			}
 			
 			@Override
@@ -81,7 +75,7 @@ public class ContextComponentTest extends Unit
 					public void handleEvent(AgentEvent event)
 					{
 						locallog.li("event: [" + event.getType().toString() + "]");
-						ContextComponent context = (ContextComponent) getComponent(AgentComponentName.COGNITIVE_COMPONENT);
+						ContextComponent context = (ContextComponent) getAgentComponent(AgentComponentName.COGNITIVE_COMPONENT);
 						
 						if(context == null)
 							locallog.li("\t parametric component is currently null");
@@ -140,7 +134,7 @@ public class ContextComponentTest extends Unit
 									e.printStackTrace();
 								}
 					
-						} else if (event.getType() == AgentEventType.AGENT_EXIT) {
+						} else if (event.getType() == AgentEventType.AGENT_STOP) {
 
 							e1 = new SimpleEdge(Emily, Living, "is-in");
 							Graph newGraph = new GraphPattern();
@@ -155,7 +149,7 @@ public class ContextComponentTest extends Unit
 
 						}	
 						
-						if(event.getType() == AgentEventType.AGENT_EXIT)
+						if(event.getType() == AgentEventType.AGENT_STOP)
 							locallog.doExit();
 					}
 				};

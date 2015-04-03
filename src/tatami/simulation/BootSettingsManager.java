@@ -7,8 +7,8 @@ import net.xqhs.util.XML.XMLTree;
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.config.Config;
 import net.xqhs.util.logging.UnitComponentExt;
+import net.xqhs.windowLayout.grid.GridLayoutIndications;
 import tatami.core.util.platformUtils.PlatformUtils;
-import tatami.pc.util.windowLayout.LayoutIndications;
 
 /**
  * This class manages settings for simulations. It handles loading these settings from various sources --
@@ -32,12 +32,12 @@ public class BootSettingsManager extends Config
 	/**
 	 * The schema for scenario files.
 	 */
-	protected String			SCENARIO_SCHEMA		= "src-schema/scenarioSchema3.xsd";
+	protected String				SCENARIO_SCHEMA		= "src-schema/scenarioSchema3.xsd";
 	
 	/**
 	 * The name of the XML scenario file that contains the settings for the current simulation.
 	 */
-	protected String			scenarioFileName;
+	protected String				scenarioFileName;
 	
 	// /////////////////// network configuration
 	/**
@@ -45,25 +45,25 @@ public class BootSettingsManager extends Config
 	 * <p>
 	 * For Jade-based setups, it is the IP of the main container.
 	 */
-	protected String			mainHost;
+	protected String				mainHost;
 	/**
 	 * The port on the main host, at which the main elements of the simulation are available.
 	 * <p>
 	 * For Jade-based setups, it is the port of the main container.
 	 */
-	protected String			mainPort;
+	protected String				mainPort;
 	/**
 	 * An indication of the local host.
 	 * <p>
 	 * For Jade-based setups, it is the IP of the local container.
 	 */
-	protected String			localHost;
+	protected String				localHost;
 	/**
 	 * The local port at which the local elements of the simulation are available.
 	 * <p>
 	 * For Jade-based setups, it is the port of the local container.
 	 */
-	protected String			localPort;
+	protected String				localPort;
 	/**
 	 * The name of the local agent container. If the main container will be created on this machine, this will be the
 	 * name of the main container.
@@ -71,22 +71,22 @@ public class BootSettingsManager extends Config
 	 * This name may be used, for instance, to be able to specify all necessary settings through command line arguments
 	 * and not use a whole scenario file just for the host information and the container name.
 	 */
-	protected String			localContainerName	= null;
+	protected String				localContainerName	= null;
 	
 	// /////////////////// visualization layout
 	/**
 	 * The width of the application layout. This is meant for PC platforms, but may be used in other situations as well.
 	 */
-	protected int				applicationLayoutWidth;
+	protected int					applicationLayoutWidth;
 	/**
 	 * The height of the application layout. This is meant for PC platforms, but may be used in other situations as
 	 * well.
 	 */
-	protected int				applicationLayoutHeight;
+	protected int					applicationLayoutHeight;
 	/**
 	 * The window layout indications, for PC platforms.
 	 */
-	protected LayoutIndications	layout;
+	protected GridLayoutIndications	layout;
 	
 	@Override
 	public BootSettingsManager makeDefaults()
@@ -299,7 +299,7 @@ public class BootSettingsManager extends Config
 	/**
 	 * @return the layout
 	 */
-	public LayoutIndications getLayout()
+	public GridLayoutIndications getLayout()
 	{
 		return layout;
 	}

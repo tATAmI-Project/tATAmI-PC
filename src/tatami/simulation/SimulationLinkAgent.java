@@ -1,12 +1,13 @@
 package tatami.simulation;
 
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.xqhs.util.logging.Logger;
-
-import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.AgentComponent.AgentComponentName;
+import tatami.core.agent.AgentEvent.AgentEventType;
+import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.visualization.VisualizableComponent.Vocabulary;
@@ -32,7 +33,7 @@ public class SimulationLinkAgent extends CompositeAgent
 	/**
 	 * A {@link Map} of agent names to agent addresses (as provided by the messaging component).
 	 */
-	Map<String, String>			agents				= new HashMap<String, String>();
+	Set<String>					agents				= new HashSet<String>();
 	
 	/**
 	 * Creates a new instance, with the specified name. The instance will have two components: a
@@ -75,25 +76,27 @@ public class SimulationLinkAgent extends CompositeAgent
 			log.error("Messaging component not present");
 			return false;
 		}
-		String agentAddress = msgComp.getAgentAddress(agentData.getAgentName(), agentData.getDestinationContainer());
-		String target = MessagingComponent.makePathHelper(agentAddress, Vocabulary.VISUALIZATION.toString(),
+		String target = msgComp.makePath(agentData.getAgentName(), Vocabulary.VISUALIZATION.toString(),
 				Vocabulary.VISUALIZATION_MONITOR.toString());
+		log.trace("Sending enrollment message to [].", target);
 		if(!msgComp.sendMessage(target, msgComp.getAgentAddress(), msgComp.getAgentAddress()))
 		{
 			log.error("Sending of enrollment message to agent [" + agentData.getAgentName() + "] failed");
 			return false;
 		}
-		agents.put(agentData.getAgentName(), agentAddress);
+		agents.add(agentData.getAgentName());
 		return true;
 	}
 	
 	/**
-	 * Sends an exit message to all agents that are monitored by this agent.
+	 * Sends an message to all agents that are monitored by this agent, indicating an agent event to be posted.
 	 * 
+	 * @param event
+	 *            - the event to post to the agent's event queue, as {@link AgentEventType}.
 	 * @return <code>true</code> if the operation has succeeded; <code>false</code> if any message (possibly all) was
 	 *         not successfully sent.
 	 */
-	public boolean broadcastExit()
+	public boolean broadcast(AgentEventType event)
 	{
 		Logger log = ((VisualizableComponent) getComponent(AgentComponentName.VISUALIZABLE_COMPONENT)).getLog();
 		MessagingComponent msgComp = (MessagingComponent) getComponent(AgentComponentName.MESSAGING_COMPONENT);
@@ -104,11 +107,10 @@ public class SimulationLinkAgent extends CompositeAgent
 		}
 		
 		boolean ret = true;
-		for(String agentAddress : agents.values())
+		for(String agent : agents)
 		{
-			String target = MessagingComponent.makePathHelper(agentAddress, Vocabulary.VISUALIZATION.toString(),
-					Vocabulary.DO_EXIT.toString());
-			if(!msgComp.sendMessage(target, msgComp.getAgentAddress(), msgComp.getAgentAddress()))
+			String target = msgComp.makePath(agent, Vocabulary.VISUALIZATION.toString(), Vocabulary.CONTROL.toString());
+			if(!msgComp.sendMessage(target, msgComp.getAgentAddress(), event.toString()))
 			{
 				log.error("Sending of exit message to [" + target + "] failed");
 				ret = false;

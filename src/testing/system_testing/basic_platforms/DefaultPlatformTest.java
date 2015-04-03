@@ -12,7 +12,7 @@ public class DefaultPlatformTest
 	/**
 	 * The scenario.
 	 */
-	private static final String	SCENARIO	= "../simpleA/scenario.xml";
+	private static final String	SCENARIO	= "../simpleA/scenario";
 
 	/**
 	 * The main method.

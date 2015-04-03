@@ -1,10 +1,9 @@
 package scenario.examples;
 
-import java.util.HashSet;
-import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
@@ -15,6 +14,8 @@ import tatami.core.agent.messaging.MessagingComponent;
 
 /**
  * An {@link AgentComponent} implementation that sends messages to other agents.
+ * <p>
+ * This is a rather older implementation, that starts pinging immediately after agent start.
  * 
  * @author Andrei Olaru
  */
@@ -58,7 +59,7 @@ public class PingTestComponent extends AgentComponent
 	 * Time between ping messages.
 	 */
 	protected static final long		PING_PERIOD					= 1000;
-
+	
 	/**
 	 * Timer for pinging.
 	 */
@@ -78,24 +79,28 @@ public class PingTestComponent extends AgentComponent
 	
 	/**
 	 * Default constructor
-	 * 
-	 * @param arguments - component arguments.
 	 */
-	public PingTestComponent(HashSet<Entry<String, Object>> arguments)
+	public PingTestComponent()
 	{
 		super(AgentComponentName.TESTING_COMPONENT);
-		
-		for(Entry<String, Object> e : arguments)
-			if(e.getKey().equals(OTHER_AGENT_PARAMETER_NAME))
-				otherAgent = (String) e.getValue();
+	}
+	
+	@Override
+	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
+	{
+		if(!super.preload(parameters, scenarioNode, log))
+			return false;
+		otherAgent = getComponentData().get(OTHER_AGENT_PARAMETER_NAME);
+		return true;
 	}
 	
 	/**
 	 * @return the log provided by the visualizable component.
 	 */
-	public Logger getLog()
+	@Override
+	public Logger getAgentLog()
 	{
-		return getVisualizable().getLog();
+		return super.getAgentLog();
 	}
 	
 	@Override
@@ -107,22 +112,10 @@ public class PingTestComponent extends AgentComponent
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
-				String eventMessage = "agent [" + thisAgent + "] event: [" + event.getType().toString() + "]";
-				getLog().li(eventMessage);
+				getAgentLog().li("agent [] event: []", thisAgent, event.getType());
 				
 				if(event.getType() == AgentEventType.AGENT_START)
-				{
-					registerMessageReceiver("", new AgentEventHandler() {
-						@Override
-						public void handleEvent(AgentEvent messageEvent)
-						{
-							getLog().li("message received: ", messageEvent);
-						}
-					});
-					
-					pingTimer = new Timer();
-					pingTimer.schedule(new Pinger(), PING_INITIAL_DELAY, PING_PERIOD);
-				}
+					atAgentStart(event);
 			}
 		};
 		for(AgentEventType eventType : AgentEventType.values())
@@ -130,9 +123,20 @@ public class PingTestComponent extends AgentComponent
 	}
 	
 	@Override
-	protected boolean registerMessageReceiver(String prefix, AgentEventHandler receiver)
+	protected void atAgentStart(AgentEvent event)
 	{
-		return super.registerMessageReceiver(prefix, receiver);
+		super.atAgentStart(event);
+		
+		registerMessageReceiver(new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent messageEvent)
+			{
+				getAgentLog().li("message received: ", messageEvent);
+			}
+		}, "");
+		
+		pingTimer = new Timer();
+		pingTimer.schedule(new Pinger(), PING_INITIAL_DELAY, PING_PERIOD);
 	}
 	
 	@Override
@@ -142,7 +146,7 @@ public class PingTestComponent extends AgentComponent
 		
 		if(getParent() != null)
 		{
-			messenger = getMessaging();
+			messenger = (MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT);
 			thisAgent = getAgentName();
 		}
 	}

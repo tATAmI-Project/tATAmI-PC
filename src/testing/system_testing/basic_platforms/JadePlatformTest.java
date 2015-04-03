@@ -1,9 +1,13 @@
 package testing.system_testing.basic_platforms;
 
+import net.xqhs.util.logging.LoggerSimple.Level;
+import net.xqhs.util.logging.logging.Logging;
 import tatami.simulation.Boot;
 
 /**
  * Tests composite agents deployed on the Jade Platform.
+ * <p>
+ * Everything is expected to work without error.
  * 
  * @author Andrei Olaru
  */
@@ -27,6 +31,7 @@ public class JadePlatformTest
 	 */
 	public static void main(String[] args)
 	{
+		Logging.getMasterLogging().setLogLevel(Level.ALL);
 		Boot.main(new String[] { SCENARIO });
 	}
 }

@@ -1,6 +1,5 @@
 package tatami.core.agent.messaging;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -10,10 +9,9 @@ import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.Debug.DebugItem;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
-import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
-import tatami.core.agent.claim.ClaimComponent;
+import tatami.core.agent.CompositeAgent;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
@@ -26,13 +24,17 @@ import tatami.core.util.platformUtils.PlatformUtils;
  * Extending classes should override the <code>parentChangeNotifier</code> method to register an event handler for
  * {@link AgentEventType#AGENT_MESSAGE}.
  * <p>
- * The communication is abstracted as exchanging messages between endpoints, where each endpoint is identified by a
- * {@link String} address composed of multiple elements separated by slashes. This means that an endpoint may be
- * identified by a URI (if the {@link MessagingComponent} implementation supports it), or, for instance, by an address
- * of the type "Agent1/Visualization" (this will work with Jade, where agents are addressable by name).
+ * The communication is abstracted internally to the agent as exchanging messages between endpoints, where each endpoint
+ * is identified by a {@link String} address composed of multiple elements separated by slashes (
+ * {@link #ADDRESS_SEPARATOR}={@value #ADDRESS_SEPARATOR}). This means that an endpoint may be identified by a URI (if
+ * the {@link MessagingComponent} implementation supports it), or, for instance, by an address of the type
+ * "Agent1/Visualization" (this will work with Jade, where agents are addressable by name).
  * <p>
- * Messages are sent from an endpoint to another, and contain a {@link String}. Specific implementations may parse the
+ * Messages are sent from one endpoint to another, and contain a {@link String}. Specific implementations may parse the
  * string for additional structure.
+ * <p>
+ * We make a difference between [complete] endpoints (or paths) and internal endpoints (or paths). An agent address
+ * concatenated with an internal path should result in a complete path. Internal paths should begin with a slash.
  * <p>
  * The abstract class implements some basic methods for working with slash-delimited addresses, and offers the method
  * for registering message handlers.
@@ -107,7 +109,7 @@ public abstract class MessagingComponent extends AgentComponent
 	/**
 	 * The string separating elements of an endpoint address.
 	 */
-	protected static final String					ADDRESS_SEPARATOR		= "/";
+	public static final String						ADDRESS_SEPARATOR		= "/";
 	/**
 	 * The name of the parameter in an {@link AgentEvent} associated with a message, that corresponds to the target
 	 * address of the message.
@@ -127,7 +129,7 @@ public abstract class MessagingComponent extends AgentComponent
 	/**
 	 * The {@link Map} of {@link AgentEventHandler} instances that were registered with this component, associated with
 	 * their respective endpoints. Multiple handlers may be registered with the same endpoint. These handlers will be
-	 * invoked in no particular order.
+	 * invoked in no particular order. The endpoint is an internal path, rather than a complete path.
 	 */
 	protected Map<String, Set<AgentEventHandler>>	messageHandlers			= new HashMap<String, Set<AgentEventHandler>>();
 	
@@ -137,12 +139,7 @@ public abstract class MessagingComponent extends AgentComponent
 	public MessagingComponent()
 	{
 		super(AgentComponentName.MESSAGING_COMPONENT);
-	}
-	
-	@Override
-	protected void parentChangeNotifier(CompositeAgent oldParent)
-	{
-		super.parentChangeNotifier(oldParent);
+		
 		registerHandler(AgentEventType.AGENT_MESSAGE, new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)
@@ -157,9 +154,9 @@ public abstract class MessagingComponent extends AgentComponent
 	 * data into an {@link AgentEvent} and posting that event in the agent event queue.
 	 * 
 	 * @param source
-	 *            - the source of the message
+	 *            - the source of the message, as a complete endpoint
 	 * @param destination
-	 *            - the internal destination of the message, not containing the address of the agent
+	 *            - the internal destination of the message, as an internal endpoint
 	 * @param content
 	 *            - the content of the message
 	 */
@@ -174,19 +171,15 @@ public abstract class MessagingComponent extends AgentComponent
 		} catch(ConfigLockedException e)
 		{
 			// should never happen.
-			if(getVisualizable() != null)
-				getVisualizable().getLog().error("Config locked:" + PlatformUtils.printException(e));
+			throw new IllegalStateException("Config locked:" + PlatformUtils.printException(e));
 		}
-		if(getVisualizable() != null)
-			getVisualizable().getLog().dbg(MessagingDebug.DEBUG_MESSAGING,
-					"Received message from [" + source + "] to [" + destination + "] with content [" + content + "].");
-		
-		/* check with which behavior does the message corresponde (if it does) */
-		// FIXME
-		if(content.startsWith("(") && getClaim() != null)
+		try
 		{
-			((ClaimComponent) getClaim()).matchStatement(source, content);
-			return;
+			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
+					"Received message from [" + source + "] to [" + destination + "] with content [" + content + "].");
+		} catch(NullPointerException e)
+		{
+			// it's ok, there was no vis component / no log
 		}
 		
 		postAgentEvent(event);
@@ -201,17 +194,122 @@ public abstract class MessagingComponent extends AgentComponent
 	protected void handleMessage(AgentEvent event)
 	{
 		// FIXME: do checks
-		String destination = (String) event.getParameter(DESTINATION_PARAMETER);
+		String destinationInternal = extractInternalAddress(event, "");
+		if(destinationInternal.length() == 0)
+			// if no internal path, make it the root path (a corect internal path).
+			destinationInternal = "/";
 		for(Map.Entry<String, Set<AgentEventHandler>> entry : messageHandlers.entrySet())
 		{
-			if(getVisualizable() != null)
-				getVisualizable().getLog().dbg(MessagingDebug.DEBUG_MESSAGING,
-						"Comparing: [" + destination + "] to declared [" + entry.getKey() + "]");
-			if(destination.startsWith(entry.getKey()))
+			try
+			{
+				getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
+						"Comparing: [" + destinationInternal + "] to declared [" + entry.getKey() + "]");
+			} catch(NullPointerException e)
+			{
+				// it's ok, there was no vis component / no log
+			}
+			if(destinationInternal.startsWith(entry.getKey()))
 				// prefix matches
 				for(AgentEventHandler receiver : entry.getValue())
 					receiver.handleEvent(event);
 		}
+	}
+	
+	/**
+	 * Registers a new message receiver for the specified prefix (internal path). Messages to a target beginning with
+	 * the prefix (after the prefix of the agent has been removed) will be delivered to this handler.
+	 * <p>
+	 * Multiple handlers may be registered for the same prefix.
+	 * <p>
+	 * WARNING: this implementation should not be confused with the method it overrides from {@link AgentComponent}.
+	 * This is the method that actually registers the receiver with the messaging component. In other components (that
+	 * do not extend {@link MessagingComponent}), the method will be used to relay calls either to the method in the
+	 * {@link MessagingComponent} implementation or to the {@link CompositeAgent} instance.
+	 * 
+	 * @param receiver
+	 *            - the message receiver, as an {@link AgentEventHandler} instance.
+	 * @param prefixElements
+	 *            - the prefix of the target, as elements of the internal path.
+	 * @return always <code>true</code>, according to the meaning of the return value as given in the overridden method.
+	 */
+	@Override
+	protected boolean registerMessageReceiver(AgentEventHandler receiver, String... prefixElements)
+	{
+		// TODO handle null for arguments
+		String prefix = makeInternalPath(prefixElements);
+		if(!messageHandlers.containsKey(prefix))
+			messageHandlers.put(prefix, new HashSet<AgentEventHandler>());
+		messageHandlers.get(prefix).add(receiver);
+		return true;
+	}
+	
+	/**
+	 * The method creates a complete path by attaching the specified elements and placing slashes between them.
+	 * <p>
+	 * E.g. it produces targetAgent/element1/element2/element3
+	 * 
+	 * @param targetAgent
+	 *            - the name of the searched agent.
+	 * @param internalElements
+	 *            - the elements in the internal path.
+	 * @return the complete path/address.
+	 */
+	public String makePath(String targetAgent, String... internalElements)
+	{
+		return makePathHelper(getAgentAddress(targetAgent), internalElements);
+	}
+	
+	/**
+	 * The method creates an internal path by attaching the specified elements and placing slashes between them. The
+	 * result begins with a slash.
+	 * <p>
+	 * E.g. it produces /element1/element2/element3
+	 * 
+	 * @param internalElements
+	 *            - the elements in the path.
+	 * @return the complete path/address.
+	 */
+	@SuppressWarnings("static-method")
+	public String makeInternalPath(String... internalElements)
+	{
+		return makePathHelper(null, internalElements);
+	}
+	
+	/**
+	 * The method creates a complete path by attaching the specified elements to the address of this agent.
+	 * <p>
+	 * E.g. it produces thisAgent/element1/element2/element3
+	 * 
+	 * @param elements
+	 *            - the elements in the path.
+	 * @return the complete path/address.
+	 */
+	public String makeLocalPath(String... elements)
+	{
+		return makePathHelper(getAgentAddress(), elements);
+	}
+	
+	/**
+	 * Produces an address by assembling the start of the address with the rest of the elements. They will be separated
+	 * by the address separator specified as constant.
+	 * <p>
+	 * Elements that are <code>null</code> will not be assembled in the path.
+	 * <p>
+	 * If the start is <code>null</code> the result will begin with a slash.
+	 * 
+	 * @param start
+	 *            - start of the address.
+	 * @param elements
+	 *            - other elements in the address
+	 * @return the resulting address.
+	 */
+	public static String makePathHelper(String start, String... elements)
+	{
+		String ret = (start != null) ? start : "";
+		for(String elem : elements)
+			if(elem != null)
+				ret += ADDRESS_SEPARATOR + elem;
+		return ret;
 	}
 	
 	/**
@@ -222,45 +320,6 @@ public abstract class MessagingComponent extends AgentComponent
 	public String getAgentAddress()
 	{
 		return getAgentName();
-	}
-	
-	/**
-	 * Registers a new message receiver for the specified prefix. Messages to a target beginning with the prefix (after
-	 * the prefix of the agent has been removed) will be delivered to this handler.
-	 * <p>
-	 * WARNING: this implementation should not be confused with the method it overrides from {@link AgentComponent}.
-	 * THis is the method that actually registers the receiver with the messaging component. In other components (that
-	 * do not extend {@link MessagingComponent}), the method will be used to relay calls either to the method in the
-	 * {@link MessagingComponent} implementation or to the {@link CompositeAgent} instance.
-	 * 
-	 * @param prefix
-	 *            - the prefix of the target.
-	 * @param receiver
-	 *            - the message receiver, as an {@link AgentEventHandler} instance.
-	 * @return always <code>true</code>, according to the meaning of the return value as given in the overridden method.
-	 */
-	@Override
-	protected boolean registerMessageReceiver(String prefix, AgentEventHandler receiver)
-	{
-		// TODO handle null for arguments
-		if(!messageHandlers.containsKey(prefix))
-			messageHandlers.put(prefix, new HashSet<AgentEventHandler>());
-		messageHandlers.get(prefix).add(receiver);
-		return true;
-	}
-	
-	/**
-	 * The method helps producing a local endpoint address, using the address of the agent and several given path
-	 * elements.
-	 * 
-	 * @param elements
-	 *            - the elements in the path.
-	 * @return the full path/address.
-	 */
-	public String makePath(String... elements)
-	{
-		String localAdr = getAgentAddress();
-		return makePathHelper((localAdr != null) ? localAdr : "", elements);
 	}
 	
 	/**
@@ -279,33 +338,56 @@ public abstract class MessagingComponent extends AgentComponent
 	public abstract String getAgentAddress(String agentName, String containerName);
 	
 	/**
-	 * The method extracts, from the address of an endpoint inside this agent, the elements of the path, after the
-	 * address of the agent itself and also eliminating specified prefix elements.
+	 * The method produces the string address of an agent on the same platform, being provided with the agent name.
+	 * <p>
+	 * This address can subsequently be suffixed with more path elements by using {@link #makePath(String, String...)}.
+	 * 
+	 * @param agentName
+	 *            - the name of the target agent.
+	 * @return the string address of the target agent.
+	 */
+	public abstract String getAgentAddress(String agentName);
+	
+	/**
+	 * The method extracts, from the complete endpoint path, the elements of the path, after the address of the agent
+	 * itself and also eliminating specified prefix elements.
 	 * 
 	 * @param event
 	 *            - the event to extract the address from.
-	 * @param prefixToRemove
+	 * @param prefixElementsToRemove
 	 *            - elements of the prefix to remove from the address.
 	 * @return the elements that were extracted from the address, following the address of the agent and the specified
 	 *         prefix elements; <code>null</code> if an error occurred (address not in the current agent or prefix
 	 *         elements not part of the address in the specified order).
 	 */
-	public String[] extractInternalAddress(AgentEvent event, String... prefixToRemove)
+	public String[] extractInternalAddressElements(AgentEvent event, String... prefixElementsToRemove)
+	{
+		String prefix = makeInternalPath(prefixElementsToRemove);
+		String rem = extractInternalAddress(event, prefix);
+		String[] ret = rem.substring(1).split(ADDRESS_SEPARATOR);
+		return ret;
+	}
+	
+	/**
+	 * The method extracts, from the complete endpoint path, the remaining internal address, after the address of the
+	 * agent itself and also eliminating a specified prefix.
+	 * 
+	 * @param event
+	 *            - the event to extract the address from.
+	 * @param prefixToRemove
+	 *            - prefix to remove from the address. The prefix must be an internal path (starting with slash, but not
+	 *            ending with slash).
+	 * @return the remaining internal address (starting with slash).
+	 */
+	public String extractInternalAddress(AgentEvent event, String prefixToRemove)
 	{
 		String address = (String) event.getParameter(DESTINATION_PARAMETER);
 		if(!address.startsWith(getAgentAddress()))
 			return null;
 		String rem = address.substring(getAgentAddress().length());
-		String[] elements = rem.split(ADDRESS_SEPARATOR);
-		int i = 0;
-		for(String prefix : prefixToRemove)
-		{
-			if(!prefix.equals(elements[i]))
-				return null;
-			i++;
-		}
-		String[] ret = Arrays.copyOfRange(elements, prefixToRemove.length, elements.length - 1);
-		return ret;
+		if(!rem.startsWith(prefixToRemove))
+			return null;
+		return rem.substring(prefixToRemove.length());
 	}
 	
 	/**
@@ -326,33 +408,12 @@ public abstract class MessagingComponent extends AgentComponent
 	 * Sends a message to another agent, according to the specific implementation.
 	 * 
 	 * @param target
-	 *            - the target endpoint of the message.
+	 *            - the target (complete) endpoint of the message.
 	 * @param source
-	 *            - the source endpoint of the message.
+	 *            - the source (internal) endpoint of the message.
 	 * @param content
 	 *            - the content of the message.
 	 * @return <code>true</code> if the message was sent successfully.
 	 */
 	public abstract boolean sendMessage(String target, String source, String content);
-	
-	/**
-	 * Produces an address by assembling the start of the address with the rest of the elements. They will be separated
-	 * by the address separator specified as constant.
-	 * <p>
-	 * Elements that are <code>null</code> will not be assembled in the path.
-	 * 
-	 * @param start
-	 *            - start of the address.
-	 * @param elements
-	 *            - other elements in the address
-	 * @return the resulting address.
-	 */
-	public static String makePathHelper(String start, String... elements)
-	{
-		String ret = start;
-		for(String elem : elements)
-			if(elem != null)
-				ret += ADDRESS_SEPARATOR + elem;
-		return ret;
-	}
 }

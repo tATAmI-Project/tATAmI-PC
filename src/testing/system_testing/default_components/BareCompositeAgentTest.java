@@ -61,7 +61,7 @@ public class BareCompositeAgentTest extends Unit
 							System.out.println("local log is null");
 						else
 							locallog.li("event: [" + event.getType().toString() + "]");
-						if(event.getType() == AgentEventType.AGENT_EXIT)
+						if(event.getType() == AgentEventType.AGENT_STOP)
 							locallog.doExit();
 					}
 				};

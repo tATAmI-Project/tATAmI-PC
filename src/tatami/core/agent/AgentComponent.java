@@ -4,31 +4,42 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.xqhs.util.XML.XMLTree.XMLNode;
+import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.hierarchical.HierarchicalComponent;
 import tatami.core.agent.kb.CognitiveComponent;
-import tatami.core.agent.kb.ContextComponent;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.movement.MovementComponent;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.webServices.WebserviceComponent;
-import tatami.jade.JadeComponent;
+import tatami.core.util.ParameterSet;
 
 /**
- * This class serves as base for agent component. a component is characterized by its functionality, denominated by
+ * This class serves as base for agent component. A component is characterized by its functionality, denominated by
  * means of its name -- an instance of {@link AgentComponentName}.
  * <p>
- * A component can belong to at most one {@link CompositeAgent}, which is its parent. When created, the component does
- * no have a parent; a parent will be set afterwards.
+ * A component can belong to at most one {@link CompositeAgent}, which is its parent. When created, the component has no
+ * parent; a parent will be set afterwards and the component notified.
  * <p>
- * The class also offers direct access to a basic set of components. It is not recommended for components to retain the
- * reference, as it may become null if the component is removed. // TODO: implement mechanisms to enable caching of
- * component references, invalidating the cache only at specific agent events; add the event COMPONENT_CHANGE.
+ * In the lifecycle of a component, it will be constructed and pre-loaded, before receiving an AGENT_START event.
  * <p>
- * The class serves as a relay to access some package-accessible functionality from {@link CompositeAgent}.
+ * The class contains methods that should be overridden by extending classes in order to intercept initialization and
+ * parent change.
+ * <p>
+ * The class also contains methods that, <i>by default</i>, are registered as event handlers for agent events. Other
+ * handlers may be registered so these methods (<code>at*</code>) are not guaranteed to be called when the event occurs.
+ * It is the choice of the developer of the extending class if events are to be handled by overriding these methods or
+ * by registering new handlers. There are events for which default handlers are not registered (e.g. AGENT_MESSAGE).
+ * <p>
+ * The class also serves as a relay to access some package-accessible functionality from {@link CompositeAgent}.
+ * <p>
+ * TODO: implement mechanisms to enable caching of component references, invalidating the cache only at specific agent
+ * events; add the event COMPONENT_CHANGE.
+ * <p>
  * 
  * @author Andrei Olaru
  */
@@ -38,6 +49,19 @@ public abstract class AgentComponent implements Serializable
 	 * The class UID.
 	 */
 	private static final long	serialVersionUID	= -8282262747231347473L;
+	
+	/**
+	 * Alias of {@link ParameterSet}.
+	 * 
+	 * @author Andrei Olaru
+	 */
+	public static class ComponentCreationData extends ParameterSet
+	{
+		/**
+		 * The serial UID.
+		 */
+		private static final long	serialVersionUID	= 5069937206709568881L;
+	}
 	
 	/**
 	 * Enumeration of available component names / functionalities. These are the standard types of components. Other
@@ -89,11 +113,6 @@ public abstract class AgentComponent implements Serializable
 		 * The name of a component extending {@link ClaimComponent}.
 		 */
 		S_CLAIM_COMPONENT(AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".claim.ClaimComponent"),
-		
-		/**
-		 * The name of a component extending {@link JadeComponent}.
-		 */
-		JADE_COMPONENT,
 		
 		/**
 		 * TEMPORARY type for testing. TODO: remove this type.
@@ -193,7 +212,13 @@ public abstract class AgentComponent implements Serializable
 	/**
 	 * The name of the component, as instance of {@link AgentComponentName}.
 	 */
-	private AgentComponentName						componentName	= null;
+	private AgentComponentName						componentName;
+	/**
+	 * Creation data for the component, loaded in {@link #preload(ComponentCreationData, XMLNode, Logger)}. The field is
+	 * initialized with an empty structure, so that it is guaranteed that it will never be <code>null</code> after
+	 * construction.
+	 */
+	private ComponentCreationData					componentData;
 	/**
 	 * The {@link CompositeAgent} instance that this instance is part of.
 	 */
@@ -201,7 +226,7 @@ public abstract class AgentComponent implements Serializable
 	/**
 	 * The {@link AgentEventHandler} instances that respond to various events in the agent.
 	 */
-	private Map<AgentEventType, AgentEventHandler>	eventHandlers	= new HashMap<AgentEventType, AgentEventHandler>();
+	private Map<AgentEventType, AgentEventHandler>	eventHandlers;
 	
 	/**
 	 * The constructor assigns the name to the component.
@@ -219,20 +244,226 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected AgentComponent(AgentComponentName name)
 	{
-		if(!name.equals(AgentComponentName.TESTING_COMPONENT))
-			componentName = name;
+		componentName = name;
+		
+		// dummy component data, in case no other is preloaded
+		componentData = new ComponentCreationData();
+		componentData.ensureLocked();
+		
+		// register
+		eventHandlers = new HashMap<AgentEventType, AgentEventHandler>();
+		registerHandler(AgentEventType.AGENT_START, new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				atAgentStart(event);
+			}
+		});
+		registerHandler(AgentEventType.SIMULATION_START, new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				atSimulationStart(event);
+			}
+		});
+		registerHandler(AgentEventType.SIMULATION_PAUSE, new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				atSimulationPause(event);
+			}
+		});
+		registerHandler(AgentEventType.AGENT_STOP, new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				atAgentStop(event);
+			}
+		});
+		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				atBeforeAgentMove(event);
+			}
+		});
+		registerHandler(AgentEventType.AFTER_MOVE, new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				atAfterAgentMove(event);
+			}
+		});
+		
 		componentInitializer();
 	}
 	
 	/**
-	 * Extending anonymous classes can override this method to perform actions when the component is created. The method
-	 * is called at the end of the constructor.
+	 * Extending <b>anonymous</b> classes can override this method to perform actions when the component is created. The
+	 * method is called at the end of the constructor.
 	 * <p>
 	 * Extending classes should always call super.componentInitializer() first.
 	 * <p>
 	 * IMPORTANT: The note in {@link #AgentComponent(AgentComponentName)} also applies to this method.
+	 * <p>
+	 * VERY IMPORTANT: initializations done in this method are done before all initializations in extending
+	 * constructors.
 	 */
 	protected void componentInitializer()
+	{
+		// this class does not do anything here.
+	}
+	
+	/**
+	 * Extending classes should override this method to verify and pre-load component data, based on scenario data. The
+	 * component should perform agent-dependent initialization actions when
+	 * {@link #parentChangeNotifier(CompositeAgent)} is called, and actions depending on other components after the
+	 * AGENT_START event has occurred.
+	 * <p>
+	 * If the component is surely not going to be able to load, <code>false</code> will be returned. For any non-fatal
+	 * issues, the method should return <code>true</code> and output warnings in the specified log.
+	 * <p>
+	 * The method loads the parameters into {@link #componentData} and locks them.
+	 * <p>
+	 * IMPORTANT: The note in {@link #AgentComponent(AgentComponentName)} also applies to this method.
+	 * <p>
+	 * ALSO IMPORTANT: always call <code>super.preload()</code> first.
+	 * <p>
+	 * This method is normally <code>protected</code>, so it can only be called from the component itself, or from the
+	 * tatami.core.agent package (through {@link AgentComponent#preload}). For testing purposes, one may override
+	 * {@link #componentInitializer()} to call {@link #preload}.
+	 * 
+	 * @param parameters
+	 *            - parameters for creating the component. The parameters will be locked (see
+	 *            {@link ComponentCreationData#lock()} from this moment on.
+	 * @param scenarioNode
+	 *            - the {@link XMLNode} that contains the complete data for creating the component, as stated in the
+	 *            scenario file.
+	 * @param log
+	 *            - the {@link Logger} in which to output any potential problems (as warnings or errors).
+	 * @return <code>true</code> if no fatal issues were found; <code>false</code> otherwise.
+	 */
+	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
+	{
+		if(parameters != null)
+		{
+			parameters.ensureLocked();
+			componentData = parameters;
+		}
+		return true;
+	}
+	
+	/**
+	 * Extending classes can override this method to perform actions when the parent of the component changes, ot when
+	 * the component is effectively integrated (added) in the agent.
+	 * <p>
+	 * The previous reference to the parent can be found in the first parameter. The current parent can be obtained by
+	 * calling {@link #getParent()}.
+	 * <p>
+	 * Such actions may be initializations that depend on the parent or on other components of the same agent.
+	 * <p>
+	 * Extending classes should always call super.parentChangeNotifier() first.
+	 * 
+	 * @param oldParent
+	 *            - the previous value for the parent, if any.
+	 */
+	protected void parentChangeNotifier(CompositeAgent oldParent)
+	{
+		// this class does not do anything here.
+	}
+	
+	/**
+	 * Method that is called by the default handler for {@link AgentEventType#AGENT_START}.
+	 * <p>
+	 * Extending classes should override this method and should consider calling the overridden method first.
+	 * <p>
+	 * Since extending classes may register other handlers for the event, it is not guaranteed that this method will be
+	 * called when the event occurs.
+	 * 
+	 * @param event
+	 *            - the event that occurred.
+	 */
+	protected void atAgentStart(AgentEvent event)
+	{
+		// this class does not do anything here.
+	}
+	
+	/**
+	 * Method that is called by the default handler for {@link AgentEventType#SIMULATION_START}.
+	 * <p>
+	 * Extending classes should override this method and should consider calling the overridden method first.
+	 * <p>
+	 * Since extending classes may register other handlers for the event, it is not guaranteed that this method will be
+	 * called when the event occurs.
+	 * 
+	 * @param event
+	 *            - the event that occurred.
+	 */
+	protected void atSimulationStart(AgentEvent event)
+	{
+		// this class does not do anything here.
+	}
+	
+	/**
+	 * Method that is called by the default handler for {@link AgentEventType#SIMULATION_PAUSE}.
+	 * <p>
+	 * Extending classes should override this method and should consider calling the overridden method first.
+	 * <p>
+	 * Since extending classes may register other handlers for the event, it is not guaranteed that this method will be
+	 * called when the event occurs.
+	 * 
+	 * @param event
+	 *            - the event that occurred.
+	 */
+	protected void atSimulationPause(AgentEvent event)
+	{
+		// this class does not do anything here.
+	}
+	
+	/**
+	 * Method that is called by the default handler for {@link AgentEventType#AGENT_STOP}.
+	 * <p>
+	 * Extending classes should override this method and should consider calling the overridden method first.
+	 * <p>
+	 * Since extending classes may register other handlers for the event, it is not guaranteed that this method will be
+	 * called when the event occurs.
+	 * 
+	 * @param event
+	 *            - the event that occurred.
+	 */
+	protected void atAgentStop(AgentEvent event)
+	{
+		// this class does not do anything here.
+	}
+	
+	/**
+	 * Method that is called by the default handler for {@link AgentEventType#BEFORE_MOVE}.
+	 * <p>
+	 * Extending classes should override this method and should consider calling the overridden method first.
+	 * <p>
+	 * Since extending classes may register other handlers for the event, it is not guaranteed that this method will be
+	 * called when the event occurs.
+	 * 
+	 * @param event
+	 *            - the event that occurred.
+	 */
+	protected void atBeforeAgentMove(AgentEvent event)
+	{
+		// this class does not do anything here.
+	}
+	
+	/**
+	 * Method that is called by the default handler for {@link AgentEventType#AFTER_MOVE}.
+	 * <p>
+	 * Extending classes should override this method and should consider calling the overridden method first.
+	 * <p>
+	 * Since extending classes may register other handlers for the event, it is not guaranteed that this method will be
+	 * called when the event occurs.
+	 * 
+	 * @param event
+	 *            - the event that occurred.
+	 */
+	protected void atAfterAgentMove(AgentEvent event)
 	{
 		// this class does not do anything here.
 	}
@@ -268,27 +499,84 @@ public abstract class AgentComponent implements Serializable
 	}
 	
 	/**
-	 * Extending classes can override this method to perform actions when the parent of the component changes, ot when
-	 * the component is effectively integrated (added) in the agent.
+	 * The method calls the event handler of the component for the event which occurred.
 	 * <p>
-	 * The previous reference to the parent can be found in the first parameter. The current parent can be obtained by
-	 * calling {@link #getParent()}.
-	 * <p>
-	 * Such actions may be initializations that depend on the parent or on other components of the same agent.
-	 * <p>
-	 * Extending classes should always call super.parentChangeNotifier() first.
+	 * It relays the call from the parent {@link CompositeAgent}.
 	 * 
-	 * @param oldParent
-	 *            - the previous value for the parent, if any.
+	 * @param event
+	 *            - the event which occurred.
 	 */
-	protected void parentChangeNotifier(CompositeAgent oldParent)
+	void signalAgentEvent(AgentEvent event)
 	{
-		// this class does not do anything here.
+		if(eventHandlers.containsKey(event.getType()))
+			eventHandlers.get(event.getType()).handleEvent(event);
+	}
+	
+	/**
+	 * @return the name of the component (instance of {@link AgentComponentName}).
+	 */
+	protected AgentComponentName getComponentName()
+	{
+		return componentName;
+	}
+	
+	/**
+	 * @return the component initialization data. It cannot be modified, and it is guaranteed to not be
+	 *         <code>null</code>.
+	 */
+	protected ComponentCreationData getComponentData()
+	{
+		return componentData;
+	}
+	
+	/**
+	 * Retrieves the parent of the component.
+	 * 
+	 * @return the {@link CompositeAgent} instance this component belongs to.
+	 */
+	protected CompositeAgent getParent()
+	{
+		return parentAgent;
+	}
+	
+	/**
+	 * Relay for calls to the method {@link CompositeAgent#getAgentName()}.
+	 * 
+	 * @return the name of the agent, or <code>null</code> if the component has no parent.
+	 */
+	protected String getAgentName()
+	{
+		return (parentAgent != null) ? parentAgent.getAgentName() : null;
+	}
+	
+	/**
+	 * Relay for calls to the method {@link CompositeAgent#getPlatformLink()}.
+	 * 
+	 * @return the platform link.
+	 */
+	protected Object getPlatformLink()
+	{
+		return parentAgent.getPlatformLink();
+	}
+	
+	/**
+	 * Relay for calls to the method {@link CompositeAgent#getComponent(AgentComponentName)}.
+	 * 
+	 * @param name
+	 *            - the name of the component.
+	 * @return the {@link AgentComponent} instance, if any. <code>null</code> otherwise.
+	 */
+	protected AgentComponent getAgentComponent(AgentComponentName name)
+	{
+		return (parentAgent != null) ? parentAgent.getComponent(name) : null;
 	}
 	
 	/**
 	 * Extending classes should use this method to register {@link AgentEventHandler} instances that would be invoked
 	 * when the specified {@link AgentEventType} appears.
+	 * <p>
+	 * Important note: The registered handler is the handler specific to <b>this</b> component (therefore it is
+	 * sufficient to have only one). All components of the agent may contain (at most) a handler for the same event.
 	 * <p>
 	 * Should a handler for the same event already exist, the old handler will be discarded. A reference to it will be
 	 * returned.
@@ -303,182 +591,18 @@ public abstract class AgentComponent implements Serializable
 	{
 		AgentEventHandler oldHandler = null;
 		if(eventHandlers.containsKey(event))
+		{
 			oldHandler = eventHandlers.get(event);
+			try
+			{
+				getAgentLog().warn("Handler for event [] overwritten with []; was []", event, handler, oldHandler);
+			} catch(NullPointerException e)
+			{
+				// no log, it's ok.
+			}
+		}
 		eventHandlers.put(event, handler);
 		return oldHandler;
-	}
-	
-	/**
-	 * Relay for calls to the method in {@link CompositeAgent}.
-	 * 
-	 * @return the name of the agent.
-	 */
-	protected String getAgentName()
-	{
-		return (parentAgent != null) ? parentAgent.getAgentName() : null;
-	}
-	
-	/**
-	 * Relay for calls to the method in {@link CompositeAgent}.
-	 * 
-	 * @return the platform link.
-	 */
-	protected Object getPlatformLink()
-	{
-		return parentAgent.getPlatformLink();
-	}
-	
-	/**
-	 * @return the name of the component (instance of {@link AgentComponentName}).
-	 */
-	protected AgentComponentName getComponentName()
-	{
-		return componentName;
-	}
-	
-	/**
-	 * Retrieves the parent of the component.
-	 * 
-	 * @return the {@link CompositeAgent} instance this component belongs to.
-	 */
-	protected CompositeAgent getParent()
-	{
-		return parentAgent;
-	}
-	
-	/**
-	 * Relay for calls to the method in {@link CompositeAgent}.
-	 * 
-	 * @param name
-	 *            - the name of the component.
-	 * @return <code>true</code> if the component exists, false otherwise.
-	 */
-	protected boolean hasComponent(AgentComponentName name)
-	{
-		return (parentAgent != null) ? parentAgent.hasComponent(name) : false;
-	}
-	
-	/**
-	 * Relay for calls to the method in {@link CompositeAgent}.
-	 * 
-	 * @param name
-	 *            - the name of the component.
-	 * @return the {@link AgentComponent} instance, if any. <code>null</code> otherwise.
-	 */
-	protected AgentComponent getComponent(AgentComponentName name)
-	{
-		return (parentAgent != null) ? parentAgent.getComponent(name) : null;
-	}
-	
-	/**
-	 * Retrieves a direct reference to the {@link ParametricComponent} of the agent, if any.
-	 * <p>
-	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be removed without notice.
-	 * 
-	 * @return the component instance, if any. <code>null</code> otherwise.
-	 */
-	protected ParametricComponent getParametric()
-	{
-		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
-			return (ParametricComponent) parentAgent.getComponent(AgentComponentName.PARAMETRIC_COMPONENT);
-		return null;
-	}
-	
-	/**
-	 * Retrieves a direct reference to the {@link VisualizableComponent} of the agent, if any.
-	 * <p>
-	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be removed without notice.
-	 * 
-	 * @return the component instance, if any. <code>null</code> otherwise.
-	 */
-	protected VisualizableComponent getVisualizable()
-	{
-		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.VISUALIZABLE_COMPONENT))
-			return (VisualizableComponent) parentAgent.getComponent(AgentComponentName.VISUALIZABLE_COMPONENT);
-		return null;
-	}
-	
-	/**
-	 * Retrieves a direct reference to the {@link MessagingComponent} of the agent, if any.
-	 * <p>
-	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be removed without notice.
-	 * 
-	 * @return the component instance, if any. <code>null</code> otherwise.
-	 */
-	protected MessagingComponent getMessaging()
-	{
-		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.MESSAGING_COMPONENT))
-			return (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
-		return null;
-	}
-	
-	/**
-	 * Retrieves a direct reference to the {@link CognitiveComponent} of the agent, if any.
-	 * <p>
-	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be removed without notice.
-	 * 
-	 * @return the component instance, if any. <code>null</code> otherwise.
-	 */
-	protected ContextComponent getCognitive()
-	{
-		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.COGNITIVE_COMPONENT))
-			return (ContextComponent) parentAgent.getComponent(AgentComponentName.COGNITIVE_COMPONENT);
-		return null;
-	}
-	
-	/**
-	 * Retrieves a direct reference to the {@link ClaimComponent} of the agent, if any.
-	 * <p>
-	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be removed without notice.
-	 * 
-	 * @return the component instance, if any. <code>null</code> otherwise.
-	 */
-	protected ClaimComponent getClaim()
-	{
-		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.S_CLAIM_COMPONENT))
-			return (ClaimComponent) parentAgent.getComponent(AgentComponentName.S_CLAIM_COMPONENT);
-		return null;
-	}
-	
-	/**
-	 * Retrieves a direct reference to the {@link WebServiceComponent} of the agent, if any.
-	 * <p>
-	 * It is <i>strongly recommended</i> that the reference is not kept, as the component may be removed without notice.
-	 * 
-	 * @return the component instance, if any. <code>null</code> otherwise.
-	 */
-	
-	protected WebserviceComponent getWebService()
-	{
-		if((parentAgent != null) && parentAgent.hasComponent(AgentComponentName.WEBSERVICE_COMPONENT))
-			return (WebserviceComponent) parentAgent.getComponent(AgentComponentName.WEBSERVICE_COMPONENT);
-		return null;
-	}
-	
-	/**
-	 * Handles the registration of an event handler for messages to a target (inside the agent) with the specified
-	 * prefix.
-	 * <p>
-	 * If a {@link MessagingComponent} exists, the handler will be registered with the messaging component. Otherwise,
-	 * the handler will also be registered directly with the agent.
-	 * 
-	 * @param prefix
-	 *            - the target prefix.
-	 * @param receiver
-	 *            - the receiving {@link AgentEventHandler} instance.
-	 * @return <code>true</code> if the registration was successful; <code>false</code> otherwise.
-	 */
-	protected boolean registerMessageReceiver(String prefix, AgentEventHandler receiver)
-	{
-		// TODO: if the messaging component disappears, register with the agent; if the messaging component appears,
-		// register with that.
-		if(parentAgent == null)
-			return false;
-		if(parentAgent.hasComponent(AgentComponentName.MESSAGING_COMPONENT))
-			return parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT).registerMessageReceiver(prefix,
-					receiver);
-		registerHandler(AgentEventType.AGENT_MESSAGE, receiver);
-		return true;
 	}
 	
 	/**
@@ -494,16 +618,94 @@ public abstract class AgentComponent implements Serializable
 	}
 	
 	/**
-	 * The method calls the event handler of the component for the event which occurred.
-	 * <p>
-	 * It relays the call from the parent {@link CompositeAgent}.
-	 * 
-	 * @param event
-	 *            - the event which occurred.
+	 * @return the log of the agent, or <code>null</code> if one is not present or cannot be obtained.
 	 */
-	void signalAgentEvent(AgentEvent event)
+	protected Logger getAgentLog()
 	{
-		if(eventHandlers.containsKey(event.getType()))
-			eventHandlers.get(event.getType()).handleEvent(event);
+		try
+		{
+			return ((VisualizableComponent) getAgentComponent(AgentComponentName.VISUALIZABLE_COMPONENT)).getLog();
+		} catch(NullPointerException e)
+		{
+			return null;
+		}
+	}
+	
+	/**
+	 * Handles the registration of an event handler for messages to a target (inside the agent) with the specified
+	 * prefix.
+	 * <p>
+	 * If the component has a parent and a {@link MessagingComponent} exists, the handler will be registered with the
+	 * messaging component. Otherwise, the handler be registered to receive any messages, regardless of prefix. In the
+	 * latter case, <code>false</code> will be returned to signal the abnormal behavior.
+	 * 
+	 * @param receiver
+	 *            - the receiving {@link AgentEventHandler} instance.
+	 * @param prefixElements
+	 *            - the target prefix, as separate elements of the path.
+	 * @return <code>true</code> if the registration was successful; <code>false</code> if the handler was registered as
+	 *         a general message handler.
+	 */
+	protected boolean registerMessageReceiver(AgentEventHandler receiver, String... prefixElements)
+	{
+		// TODO: if the messaging component disappears, register with the agent; if the messaging component appears,
+		// register with that.
+		if((parentAgent != null) && (parentAgent.hasComponent(AgentComponentName.MESSAGING_COMPONENT)))
+		{
+			// the implementation somewhat non-intuitively uses the fact that the method in MessagingComponent that is
+			// used has the same name.
+			AgentComponent msgr = parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
+			return msgr.registerMessageReceiver(receiver, prefixElements);
+		}
+		registerHandler(AgentEventType.AGENT_MESSAGE, receiver);
+		return false;
+	}
+	
+	/**
+	 * Retrieve the complete path of the endpoint of the current component, as specified by the component by means of
+	 * the path elements in arguments, and adding the agent's address. This method is meant to be used by components
+	 * that send messages to obtain the 'source' part of the message.
+	 * <p>
+	 * The obtained result can be used by another agent to send a message (reply) to the component / service.
+	 * 
+	 * @param pathElements
+	 *            - the elements in the path to the component.
+	 * @return the requested complete path, as generated by the messaging component. <code>null</code> is returned if
+	 *         the component is not available.
+	 */
+	protected String getComponentEndpoint(String... pathElements)
+	{
+		try
+		{
+			return ((MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT))
+					.makeLocalPath(pathElements);
+		} catch(NullPointerException e)
+		{
+			// messaging component not available
+			return null;
+		}
+	}
+	
+	/**
+	 * Method that relays the sending of a message, without the need to interact with the messaging component directly.
+	 * 
+	 * @param content
+	 *            - the content of the message.
+	 * @param sourceEndpoint
+	 *            - the source endpoint, as a complete path. See {@link #getComponentEndpoint(String...)}.
+	 * @param targetAgent
+	 *            - the name of the target agent, as a name that can be passed to
+	 *            {@link MessagingComponent#getAgentAddress(String)}.
+	 * @param targetPathElements
+	 *            - elements in the internal path of the target.
+	 * @return <code>true</code> if the message has been successfully sent.
+	 */
+	protected boolean sendMessage(String content, String sourceEndpoint, String targetAgent,
+			String... targetPathElements)
+	{
+		MessagingComponent msgr = (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
+		if(msgr != null)
+			return msgr.sendMessage(msgr.makePath(targetAgent, targetPathElements), sourceEndpoint, content);
+		return false;
 	}
 }

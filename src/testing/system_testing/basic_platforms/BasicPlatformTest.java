@@ -16,18 +16,18 @@ public class BasicPlatformTest
 	 */
 	public final static String[]	SCENARIOS		= {
 													
-													"scenario-syntax-error",
-													
-													"scenario-no-initial",
-													
-													"scenario-no-containers",
-													
-													"scenario-empty-container",
-													
-													"scenario-empty-agents",
-													
-													"scenario-empty-named-agents",
-													
+													"scenario-syntax-error", // XML error is expected
+			
+			"scenario-no-initial", // messaging component error is expected
+			
+			"scenario-no-containers", // XML error is expected
+			
+			"scenario-empty-container", // messaging component error is expected
+			
+			"scenario-empty-agents", // messaging component error is expected; no agents.
+			
+			"scenario-empty-named-agents",// messaging component error is expected; agents, no GUI.
+			
 													};
 	
 	/**
@@ -47,7 +47,8 @@ public class BasicPlatformTest
 	/**
 	 * Main method.
 	 * 
-	 * @param args - not used.
+	 * @param args
+	 *            - not used.
 	 */
 	public static void main(String[] args)
 	{

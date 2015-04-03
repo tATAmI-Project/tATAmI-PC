@@ -74,7 +74,7 @@ public class HierarchicalComponent extends AgentComponent
 		if("true".equals(parVal(AgentParameterName.FIXED)))
 		{
 			fixedAgent = true;
-			getLog().info("agent is fixed");
+			getAgentLog().info("agent is fixed");
 		}
 		
 		// parameters
@@ -133,7 +133,7 @@ public class HierarchicalComponent extends AgentComponent
 					String newChild = msg.getSender().getLocalName();
 					hierRelation.addChild(newChild);
 					// FIXME add log entry
-					((HierarchicalComponent) this.myAgent).getLog().info(
+					((HierarchicalComponent) this.myAgent).getAgentLog().info(
 							this.myAgent.getLocalName() + " has new child " + newChild);
 				}
 				else
@@ -155,7 +155,7 @@ public class HierarchicalComponent extends AgentComponent
 				{
 					String child = msg.getSender().getLocalName();
 					hierRelation.getChildren().remove(child);
-					getLog().info(
+					getAgentLog().info(
 							myAgent.getLocalName() + " has removed " + msg.getSender().getLocalName()
 									+ " from the children list");
 				}
@@ -176,7 +176,7 @@ public class HierarchicalComponent extends AgentComponent
 				ACLMessage msg = myAgent.receive(HierarchyOntology.template(Vocabulary.DEMANDPARENT));
 				if(msg != null)
 				{
-					getLog().info("received request of being child from " + msg.getSender().getLocalName());
+					getAgentLog().info("received request of being child from " + msg.getSender().getLocalName());
 					// For testing only: always agree
 					ACLMessage msgAnswer = HierarchyOntology.setupMessage(Vocabulary.AGREEPARENT);
 					msgAnswer.addReceiver(msg.getSender());
