@@ -16,8 +16,8 @@
 	xsi:schemaLocation="http://www.example.org/scenarioSchema ../../../config/scenarioSchema2.xsd ">
 
 	<scen:jadeConfig isMain="true" />
-	<scen:adfPath>scenario/examples/simpleScenarioE</scen:adfPath>
-	<scen:agentPackage>agent_packages.example.chat</scen:agentPackage>
+	<scen:adfPath>scenario/examples/simpleScenarioF</scen:adfPath>
+	<scen:agentPackage>agent_packages.example.follow_me</scen:agentPackage>
 
 	<scen:initial>
 		<scen:container name="container-1">

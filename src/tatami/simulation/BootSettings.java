@@ -16,7 +16,7 @@ import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
 
 class BootSettings
 {
-	final String		scenarioFileName	= "scenario/examples/simpleScenarioF/scenario.xml";
+	final String		scenarioFileName	= "scenario/examples/simpleScenarioF/scenario-distributed.xml";
 	// final String scenarioFileName = "scenario/examples/simpleScenarioE/scenario-distributed.xml";
 	// final String scenarioFileName = "scenario/examples/debateScenario-android/scenario.xml";
 	// final String scenarioFileName = "scenario/2011/phase2-android/scenario_new_schema.xml";
