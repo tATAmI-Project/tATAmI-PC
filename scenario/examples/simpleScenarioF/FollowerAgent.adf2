@@ -1,0 +1,10 @@
+(agent ChatAgent ?otherAgent
+
+(behavior
+	
+	(reactive go
+		(receive (struct message call ?where))				// receive a message of type 'call' with a host name
+		(in ?where)
+	)
+)
+)

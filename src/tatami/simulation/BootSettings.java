@@ -16,10 +16,10 @@ import tatami.pc.util.windowLayout.LayoutIndications.BarPosition;
 
 class BootSettings
 {
-	// final String scenarioFileName = "scenario/examples/simpleScenarioE/scenario.xml";
+	final String		scenarioFileName	= "scenario/examples/simpleScenarioF/scenario.xml";
 	// final String scenarioFileName = "scenario/examples/simpleScenarioE/scenario-distributed.xml";
 	// final String scenarioFileName = "scenario/examples/debateScenario-android/scenario.xml";
-	final String		scenarioFileName	= "scenario/2011/phase2-android/scenario_new_schema.xml";
+	// final String scenarioFileName = "scenario/2011/phase2-android/scenario_new_schema.xml";
 	
 	final int			windowLayoutWidth	= 1530;
 	final int			windowLayoutHeight	= 600;
@@ -30,7 +30,7 @@ class BootSettings
 													
 													// .indicateBar(BarPosition.LEFT, 0, 0) // otherwise
 													
-													.indicateWindowType("agent", 5, 2)
+													.indicateWindowType("agent", 3, 2)
 													
 													.indicateWindowType("system", 6, 3)
 													
