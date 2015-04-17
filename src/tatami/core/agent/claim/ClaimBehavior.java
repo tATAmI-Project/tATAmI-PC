@@ -11,13 +11,19 @@
  ******************************************************************************/
 package tatami.core.agent.claim;
 
+import jade.content.ContentElement;
+import jade.content.lang.Codec.CodecException;
+import jade.content.onto.OntologyException;
+import jade.content.onto.UngroundedException;
+import jade.content.onto.basic.Action;
+import jade.lang.acl.MessageTemplate;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Vector;
 
 import net.xqhs.graphs.context.ContextPattern;
@@ -31,11 +37,11 @@ import net.xqhs.graphs.representation.text.TextGraphRepresentation;
 import net.xqhs.graphs.util.ContentHolder;
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentEvent;
-import tatami.core.agent.claim.ClaimComponent.Vocabulary;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
-import tatami.core.agent.parametric.AgentParameterName;
+import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.visualization.AgentGui;
-import tatami.core.agent.visualization.AgentGui.InputListener;
+import tatami.core.agent.webServices.WebServiceOntology;
+import tatami.core.agent.webServices.WebServiceOntology.ReceiveOperation;
 import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
 import tatami.sclaim.constructs.basic.ClaimBehaviorType;
 import tatami.sclaim.constructs.basic.ClaimCondition;
@@ -437,10 +443,8 @@ public class ClaimBehavior
 	
 	/**
 	 * Handle the <code>receive</code> construct.
-	 * 
 	 * <p>
 	 * Format: <code>(receive field-1 field-2 ...)</code>
-	 * 
 	 * <p>
 	 * Fields that are values or instantiated variables are used to match the received message; uninstantiated variables
 	 * will be bound to the values in the message
@@ -453,60 +457,28 @@ public class ClaimBehavior
 	 */
 	protected boolean handleReceive(Vector<ClaimConstruct> args)
 	{
-		int argsSize = args.size();
-		boolean ret = true;
-		
-		/*
-		 * TODO handle potential web service access to the agent MessageTemplate WStemplate =
-		 * MessageTemplate.MatchOntology(WebServiceOntology.NAME);
-		 * 
-		 * //msg = this.myAgent.getMessaging().receive(WStemplate); if(msg != null) { // incoming web service access //
-		 * check if right message
-		 * 
-		 * log.trace("checking received ws access message [" + msg + "]"); String messageContent = content;
-		 * messageContent = (String)myAgent.getContentManager().extractContent(msg); ContentElement ce = null; try { ce
-		 * = myAgent.getContentManager().extractContent(msg); } catch(UngroundedException e) { e.printStackTrace(); }
-		 * catch(CodecException e) { e.printStackTrace(); } catch(OntologyException e) { e.printStackTrace(); } if(ce !=
-		 * null) { log.trace("received content [" + ce + "]"); ReceiveOperation op = (ReceiveOperation) ((Action)
-		 * ce).getAction(); messageContent = op.getOperationArgument(); log.trace("received content detail [" +
-		 * messageContent + "]"); ClaimStructure messageStruct = ClaimStructure.parseString(messageContent, log);
-		 * log.trace("received message [" + messageStruct + "]");
-		 * 
-		 * String messageProtocol = (String) ((ClaimValue) messageStruct.getFields().get(1)).getValue();
-		 * log.trace("received protocol [" + messageProtocol + "]; waiting for [" + protocol + "]");
-		 * if(protocol.equals(messageProtocol)) { // it's ok, the message should be received by this RECEIVE construct
-		 * lastMessage = msg; lastReceivedAction = (Action) ce; received = messageStruct;
-		 * log.info("received / ws access " + ClaimMessage.printMessage(msg)); } else { // put it back; discontinue
-		 * behavior // myAgent.putBack(msg); ret = false; log.trace("ws access does not match protocol"); } } } else
-		 */
-		// normal JADE message
-		
+		String content = (String) activationRecord.activationEvent.getParameter(MessagingComponent.CONTENT_PARAMETER);
 		ClaimStructure received = ClaimStructure.parseString(content);
 		
-		if(received != null)
-		{
-			
-			Vector<ClaimConstruct> newArgs = ((ClaimStructure) args.get(argsSize - 1)).getFields();
-			ClaimStructure cl = st.bindStructure(received);
-			
-			if(!readMessage(st.bindStructure(received), newArgs))
-			{ // the message does not match the pattern
-			
-				log.trace("message not matching pattern [" + content + "]");
-				ret = false;
-			}
-			else
-			{
-				
-				log.trace("--------- message received: [" + content + "]");
-				if(argsSize == 2)
-					st.put((ClaimVariable) args.get(0), new ClaimValue(source));
-			}
+		if(received == null)
+			return false;
+		
+		ClaimStructure toBind = (ClaimStructure) args.get(args.size() - 1);
+		
+		if(!readMessage(st.bindStructure(received), toBind))
+		{ // the message does not match the pattern
+		
+			log.trace("message not matching pattern [" + content + "]");
+			ret = false;
 		}
 		else
-			ret = false;
-		
-		return ret;
+		{
+			
+			log.trace("--------- message received: [" + content + "]");
+			if(argsSize == 2)
+				st.put((ClaimVariable) args.get(0), new ClaimValue(source));
+		}
+		return true;
 	}
 	
 	/**
@@ -835,21 +807,6 @@ public class ClaimBehavior
 			for(ClaimConstruct statement : statements)
 				handleStatement(statement);
 		}
-	}
-	
-	/**
-	 * Read a received message. Content of the message is in the form of a claim structure
-	 * 
-	 * @param messageStructure
-	 *            : structure received in message : (struct message f1 f2 f3 ... fn)
-	 * @param args
-	 *            : vector of {@link ClaimConstruct} (defined in adf2) : f1 f2 f3 ... fn
-	 */
-	protected boolean readMessage(ClaimStructure messageStructure, Vector<ClaimConstruct> args)
-	{
-		log.trace("read from [" + messageStructure + "] into [" + args + "]");
-		
-		return readValues(messageStructure.getFields(), args, 0, false, true);
 	}
 	
 	/**
