@@ -66,43 +66,6 @@ import tatami.sclaim.constructs.basic.ClaimWhile;
 public class ClaimBehavior
 {
 	/**
-	 * Enumeration of the methods by which a behavior may be activated.
-	 * 
-	 * @author Andrei Olaru
-	 */
-	public static enum ActivationMethod {
-		
-		WEB_SERVICE,
-		
-		MESSAGE,
-	}
-	
-	public static class ActivationRecord
-	{
-		ActivationMethod	method;
-		AgentEvent			activationEvent	= null;
-		
-		public ActivationRecord(AgentEvent event)
-		{
-			activationEvent = event;
-			switch(event.getType())
-			{
-			case AGENT_MESSAGE:
-				// TODO
-				break;
-			
-			default:
-				break;
-			}
-		}
-		
-		protected ActivationMethod getActivationMethod()
-		{
-			return method;
-		}
-	}
-	
-	/**
 	 * The behavior definition.
 	 */
 	protected ClaimBehaviorDefinition	cbd;
@@ -117,11 +80,11 @@ public class ClaimBehavior
 	/**
 	 * The {@link Logger} instance to use.
 	 */
-	protected transient Logger			log					= null;
+	protected transient Logger			log				= null;
 	/**
 	 * Information about how the behavior was activated.
 	 */
-	protected ActivationRecord			activationRecord	= null;
+	protected AgentEvent				activationEvent	= null;
 	/**
 	 * The number (index) of the statement currently being processed.
 	 */
@@ -366,8 +329,8 @@ public class ClaimBehavior
 		String receiver = null; // receiver of the message to be sent
 		int parametersAdjust = 0; // offset argument number if there is no receiver field
 		
-		boolean replyToAgent = false; // if true, the reply will be sent to an agent
-		boolean replyToWebServiceInvocation = false; // if true, the reply is a response to a web service invocation
+		boolean replyMode = false; // if true, the reply will be sent to an agent
+		// TODO remove this and rebrand it as general communication?
 		boolean webServiceInvocation = false; // if true, the send is a web service invocation
 		boolean expectServiceReturn = false; // if true, wait for a reply (blocking call)
 		
@@ -382,15 +345,11 @@ public class ClaimBehavior
 			break;
 		case STRUCTURE:
 			// there is no receiver information; should reply to the original sender
-			switch(activationRecord.getActivationMethod())
+			switch(activationEvent.getType())
 			{
-			case MESSAGE:
+			case AGENT_MESSAGE:
 				// log.trace("replying to message " + lastMessage);
-				replyToAgent = true;
-				// TODO
-				break;
-			case WEB_SERVICE:
-				replyToWebServiceInvocation = true;
+				replyMode = true;
 				// TODO
 				break;
 			default:
@@ -428,15 +387,7 @@ public class ClaimBehavior
 		}
 		else
 		{
-			if(replyToWebServiceInvocation)
-			{ // WS return result
-				log.trace("sending WS result [" + message.toString() + "]");
-				// TODO
-			}
-			else
-			{
-				claimComponent.sendMessage(message.toString(), receiver);
-			}
+			claimComponent.sendMessage(message.toString(), receiver);
 			log.info("sent " + message.toString());
 		}
 	}
@@ -457,7 +408,7 @@ public class ClaimBehavior
 	 */
 	protected boolean handleReceive(Vector<ClaimConstruct> args)
 	{
-		String content = (String) activationRecord.activationEvent.getParameter(MessagingComponent.CONTENT_PARAMETER);
+		String content = (String) activationEvent.getParameter(MessagingComponent.CONTENT_PARAMETER);
 		ClaimStructure received = ClaimStructure.parseString(content);
 		
 		if(received == null)
@@ -809,33 +760,6 @@ public class ClaimBehavior
 		}
 	}
 	
-	/**
-	 * The function has two goals: match the source and destination structures based on their structure and values; and
-	 * instantiate variables in the destination structure based on the values in the source structure.
-	 * 
-	 * <p>
-	 * If the destination field is a value, or an instantiated variable, it is checked if it matches the value of the
-	 * source.
-	 * 
-	 * <p>
-	 * If the destination field is an uninstantiated variable, it will be instanced to the value of the corresponding
-	 * source field.
-	 * 
-	 * <p>
-	 * If both destination and source field are structures, the function is called recursively.
-	 * 
-	 * @param sourceStructure
-	 * @param destinationStructure
-	 * @param ignore
-	 *            : number of fields at the beginning to ignore in both structures
-	 * @param mandatoryMatch
-	 *            : states if it is mandatory to have a match before binding the fields of the destination
-	 * @param rebindAllowed
-	 *            : set to <code>true</code> to allow variables to be rebound; PLEASE do this only for Java calls;
-	 *            FIXME: this is only allowed for re-assignable variables, which will always be reassignable. Therefore,
-	 *            this parameter should be eliminated.
-	 * @return <code>true</code> if the two structures match.
-	 */
 	protected boolean readStructure(ClaimStructure sourceStructure, ClaimStructure destinationStructure, int ignore,
 			boolean mandatoryMatch, boolean rebindAllowed)
 	{
@@ -874,10 +798,33 @@ public class ClaimBehavior
 	}
 	
 	/**
-	 * see <code>readStructure()</code>
+	 * The method matches the source and destination lists of constructs, based on their structure and values; it
+	 * identifies potential bindings that can be done if the constructs match (instantiating variables in the
+	 * destination structure based on the values in the source structure), but does not perform any binding.
+	 * <p>
+	 * If the destination field is a value, or an instantiated variable, it is checked if it matches the value of the
+	 * source.
+	 * <p>
+	 * If the destination field is an uninstantiated variable, it will be instanced to the value of the corresponding
+	 * source field.
+	 * <p>
+	 * If both destination and source field are structures, the function is called recursively.
+	 * <p>
+	 * Even if some constructs do not match, the structures are explored completely and bindings are created.
+	 * 
+	 * @param sourceConstructs
+	 *            : the constructs to take values from
+	 * @param destinationConstructs
+	 *            : the constructs that could be bound to the values in the sources.
+	 * @param ignore
+	 *            : number of fields at the beginning to ignore in both lists
+	 * @param bindingsOut
+	 *            : the bindings that should be performed if the constructs match. Only destination constructs will be
+	 *            bound.
+	 * @return <code>true</code> if the two lists match.
 	 */
 	protected boolean readValues(Vector<ClaimConstruct> sourceConstructs, Vector<ClaimConstruct> destinationConstructs,
-			int ignore, boolean mandatoryMatch, boolean rebindAllowed, Map<ClaimVariable, ClaimValue> bindingsOut)
+			int ignore, Map<ClaimVariable, ClaimValue> bindingsOut)
 	{
 		// TODO: fill this with log traces
 		boolean match = true;
