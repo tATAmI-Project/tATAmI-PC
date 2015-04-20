@@ -760,41 +760,28 @@ public class ClaimBehavior
 		}
 	}
 	
-	protected boolean readStructure(ClaimStructure sourceStructure, ClaimStructure destinationStructure, int ignore,
-			boolean mandatoryMatch, boolean rebindAllowed)
-	{
-		return readValues(sourceStructure.getFields(), destinationStructure.getFields(), ignore, mandatoryMatch,
-				rebindAllowed);
-	}
-	
 	/**
-	 * see <code>readStructure()</code> above.
+	 * This method calls {@link #readValues(Vector, Vector, int, Map)} and performs the bindings returned.
+	 * 
+	 * @param sourceConstructs
+	 *            : the constructs to take values from; must be (recursively) of type {@link ClaimValue},
+	 *            {@link ClaimVariable} or {@link ClaimStructure}.
+	 * @param destinationConstructs
+	 *            : the constructs that could be bound to the values in the sources; same restriction as above applies
+	 *            here too.
+	 * @param ignore
+	 *            : number of fields at the beginning to ignore in both lists
+	 * @return
 	 */
 	protected boolean readValues(Vector<ClaimConstruct> sourceConstructs, Vector<ClaimConstruct> destinationConstructs,
-			int ignore, boolean mandatoryMatch, boolean rebindAllowed)
+			int ignore)
 	{
 		Map<ClaimVariable, ClaimValue> bindings = new HashMap<ClaimVariable, ClaimValue>(); // to bind at the end if OK
-		boolean match = readValues(sourceConstructs, destinationConstructs, ignore, mandatoryMatch, rebindAllowed,
-				bindings);
-		if(match || !mandatoryMatch)
+		boolean match = readValues(sourceConstructs, destinationConstructs, ignore, bindings);
+		if(match)
 			for(Map.Entry<ClaimVariable, ClaimValue> entry : bindings.entrySet())
 				bindVariable(entry.getKey(), entry.getValue());
-		
 		return match;
-	}
-	
-	/**
-	 * see the other definition of <code>readStructure()</code> for details. This version only returns the bindings to
-	 * be done, does not actually do the bindings.
-	 * 
-	 * @param bindingsOut
-	 *            : the map will be filled with the bindings to perform.
-	 */
-	protected boolean readStructure(ClaimStructure sourceStructure, ClaimStructure destinationStructure, int ignore,
-			boolean mandatoryMatch, boolean rebindAllowed, Map<ClaimVariable, ClaimValue> bindingsOut)
-	{
-		return readValues(sourceStructure.getFields(), destinationStructure.getFields(), ignore, mandatoryMatch,
-				rebindAllowed, bindingsOut);
 	}
 	
 	/**
@@ -806,103 +793,91 @@ public class ClaimBehavior
 	 * source.
 	 * <p>
 	 * If the destination field is an uninstantiated variable, it will be instanced to the value of the corresponding
-	 * source field.
+	 * source field (if the source is instantiated).
 	 * <p>
-	 * If both destination and source field are structures, the function is called recursively.
+	 * If both destination and source field are structures, they must have the same number of fields and the function is
+	 * called recursively.
 	 * <p>
 	 * Even if some constructs do not match, the structures are explored completely and bindings are created.
 	 * 
 	 * @param sourceConstructs
-	 *            : the constructs to take values from
+	 *            : the constructs to take values from; must be (recursively) of type {@link ClaimValue},
+	 *            {@link ClaimVariable} or {@link ClaimStructure}.
 	 * @param destinationConstructs
-	 *            : the constructs that could be bound to the values in the sources.
+	 *            : the constructs that could be bound to the values in the sources; same restriction as above applies
+	 *            here too.
 	 * @param ignore
 	 *            : number of fields at the beginning to ignore in both lists
 	 * @param bindingsOut
 	 *            : the bindings that should be performed if the constructs match. Only destination constructs will be
 	 *            bound.
-	 * @return <code>true</code> if the two lists match.
+	 * @return <code>true</code> if the two lists of constructs match.
 	 */
 	protected boolean readValues(Vector<ClaimConstruct> sourceConstructs, Vector<ClaimConstruct> destinationConstructs,
 			int ignore, Map<ClaimVariable, ClaimValue> bindingsOut)
 	{
-		// TODO: fill this with log traces
 		boolean match = true;
 		if(sourceConstructs.size() != destinationConstructs.size())
 			match = false;
 		for(int i = ignore; i < Math.min(sourceConstructs.size(), destinationConstructs.size()); i++)
 		{
-			ClaimConstruct field = destinationConstructs.get(i); // destination
-			ClaimConstruct arg = sourceConstructs.get(i); // source
-			
-			if(field.getType() == ClaimConstructType.VALUE)
-			{ // just check match
-				switch(arg.getType())
-				{
-				case VALUE:
-					match = ((ClaimValue) field).getValue().equals(((ClaimValue) arg).getValue());
-					break;
-				case VARIABLE:
-					match = ((ClaimValue) field).getValue().equals(getVariableValue((ClaimVariable) arg).getValue());
-					break;
-				default:
-					match = false;
-				}
-			}
-			else if(field.getType() == ClaimConstructType.VARIABLE)
-			{
-				ClaimValue fieldValue = getVariableValue((ClaimVariable) field);
-				boolean assignable = ((ClaimVariable) field).isAffectable();
-				switch(arg.getType())
-				{
-				case VALUE:
-					if(fieldValue == null)
-						// instantiate variable
-						bindingsOut.put((ClaimVariable) field, (ClaimValue) arg);
-					else
-					{
-						match = fieldValue.getValue().equals(((ClaimValue) arg).getValue());
-						if(assignable && !match)
-							bindingsOut.put((ClaimVariable) field, (ClaimValue) arg);
-					}
-					break;
-				case VARIABLE:
-					ClaimValue argValue = getVariableValue((ClaimVariable) arg);
-					if(argValue == null)
-					{
-						// don't really know what to do // TODO
-					}
-					else
-					{
-						if(fieldValue == null)
-							// instantiate variable
-							bindingsOut.put((ClaimVariable) field, getVariableValue((ClaimVariable) arg));
-						else
-						{
-							match = fieldValue.getValue().equals(((ClaimValue) arg).getValue());
-							if(assignable && !match)
-								bindingsOut.put((ClaimVariable) field, (ClaimValue) arg);
-						}
-					}
-					break;
-				default:
-					match = false;
-				}
-			}
-			else if(field.getType() == ClaimConstructType.STRUCTURE)
-			{
-				if(arg.getType() == ClaimConstructType.STRUCTURE)
-					// FIXME: the bindings in the recursive call should only be performed at the last level
-					readStructure((ClaimStructure) arg, (ClaimStructure) field, 0, mandatoryMatch, rebindAllowed,
-							bindingsOut);
-				else
-					log.error("unable to match [" + arg.getType() + "] construct to a destination field");
-			}
-			else
-				log.error("unable to use [" + field.getType() + "] construct as destination field");
+			boolean res = readValue(sourceConstructs.get(i), destinationConstructs.get(i), bindingsOut);
+			match = match && res;
 		}
 		
 		return match;
+	}
+	
+	/**
+	 * The method checks if two claim constructs match and indicates what bindings should be done to match the
+	 * destination to the source.
+	 * <p>
+	 * See {@link #readValues(Vector, Vector, int, Map)}.
+	 * 
+	 * @param sourceField
+	 *            : the construct to take values from. Must be a value, variable or structure.
+	 * @param destField
+	 *            : the construct to put bind values to. Must be a value, variable or structure.
+	 * @param bindingsOut
+	 *            : bindings that should be performed in case the constructs match.
+	 * @return <code>true</code> if the constructs can be unified.
+	 */
+	protected boolean readValue(ClaimConstruct sourceField, ClaimConstruct destField,
+			Map<ClaimVariable, ClaimValue> bindingsOut)
+	{
+		ClaimConstructType destType = destField.getType();
+		ClaimConstructType sourceType = sourceField.getType();
+		
+		if(destType == ClaimConstructType.STRUCTURE || sourceType == ClaimConstructType.STRUCTURE)
+		{
+			if(destType == sourceType)
+				return readValues(((ClaimStructure) sourceField).getFields(), ((ClaimStructure) destField).getFields(),
+						0, bindingsOut);
+			return false;
+		}
+		
+		if(!((destType == ClaimConstructType.VALUE || destType == ClaimConstructType.VARIABLE) && (sourceType == ClaimConstructType.VALUE || sourceType == ClaimConstructType.VARIABLE)))
+			return false;
+		
+		ClaimValue destValue = (destType == ClaimConstructType.VALUE) ? (ClaimValue) destField
+				: getVariableValue((ClaimVariable) destField);
+		ClaimValue sourceValue = (sourceType == ClaimConstructType.VALUE) ? (ClaimValue) sourceField
+				: getVariableValue((ClaimVariable) sourceField);
+		boolean assignable = (destType == ClaimConstructType.VARIABLE)
+				&& ((destValue == null) || ((ClaimVariable) destField).isAssignable());
+		
+		if(assignable)
+		{
+			if((sourceValue != null) && ((destValue == null) || !destValue.getValue().equals(sourceValue.getValue())))
+				bindingsOut.put((ClaimVariable) destField, (ClaimValue) sourceField);
+			return true;
+		}
+		
+		if((destValue == null) && (sourceValue == null))
+			return true;
+		if((destValue == null) || (sourceValue == null))
+			return false;
+		return destValue.getValue().equals(sourceValue.getValue());
 	}
 	
 	/**
@@ -1004,7 +979,7 @@ public class ClaimBehavior
 			case VARIABLE:
 				// get the value from the symbol table (can be null)
 				ClaimValue value = getVariableValue((ClaimVariable) cons);
-				boolean assignable = ((ClaimVariable) cons).isAffectable();
+				boolean assignable = ((ClaimVariable) cons).isAssignable();
 				switch(keepVariables)
 				{
 				case KEEP_NONE:
