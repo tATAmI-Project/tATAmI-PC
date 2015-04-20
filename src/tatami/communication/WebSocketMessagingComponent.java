@@ -43,15 +43,19 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 		return getAgentAddress(agentName, null);
 	}
 	
-	public void onMessage(String message){
-		System.out.println("Agent received message: " + message);
-		receiveMessage(source, destination, content); // TODO
+	/**
+	 * 
+	 * @param source  -Source
+	 * @param target - Target
+	 * @param message - Content
+	 */
+	public void onMessage(String source, String target, String message){
+		receiveMessage(source, target, message);
 	}
 
 	@Override
 	public boolean sendMessage(String target, String source, String content) {
 		String tg = (target.indexOf("/") > 0) ? target.substring(0, target.indexOf("/")) : target;
-		System.out.println("Send message source: " + source + " taget: " + tg + " content: " +  content);
 		try{
 			platform.client.send(source + "::" + tg + "::" + content);
 			return true;

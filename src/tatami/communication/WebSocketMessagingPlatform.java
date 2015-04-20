@@ -15,6 +15,9 @@ import tatami.simulation.BootSettingsManager;
 import tatami.simulation.PlatformLoader;
 import tatami.simulation.PlatformLoader.PlatformLink;
 
+/**
+ *
+ */
 public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink {
 
 	/**
@@ -37,15 +40,30 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	 */
 	public int componentType = NONE;
 
+	/**
+	 * 
+	 */
 	public int port = 9002;
 	
 	
+	/**
+	 * 
+	 */
 	public AutobahnServer server;
 	
+	/**
+	 * 
+	 */
 	AutobahnClient client;
 	
+	/**
+	 * 
+	 */
 	Thread clientThread;
 	
+	/**
+	 * 
+	 */
 	HashMap<String, WebSocketMessagingComponent> agents;
 	
 
@@ -53,7 +71,6 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	 * 
 	 */
 	public WebSocketMessagingPlatform() {
-		System.out.println("WebSocketMessagingPlatform constructor");
 	}
 
 	@Override
@@ -66,7 +83,6 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 			BootSettingsManager settings) {
 
 		agents = new HashMap<String, WebSocketMessagingComponent>();
-		System.out.println("Config entered " + settings.getMainHost());
 
 		String tmpComponentType = settings.getMainHost();
 
@@ -115,13 +131,11 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 
 			String protocol = "ws";
 			String host = "localhost";
-			int port = 9002;
 
 			String serverlocation = protocol + "://" + host + ":" + port;
 			URI uri = null;
 			uri = URI.create( serverlocation + "/agent=" + clientname );
 			
-			System.out.println( "//////////////////////Exec: " + uri.getQuery() );
 			client = new AutobahnClient( d, uri );
 			clientThread = new Thread( client );
 			clientThread.start();
@@ -147,17 +161,25 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 
 	@Override
 	public boolean addContainer(String containerName) {
-		// TODO Auto-generated method stub
 		return true;
 	}
 	
-	public void onMessage(String agentName, String message){
-		System.out.println("########################## " + agentName);
-		agents.get(agentName).onMessage(message);
+	/**
+	 * 
+	 * @param target
+	 * @param source
+	 * @param message
+	 */
+	public void onMessage(String source, String target, String message){
+		agents.get(target).onMessage(source, target, message);
 	}
 	
+	/**
+	 * 
+	 * @param agentName
+	 * @param messagingComponent
+	 */
 	public void register(String agentName, WebSocketMessagingComponent messagingComponent){
-		System.out.println("************************** " + agentName);
 		agents.put(agentName, messagingComponent);
 	}
 
