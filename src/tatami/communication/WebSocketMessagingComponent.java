@@ -6,10 +6,24 @@ import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.messaging.MessagingComponent;
 
+/**
+ * 
+ */
 public class WebSocketMessagingComponent extends MessagingComponent{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * Reference to the platform
+	 */
 	WebSocketMessagingPlatform platform;
 	
+	/**
+	 * 
+	 */
 	public WebSocketMessagingComponent(){
 
 	}
@@ -44,7 +58,7 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 	}
 	
 	/**
-	 * 
+	 * Pass the message to the agent implementation
 	 * @param source  -Source
 	 * @param target - Target
 	 * @param message - Content

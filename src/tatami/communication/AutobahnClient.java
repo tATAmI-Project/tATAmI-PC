@@ -8,9 +8,16 @@ import main.java.org.java_websocket.client.WebSocketClient;
 import main.java.org.java_websocket.drafts.Draft;
 import main.java.org.java_websocket.handshake.ServerHandshake;
 
+
+/**
+ *
+ */
 public class AutobahnClient extends WebSocketClient {
 	
 
+	/**
+	 * A map between the agent names and their corresponding server references
+	 */
 	HashMap<String, WebSocketMessagingPlatform> pltformRouting;
 
 	/**
@@ -27,10 +34,20 @@ public class AutobahnClient extends WebSocketClient {
 	public void onOpen(ServerHandshake handshakedata) {
 	}
 	
+	/**
+	 * Register a platform associated with an agent name
+	 * @param platform
+	 * @param agentName
+	 */
 	public void registerPlatform(WebSocketMessagingPlatform platform, String agentName){
 		pltformRouting.put(agentName, platform);
 	}
 	
+	/**
+	 * 
+	 * Sends a notification to the server when a new agent starts
+	 * @param agentName The agent that will be registered
+	 */
 	public void newAgentNotification(String agentName){
 		String message = "::" + "internal" + "::" + agentName;
 		send( message );
@@ -38,7 +55,7 @@ public class AutobahnClient extends WebSocketClient {
 
 	@Override
 	public void onMessage(String message) {
-		System.out.println("Message received client: " + message);
+		/*Forward the message to the platform*/
 		String[] messageComponents = message.split("::");
 		pltformRouting.get(messageComponents[0]).onMessage( messageComponents[2], messageComponents[0], messageComponents[1]);
 		
