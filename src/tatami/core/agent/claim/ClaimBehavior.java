@@ -58,6 +58,12 @@ import tatami.sclaim.constructs.basic.ClaimWhile;
 
 /**
  * There is one {@link ClaimBehavior} instance for each behavior in a {@link ClaimComponent}.
+ * <p>
+ * A behavior is activated by an agent event.
+ * <p>
+ * TODO: currently, a behavior is activated by one event and will be executed sequentially, without interruptions. The
+ * Claim Component, as well as the whole agent, will wait for the completion of the behavior before processing any other
+ * events. In the future, this may be change so as to allow the interruption of behaviors.
  * 
  * @author Nguyen Thi Thuy Nga
  * @author Andrei Olaru
@@ -82,7 +88,8 @@ public class ClaimBehavior
 	 */
 	protected transient Logger			log				= null;
 	/**
-	 * Information about how the behavior was activated.
+	 * Information about how the behavior was activated. For future use, more activation records may be present.
+	 * Currently, only one is used.
 	 */
 	protected AgentEvent				activationEvent	= null;
 	/**
