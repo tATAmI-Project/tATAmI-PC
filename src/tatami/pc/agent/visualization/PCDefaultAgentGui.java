@@ -43,24 +43,39 @@ public class PCDefaultAgentGui implements AgentGui
 	/**
 	 * The configuration for the GUI, containing parameters such as window name and type.
 	 */
-	protected AgentGuiConfig				config				= null;
+	protected AgentGuiConfig				config							= null;
 	
 	/**
 	 * Parameters for the window, as returned by the {@link WindowLayout}.
 	 */
-	protected WindowParameters				params				= null;
+	protected WindowParameters				params							= null;
 	/**
 	 * The {@link JFrame} containing the GUI.
 	 */
-	protected JFrame						window				= null;
+	protected JFrame						window							= null;
 	/**
 	 * The components in the gui, identified by their name.
 	 */
-	protected Map<String, Component>		components			= null;
+	protected Map<String, Component>		components						= null;
 	/**
 	 * Connections between component names and {@link InputListener} instances responding to that input.
 	 */
-	protected Map<String, InputListener>	inputConnections	= null;
+	protected Map<String, InputListener>	inputConnections				= null;
+	
+	/**
+	 * The default input listener, as set by means of {@link #registerDefaultListener(InputListener)}. This should not
+	 * be registered directly as a receiver for component input as it might not be possible to differentiate anymore if
+	 * an input is connected to a listener that is default or not, especially since the default listener may be used for
+	 * other inputs, as an intended (not default) listener. When a different default input listener is registered, it
+	 * must be clear which components where using the default listener. This is what {@link #defaultInputListener} is
+	 * used for.
+	 */
+	protected InputListener					externalDefaultInputListener	= null;
+	
+	/**
+	 * The listener to be used as default. All calls will be relayed to {@link #externalDefaultInputListener}, if any.
+	 */
+	protected InputListener					defaultInputListener;
 	
 	/**
 	 * Creates and configures the GUI.
@@ -70,6 +85,15 @@ public class PCDefaultAgentGui implements AgentGui
 	 */
 	public PCDefaultAgentGui(AgentGuiConfig configuration)
 	{
+		defaultInputListener = new InputListener() {
+			@Override
+			public void receiveInput(String componentName, Vector<Object> arguments)
+			{
+				if(externalDefaultInputListener != null)
+					externalDefaultInputListener.receiveInput(componentName, arguments);
+			}
+		};
+		
 		config = configuration;
 		
 		components = new Hashtable<String, Component>();
@@ -117,7 +141,7 @@ public class PCDefaultAgentGui implements AgentGui
 				config.getWindowName(), null) : WindowParameters.defaultParameters();
 		params.setWindow(window, true);
 	}
-
+	
 	@Override
 	public void close()
 	{
@@ -208,7 +232,24 @@ public class PCDefaultAgentGui implements AgentGui
 	}
 	
 	@Override
-	public Vector<Object> getinput(String componentName)
+	public void registerDefaultListener(InputListener listener)
+	{
+		reconnectDefault();
+		externalDefaultInputListener = listener;
+	}
+	
+	/**
+	 * Reconnects all components not associated with a listener to the default listener.
+	 */
+	protected void reconnectDefault()
+	{
+		for(String component : components.keySet())
+			if(!inputConnections.containsKey(component))
+				connectInput(component, defaultInputListener);
+	}
+	
+	@Override
+	public Vector<Object> getInput(String componentName)
 	{
 		// TODO Auto-generated method stub
 		return null;
