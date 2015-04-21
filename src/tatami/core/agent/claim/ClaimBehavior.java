@@ -395,7 +395,8 @@ public class ClaimBehavior
 	/**
 	 * Handle the <code>receive</code> construct.
 	 * <p>
-	 * Format: <code>(receive field-1 field-2 ...)</code>
+	 * Format: <code>(receive (struct message field-1 field-2 ...))</code> or
+	 * <code>(receive ?from (struct message field-1 field-2 ...))</code>
 	 * <p>
 	 * Fields that are values or instantiated variables are used to match the received message; uninstantiated variables
 	 * will be bound to the values in the message
@@ -409,26 +410,25 @@ public class ClaimBehavior
 	protected boolean handleReceive(Vector<ClaimConstruct> args)
 	{
 		String content = (String) activationEvent.getParameter(MessagingComponent.CONTENT_PARAMETER);
+		String sender = (String) activationEvent.getParameter(MessagingComponent.SOURCE_PARAMETER);
 		ClaimStructure received = ClaimStructure.parseString(content);
 		
 		if(received == null)
 			return false;
 		
-		ClaimStructure toBind = (ClaimStructure) args.get(args.size() - 1);
+		ClaimStructure toBind = (ClaimStructure) args.get(args.size() - 1); // the last part is the message
 		
-		if(!readMessage(st.bindStructure(received), toBind))
+		if(!readValues(received.getFields(), toBind.getFields(), 0))
 		{ // the message does not match the pattern
 		
 			log.trace("message not matching pattern [" + content + "]");
-			ret = false;
+			return false;
 		}
-		else
-		{
-			
-			log.trace("--------- message received: [" + content + "]");
-			if(argsSize == 2)
-				st.put((ClaimVariable) args.get(0), new ClaimValue(source));
-		}
+		
+		log.trace("message received: [" + content + "]");
+		// capture sender, if necessary
+		if(args.size() >= 2)
+			st.put((ClaimVariable) args.get(0), new ClaimValue(sender));
 		return true;
 	}
 	
@@ -473,7 +473,7 @@ public class ClaimBehavior
 		Vector<Object> inputArgs = null;
 		if(inputQueues.get(inputComponent).isEmpty() && gui != null)
 			// input was not activated
-			inputArgs = gui.getinput(inputComponent);
+			inputArgs = gui.getInput(inputComponent);
 		else
 			// input has been activated; get an event from the queue
 			inputArgs = inputQueues.get(inputComponent).poll();
@@ -761,6 +761,22 @@ public class ClaimBehavior
 	}
 	
 	/**
+	 * Same as {@link #readValues(Vector, Vector, int)}, but without ignoring any elements.
+	 * 
+	 * @param sourceConstructs
+	 *            : the constructs to take values from; must be (recursively) of type {@link ClaimValue},
+	 *            {@link ClaimVariable} or {@link ClaimStructure}.
+	 * @param destinationConstructs
+	 *            : the constructs that could be bound to the values in the sources; same restriction as above applies
+	 *            here too.
+	 * @return <code>true</code> if the two lists of constructs match.
+	 */
+	protected boolean readValues(Vector<ClaimConstruct> sourceConstructs, Vector<ClaimConstruct> destinationConstructs)
+	{
+		return readValues(sourceConstructs, destinationConstructs, 0);
+	}
+	
+	/**
 	 * This method calls {@link #readValues(Vector, Vector, int, Map)} and performs the bindings returned.
 	 * 
 	 * @param sourceConstructs
@@ -771,7 +787,7 @@ public class ClaimBehavior
 	 *            here too.
 	 * @param ignore
 	 *            : number of fields at the beginning to ignore in both lists
-	 * @return
+	 * @return <code>true</code> if the two lists of constructs match.
 	 */
 	protected boolean readValues(Vector<ClaimConstruct> sourceConstructs, Vector<ClaimConstruct> destinationConstructs,
 			int ignore)
@@ -780,7 +796,7 @@ public class ClaimBehavior
 		boolean match = readValues(sourceConstructs, destinationConstructs, ignore, bindings);
 		if(match)
 			for(Map.Entry<ClaimVariable, ClaimValue> entry : bindings.entrySet())
-				bindVariable(entry.getKey(), entry.getValue());
+				st.put(entry.getKey(), entry.getValue());
 		return match;
 	}
 	
@@ -1109,28 +1125,4 @@ public class ClaimBehavior
 		 */// not needed. The implementation of the symbol table already permits this
 		return value;
 	}
-	
-	/**
-	 * Binds a variable to a value. Works only if the variable is previously unbound.
-	 * 
-	 * @param variable
-	 *            : the variable
-	 * @param value
-	 *            : the value
-	 */
-	protected void bindVariable(ClaimVariable variable, ClaimValue value)
-	{
-		if(getVariableValue(variable) == null)
-		{
-			st.put(variable, value);
-			log.trace("variable [" + variable.getName() + "] bound to [" + value + "]");
-		}
-		else
-		{
-			st.put(variable, value);
-			log.warn("variable [" + variable.getName() + "] already bound; rebound to [" + value + "]");
-			// FIXME: decide on whether variables can be rebound
-		}
-	}
-	
 }
