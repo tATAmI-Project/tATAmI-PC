@@ -12,7 +12,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.AgentEvent.AgentSequenceType;
-import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.simulation.AgentManager;
@@ -324,6 +323,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 */
 	protected boolean postAgentEvent(AgentEvent event)
 	{
+		event.lock();
 		if(!(((state == AgentState.STARTING) && (event.getType() == AgentEventType.AGENT_START)) || (state == AgentState.RUNNING)))
 			return false;
 		boolean exiting = (event.getType() == AgentEventType.AGENT_STOP);
