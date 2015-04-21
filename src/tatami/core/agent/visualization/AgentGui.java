@@ -155,7 +155,7 @@ public interface AgentGui
 	 * @param listener
 	 *            - the {@link InputListener} implementation to be invoked on activation. <code>null</code> can be used.
 	 */
-	public void registerDefaultListener(InputListener listener);
+	public void setDefaultListener(InputListener listener);
 	
 	/**
 	 * Instructs the GUI to unload, effectively closing the GUI.

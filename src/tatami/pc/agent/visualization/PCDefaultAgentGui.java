@@ -63,7 +63,7 @@ public class PCDefaultAgentGui implements AgentGui
 	protected Map<String, InputListener>	inputConnections				= null;
 	
 	/**
-	 * The default input listener, as set by means of {@link #registerDefaultListener(InputListener)}. This should not
+	 * The default input listener, as set by means of {@link #setDefaultListener(InputListener)}. This should not
 	 * be registered directly as a receiver for component input as it might not be possible to differentiate anymore if
 	 * an input is connected to a listener that is default or not, especially since the default listener may be used for
 	 * other inputs, as an intended (not default) listener. When a different default input listener is registered, it
@@ -232,7 +232,7 @@ public class PCDefaultAgentGui implements AgentGui
 	}
 	
 	@Override
-	public void registerDefaultListener(InputListener listener)
+	public void setDefaultListener(InputListener listener)
 	{
 		reconnectDefault();
 		externalDefaultInputListener = listener;
