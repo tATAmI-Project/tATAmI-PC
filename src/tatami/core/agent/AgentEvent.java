@@ -45,6 +45,10 @@ public class AgentEvent extends Config
 		 * messaging component exists; otherwise, message routing will be handled by the messaging component.
 		 */
 		AGENT_MESSAGE(AgentSequenceType.UNORDERED),
+		/**
+		 * Event occurs when an active input (see AgentGui) is activated by the user and the agent must react to it.
+		 */
+		GUI_INPUT(AgentSequenceType.UNORDERED),
 		
 		/**
 		 * Event occurs when the start of the simulation is requested by the user.

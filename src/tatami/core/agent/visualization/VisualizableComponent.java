@@ -14,6 +14,7 @@ package tatami.core.agent.visualization;
 import java.util.Vector;
 
 import net.xqhs.util.config.Config;
+import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.Logger;
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.ReportingEntity;
@@ -29,6 +30,7 @@ import tatami.core.agent.movement.MovementComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.AgentGui.DefaultComponent;
+import tatami.core.agent.visualization.AgentGui.InputListener;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
@@ -42,7 +44,7 @@ import tatami.core.util.platformUtils.PlatformUtils;
  * 
  * @author Andrei Olaru
  */
-public class VisualizableComponent extends AgentComponent implements ReportingEntity
+public class VisualizableComponent extends AgentComponent implements ReportingEntity, InputListener
 {
 	/**
 	 * Class UID.
@@ -94,34 +96,45 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	/**
 	 * The name of the parameter in the component parameter set that corresponds to the name of the GUI.
 	 */
-	public static final String				GUI_PARAMETER_NAME			= null;
+	public static final String				GUI_PARAMETER_NAME					= null;
 	/**
 	 * The name of the parameter in the component parameter set that corresponds to the type of the window.
 	 */
-	public static final String				WINDOW_TYPE_PARAMETER_NAME	= null;
+	public static final String				WINDOW_TYPE_PARAMETER_NAME			= null;
+	
+	/**
+	 * The name of the parameter in the event corresponding to GUI input, designating the name of the activated GUI
+	 * component.
+	 */
+	public static final String				GUI_COMPONENT_EVENT_PARAMETER_NAME	= "component";
+	/**
+	 * The name of the parameter in the event corresponding to GUI input, containing arguments (information about the
+	 * GUI event).
+	 */
+	public static final String				GUI_ARGUMENTS_EVENT_PARAMETER_NAME	= "arguments";
 	
 	/**
 	 * The logging {@link Unit}.
 	 */
-	protected transient UnitComponentExt	loggingUnit					= null;
+	protected transient UnitComponentExt	loggingUnit							= null;
 	/**
 	 * The {@link Config} for the GUI. Should remain the same object throughout the agent's lifecycle, although it may
 	 * be changed, and the agent's GUI will be recreated.
 	 */
-	protected AgentGuiConfig				guiConfig					= new AgentGuiConfig();
+	protected AgentGuiConfig				guiConfig							= new AgentGuiConfig();
 	/**
 	 * The GUI implementation. Depends on platform, but implements {@link AgentGui}.
 	 */
-	protected transient AgentGui			gui							= null;
+	protected transient AgentGui			gui									= null;
 	
 	/**
 	 * The name of the entity to which the agent has to report.
 	 */
-	private String							visualizationParent			= null;
+	private String							visualizationParent					= null;
 	/**
 	 * The name of the entity which serves as the current container for the agent.
 	 */
-	private String							currentContainer			= null;
+	private String							currentContainer					= null;
 	
 	/**
 	 * Create a new {@link VisualizableComponent} instance:
@@ -261,7 +274,10 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		}
 		
 		if(gui != null)
+		{
 			loggingUnit.setLogDisplay(new Log2AgentGui(gui, DefaultComponent.AGENT_LOG.toString()));
+			gui.setDefaultListener(this);
+		}
 		
 		getLog().trace("visualization started on platform " + PlatformUtils.getPlatform());
 	}
@@ -401,6 +417,25 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	public Vector<Object> inputFromGUI(String guiComponentName)
 	{
 		return gui.getInput(guiComponentName);
+	}
+	
+	/**
+	 * method that receives active input events in the GUI (by default).
+	 */
+	@Override
+	public void receiveInput(String componentName, Vector<Object> arguments)
+	{
+		AgentEvent event = new AgentEvent(AgentEventType.GUI_INPUT);
+		try
+		{
+			event.addParameter(GUI_COMPONENT_EVENT_PARAMETER_NAME, componentName);
+			event.addParameter(GUI_ARGUMENTS_EVENT_PARAMETER_NAME, arguments);
+		} catch(ConfigLockedException e)
+		{
+			// can't get here
+			throw new IllegalStateException("should ot be here");
+		}
+		postAgentEvent(event);
 	}
 	
 	/**
