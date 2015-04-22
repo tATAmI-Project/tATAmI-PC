@@ -21,6 +21,7 @@ import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.kb.KnowledgeBase;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
+import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.sclaim.constructs.basic.ClaimAgentDefinition;
 import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
 import tatami.sclaim.constructs.basic.ClaimBehaviorType;
@@ -173,13 +174,27 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 		return null;
 	}
 	
+	/**
+	 * The method should only be used when GUI events have been received or it is otherwise sure there is one such
+	 * component.
+	 * 
+	 * @return the {@link VisualizableComponent} of this agent.
+	 */
+	protected VisualizableComponent getVisualizable()
+	{
+		AgentComponent ret = getAgentComponent(AgentComponentName.VISUALIZABLE_COMPONENT);
+		if(ret == null)
+			throw new IllegalStateException("No vis component");
+		return (VisualizableComponent) ret;
+	}
+	
 	@Override
 	public void handleEvent(AgentEvent event)
 	{
 		// TODO receive message
 		
 	}
-	
+
 	/**
 	 * Method for use by ClaimBehavior, calling {@link AgentComponent#sendMessage()}.
 	 * 

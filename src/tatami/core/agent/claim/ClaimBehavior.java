@@ -37,9 +37,11 @@ import net.xqhs.graphs.representation.text.TextGraphRepresentation;
 import net.xqhs.graphs.util.ContentHolder;
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentEvent;
+import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.visualization.AgentGui;
+import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.webServices.WebServiceOntology;
 import tatami.core.agent.webServices.WebServiceOntology.ReceiveOperation;
 import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
@@ -441,30 +443,43 @@ public class ClaimBehavior
 	
 	/**
 	 * There are two mechanisms for handling input:
-	 * 
 	 * <p>
-	 * For <i>active</i> inputs, the input will call the <code>receiveInput()</code> method of the behavior. The
-	 * arguments will be stored in the input queue of the input, and in this method will be copied to the elements in
-	 * the construct.
-	 * 
+	 * For <i>active</i> inputs, the input will generate an agent event which will be handled by {@link ClaimComponent}.
 	 * <p>
 	 * For <i>passive</i> inputs, the behavior will use <code>getInput</code> to get the arguments of the input, which
 	 * will be copied to the elements in the construct.
-	 * 
 	 * <p>
-	 * The difference between active and passive inputs is done by looking if there are any events in the queue of the
-	 * input. If there are, the input is active and is not queried for arguments. Otherwise, the input is passive.
+	 * The difference between active and passive inputs is done by looking if the behavior has been activated by an
+	 * input. If it has, the input is active.
 	 * 
-	 * <p>
-	 * The behavior will only be immediately activated by an active input (that restarts the behavior in
-	 * <code>receiveInput()</code>.
+	 * @param args
+	 *            - elements in the <code>input</code> construct.
+	 * @return <code>true</code> if the input has been activated. TODO: what that actually means
 	 */
 	protected boolean handleInput(Vector<ClaimConstruct> args)
 	{
+		Vector<ClaimValue> receivedInput;
+		ClaimConstruct a0 = args.get(0);
+		String inputComponent = ((a0.getType() == ClaimConstructType.VARIABLE) ? st.get((ClaimVariable) a0)
+				: (ClaimValue) a0).toString();
+		
+		if(activationEvent.getType() == AgentEventType.GUI_INPUT)
+			// input is active
+			if(activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME).equals(
+					inputComponent))
+				receivedInput = (Vector<ClaimValue>) activationEvent
+						.getParameter(VisualizableComponent.GUI_ARGUMENTS_EVENT_PARAMETER_NAME);
+			else
+				// incorrect input activated
+				return false;
+		else
+			// input is passive
+			receivedInput = claimComponent.getVisualizable().inputFromGUI(inputComponent);
+		
+		Vector<ClaimVariable> destinationArgs;
 		AgentGui gui = null; // FIXME = myAgent.getVisualizable().getInteractivGUI();
 		
 		// FIXME: variables should be supported
-		String inputComponent = ((ClaimValue) args.get(0)).toString();
 		
 		// FIXME: variables should be supported
 		// @SuppressWarnings("unused")
