@@ -456,9 +456,10 @@ public class ClaimBehavior
 	 *            - elements in the <code>input</code> construct.
 	 * @return <code>true</code> if the input has been activated. TODO: what that actually means
 	 */
+	@SuppressWarnings("unchecked")
 	protected boolean handleInput(Vector<ClaimConstruct> args)
 	{
-		Vector<ClaimValue> receivedInput;
+		Vector<Object> receivedInput;
 		ClaimConstruct a0 = args.get(0);
 		String inputComponent = ((a0.getType() == ClaimConstructType.VARIABLE) ? st.get((ClaimVariable) a0)
 				: (ClaimValue) a0).toString();
@@ -467,8 +468,7 @@ public class ClaimBehavior
 			// input is active
 			if(activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME).equals(
 					inputComponent))
-				receivedInput = (Vector<ClaimValue>) activationEvent
-						.getParameter(VisualizableComponent.GUI_ARGUMENTS_EVENT_PARAMETER_NAME);
+				receivedInput = (Vector<Object>) activationEvent.getParameter(VisualizableComponent.GUI_ARGUMENTS_EVENT_PARAMETER_NAME);
 			else
 				// incorrect input activated
 				return false;
@@ -476,38 +476,12 @@ public class ClaimBehavior
 			// input is passive
 			receivedInput = claimComponent.getVisualizable().inputFromGUI(inputComponent);
 		
-		Vector<ClaimVariable> destinationArgs;
-		AgentGui gui = null; // FIXME = myAgent.getVisualizable().getInteractivGUI();
+		Vector<ClaimConstruct> sourceArgs = objects2values(receivedInput);
+		Vector<ClaimConstruct> destinationArgs = new Vector<ClaimConstruct>(args);
+		destinationArgs.remove(0);
 		
-		// FIXME: variables should be supported
-		
-		// FIXME: variables should be supported
-		// @SuppressWarnings("unused")
-		// ClaimValue inputComponentType = (ClaimValue) args.get(1); // unused anymore, for now.
-		
-		if(!inputQueues.containsKey(inputComponent) && gui != null)
-		{
-			gui.connectInput(inputComponent, this);
-			inputQueues.put(inputComponent, new LinkedList<Vector<Object>>());
-			return false;
-		}
-		
-		Vector<Object> inputArgs = null;
-		if(inputQueues.get(inputComponent).isEmpty() && gui != null)
-			// input was not activated
-			inputArgs = gui.getInput(inputComponent);
-		else
-			// input has been activated; get an event from the queue
-			inputArgs = inputQueues.get(inputComponent).poll();
-		
-		if(inputArgs == null)
-			return false;
-		// match arguments
-		Vector<ClaimConstruct> args2 = new Vector<ClaimConstruct>(args);
-		
-		args2.remove(0);
-		// return true;
-		return readValues(objects2values(inputArgs), args2, 1, true, false);
+		// FIXME: find a way to fix input construct not to need the ignored argument
+		return readValues(sourceArgs, destinationArgs, 1);
 	}
 	
 	protected boolean handleOutput(Vector<ClaimConstruct> args)
@@ -953,8 +927,17 @@ public class ClaimBehavior
 		return ret;
 	}
 	
-	@SuppressWarnings("static-method")
-	protected Vector<ClaimConstruct> objects2values(Vector<Object> args)
+	/**
+	 * The method creates a vector of {@link ClaimConstruct} instances (more precisely {@link ClaimValue} instances),
+	 * each of them containing an object from the argument vector.
+	 * <p>
+	 * The method uses {@link ClaimConstruct} instead of {@link ClaimValue} for compatibility with other methods in this
+	 * file (such as {@link #readValues}).
+	 * 
+	 * @param args
+	 * @return
+	 */
+	protected static Vector<ClaimConstruct> objects2values(Vector<Object> args)
 	{
 		Vector<ClaimConstruct> ret = new Vector<ClaimConstruct>(args.size());
 		for(Object arg : args)
