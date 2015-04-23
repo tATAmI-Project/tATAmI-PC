@@ -57,7 +57,8 @@ public class AutobahnClient extends WebSocketClient {
 	public void onMessage(String message) {
 		/*Forward the message to the platform*/
 		String[] messageComponents = message.split("::");
-		pltformRouting.get(messageComponents[1]).onMessage( messageComponents[0], messageComponents[1], messageComponents[2]);
+		String currentTarget = (messageComponents[1].indexOf("/") > 0) ? messageComponents[1].substring(0, messageComponents[1].indexOf("/")) : messageComponents[1];
+		pltformRouting.get(currentTarget).onMessage( messageComponents[0], messageComponents[1], messageComponents[2]);
 		
 	}
 

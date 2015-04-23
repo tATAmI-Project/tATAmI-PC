@@ -69,9 +69,8 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 
 	@Override
 	public boolean sendMessage(String target, String source, String content) {
-		String tg = (target.indexOf("/") > 0) ? target.substring(0, target.indexOf("/")) : target;
 		try{
-			platform.client.send(source + "::" + tg + "::" + content);
+			platform.client.send(source + "::" + target + "::" + content);
 			return true;
 		}
 		catch(Exception e){

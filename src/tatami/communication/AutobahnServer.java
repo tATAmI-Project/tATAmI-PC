@@ -67,8 +67,10 @@ public class AutobahnServer extends WebSocketServer {
 			registry.put(agentName, conn);
 		}
 		else{
-			String target = message.substring(message.indexOf("::") + 2, message.lastIndexOf("::"));
-			registry.get(target).send(message);
+			String target = message.split("::")[1];
+			String currentTarget = (target.indexOf("/") > 0) ? target.substring(0, target.indexOf("/")) : target;
+			
+			registry.get(currentTarget).send(message);
 		}
 		
 	}

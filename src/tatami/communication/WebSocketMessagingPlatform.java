@@ -171,7 +171,8 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	 * @param message
 	 */
 	public void onMessage(String source, String target, String message){
-		agents.get(target).onMessage(source, target, message);
+		String currentTarget = (target.indexOf("/") > 0) ? target.substring(0, target.indexOf("/")) : target;
+		agents.get(currentTarget).onMessage(source, target, message);
 	}
 	
 	/**
