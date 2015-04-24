@@ -8,7 +8,6 @@ import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
-import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.messaging.MessagingComponent;
 
 /**
@@ -130,6 +129,13 @@ public class PingTestComponent extends AgentComponent
 		super.atSimulationStart(event);
 		System.out.println("here");
 		pingTimer.schedule(new Pinger(), PING_INITIAL_DELAY, PING_PERIOD);
+	}
+	
+	@Override
+	protected void atAgentStop(AgentEvent event)
+	{
+		super.atAgentStop(event);
+		pingTimer.cancel();
 	}
 	
 	/**
