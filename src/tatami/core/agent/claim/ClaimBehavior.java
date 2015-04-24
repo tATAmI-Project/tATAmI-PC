@@ -11,13 +11,6 @@
  ******************************************************************************/
 package tatami.core.agent.claim;
 
-import jade.content.ContentElement;
-import jade.content.lang.Codec.CodecException;
-import jade.content.onto.OntologyException;
-import jade.content.onto.UngroundedException;
-import jade.content.onto.basic.Action;
-import jade.lang.acl.MessageTemplate;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,15 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import net.xqhs.graphs.context.ContextPattern;
-import net.xqhs.graphs.graph.Graph;
-import net.xqhs.graphs.graph.Node;
-import net.xqhs.graphs.graph.SimpleGraph;
-import net.xqhs.graphs.matcher.Match;
-import net.xqhs.graphs.pattern.GraphPattern;
-import net.xqhs.graphs.pattern.NodeP;
-import net.xqhs.graphs.representation.text.TextGraphRepresentation;
-import net.xqhs.graphs.util.ContentHolder;
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventType;
@@ -42,8 +26,6 @@ import tatami.core.agent.kb.simple.SimpleKnowledge;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.visualization.AgentGui;
 import tatami.core.agent.visualization.VisualizableComponent;
-import tatami.core.agent.webServices.WebServiceOntology;
-import tatami.core.agent.webServices.WebServiceOntology.ReceiveOperation;
 import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
 import tatami.sclaim.constructs.basic.ClaimBehaviorType;
 import tatami.sclaim.constructs.basic.ClaimCondition;
@@ -468,7 +450,8 @@ public class ClaimBehavior
 			// input is active
 			if(activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME).equals(
 					inputComponent))
-				receivedInput = (Vector<Object>) activationEvent.getParameter(VisualizableComponent.GUI_ARGUMENTS_EVENT_PARAMETER_NAME);
+				receivedInput = (Vector<Object>) activationEvent
+						.getParameter(VisualizableComponent.GUI_ARGUMENTS_EVENT_PARAMETER_NAME);
 			else
 				// incorrect input activated
 				return false;
@@ -545,16 +528,18 @@ public class ClaimBehavior
 		// after wait there's always a constant
 		ClaimValue waitTimeConstant = (ClaimValue) args.get(0);
 		
-		long timeout = Integer.parseInt((String) waitTimeConstant.getValue());
-		wakeUpAtTime = System.currentTimeMillis() + timeout;
+		// TODO
 		
-		try
-		{
-			Thread.sleep(timeout);
-		} catch(InterruptedException e)
-		{
-			e.printStackTrace();
-		}
+		// long timeout = Integer.parseInt((String) waitTimeConstant.getValue());
+		// wakeUpAtTime = System.currentTimeMillis() + timeout;
+		//
+		// try
+		// {
+		// Thread.sleep(timeout);
+		// } catch(InterruptedException e)
+		// {
+		// e.printStackTrace();
+		// }
 		
 		return true;
 	}
@@ -586,7 +571,7 @@ public class ClaimBehavior
 		try
 		{
 			returnValue = ((Boolean) method.invoke(null, arguments)).booleanValue();
-			readValues(arguments, args, 0, false, false);
+			readValues(arguments, args, 0);
 			
 		} catch(Exception e)
 		{
@@ -599,109 +584,111 @@ public class ClaimBehavior
 	
 	protected boolean handleKnowledgeManagement(ClaimFunctionType construct, Vector<ClaimConstruct> args)
 	{
-		Graph graph = getKBase();
-		
-		String knowledge = constructs2OneStrings(((ClaimStructure) args.get(0)).getFields(), 1);
-		
-		switch(construct)
-		{
-		case ADDK:
-		// function "add knowledge"
-		{
-			// after addK there's always knowledge (pattern condition will be after condition)
-			// TODO emma move this to condition
-			if(knowledge.substring(0, knowledge.indexOf(" ")).equals("pattern"))
-			{
-				knowledge = knowledge.substring(knowledge.indexOf(" ") + 1);
-				ContextPattern CP = new ContextPattern();
-				claimComponent.getCognitive().addPattern(
-						(ContextPattern) new TextGraphRepresentation(CP).readRepresentation(new ContentHolder<String>(
-								knowledge)));
-			}
-			else
-			{
-				// since it is not a pattern, it should not contain ?variables -> we should get their value from
-				// symbolTable
-				String[] elements = knowledge.split(" ");
-				knowledge = "";
-				for(String element : elements)
-				{
-					if(element.startsWith("?") && st.containsSymbol(new ClaimVariable(element.substring(1))))
-					{
-						knowledge += st.get(new ClaimVariable(element.substring(1))).getValue().toString() + " ";
-					}
-					else
-					{
-						knowledge += element + " ";
-					}
-				}
-				
-				claimComponent.getCognitive().add(
-						new TextGraphRepresentation(new SimpleGraph()).readRepresentation(new ContentHolder<String>(
-								knowledge)));
-			}
-			log.info(" adds new knowledge " + knowledge + " in behavior " + this.cbd.getName());
-			return true;
-		}
-		
-		case READK:
-		// function "check if agent already has the knowledge"
-		// If yes : return true, also put the value of variable in knowledge pattern into the symbol table
-		{
-			// after readK there's always a pattern
-			@SuppressWarnings("unused")
-			ClaimStructure knowledgeStruct = (ClaimStructure) args.get(0); // struct knowledge <kl type> <kl fields>
-			
-			/* replace all ClaimVariables (represented as ?<name>) with an index if they are not already stored */
-			HashMap<Integer, ClaimVariable> intToVariable = new HashMap<Integer, ClaimVariable>();
-			knowledge = constructsAndMaps(knowledgeStruct.getFields(), intToVariable, 1);
-			
-			GraphPattern CP = new GraphPattern();
-			TextGraphRepresentation repr = new TextGraphRepresentation(CP);
-			repr.readRepresentation(new ContentHolder<String>(knowledge));
-			
-			Match m = claimComponent.getCognitive().read(CP);
-			if(m == null)
-				return false;
-			
-			for(Node node : CP.getNodes())
-				if(node instanceof NodeP)
-				{
-					Node rez = m.getMatchedGraphNode(node);
-					if(!st.containsSymbol(intToVariable.get(((NodeP) node).genericIndex())))
-					{
-						st.put(intToVariable.get(((NodeP) node).genericIndex()), new ClaimValue(rez.getLabel()));
-					}
-				}
-			return true;
-		}
-		
-		case REMOVEK:
-		// function "remove knowledge" TODO remove patterns
-		{
-			String[] elements = knowledge.split(" ");
-			knowledge = "";
-			for(String element : elements)
-			{
-				if(element.startsWith("?") && st.containsSymbol(new ClaimVariable(element.substring(1))))
-				{
-					knowledge += st.get(new ClaimVariable(element.substring(1))).getValue().toString() + " ";
-				}
-				else
-				{
-					knowledge += element + " ";
-				}
-			}
-			claimComponent.getCognitive().remove(knowledge);
-			return true;
-		}
-		
-		default:
-			// should not be here
-			return true; // unreachable code
-		}
-		
+		// KnowledgeBase kb = claimComponent.getKBase();
+		// CognitiveComponent cognitive = claimComponent.getCognitive();
+		// boolean isCognitive = (cognitive != null);
+		//
+		// String knowledge = constructs2OneStrings(((ClaimStructure) args.get(0)).getFields(), 1);
+		//
+		// switch(construct)
+		// {
+		// case ADDK:
+		// // function "add knowledge"
+		// {
+		// // after addK there's always knowledge (pattern condition will be after condition)
+		// // TODO emma move this to condition
+		// if(knowledge.substring(0, knowledge.indexOf(" ")).equals("pattern"))
+		// {
+		// knowledge = knowledge.substring(knowledge.indexOf(" ") + 1);
+		// ContextPattern CP = new ContextPattern();
+		// claimComponent.getCognitive().addPattern(
+		// (ContextPattern) new TextGraphRepresentation(CP).readRepresentation(new ContentHolder<String>(
+		// knowledge)));
+		// }
+		// else
+		// {
+		// // since it is not a pattern, it should not contain ?variables -> we should get their value from
+		// // symbolTable
+		// String[] elements = knowledge.split(" ");
+		// knowledge = "";
+		// for(String element : elements)
+		// {
+		// if(element.startsWith("?") && st.containsSymbol(new ClaimVariable(element.substring(1))))
+		// {
+		// knowledge += st.get(new ClaimVariable(element.substring(1))).getValue().toString() + " ";
+		// }
+		// else
+		// {
+		// knowledge += element + " ";
+		// }
+		// }
+		//
+		// kb.add(
+		// new TextGraphRepresentation(new SimpleGraph()).readRepresentation(new ContentHolder<String>(
+		// knowledge)));
+		// }
+		// log.info(" adds new knowledge " + knowledge + " in behavior " + this.cbd.getName());
 		// return true;
+		// }
+		//
+		// case READK:
+		// // function "check if agent already has the knowledge"
+		// // If yes : return true, also put the value of variable in knowledge pattern into the symbol table
+		// {
+		// // after readK there's always a pattern
+		// @SuppressWarnings("unused")
+		// ClaimStructure knowledgeStruct = (ClaimStructure) args.get(0); // struct knowledge <kl type> <kl fields>
+		//
+		// /* replace all ClaimVariables (represented as ?<name>) with an index if they are not already stored */
+		// HashMap<Integer, ClaimVariable> intToVariable = new HashMap<Integer, ClaimVariable>();
+		// knowledge = constructsAndMaps(knowledgeStruct.getFields(), intToVariable, 1);
+		//
+		// GraphPattern CP = new GraphPattern();
+		// TextGraphRepresentation repr = new TextGraphRepresentation(CP);
+		// repr.readRepresentation(new ContentHolder<String>(knowledge));
+		//
+		// Match m = kb.read(CP);
+		// if(m == null)
+		// return false;
+		//
+		// for(Node node : CP.getNodes())
+		// if(node instanceof NodeP)
+		// {
+		// Node rez = m.getMatchedGraphNode(node);
+		// if(!st.containsSymbol(intToVariable.get(((NodeP) node).genericIndex())))
+		// {
+		// st.put(intToVariable.get(((NodeP) node).genericIndex()), new ClaimValue(rez.getLabel()));
+		// }
+		// }
+		// return true;
+		// }
+		//
+		// case REMOVEK:
+		// // function "remove knowledge" TODO remove patterns
+		// {
+		// String[] elements = knowledge.split(" ");
+		// knowledge = "";
+		// for(String element : elements)
+		// {
+		// if(element.startsWith("?") && st.containsSymbol(new ClaimVariable(element.substring(1))))
+		// {
+		// knowledge += st.get(new ClaimVariable(element.substring(1))).getValue().toString() + " ";
+		// }
+		// else
+		// {
+		// knowledge += element + " ";
+		// }
+		// }
+		// claimComponent.getCognitive().remove(knowledge);
+		// return true;
+		// }
+		//
+		// default:
+		// // should not be here
+		// return true; // unreachable code
+		// }
+		
+		return true;
 	}
 	
 	/**
@@ -709,34 +696,34 @@ public class ClaimBehavior
 	 */
 	protected void handleForAllK(ClaimForAllK construct)
 	{
-		ClaimStructure knowledgeStruct = construct.getStructure();
-		Vector<ClaimConstruct> statements = construct.getStatements();
-		
-		// replace all ClaimVariables (represented as ?<name>) with an index
-		HashMap<Integer, ClaimVariable> intToVariable = new HashMap<Integer, ClaimVariable>();
-		String knowledge = constructsAndMaps(knowledgeStruct.getFields(), intToVariable, 1);
-		
-		GraphPattern CP = new GraphPattern();
-		TextGraphRepresentation repr = new TextGraphRepresentation(CP);
-		repr.readRepresentation(new ContentHolder<String>(knowledge));
-		
-		List<Match> matches = claimComponent.getCognitive().readAll(CP);
-		for(Match match : matches)
-		{
-			st = new SymbolTable(st);
-			
-			for(Node node : CP.getNodes())
-				if(node instanceof NodeP)
-				{
-					Node rez = match.getMatchedGraphNode(node);
-					int genericIndex = ((NodeP) node).genericIndex();
-					st.put(intToVariable.get(genericIndex), new ClaimValue(rez.toString()));
-				}
-			for(ClaimConstruct claimConstruct : construct.getStatements())
-				handleStatement(claimConstruct);
-			
-			st = st.prev;
-		}
+//		ClaimStructure knowledgeStruct = construct.getStructure();
+//		Vector<ClaimConstruct> statements = construct.getStatements();
+//		
+//		// replace all ClaimVariables (represented as ?<name>) with an index
+//		HashMap<Integer, ClaimVariable> intToVariable = new HashMap<Integer, ClaimVariable>();
+//		String knowledge = constructsAndMaps(knowledgeStruct.getFields(), intToVariable, 1);
+//		
+//		GraphPattern CP = new GraphPattern();
+//		TextGraphRepresentation repr = new TextGraphRepresentation(CP);
+//		repr.readRepresentation(new ContentHolder<String>(knowledge));
+//		
+//		List<Match> matches = claimComponent.getCognitive().readAll(CP);
+//		for(Match match : matches)
+//		{
+//			st = new SymbolTable(st);
+//			
+//			for(Node node : CP.getNodes())
+//				if(node instanceof NodeP)
+//				{
+//					Node rez = match.getMatchedGraphNode(node);
+//					int genericIndex = ((NodeP) node).genericIndex();
+//					st.put(intToVariable.get(genericIndex), new ClaimValue(rez.toString()));
+//				}
+//			for(ClaimConstruct claimConstruct : construct.getStatements())
+//				handleStatement(claimConstruct);
+//			
+//			st = st.prev;
+//		}
 	}
 	
 	/**
