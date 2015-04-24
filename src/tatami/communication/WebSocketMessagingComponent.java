@@ -1,9 +1,6 @@
 package tatami.communication;
 
 import tatami.core.agent.AgentEvent;
-import tatami.core.agent.CompositeAgent;
-import tatami.core.agent.AgentEvent.AgentEventHandler;
-import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.messaging.MessagingComponent;
 
 /**
@@ -70,6 +67,7 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 	@Override
 	public boolean sendMessage(String target, String source, String content) {
 		try{
+			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING, "seding message: " + source + "::" + target + "::" + content);
 			platform.client.send(source + "::" + target + "::" + content);
 			return true;
 		}
