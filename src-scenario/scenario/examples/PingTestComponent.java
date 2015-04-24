@@ -37,7 +37,7 @@ public class PingTestComponent extends AgentComponent
 		{
 			tick++;
 			
-			messenger.sendMessage(otherAgent, thisAgent, "ping no " + tick);
+			doSend(tick);
 		}
 		
 	}
@@ -103,25 +103,6 @@ public class PingTestComponent extends AgentComponent
 	}
 	
 	@Override
-	protected void componentInitializer()
-	{
-		super.componentInitializer();
-		
-		AgentEventHandler allEventHandler = new AgentEventHandler() {
-			@Override
-			public void handleEvent(AgentEvent event)
-			{
-				getAgentLog().li("agent [] event: []", thisAgent, event.getType());
-				
-				if(event.getType() == AgentEventType.AGENT_START)
-					atAgentStart(event);
-			}
-		};
-		for(AgentEventType eventType : AgentEventType.values())
-			registerHandler(eventType, allEventHandler);
-	}
-	
-	@Override
 	protected void atAgentStart(AgentEvent event)
 	{
 		super.atAgentStart(event);
@@ -149,6 +130,17 @@ public class PingTestComponent extends AgentComponent
 		super.atSimulationStart(event);
 		System.out.println("here");
 		pingTimer.schedule(new Pinger(), PING_INITIAL_DELAY, PING_PERIOD);
+	}
+	
+	/**
+	 * Send the ping.
+	 * 
+	 * @param tick - tick no.
+	 */
+	protected void doSend(int tick)
+	{
+		getAgentLog().trace("Sending ping");
+		sendMessage("ping no " + tick, thisAgent, otherAgent);
 	}
 	
 }
