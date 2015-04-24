@@ -64,6 +64,11 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	/**
 	 * 
 	 */
+	String clientHost;
+	
+	/**
+	 * 
+	 */
 	HashMap<String, WebSocketMessagingComponent> agents;
 	
 
@@ -88,11 +93,14 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 
 		String tmpPort = settings.getLocalPort();
 
+		clientHost = settings.getLocalHost();
+
 		if (tmpComponentType.toLowerCase().indexOf("server") > -1) {
 			componentType |= SERVER;
 		}
 
 		if (tmpComponentType.toLowerCase().indexOf("client") > -1) {
+			System.out.println("Started as client");
 			componentType |= CLIENT;
 		}
 
@@ -125,12 +133,12 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 
 		if ((componentType & CLIENT) == CLIENT) {
 			
-			System.out.println("Also a client");
+			System.out.println("Client started");
 			Draft d = new Draft_17();
 			String clientname = "tootallnate/websocket";
 
 			String protocol = "ws";
-			String host = "localhost";
+			
 
 			String serverlocation = protocol + "://" + host + ":" + port;
 			URI uri = null;
@@ -140,7 +148,6 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 			clientThread = new Thread( client );
 			clientThread.start();
 		}
-
 		return true;
 	}
 
@@ -149,7 +156,6 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 		System.out.println("Platform stopped");
 		try {
 			clientThread.join();
-
 		} catch ( InterruptedException e ) {
 			e.printStackTrace();
 			return false;
