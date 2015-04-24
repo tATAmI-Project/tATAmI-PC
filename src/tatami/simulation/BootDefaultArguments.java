@@ -29,9 +29,8 @@ public class BootDefaultArguments
 	 * The scenario file.
 	 */
 	// static final String scenarioFileName = "src-scenario/scenario/examples/composite/simpleA/scenario.xml";
-	static final String				scenarioFileName		= "src-scenario/scenario/examples/jade/simpleA/scenario.xml";
-	// static final String scenarioFileName =
-	// "src-scenario/scenario/examples/sclaim_tatami2/simpleScenarioE/scenarioE-tATAmI2.xml";
+	// static final String scenarioFileName = "src-scenario/scenario/examples/jade/simpleA/scenario.xml";
+	static final String				scenarioFileName		= "src-scenario/scenario/examples/sclaim_tatami2/simpleScenarioA/scenario.xml";
 	
 	/**
 	 * Main (Jade) host.

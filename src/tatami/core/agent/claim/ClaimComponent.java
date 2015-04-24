@@ -11,6 +11,7 @@
  ******************************************************************************/
 package tatami.core.agent.claim;
 
+import java.util.Collection;
 import java.util.Vector;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
@@ -18,6 +19,7 @@ import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
+import tatami.core.agent.kb.CognitiveComponent;
 import tatami.core.agent.kb.KnowledgeBase;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
@@ -39,7 +41,25 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	/**
 	 * The serial version UID.
 	 */
-	private static final long	serialVersionUID	= 0L;
+	private static final long		serialVersionUID				= 0L;
+	
+	/**
+	 * The name of the component parameter specifying the S-Claim class for the agent.
+	 */
+	protected final static String	AGENT_CLASS_COMPONENT_PARAMETER	= "class";
+	/**
+	 * The name of the component parameter specifying a java code attachment for the agent.
+	 */
+	protected final static String	JAVA_CODE_COMPONENT_PARAMETER	= "java-code";
+
+	/**
+	 * Name of the variable which holds the name of this agent.
+	 */
+	protected static final String	THIS_VARIABLE	= "this";
+	/**
+	 * Name of the variable which holds the name of the parent of this agent.
+	 */
+	protected static final String	PARENT_VARIABLE	= "parent";
 	
 	/**
 	 * @author Andrei Olaru
@@ -88,15 +108,22 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 		if(!super.preload(parameters, scenarioNode, log))
 			return false;
 		
-		// TODO preload cad (put it in a static map of cads)
-		// preload parameters in the component creation data
+		String adfClass = parameters.get(AGENT_CLASS_COMPONENT_PARAMETER);
+		Collection<String> javaCodeAttachments = parameters.getValues(JAVA_CODE_COMPONENT_PARAMETER);
+		Collection<String> agentPackages = ((ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT))
+				.parVals(AgentParameterName.AGENT_PACKAGE);
 		
+		cad = ClaimLoader.fillCAD(adfClass, javaCodeAttachments, agentPackages, log);
+		
+		st = new SymbolTable(null, cad.getParameters());
+		st.setLogLink(log);
+
 		// retrieve parameters specified in the agent
 		if(cad.getParameters() != null)
 		{
 			for(ClaimVariable agentParam : cad.getParameters())
-				if(agentParam.getName().equals("parent"))
-					st.put(new ClaimVariable("parent", true), null);
+				if(agentParam.getName().equals(PARENT_VARIABLE))
+					st.put(new ClaimVariable(PARENT_VARIABLE, true), null);
 		}
 		
 		return true;
@@ -106,6 +133,8 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	protected void atAgentStart(AgentEvent event)
 	{
 		super.atAgentStart(event);
+		
+		st.setLogLink(getAgentLog());
 		
 		ParametricComponent parametric = (ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT);
 		
@@ -131,7 +160,7 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 		}
 		
 		// bind value for "this" parameter (agent's local name)
-		st.put(new ClaimVariable("this"), new ClaimValue(parametric.parVal(AgentParameterName.AGENT_NAME)));
+		st.put(new ClaimVariable(THIS_VARIABLE), new ClaimValue(parametric.parVal(AgentParameterName.AGENT_NAME)));
 		
 		// create behaviors
 		for(ClaimBehaviorDefinition cbd : cad.getBehaviors())
@@ -167,10 +196,16 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	 * 
 	 * @return the knowledge base.
 	 */
-	KnowledgeBase getKBase()
+	protected KnowledgeBase getKBase()
 	{
 		// return getCognitive().getKnowledge();
 		// TODO
+		return null;
+	}
+	
+	protected CognitiveComponent getCognitive()
+	{
+		// TODO Auto-generated method stub
 		return null;
 	}
 	
@@ -194,7 +229,7 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 		// TODO receive message
 		
 	}
-
+	
 	/**
 	 * Method for use by ClaimBehavior, calling {@link AgentComponent#sendMessage()}.
 	 * 

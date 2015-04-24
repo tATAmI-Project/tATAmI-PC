@@ -1,5 +1,6 @@
 package tatami.core.agent.kb;
 
+import net.xqhs.graphs.context.ContextPattern;
 import net.xqhs.graphs.graph.Edge;
 import net.xqhs.graphs.graph.Graph;
 import net.xqhs.graphs.representation.text.TextGraphRepresentation;
@@ -40,6 +41,11 @@ public class CognitiveComponent extends AgentComponent // TODO implement to be u
 				}
 			}
 		}
+	}
+	
+	public void addPattern(ContextPattern pattern)
+	{
+		// TODO
 	}
 	
 	/**

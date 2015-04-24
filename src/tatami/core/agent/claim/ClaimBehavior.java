@@ -504,7 +504,7 @@ public class ClaimBehavior
 		 * getVariableValue((ClaimVariable) goIn); break; case VALUE: value = (ClaimValue) goIn; break; default:
 		 * log.error("Unsupported argument type for the primitive \"in\"."); break; }
 		 * 
-		 * // changing the value of the "parent" parameter of the agent: st.put(new ClaimVariable("parent", true),
+		 * // changing the value of the "parent" parameter of the agent: st.put(new ClaimVariable(parent here, true),
 		 * value);
 		 * 
 		 * // after IN there's always one variable of destination // check if this variable is bound or not

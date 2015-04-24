@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package tatami.simulation;
+package tatami.core.agent.claim;
 
 import java.io.File;
 import java.util.Collection;
@@ -17,61 +17,85 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import net.xqhs.util.logging.UnitComponentExt;
+import net.xqhs.util.logging.Logger;
 import tatami.sclaim.constructs.basic.ClaimAgentDefinition;
 import tatami.sclaim.parser.Parser;
 
 /**
- * The purpose of this class is to hold functions that are necessary for the simulation, but are related to CLAIM
- * agents.
+ * This class handles the loading of .adf2 files to {@link ClaimAgentDefinition} instances and the attachment of java
+ * code to the S-Claim agent definitions.
+ * <p>
+ * Ideally, loaded definitions should be cached so that the same file would be parsed only once, even if used by
+ * multiple agents.
  * 
  * @author Andrei Olaru
  */
-public class ClaimUtils
+public class ClaimLoader
 {
-	
-	protected static Map<String, ClaimAgentDefinition>	claimDefinitions	= new HashMap<String, ClaimAgentDefinition>();
-	protected static boolean								cachingEnabled		= false;
-	final protected static String							SOURCE_FOLDER		= "src-scenario";
 	/**
-	 * //TODO: to document
+	 * The map of S-Claim agent agent definitions, indexed by the name of the S-CLaim class.
+	 */
+	protected static Map<String, ClaimAgentDefinition>	claimDefinitions	= new HashMap<String, ClaimAgentDefinition>();
+	/**
+	 * Specifies if chaching should be enabled (see {@link ClaimLoader}).
+	 */
+	protected static boolean							cachingEnabled		= false;
+	/**
+	 * The source folder for scenario files. FIXME this should be specified elsewhere?
+	 */
+	final protected static String						SOURCE_FOLDER		= "src-scenario";
+	
+	/**
+	 * Loads an S-Claim Agent Definition instance, or returns a pre-cached one (according to the settings).
+	 * <p>
+	 * The returned {@link ClaimAgentDefinition} instance comes complete with code attachments.
 	 * 
 	 * @param agentClass
+	 *            - the S-CLaim class to search for (same as the name of the .adf2 file)
 	 * @param javaCodeAttachments
-	 * @param adfPaths
+	 *            - a list of Java code attachments as specified in the scenario file.
 	 * @param agentPackages
+	 *            - the list of agent packages, specified in the scenario file, in which to search for the .adf2 file.
 	 * @param log
-	 * @return
+	 *            - a {@link Logger} instance to use for logging messages.
+	 * @return the created (or cached) {@link ClaimAgentDefinition} instance, on <code>null</code> if the loading fails.
 	 */
 	public static ClaimAgentDefinition fillCAD(String agentClass, Collection<String> javaCodeAttachments,
-				Collection<String> agentPackages, UnitComponentExt log)
+			Collection<String> agentPackages, Logger log)
 	{
 		ClaimAgentDefinition cad = null;
 		// should not cache for now: some parameters and java code attachments might differ even
 		// if the class is the same. PLUS: the cad contains the symbol table.
-		if(ClaimUtils.claimDefinitions.containsKey(agentClass) && ClaimUtils.cachingEnabled)
-			cad = ClaimUtils.claimDefinitions.get(agentClass);
+		if(ClaimLoader.claimDefinitions.containsKey(agentClass) && ClaimLoader.cachingEnabled)
+			cad = ClaimLoader.claimDefinitions.get(agentClass);
 		else
 		{
 			for(String adfPath : agentPackages)
 			{
-				String path = SOURCE_FOLDER + "/" + adfPath + "/" + agentClass + ".adf2";
+				String path = SOURCE_FOLDER + "/" + adfPath.replace('.', '/') + "/" + agentClass + ".adf2";
 				log.trace("trying adf path [" + path + "]");
 				File f = new File(path);
 				if(f.exists())
 				{
 					cad = new Parser(path).parse();
 					log.trace("agent definition loaded for agent class [" + agentClass + "]");
-					ClaimUtils.claimDefinitions.put(agentClass, cad);
+					ClaimLoader.claimDefinitions.put(agentClass, cad);
 					break;
 				}
 			}
 		}
 		
-		if(cad != null)
+		// FIXME load code attachments per cad, not per agent.
+		
+		if(cad == null)
 		{
-			// attach java code
-			if (javaCodeAttachments != null) {
+			log.error("agent definition not found for agent class [" + agentClass + "]");
+			return null;
+		}
+		
+		// attach java code
+		if(javaCodeAttachments != null)
+		{
 			for(String className : javaCodeAttachments)
 			{
 				Class<?> attachment = null;
@@ -114,10 +138,8 @@ public class ClaimUtils
 				}
 				else
 					log.error("code attachment [" + className + "] not found.");
-			}}
+			}
 		}
-		else
-			log.error("agent definition not found for agent class [" + agentClass + "]");
 		
 		return cad;
 	}
