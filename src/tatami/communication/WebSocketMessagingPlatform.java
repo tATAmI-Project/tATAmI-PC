@@ -140,7 +140,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 			String protocol = "ws";
 			
 
-			String serverlocation = protocol + "://" + host + ":" + port;
+			String serverlocation = protocol + "://" + clientHost + ":" + port;
 			URI uri = null;
 			uri = URI.create( serverlocation + "/agent=" + clientname );
 			
