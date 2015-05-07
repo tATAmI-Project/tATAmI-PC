@@ -225,8 +225,10 @@ public class BootSettingsManager extends Config
 			}
 		}
 		
-		log.info("network config: Main:[]:[] Local:[]:[]", mainHost, mainPort, localHost, localPort);
-		log.info("local container: []", localContainerName);
+		log.info("network config: Main:[]:[] Local:[]:[]", mainHost == null ? "<null>" : mainHost,
+				mainPort == null ? "<null>" : mainPort, localHost == null ? "<null>" : localHost,
+				localPort == null ? "<null>" : localPort);
+		log.info("local container: []", localContainerName == null ? "<null>" : localContainerName);
 		
 		if(applicationLayoutWidth > 0)
 			layout.indicateW(applicationLayoutWidth);
@@ -280,9 +282,9 @@ public class BootSettingsManager extends Config
 	}
 	
 	/**
-	 * @return the mainContainerName
+	 * @return the local container name
 	 */
-	public String getMainContainerName()
+	public String getLocalContainerName()
 	{
 		return localContainerName;
 	}
