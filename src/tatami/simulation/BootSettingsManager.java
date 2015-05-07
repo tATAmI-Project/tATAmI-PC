@@ -205,7 +205,7 @@ public class BootSettingsManager extends Config
 			}
 			
 			log.info("scenario:");
-			log.info(scenarioTree.toString());
+			log.trace(scenarioTree.toString());
 			
 			// TODO: make this jade-independent
 			XMLNode configNode = (scenarioTree.getRoot().getNodeIterator("config").hasNext() ? scenarioTree.getRoot()
@@ -224,6 +224,15 @@ public class BootSettingsManager extends Config
 					localContainerName = configNode.getAttributeValue("mainContainerName");
 			}
 		}
+		
+		log.info("network config: Main:[]:[] Local:[]:[]", mainHost, mainPort, localHost, localPort);
+		log.info("local container: []", localContainerName);
+		
+		if(applicationLayoutWidth > 0)
+			layout.indicateW(applicationLayoutWidth);
+		if(applicationLayoutHeight > 0)
+			layout.indicateH(applicationLayoutHeight);
+		log.info("screen setup: []", applicationLayoutWidth + "x" + applicationLayoutHeight);
 		
 		log.doExit();
 		lock();
