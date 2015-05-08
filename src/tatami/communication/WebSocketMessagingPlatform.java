@@ -120,9 +120,9 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 		if ((componentType & SERVER) == SERVER) {
 			WebSocketImpl.DEBUG = false;
 			try {
-				System.out.println("Server started on port: " + port);
 				server = new AutobahnServer(port, new Draft_17());
 				server.start();
+				System.out.println("Server started on port: " + port);
 				
 			} catch (UnknownHostException e) {
 				System.out.println("Unknown host exception");
@@ -130,16 +130,22 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 			}
 			System.out.println("Server started");
 		}
+		// FIXME
+		try
+		{
+			Thread.sleep(1500);
+		} catch(InterruptedException e)
+		{
+			e.printStackTrace();
+		}
 
 		if ((componentType & CLIENT) == CLIENT) {
 			
-			System.out.println("Client started");
 			Draft d = new Draft_17();
 			String clientname = "tootallnate/websocket";
 
 			String protocol = "ws";
 			
-
 			String serverlocation = protocol + "://" + clientHost + ":" + port;
 			URI uri = null;
 			uri = URI.create( serverlocation + "/agent=" + clientname );
@@ -147,6 +153,8 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 			client = new AutobahnClient( d, uri );
 			clientThread = new Thread( client );
 			clientThread.start();
+			
+			System.out.println("Client started");
 		}
 		return true;
 	}
