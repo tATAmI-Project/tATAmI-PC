@@ -23,23 +23,39 @@ import tatami.core.util.platformUtils.PlatformUtils;
  * The class should be extended by any component that offers to the agent services of communication with other agents.
  * Extending classes should override the <code>parentChangeNotifier</code> method to register an event handler for
  * {@link AgentEventType#AGENT_MESSAGE}.
- * <p>
+ * 
+ * <h2>Endpoints</h2>
  * The communication is abstracted internally to the agent as exchanging messages between endpoints, where each endpoint
- * is identified by a {@link String} address composed of multiple elements separated by slashes (
- * {@link #ADDRESS_SEPARATOR}={@value #ADDRESS_SEPARATOR}). This means that an endpoint may be identified by a URI (if
+ * is identified by a {@link String} address composed of multiple elements separated by slashes (by default
+ * {@link #ADDRESS_SEPARATOR}={@value #ADDRESS_SEPARATOR}). This means that an endpoint may be identified by an URI (if
  * the {@link MessagingComponent} implementation supports it), or, for instance, by an address of the type
  * "Agent1/Visualization" (this will work with Jade, where agents are addressable by name).
  * <p>
  * Messages are sent from one endpoint to another, and contain a {@link String}. Specific implementations may parse the
  * string for additional structure.
  * <p>
- * We make a difference between [complete] endpoints (or paths) and internal endpoints (or paths). An agent address
- * concatenated with an internal path should result in a complete path. Internal paths should begin with a slash.
+ * We make a difference between [complete] endpoints (or paths) and internal endpoints (or paths).
  * <p>
+ * <b>IMPORTANT NOTE:</b> An agent address (returned by {@link #getAgentAddress}) concatenated with an internal path
+ * should result in a complete path. Internal paths should begin with a slash. Otherwise, the predefined methods for
+ * parsing and assembling endpoint paths may not work correctly.
+ * 
+ * <h2>Extending this class</h2>
  * The abstract class implements some basic methods for working with slash-delimited addresses, and offers the method
- * for registering message handlers.
+ * for registering message handlers. The class also eases the task of posting agent events to the agent thread, by means
+ * of the method {@link #receiveMessage} that should be called by extending classes.
  * <p>
- * TODO: make this not abstract by implementing a simple local messaging service.
+ * Basically, a class extending {@link MessagingComponent} should implement the following:
+ * <ul>
+ * <li>if it needs to access the platform containing the agent and implementing communication, it should do that after
+ * {@link #atAgentStart} is called (at any point before this method is called the agent may not be loaded onto the
+ * platform yet). To get a reference to the platform, by means of the {@link #getPlatformLink} method.
+ * <li>it should implement the {@link #sendMessage(String, String, String)} method that sends a message to another
+ * agent.
+ * <li>when a message is received, the implementation should call the {@link #receiveMessage} of the parent, that will
+ * pack the information into an {@link AgentEvent} instance and post it in the event queue.
+ * </ul>
+ * 
  * 
  * @author Andrei Olaru
  */
@@ -156,7 +172,7 @@ public abstract class MessagingComponent extends AgentComponent
 	 * @param source
 	 *            - the source of the message, as a complete endpoint
 	 * @param destination
-	 *            - the internal destination of the message, as an internal endpoint
+	 *            - the destination of the message, as complete endpoint (must begin with the agent's address).
 	 * @param content
 	 *            - the content of the message
 	 */
@@ -195,6 +211,12 @@ public abstract class MessagingComponent extends AgentComponent
 	{
 		// FIXME: do checks
 		String destinationInternal = extractInternalAddress(event, "");
+		if(destinationInternal == null)
+		{
+			if(getAgentLog() != null)
+				getAgentLog().error("No internal destination returned for event", event);
+			return;
+		}
 		if(destinationInternal.length() == 0)
 			// if no internal path, make it the root path (a corect internal path).
 			destinationInternal = "/";
@@ -235,7 +257,6 @@ public abstract class MessagingComponent extends AgentComponent
 	@Override
 	protected boolean registerMessageReceiver(AgentEventHandler receiver, String... prefixElements)
 	{
-		// TODO handle null for arguments
 		String prefix = makeInternalPath(prefixElements);
 		if(!messageHandlers.containsKey(prefix))
 			messageHandlers.put(prefix, new HashSet<AgentEventHandler>());
@@ -353,7 +374,7 @@ public abstract class MessagingComponent extends AgentComponent
 	 * itself and also eliminating specified prefix elements.
 	 * 
 	 * @param event
-	 *            - the event to extract the address from.
+	 *            - the event to extract the address from (contains a complete destination endpoint).
 	 * @param prefixElementsToRemove
 	 *            - elements of the prefix to remove from the address.
 	 * @return the elements that were extracted from the address, following the address of the agent and the specified
@@ -364,7 +385,9 @@ public abstract class MessagingComponent extends AgentComponent
 	{
 		String prefix = makeInternalPath(prefixElementsToRemove);
 		String rem = extractInternalAddress(event, prefix);
-		String[] ret = rem.substring(1).split(ADDRESS_SEPARATOR);
+		String[] ret = null;
+		if(rem != null)
+			ret = (rem.startsWith(ADDRESS_SEPARATOR) ? rem.substring(1) : rem).split(ADDRESS_SEPARATOR);
 		return ret;
 	}
 	
@@ -373,7 +396,7 @@ public abstract class MessagingComponent extends AgentComponent
 	 * agent itself and also eliminating a specified prefix.
 	 * 
 	 * @param event
-	 *            - the event to extract the address from.
+	 *            - the event to extract the address from (contains a complete destination endpoint).
 	 * @param prefixToRemove
 	 *            - prefix to remove from the address. The prefix must be an internal path (starting with slash, but not
 	 *            ending with slash).
@@ -381,12 +404,36 @@ public abstract class MessagingComponent extends AgentComponent
 	 */
 	public String extractInternalAddress(AgentEvent event, String prefixToRemove)
 	{
+		if(event == null)
+		{
+			if(getAgentLog() != null)
+				getAgentLog().error("Event is null.");
+			return null;
+		}
 		String address = (String) event.getParameter(DESTINATION_PARAMETER);
 		if(!address.startsWith(getAgentAddress()))
+		{
+			try
+			{
+				getAgentLog().error("Address [] does not begin with this agent's address", address);
+			} catch(NullPointerException e)
+			{
+				// nothing
+			}
 			return null;
+		}
 		String rem = address.substring(getAgentAddress().length());
 		if(!rem.startsWith(prefixToRemove))
-			return null;
+		{
+			try
+			{
+				getAgentLog().warn("Internal path [] does not begin with the specified prefix []", rem, prefixToRemove);
+			} catch(NullPointerException e)
+			{
+				// nothing
+			}
+			return rem;
+		}
 		return rem.substring(prefixToRemove.length());
 	}
 	
@@ -397,9 +444,14 @@ public abstract class MessagingComponent extends AgentComponent
 	 *            - the event to extract the content from.
 	 * @return the content of the message.
 	 */
-	@SuppressWarnings("static-method")
 	public String extractContent(AgentEvent event)
 	{
+		if(event == null)
+		{
+			if(getAgentLog() != null)
+				getAgentLog().error("Event is null.");
+			return null;
+		}
 		String content = (String) event.getParameter(CONTENT_PARAMETER);
 		return content;
 	}

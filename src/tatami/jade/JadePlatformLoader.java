@@ -85,8 +85,8 @@ public class JadePlatformLoader implements PlatformLoader
 			config.setLocalHost(settings.getLocalHost());
 		if(settings.getLocalPort() != null)
 			config.setLocalPort(settings.getLocalPort());
-		if(settings.getMainContainerName() != null)
-			config.setMainContainerName(settings.getMainContainerName());
+		if(settings.getLocalContainerName() != null)
+			config.setMainContainerName(settings.getLocalContainerName());
 		jadeInterface.setConfig(config);
 		return this;
 	}
