@@ -35,6 +35,23 @@ public class BootSettingsManager extends Config
 	protected String				SCENARIO_SCHEMA		= "src-schema/scenarioSchema3.xsd";
 	
 	/**
+	 * The name of the attribute in the config node of the scenario file.
+	 */
+	protected final String CONFIG_MAIN_HOST = "mainHost";
+	/**
+	 * The name of the attribute in the config node of the scenario file.
+	 */
+	protected final String CONFIG_MAIN_PORT = "mainPort";
+	/**
+	 * The name of the attribute in the config node of the scenario file.
+	 */
+	protected final String CONFIG_LOCAL_HOST = "localHost";
+	/**
+	 * The name of the attribute in the config node of the scenario file.
+	 */
+	protected final String CONFIG_LOCAL_PORT = "localPort";
+	
+	/**
 	 * The name of the XML scenario file that contains the settings for the current simulation.
 	 */
 	protected String				scenarioFileName;
@@ -212,16 +229,14 @@ public class BootSettingsManager extends Config
 					.getNodeIterator("config").next() : null);
 			if(configNode != null)
 			{
-				if(configNode.getAttributeValue("mainHost") != null){
-					mainHost = configNode.getAttributeValue("mainHost");
-				}
-				
-				if(configNode.getAttributeValue("mainPort") != null)
-					mainPort = configNode.getAttributeValue("port");
-				if(configNode.getAttributeValue("localHost") != null)
-					localHost = configNode.getAttributeValue("localIPaddress");
-				if(configNode.getAttributeValue("localPort") != null)
-					localPort = configNode.getAttributeValue("localPort");
+				if(configNode.getAttributeValue(CONFIG_MAIN_HOST) != null)
+					mainHost = configNode.getAttributeValue(CONFIG_MAIN_HOST);
+				if(configNode.getAttributeValue(CONFIG_MAIN_PORT) != null)
+					mainPort = configNode.getAttributeValue(CONFIG_MAIN_PORT);
+				if(configNode.getAttributeValue(CONFIG_LOCAL_HOST) != null)
+					localHost = configNode.getAttributeValue(CONFIG_LOCAL_HOST);
+				if(configNode.getAttributeValue(CONFIG_LOCAL_PORT) != null)
+					localPort = configNode.getAttributeValue(CONFIG_LOCAL_PORT);
 				if(configNode.getAttributeValue("mainContainerName") != null)
 					localContainerName = configNode.getAttributeValue("mainContainerName");
 			}
