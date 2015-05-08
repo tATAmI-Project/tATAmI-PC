@@ -163,12 +163,11 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	public boolean stop() {
 		System.out.println("Platform stopped");
 		try {
+			client.close();
 			clientThread.join();
 		} catch ( InterruptedException e ) {
 			e.printStackTrace();
 			return false;
-		} finally {
-			client.close();
 		}
 		return true;
 	}
