@@ -15,7 +15,7 @@
 	xsi:schemaLocation="http://www.example.org/scenarioSchema3 ../../../../../src-schema/scenarioSchema3.xsd ">
 
 	<scen:platform>
-		<scen:parameter name="name" value="jade" />
+		<scen:parameter name="name" value="local" />
 	</scen:platform>
 	<scen:agentPackage>scenario.examples.sclaim_tatami2.simpleScenarioA</scen:agentPackage>
 

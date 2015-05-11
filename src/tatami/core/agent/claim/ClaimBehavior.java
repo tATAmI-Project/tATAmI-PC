@@ -27,7 +27,6 @@ import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.visualization.AgentGui;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
-import tatami.sclaim.constructs.basic.ClaimBehaviorType;
 import tatami.sclaim.constructs.basic.ClaimCondition;
 import tatami.sclaim.constructs.basic.ClaimConstruct;
 import tatami.sclaim.constructs.basic.ClaimConstructType;
@@ -107,9 +106,14 @@ public class ClaimBehavior
 	/**
 	 * This method is called whenever the behavior may be executed. It tests for the activation conditions and executes
 	 * all the statements.
+	 * 
+	 * @param activatingEvent
+	 *            - the {@link AgentEvent} that activates the behavior (according to the value of
+	 *            {@link #getActivationType()}).
 	 */
-	public void action()
+	public void activate(AgentEvent activatingEvent)
 	{
+		activationEvent = activatingEvent;
 		while(currentStatement < cbd.getStatements().size())
 			if(!handleStatement(cbd.getStatements().get(currentStatement++)))
 			{
@@ -123,9 +127,32 @@ public class ClaimBehavior
 	/**
 	 * @return the type of the behavior.
 	 */
-	public ClaimBehaviorType getBehaviorType()
+	public AgentEventType getActivationType()
 	{
-		return cbd.getBehaviorType();
+		switch(cbd.getBehaviorType())
+		{
+		case INITIAL:
+			return AgentEventType.SIMULATION_START;
+		case REACTIVE:
+		{
+			ClaimConstruct statement = cbd.getStatements().get(currentStatement);
+			if(statement.getType() != ClaimConstructType.FUNCTION_CALL)
+				throw new IllegalStateException("illegal start of behavior.");
+			switch(((ClaimFunctionCall) statement).getFunctionType())
+			{
+			case RECEIVE:
+				return AgentEventType.AGENT_MESSAGE;
+			case INPUT:
+				return AgentEventType.GUI_INPUT;
+			default:
+				throw new IllegalStateException("illegal start of behavior.");
+			}
+		}
+		case PROACTIVE:
+		case CYCLIC:
+			throw new IllegalStateException("Unimplemented activation");
+		}
+		throw new IllegalStateException("behavior type not handled.");
 	}
 	
 	/**
@@ -696,34 +723,34 @@ public class ClaimBehavior
 	 */
 	protected void handleForAllK(ClaimForAllK construct)
 	{
-//		ClaimStructure knowledgeStruct = construct.getStructure();
-//		Vector<ClaimConstruct> statements = construct.getStatements();
-//		
-//		// replace all ClaimVariables (represented as ?<name>) with an index
-//		HashMap<Integer, ClaimVariable> intToVariable = new HashMap<Integer, ClaimVariable>();
-//		String knowledge = constructsAndMaps(knowledgeStruct.getFields(), intToVariable, 1);
-//		
-//		GraphPattern CP = new GraphPattern();
-//		TextGraphRepresentation repr = new TextGraphRepresentation(CP);
-//		repr.readRepresentation(new ContentHolder<String>(knowledge));
-//		
-//		List<Match> matches = claimComponent.getCognitive().readAll(CP);
-//		for(Match match : matches)
-//		{
-//			st = new SymbolTable(st);
-//			
-//			for(Node node : CP.getNodes())
-//				if(node instanceof NodeP)
-//				{
-//					Node rez = match.getMatchedGraphNode(node);
-//					int genericIndex = ((NodeP) node).genericIndex();
-//					st.put(intToVariable.get(genericIndex), new ClaimValue(rez.toString()));
-//				}
-//			for(ClaimConstruct claimConstruct : construct.getStatements())
-//				handleStatement(claimConstruct);
-//			
-//			st = st.prev;
-//		}
+		// ClaimStructure knowledgeStruct = construct.getStructure();
+		// Vector<ClaimConstruct> statements = construct.getStatements();
+		//
+		// // replace all ClaimVariables (represented as ?<name>) with an index
+		// HashMap<Integer, ClaimVariable> intToVariable = new HashMap<Integer, ClaimVariable>();
+		// String knowledge = constructsAndMaps(knowledgeStruct.getFields(), intToVariable, 1);
+		//
+		// GraphPattern CP = new GraphPattern();
+		// TextGraphRepresentation repr = new TextGraphRepresentation(CP);
+		// repr.readRepresentation(new ContentHolder<String>(knowledge));
+		//
+		// List<Match> matches = claimComponent.getCognitive().readAll(CP);
+		// for(Match match : matches)
+		// {
+		// st = new SymbolTable(st);
+		//
+		// for(Node node : CP.getNodes())
+		// if(node instanceof NodeP)
+		// {
+		// Node rez = match.getMatchedGraphNode(node);
+		// int genericIndex = ((NodeP) node).genericIndex();
+		// st.put(intToVariable.get(genericIndex), new ClaimValue(rez.toString()));
+		// }
+		// for(ClaimConstruct claimConstruct : construct.getStatements())
+		// handleStatement(claimConstruct);
+		//
+		// st = st.prev;
+		// }
 	}
 	
 	/**

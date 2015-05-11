@@ -12,6 +12,7 @@
 package tatami.core.agent.claim;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Vector;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
@@ -19,6 +20,7 @@ import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
+import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.kb.CognitiveComponent;
 import tatami.core.agent.kb.KnowledgeBase;
 import tatami.core.agent.parametric.AgentParameterName;
@@ -103,15 +105,13 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	}
 	
 	@Override
-	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
+	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, List<String> agentPackages, Logger log)
 	{
-		if(!super.preload(parameters, scenarioNode, log))
+		if(!super.preload(parameters, scenarioNode, agentPackages, log))
 			return false;
 		
 		String adfClass = parameters.get(AGENT_CLASS_COMPONENT_PARAMETER);
 		Collection<String> javaCodeAttachments = parameters.getValues(JAVA_CODE_COMPONENT_PARAMETER);
-		Collection<String> agentPackages = ((ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT))
-				.parVals(AgentParameterName.AGENT_PACKAGE);
 		
 		cad = ClaimLoader.fillCAD(adfClass, javaCodeAttachments, agentPackages, log);
 		
@@ -162,14 +162,19 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 		// bind value for "this" parameter (agent's local name)
 		st.put(new ClaimVariable(THIS_VARIABLE), new ClaimValue(parametric.parVal(AgentParameterName.AGENT_NAME)));
 		
+		behaviors = new Vector<ClaimBehavior>();
 		// create behaviors
 		for(ClaimBehaviorDefinition cbd : cad.getBehaviors())
 		{
-			behaviors.add(new ClaimBehavior(cbd, st, this, getAgentLog()));
+			ClaimBehavior b = new ClaimBehavior(cbd, st, this, getAgentLog());
+			behaviors.add(b);
 			
-			if(true)
-				// TODO if behavior is message-activated
+			switch(b.getActivationType())
+			{
+			case AGENT_MESSAGE:
 				registerMessageReceiver(this, Vocabulary.CLAIM.toString());
+				break;
+			}
 			
 			// TODO input-activated behaviors
 			
@@ -187,8 +192,8 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 		super.atSimulationStart(event);
 		
 		for(ClaimBehavior cb : behaviors)
-			if(cb.getBehaviorType().equals(ClaimBehaviorType.INITIAL))
-				cb.action();
+			if(cb.getActivationType().equals(AgentEventType.SIMULATION_START))
+				cb.activate(event);
 	}
 	
 	/**
@@ -226,8 +231,9 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	@Override
 	public void handleEvent(AgentEvent event)
 	{
-		// TODO receive message
-		
+		for(ClaimBehavior b : behaviors)
+			if(b.getActivationType() == event.getType())
+				b.activate(event);
 	}
 	
 	/**
