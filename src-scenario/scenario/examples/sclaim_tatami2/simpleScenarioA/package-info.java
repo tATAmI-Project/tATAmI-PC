@@ -6,6 +6,7 @@
  * <p>
  * Features tested:
  * <ul>
+ * <li> message-activated reactive behaviors
  * <li> send and receive
  * </ul>
  * 
