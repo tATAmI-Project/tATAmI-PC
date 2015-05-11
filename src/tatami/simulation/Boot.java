@@ -11,9 +11,11 @@
  ******************************************************************************/
 package tatami.simulation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -88,7 +90,7 @@ public class Boot
 		// agent loader name -> agent loader
 		Map<String, AgentLoader> agentLoaders = new HashMap<String, AgentLoader>();
 		// package names where agent code (adf & java) may be located
-		Set<String> agentPackages = new HashSet<String>();
+		List<String> agentPackages = new ArrayList<String>();
 		// container name -> do create (true for local containers, false for remote)
 		Map<String, Boolean> allContainers = new HashMap<String, Boolean>();
 		// platform name -> names of containers to be present in the platform
@@ -334,7 +336,7 @@ public class Boot
 	 */
 	protected void loadContainerAgents(Iterator<XMLNode> containerNodes, String defaultPlatform,
 			Map<String, PlatformLoader> platforms, String defaultAgentLoader, Map<String, AgentLoader> agentLoaders,
-			Set<String> agentPackages, Map<String, Boolean> allContainers, Map<String, Set<String>> platformContainers,
+			List<String> agentPackages, Map<String, Boolean> allContainers, Map<String, Set<String>> platformContainers,
 			Set<AgentCreationData> allAgents)
 	{
 		while(containerNodes.hasNext())
@@ -382,8 +384,8 @@ public class Boot
 				}
 				
 				// load agent
-				AgentCreationData agentCreationData = preloadAgent(agentNode, agentName, containerName, doCreateContainer,
-						platforms.get(platformName), defaultAgentLoader, agentLoaders, agentPackages);
+				AgentCreationData agentCreationData = preloadAgent(agentNode, agentName, containerName,
+						doCreateContainer, platforms.get(platformName), defaultAgentLoader, agentLoaders, agentPackages);
 				if(agentCreationData == null)
 					continue;
 				allAgents.add(agentCreationData);
@@ -431,7 +433,7 @@ public class Boot
 	 */
 	protected AgentCreationData preloadAgent(XMLNode agentNode, String agentName, String containerName,
 			boolean doCreateContainer, PlatformLoader platform, String defaultAgentLoader,
-			Map<String, AgentLoader> agentLoaders, Set<String> agentPackages)
+			Map<String, AgentLoader> agentLoaders, List<String> agentPackages)
 	{
 		// loader
 		String agentLoaderName = PlatformUtils.getParameterValue(agentNode, AgentParameterName.AGENT_LOADER.toString());
@@ -459,8 +461,8 @@ public class Boot
 		for(String pack : agentPackages)
 			parameters.add(AgentParameterName.AGENT_PACKAGE, pack);
 		
-		AgentCreationData agentCreationData = new AgentCreationData(agentName, parameters, containerName,
-				!doCreateContainer, platform.getName(), loader, agentNode);
+		AgentCreationData agentCreationData = new AgentCreationData(agentName, parameters, agentPackages,
+				containerName, !doCreateContainer, platform.getName(), loader, agentNode);
 		if(!loader.preload(agentCreationData, platform, log))
 		{
 			log.error("Agent [" + agentName + "] cannot be loaded.");

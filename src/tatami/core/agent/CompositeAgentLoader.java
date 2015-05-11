@@ -146,7 +146,7 @@ public class CompositeAgentLoader implements AgentLoader
 				componentData
 						.addObject(ParametricComponent.COMPONENT_PARAMETER_NAME, agentCreationData.getParameters());
 			
-			if(component.preload(componentData, componentNode, log))
+			if(component.preload(componentData, componentNode, agentCreationData.getPackages(), log))
 			{
 				agentCreationData.getParameters().addObject(COMPONENT_PARAMETER_NAME, component);
 				log.trace("component [] pre-loaded for agent []", componentClass, agentCreationData.getAgentName());

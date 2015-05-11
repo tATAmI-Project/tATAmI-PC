@@ -54,9 +54,10 @@ public class PingBackTestComponent extends AgentComponent
 	}
 	
 	@Override
-	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
+	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, List<String> agentPackages,
+			Logger log)
 	{
-		if(!super.preload(parameters, scenarioNode, log))
+		if(!super.preload(parameters, scenarioNode, agentPackages, log))
 			return false;
 		otherAgents = getComponentData().getValues(OTHER_AGENT_PARAMETER_NAME);
 		return true;

@@ -2,6 +2,7 @@ package tatami.core.agent;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
@@ -345,11 +346,14 @@ public abstract class AgentComponent implements Serializable
 	 * @param scenarioNode
 	 *            - the {@link XMLNode} that contains the complete data for creating the component, as stated in the
 	 *            scenario file.
+	 * @param agentPackages
+	 *            - the packages where the agent may look for files.
 	 * @param log
 	 *            - the {@link Logger} in which to output any potential problems (as warnings or errors).
 	 * @return <code>true</code> if no fatal issues were found; <code>false</code> otherwise.
 	 */
-	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
+	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, List<String> agentPackages,
+			Logger log)
 	{
 		if(parameters != null)
 		{
