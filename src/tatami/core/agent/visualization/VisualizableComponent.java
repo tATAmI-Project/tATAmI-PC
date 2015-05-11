@@ -114,6 +114,11 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	public static final String				GUI_ARGUMENTS_EVENT_PARAMETER_NAME	= "arguments";
 	
 	/**
+	 * Debug constant to disable reporting (lowers quantity of messages). Normally should be set to <code>false</code>.
+	 */
+	private static final boolean			DEBUG_DISABLE_REPORTING				= true;
+	
+	/**
 	 * The logging {@link Unit}.
 	 */
 	protected transient UnitComponentExt	loggingUnit							= null;
@@ -261,7 +266,9 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	{
 		// configure log / logging Unit
 		loggingUnit = (UnitComponentExt) new UnitComponentExt().setUnitName(getAgentName()).setLogEnsureNew()
-				.setLogReporter(this).setLoggerType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL);
+				.setLoggerType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL);
+		if(!DEBUG_DISABLE_REPORTING)
+			loggingUnit.setLogReporter(this);
 		
 		// load GUI
 		try
