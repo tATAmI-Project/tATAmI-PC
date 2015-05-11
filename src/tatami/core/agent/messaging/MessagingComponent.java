@@ -54,7 +54,7 @@ public abstract class MessagingComponent extends AgentComponent
 		/**
 		 * General messaging debugging switch.
 		 */
-		DEBUG_MESSAGING(false),
+		DEBUG_MESSAGING(true),
 		
 		;
 		
@@ -211,7 +211,16 @@ public abstract class MessagingComponent extends AgentComponent
 			if(destinationInternal.startsWith(entry.getKey()))
 				// prefix matches
 				for(AgentEventHandler receiver : entry.getValue())
+				{
+					try
+					{
+						getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING, "Dispatching to [" + receiver + "]");
+					} catch(NullPointerException e)
+					{
+						// it's ok, there was no vis component / no log
+					}
 					receiver.handleEvent(event);
+				}
 		}
 	}
 	
