@@ -420,4 +420,11 @@ public class CompositeAgent implements Serializable, AgentManager
 	{
 		return (state == AgentState.INITIALIZING) || (state == AgentState.STOPPED) || (state == AgentState.RUNNING);
 	}
+	
+	@Override
+	public String toString()
+	{
+		// TODO improve; currently just for debugging.
+		return getAgentName();
+	}
 }
