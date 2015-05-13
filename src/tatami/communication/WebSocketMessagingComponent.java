@@ -22,9 +22,11 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 	 * 
 	 */
 	public WebSocketMessagingComponent(){
-
 	}
 	
+	/**
+	 * Method called when an agent starts
+	 */
 	@Override
 	protected void atAgentStart(AgentEvent event)
 	{
@@ -37,20 +39,27 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 
 	}
 	
+	/**
+	 * Obtain a link to the platform
+	 */
 	@Override
 	protected Object getPlatformLink() {
 		return super.getPlatformLink();
 	}
 
+	/**
+	 * Returns the agent name
+	 */
 	@Override
 	public String getAgentAddress(String agentName, String containerName) {
-		System.out.println("Get agent address " + agentName);
 		return agentName;
 	}
 	
+	/**
+	 * Returns the agent's address
+	 */
 	@Override
-	public String getAgentAddress(String agentName)
-	{
+	public String getAgentAddress(String agentName){
 		return getAgentAddress(agentName, null);
 	}
 	
@@ -64,15 +73,17 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 		receiveMessage(source, target, message);
 	}
 
+	/**
+	 * Method called from the agent when it needs to send a message
+	 */
 	@Override
 	public boolean sendMessage(String target, String source, String content) {
 		try{
-			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING, "seding message: " + source + "::" + target + "::" + content);
-			platform.client.send(source + "::" + target + "::" + content);
+			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING, "Seding message: " + source + "::" + target + "::" + content);
+			platform.mClient.send(source + "::" + target + "::" + content);
 			return true;
 		}
 		catch(Exception e){
-			System.out.println("Message could not be sent");
 			e.printStackTrace();
 		}
 		

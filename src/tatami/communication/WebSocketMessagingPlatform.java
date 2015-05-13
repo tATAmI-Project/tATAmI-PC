@@ -21,55 +21,62 @@ import tatami.simulation.PlatformLoader.PlatformLink;
 public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink {
 
 	/**
-	 * 
+	 * When the componentType is NONE, 
+	 * this class is neither server or client
 	 */
 	public static final int NONE = 0x0;
 
 	/**
-	 * 
+	 * When the SERVER bit is configured, this class is 
+	 * initialized as a server
 	 */
 	public static final int SERVER = 0x1;
 
 	/**
-	 * 
+	 * When the CLIENT bit is configured, this class is
+	 * initialized as a client
 	 */
 	public static final int CLIENT = 0x2;
 
 	/**
-	 * 
+	 * In this parameter will be stored the info about the class
+	 * profile: client, server or both
 	 */
 	public int componentType = NONE;
 
 	/**
-	 * 
+	 * The port on which the server will be started or
+	 * on which the client will connect to the server
 	 */
-	public int port = 9002;
+	public int mPort = 9002;
 	
 	
 	/**
-	 * 
+	 * The object representing the server if this platform will
+	 * have the server role
 	 */
-	public AutobahnServer server;
+	public AutobahnServer mServer;
 	
 	/**
-	 * 
+	 * The object representing the client if this platform will
+	 * have the client role
 	 */
-	AutobahnClient client;
+	AutobahnClient mClient;
 	
 	/**
-	 * 
+	 * The thread on which the client will run
 	 */
-	Thread clientThread;
+	Thread mClientThread;
 	
 	/**
-	 * 
+	 * The host name on which the websocket will be launched
 	 */
-	String clientHost;
+	String mClientHost;
 	
 	/**
-	 * 
+	 * The register where all agents and their connections are registered
 	 */
-	HashMap<String, WebSocketMessagingComponent> agents;
+	HashMap<String, WebSocketMessagingComponent> mAgents;
 	
 
 	/**
@@ -78,57 +85,59 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	public WebSocketMessagingPlatform() {
 	}
 
+	/**
+	 * 
+	 * @return Returns the name of the current platform
+	 */
 	@Override
 	public String getName() {
 		return StandardPlatformType.GENERAL.toString();
 	}
 
+	/**
+	 * Configure the cuurent platform
+	 * @param configuration 
+	 * @param settings The settings provided by the boot component
+	 */
 	@Override
 	public WebSocketMessagingPlatform setConfig(XMLNode configuration,
 			BootSettingsManager settings) {
 
-		agents = new HashMap<String, WebSocketMessagingComponent>();
+		mAgents = new HashMap<String, WebSocketMessagingComponent>();
 
 		String tmpComponentType = settings.getMainHost();
 
 		String tmpPort = settings.getLocalPort();
 
-		clientHost = settings.getLocalHost();
+		mClientHost = settings.getLocalHost();
 
 		if (tmpComponentType.toLowerCase().indexOf("server") > -1) {
 			componentType |= SERVER;
 		}
 
 		if (tmpComponentType.toLowerCase().indexOf("client") > -1) {
-			System.out.println("Started as client");
 			componentType |= CLIENT;
 		}
 
-		port = Integer.parseInt(tmpPort);
-		System.out.println("WebSocketMessagingPlatform configured");
-
+		mPort = Integer.parseInt(tmpPort);
 		return this;
 	}
 
 	@Override
 	public boolean start() {
 		if (componentType == NONE) {
-			System.out.println("Component type = none");
 			return false;
 		}
 
 		if ((componentType & SERVER) == SERVER) {
 			WebSocketImpl.DEBUG = false;
 			try {
-				server = new AutobahnServer(port, new Draft_17());
-				server.start();
-				System.out.println("Server started on port: " + port);
+				mServer = new AutobahnServer(mPort, new Draft_17());
+				mServer.start();
 				
 			} catch (UnknownHostException e) {
-				System.out.println("Unknown host exception");
 				e.printStackTrace();
 			}
-			System.out.println("Server started");
 		}
 		// FIXME
 		try
@@ -146,30 +155,31 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 
 			String protocol = "ws";
 			
-			String serverlocation = protocol + "://" + clientHost + ":" + port;
+			String serverlocation = protocol + "://" + mClientHost + ":" + mPort;
 			URI uri = null;
 			uri = URI.create( serverlocation + "/agent=" + clientname );
 			
-			client = new AutobahnClient( d, uri );
-			clientThread = new Thread( client );
-			clientThread.start();
-			
-			System.out.println("Client started");
+			mClient = new AutobahnClient( d, uri );
+			mClientThread = new Thread( mClient );
+			mClientThread.start();
 		}
 		return true;
 	}
 
+	/**
+	 * 
+	 * @return Returns true if the platform successfully stopped
+	 */
 	@Override
 	public boolean stop() {
-		System.out.println("Platform stopped");
 		try {
-			client.close();
-			clientThread.join();
+			mClient.close();
+			mClientThread.join();
+			return true;
 		} catch ( InterruptedException e ) {
 			e.printStackTrace();
 			return false;
 		}
-		return true;
 	}
 
 	@Override
@@ -179,13 +189,13 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	
 	/**
 	 * 
-	 * @param target
-	 * @param source
-	 * @param message
+	 * @param target The target of the message
+	 * @param source The source of the message
+	 * @param message The content of the message
 	 */
 	public void onMessage(String source, String target, String message){
 		String currentTarget = (target.indexOf("/") > 0) ? target.substring(0, target.indexOf("/")) : target;
-		agents.get(currentTarget).onMessage(source, target, message);
+		mAgents.get(currentTarget).onMessage(source, target, message);
 	}
 	
 	/**
@@ -194,14 +204,19 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	 * @param messagingComponent
 	 */
 	public void register(String agentName, WebSocketMessagingComponent messagingComponent){
-		agents.put(agentName, messagingComponent);
+		mAgents.put(agentName, messagingComponent);
 	}
 
+	/**
+	 * Method called when an agent is loaded
+	 * @param containerName 
+	 * @param agentManager
+	 */
 	@Override
 	public boolean loadAgent(String containerName, AgentManager agentManager) {
 		agentManager.setPlatformLink(this);
-		client.registerPlatform(this, agentManager.getAgentName());
-		client.newAgentNotification(agentManager.getAgentName());
+		mClient.registerPlatform(this, agentManager.getAgentName());
+		mClient.newAgentNotification(agentManager.getAgentName());
 		return true;
 	}
 
