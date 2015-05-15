@@ -445,16 +445,6 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	}
 	
 	/**
-	 * Relays calls to the underlying {@link AgentComponent} instance in order to avoid synthetic access warnings for
-	 * event handlers.
-	 */
-	@Override
-	protected String getAgentName()
-	{
-		return super.getAgentName();
-	}
-	
-	/**
 	 * Getter for <code>currentContainer</code>.
 	 * 
 	 * @return the name of the current container.
@@ -473,12 +463,6 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	protected void setCurrentContainer(String containerName)
 	{
 		currentContainer = containerName;
-	}
-	
-	@Override
-	protected ComponentCreationData getComponentData()
-	{
-		return super.getComponentData();
 	}
 	
 	/**
