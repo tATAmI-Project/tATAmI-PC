@@ -177,16 +177,6 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	{
 		super.atAgentStart(event);
 		
-		try
-		{
-			if(getComponentData().isSet(GUI_PARAMETER_NAME))
-				guiConfig.setGuiClass(getComponentData().get(GUI_PARAMETER_NAME),
-						((ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT))
-								.parVals(AgentParameterName.AGENT_PACKAGE));
-		} catch(NullPointerException e)
-		{
-			// it's ok, no parametric component
-		}
 		resetVisualization();
 		registerMessageHandlers();
 	}
@@ -273,7 +263,18 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		// load GUI
 		try
 		{
-			gui = (AgentGui) PlatformUtils.loadClassInstance(this, guiConfig.guiClassName, guiConfig);
+			if(getComponentData().isSet(GUI_PARAMETER_NAME))
+				guiConfig.setGuiClass(getComponentData().get(GUI_PARAMETER_NAME),
+						((ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT))
+								.parVals(AgentParameterName.AGENT_PACKAGE), getLog());
+		} catch(NullPointerException e)
+		{
+			// it's ok, no parametric component
+		}
+		
+		try
+		{
+			gui = (AgentGui) PlatformUtils.loadClassInstance(this, guiConfig.getGuiClass(), guiConfig);
 		} catch(Exception e)
 		{
 			getLog().error("Load GUI failed: " + PlatformUtils.printException(e));
