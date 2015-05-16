@@ -199,7 +199,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			String destination = mvmt.extractDestination(event);
 			if(!destination.equals(getCurrentContainer()))
 			{
-				getLog().info("moving to [" + destination.toString() + "]");
+				getLog().info("moving to []", destination.toString());
 				setCurrentContainer(destination.toString());
 				removeVisualization();
 			}
@@ -212,7 +212,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		super.atAfterAgentMove(event);
 		
 		resetVisualization();
-		getLog().info(getAgentName() + ": arrived after move");
+		getLog().info("arrived after move");
 	}
 	
 	/**
@@ -228,7 +228,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			{
 				String parent = ((MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT)).extractContent(event);
 				setVisualizationParent(parent);
-				getLog().info("visualization root received: [" + parent + "]");
+				getLog().info("visualization root received: []", parent);
 			}
 		}, Vocabulary.VISUALIZATION.toString(), Vocabulary.VISUALIZATION_MONITOR.toString()))
 			getLog().warn("No messaging component present");
@@ -278,7 +278,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			gui = (AgentGui) PlatformUtils.loadClassInstance(this, guiConfig.getGuiClass(), guiConfig);
 		} catch(Exception e)
 		{
-			getLog().error("Load GUI failed: " + PlatformUtils.printException(e));
+			getLog().error("Load GUI failed: []", PlatformUtils.printException(e));
 		}
 		
 		if(gui != null)
@@ -287,9 +287,8 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			gui.setDefaultListener(this);
 		}
 		
-		getLog().trace(
-				"visualization started on platform " + PlatformUtils.getPlatform() + " with GUI class ["
-						+ guiConfig.guiClassName + "]");
+		getLog().trace("visualization started on platform [] with GUI class []", guiConfig.guiClassName,
+				PlatformUtils.getPlatform());
 	}
 	
 	/**

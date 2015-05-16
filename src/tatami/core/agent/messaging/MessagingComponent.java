@@ -175,8 +175,8 @@ public abstract class MessagingComponent extends AgentComponent
 		}
 		try
 		{
-			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
-					"Received message from [" + source + "] to [" + destination + "] with content [" + content + "].");
+			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING, "Received message from [] to [] with content [].",
+					source, destination, content);
 		} catch(NullPointerException e)
 		{
 			// it's ok, there was no vis component / no log
@@ -203,7 +203,7 @@ public abstract class MessagingComponent extends AgentComponent
 			try
 			{
 				getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
-						"Comparing: [" + destinationInternal + "] to declared [" + entry.getKey() + "]");
+						"Comparing: [] to declared []", destinationInternal, entry.getKey());
 			} catch(NullPointerException e)
 			{
 				// it's ok, there was no vis component / no log
@@ -214,7 +214,7 @@ public abstract class MessagingComponent extends AgentComponent
 				{
 					try
 					{
-						getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING, "Dispatching to [" + receiver + "]");
+						getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING, "Dispatching to []", receiver);
 					} catch(NullPointerException e)
 					{
 						// it's ok, there was no vis component / no log
