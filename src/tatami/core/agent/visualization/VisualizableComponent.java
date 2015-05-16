@@ -96,11 +96,11 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	/**
 	 * The name of the parameter in the component parameter set that corresponds to the name of the GUI.
 	 */
-	public static final String				GUI_PARAMETER_NAME					= null;
+	public static final String				GUI_PARAMETER_NAME					= "GUI";
 	/**
 	 * The name of the parameter in the component parameter set that corresponds to the type of the window.
 	 */
-	public static final String				WINDOW_TYPE_PARAMETER_NAME			= null;
+	public static final String				WINDOW_TYPE_PARAMETER_NAME			= "WindowType";
 	
 	/**
 	 * The name of the parameter in the event corresponding to GUI input, designating the name of the activated GUI
@@ -270,6 +270,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		} catch(NullPointerException e)
 		{
 			// it's ok, no parametric component
+			getLog().warn("Failed to set GUI class");
 		}
 		
 		try
@@ -286,7 +287,9 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			gui.setDefaultListener(this);
 		}
 		
-		getLog().trace("visualization started on platform " + PlatformUtils.getPlatform());
+		getLog().trace(
+				"visualization started on platform " + PlatformUtils.getPlatform() + " with GUI class ["
+						+ guiConfig.guiClassName + "]");
 	}
 	
 	/**

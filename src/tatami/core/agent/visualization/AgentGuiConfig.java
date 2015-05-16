@@ -179,10 +179,10 @@ public class AgentGuiConfig extends Config implements Serializable
 			{
 				guiClassName = defaultGuiPath + "." + platform + DEFAULT_AGENT_GUI;
 				if(log != null)
-					log.trace("not found; reverted to default: [" + guiClassName + "]");
+					log.trace("GUI not found; reverted to default: [" + guiClassName + "]");
 			}
 			else if(log != null)
-				log.trace("found: [" + guiClassName + "]");
+				log.trace("GUI found: [" + guiClassName + "]");
 		}
 		return this;
 	}
