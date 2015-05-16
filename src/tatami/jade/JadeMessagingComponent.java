@@ -92,14 +92,8 @@ public class JadeMessagingComponent extends MessagingComponent
 		if(nElements > 3)
 			message.setConversationId(targetElements[3]);
 		message.setContent(content);
-		try
-		{
-			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
-					"Sending message to [" + target + "] with content [" + content + "].");
-		} catch(NullPointerException e1)
-		{
-			// it's ok
-		}
+		getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
+				"Sending message to [" + target + "] with content [" + content + "].");
 		getWrapper().send(message);
 		return true;
 	}
@@ -117,25 +111,13 @@ public class JadeMessagingComponent extends MessagingComponent
 			wrapper = (JadeAgentWrapper) getPlatformLink();
 		} catch(ClassCastException e)
 		{
-			try
-			{
-				getAgentLog().error("Platform link is not a jade agent wrapper:" + PlatformUtils.printException(e));
-			} catch(NullPointerException e1)
-			{
-				// it's ok
-			}
+			getAgentLog().error("Platform link is not a jade agent wrapper:" + PlatformUtils.printException(e));
 			throw new IllegalStateException("Platform link is not a jade agent wrapper:"
 					+ PlatformUtils.printException(e));
 		}
 		if(wrapper == null)
 		{
-			try
-			{
-				getAgentLog().error("Platform link is null.");
-			} catch(NullPointerException e1)
-			{
-				// it's ok
-			}
+			getAgentLog().error("Platform link is null.");
 			throw new IllegalStateException("Platform link is null.");
 		}
 		return wrapper;

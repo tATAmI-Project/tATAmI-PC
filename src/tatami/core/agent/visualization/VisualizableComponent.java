@@ -15,6 +15,7 @@ import java.util.Vector;
 
 import net.xqhs.util.config.Config;
 import net.xqhs.util.config.Config.ConfigLockedException;
+import net.xqhs.util.logging.DumbLogger;
 import net.xqhs.util.logging.Logger;
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.ReportingEntity;
@@ -376,13 +377,16 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	}
 	
 	/**
-	 * Getter for the log.
+	 * Getter for the log. It never returns <code>null</code>, but in faulty cases it might returned a
+	 * {@link DumbLogger} instance.
 	 * 
 	 * @return the log, as a {@link Logger} instance.
 	 */
 	public Logger getLog()
 	{
-		return loggingUnit;
+		if(loggingUnit != null)
+			return loggingUnit;
+		return DumbLogger.get();
 	}
 	
 	/**

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import net.xqhs.util.logging.DumbLogger;
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventType;
@@ -67,7 +68,8 @@ public class ClaimBehavior
 	 */
 	protected ClaimComponent			claimComponent;
 	/**
-	 * The {@link Logger} instance to use.
+	 * The {@link Logger} instance to use. It will never be <code>null</code>, though it may fall back to a
+	 * {@link DumbLogger}.
 	 */
 	protected transient Logger			log				= null;
 	/**
@@ -100,6 +102,8 @@ public class ClaimBehavior
 		st = new SymbolTable(agentST);
 		currentStatement = 0;
 		log = logLink;
+		if(log == null)
+			log = DumbLogger.get();
 		st.setLogLink(log);
 	}
 	
@@ -185,7 +189,7 @@ public class ClaimBehavior
 			boolean condition = handleCall(((ClaimIf) statement).getCondition());
 			if(condition)
 			{
-				log.trace("if condition satisfied " + currentStatement);
+				log.trace("if condition satisfied ", new Integer(currentStatement));
 				
 				// after "then" there's a true branch and a false branch
 				Vector<ClaimConstruct> trueBranch = ((ClaimIf) statement).getTrueBranch();
@@ -366,7 +370,7 @@ public class ClaimBehavior
 			switch(activationEvent.getType())
 			{
 			case AGENT_MESSAGE:
-				// log.trace("replying to message " + lastMessage);
+				// log.trace("replying to message ", lastMessage);
 				replyMode = true;
 				// TODO
 				break;
@@ -406,7 +410,7 @@ public class ClaimBehavior
 		else
 		{
 			claimComponent.sendMessage(message.toString(), receiver);
-			log.info("sent " + message.toString());
+			log.info("sent ", message.toString());
 		}
 	}
 	
@@ -439,11 +443,11 @@ public class ClaimBehavior
 		if(!readValues(received.getFields(), toBind.getFields(), 0))
 		{ // the message does not match the pattern
 		
-			log.trace("message not matching pattern [" + content + "]");
+			log.trace("message not matching pattern []", content);
 			return false;
 		}
 		
-		log.trace("message received: [" + content + "]");
+		log.trace("message received: []", content);
 		// capture sender, if necessary
 		if(args.size() >= 2)
 			st.put((ClaimVariable) args.get(0), new ClaimValue(sender));
@@ -517,7 +521,7 @@ public class ClaimBehavior
 		if(myAgentGUI != null)
 			myAgentGUI.doOutput((String) outputComponent.getValue(), outV);
 		
-		log.trace("The output \"" + outputV + "\" was written on " + (String) outputComponent.getValue());
+		log.trace("The output [] was written on []", outputV, (String) outputComponent.getValue());
 		return true;
 	}
 	
@@ -586,7 +590,7 @@ public class ClaimBehavior
 			}
 		if(method == null)
 		{
-			log.error("function [" + functionName + "] not found in code attachments");
+			log.error("function [] not found in code attachments", functionName);
 			return false;
 		}
 		
@@ -594,7 +598,7 @@ public class ClaimBehavior
 		Vector<ClaimConstruct> arguments = new Vector<ClaimConstruct>(flattenConstructs(args, 0,
 				KeepVariables.KEEP_NONE));
 		
-		log.trace("invoking code attachment function [" + functionName + "] with arguments: " + arguments);
+		log.trace("invoking code attachment function [] with arguments: []", functionName, arguments);
 		try
 		{
 			returnValue = ((Boolean) method.invoke(null, arguments)).booleanValue();
@@ -602,7 +606,7 @@ public class ClaimBehavior
 			
 		} catch(Exception e)
 		{
-			log.error("function [" + functionName + "] invocation failed: " + e);
+			log.error("function [] invocation failed: ", functionName, e);
 			e.printStackTrace(); // FIXME: put this into the log
 		}
 		
@@ -1047,7 +1051,7 @@ public class ClaimBehavior
 					args.add(new ClaimValue(new Boolean(false)));
 				break;
 			default:
-				log.error("illegal construct type [" + constructType + "] inside construct");
+				log.error("illegal construct type [] inside construct", constructType);
 				break;
 			}
 		}

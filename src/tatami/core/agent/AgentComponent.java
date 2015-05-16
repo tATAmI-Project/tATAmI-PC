@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
+import net.xqhs.util.logging.DumbLogger;
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
@@ -603,13 +604,7 @@ public abstract class AgentComponent implements Serializable
 		if(eventHandlers.containsKey(event))
 		{
 			oldHandler = eventHandlers.get(event);
-			try
-			{
-				getAgentLog().warn("Handler for event [] overwritten with []; was []", event, handler, oldHandler);
-			} catch(NullPointerException e)
-			{
-				// no log, it's ok.
-			}
+			getAgentLog().warn("Handler for event [] overwritten with []; was []", event, handler, oldHandler);
 		}
 		eventHandlers.put(event, handler);
 		return oldHandler;
@@ -628,7 +623,8 @@ public abstract class AgentComponent implements Serializable
 	}
 	
 	/**
-	 * @return the log of the agent, or <code>null</code> if one is not present or cannot be obtained.
+	 * @return the log of the agent, or an instance of {@link DumbLogger}, if one is not present or cannot be obtained.
+	 *         <code>null</code> should never be returned.
 	 */
 	protected Logger getAgentLog()
 	{
@@ -637,7 +633,7 @@ public abstract class AgentComponent implements Serializable
 			return ((VisualizableComponent) getAgentComponent(AgentComponentName.VISUALIZABLE_COMPONENT)).getLog();
 		} catch(NullPointerException e)
 		{
-			return null;
+			return DumbLogger.get();
 		}
 	}
 	

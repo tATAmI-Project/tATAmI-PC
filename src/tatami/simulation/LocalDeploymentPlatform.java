@@ -38,7 +38,7 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 		{
 			return getAgentAddress(agentName, null);
 		}
-
+		
 		@Override
 		public boolean sendMessage(String target, String source, String content)
 		{
@@ -60,13 +60,7 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 			super.atAgentStart(event);
 			if(!(getPlatformLink() instanceof LocalDeploymentPlatform))
 				throw new IllegalStateException("Platform Link is not of expected type");
-			try
-			{
-				getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING, "Registered with platform.");
-			} catch(NullPointerException e)
-			{
-				// nothing
-			}
+			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING, "Registered with platform.");
 			((LocalDeploymentPlatform) getPlatformLink()).registry.put(getAgentName(), this);
 		}
 	}

@@ -174,6 +174,8 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 			case AGENT_MESSAGE:
 				registerMessageReceiver(this, Vocabulary.CLAIM.toString());
 				break;
+			default:
+				getAgentLog().error("behavior activation type [] cannot be handled.", b.getActivationType());
 			}
 			
 			// TODO input-activated behaviors
