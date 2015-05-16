@@ -24,7 +24,6 @@ import javax.swing.JButton;
 import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.pc.agent.visualization.PCDefaultAgentGui;
 
-
 @SuppressWarnings("javadoc")
 public class ChatAgentGui extends PCDefaultAgentGui
 {
@@ -67,15 +66,18 @@ public class ChatAgentGui extends PCDefaultAgentGui
 				if(inputListener != null)
 				{
 					Vector<Object> args = new Vector<Object>(1);
-					args.add(((TextField)components.get(ChatComponents.CHATTEXT.toString())).getText());
+					args.add(((TextField) components.get(ChatComponents.CHATTEXT.toString())).getText());
 					inputListener.receiveInput(ChatComponents.MESSAGEINPUT.toString().toLowerCase(), args);
-					((TextField)components.get(ChatComponents.CHATTEXT.toString())).setText("");
+					((TextField) components.get(ChatComponents.CHATTEXT.toString())).setText("");
 				}
 				else
-					System.out.println("nobody to receive the input");
+					System.out.println("nobody to receive the input from [" + ChatComponents.MESSAGEINPUT.toString()
+							+ "]..");
 				// FIXME else, a log should pick up an error
 			}
 		});
+		components.put(ChatComponents.SEND.toString(), sendButton);
+		components.put(ChatComponents.MESSAGEINPUT.toString(), sendButton);
 		window.add(sendButton, c);
 		components.put(DefaultComponent.AGENT_NAME.toString(), sendButton);
 	}
@@ -84,7 +86,7 @@ public class ChatAgentGui extends PCDefaultAgentGui
 	public void connectInput(String componentName, InputListener listener)
 	{
 		System.out.println("connecting input [" + componentName + "]..");
-		if(componentName.equals(ChatComponents.MESSAGEINPUT.toString().toLowerCase()))
+		if(componentName.equals(ChatComponents.MESSAGEINPUT.toString()))
 		{
 			inputListener = listener;
 			System.out.println("...done");
@@ -97,7 +99,7 @@ public class ChatAgentGui extends PCDefaultAgentGui
 	public void doOutput(String componentName, Vector<Object> arguments)
 	{
 		if(componentName.compareToIgnoreCase(ChatComponents.CHATLOG.toString()) == 0)
-			super.doOutput(ChatComponents.CHATLOG.toString(), arguments);	// FIXME: artificial
+			super.doOutput(ChatComponents.CHATLOG.toString(), arguments); // FIXME: artificial
 		else
 			super.doOutput(componentName, arguments);
 	}

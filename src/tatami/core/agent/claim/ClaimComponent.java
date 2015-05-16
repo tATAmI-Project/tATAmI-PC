@@ -28,7 +28,6 @@ import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.sclaim.constructs.basic.ClaimAgentDefinition;
 import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
-import tatami.sclaim.constructs.basic.ClaimBehaviorType;
 import tatami.sclaim.constructs.basic.ClaimValue;
 import tatami.sclaim.constructs.basic.ClaimVariable;
 
@@ -174,11 +173,15 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 			case AGENT_MESSAGE:
 				registerMessageReceiver(this, Vocabulary.CLAIM.toString());
 				break;
+			case GUI_INPUT:
+				registerHandler(AgentEventType.GUI_INPUT, this);
+				break;
+			case SIMULATION_START:
+				// nothing to do
+				break;
 			default:
 				getAgentLog().error("behavior activation type [] cannot be handled.", b.getActivationType());
 			}
-			
-			// TODO input-activated behaviors
 			
 			// TODO
 			// if(cbd.getBehaviorType().equals(ClaimBehaviorType.REACTIVE))

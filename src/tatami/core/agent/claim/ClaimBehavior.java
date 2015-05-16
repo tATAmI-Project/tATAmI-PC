@@ -252,8 +252,7 @@ public class ClaimBehavior
 		case READK:
 			return handleKnowledgeManagement(function.getFunctionType(), args);
 		case INPUT:
-			handleInput(args);
-			return true;
+			return handleInput(args);
 		case OUTPUT:
 			handleOutput(args);
 			return true;
@@ -478,6 +477,7 @@ public class ClaimBehavior
 				: (ClaimValue) a0).toString();
 		
 		if(activationEvent.getType() == AgentEventType.GUI_INPUT)
+			// FIXME this will make all inputs in the behavior active
 			// input is active
 			if(activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME).equals(
 					inputComponent))
@@ -492,10 +492,11 @@ public class ClaimBehavior
 		
 		Vector<ClaimConstruct> sourceArgs = objects2values(receivedInput);
 		Vector<ClaimConstruct> destinationArgs = new Vector<ClaimConstruct>(args);
-		destinationArgs.remove(0);
+		destinationArgs.remove(0); // this is the name of the component
+		destinationArgs.remove(0); // this is the extraneous element that should be removed FIXME
 		
-		// FIXME: find a way to fix input construct not to need the ignored argument
-		return readValues(sourceArgs, destinationArgs, 1);
+		log.trace("reading input from [] to []", sourceArgs, destinationArgs);
+		return readValues(sourceArgs, destinationArgs);
 	}
 	
 	protected boolean handleOutput(Vector<ClaimConstruct> args)

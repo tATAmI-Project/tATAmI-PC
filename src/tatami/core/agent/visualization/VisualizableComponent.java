@@ -446,7 +446,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		} catch(ConfigLockedException e)
 		{
 			// can't get here
-			throw new IllegalStateException("should ot be here");
+			throw new IllegalStateException("should not be here");
 		}
 		postAgentEvent(event);
 	}
