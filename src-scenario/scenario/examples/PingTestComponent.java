@@ -11,7 +11,6 @@ import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.CompositeAgent;
-import tatami.core.agent.messaging.MessagingComponent;
 
 /**
  * An {@link AgentComponent} implementation that sends messages to other agents.
@@ -39,7 +38,7 @@ public class PingTestComponent extends AgentComponent
 		{
 			tick++;
 			
-			messenger.sendMessage(otherAgent, thisAgent, "ping no " + tick);
+			sendMessage("ping no " + tick, thisAgent, otherAgent);
 		}
 		
 	}
@@ -65,10 +64,6 @@ public class PingTestComponent extends AgentComponent
 	 * Timer for pinging.
 	 */
 	Timer							pingTimer					= null;
-	/**
-	 * Reference to the messenger component.
-	 */
-	MessagingComponent				messenger					= null;
 	/**
 	 * Cache for the name of this agent.
 	 */
@@ -148,8 +143,17 @@ public class PingTestComponent extends AgentComponent
 		
 		if(getParent() != null)
 		{
-			messenger = (MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT);
 			thisAgent = getAgentName();
 		}
+	}
+	
+	/**
+	 * Relay.
+	 */
+	@Override
+	protected boolean sendMessage(String content, String sourceEndpoint, String targetAgent,
+			String... targetPathElements)
+	{
+		return super.sendMessage(content, sourceEndpoint, targetAgent, targetPathElements);
 	}
 }
