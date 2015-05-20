@@ -19,7 +19,7 @@ import tatami.core.agent.webServices.WebserviceComponent;
 import tatami.core.util.ParameterSet;
 
 /**
- * This class serves as base for agent component. A component is characterized by its functionality, denominated by
+ * This class serves as base for agent components. A component is characterized by its functionality, denominated by
  * means of its name -- an instance of {@link AgentComponentName}.
  * <p>
  * A component can belong to at most one {@link CompositeAgent}, which is its parent. When created, the component has no
@@ -27,15 +27,42 @@ import tatami.core.util.ParameterSet;
  * <p>
  * In the lifecycle of a component, it will be constructed and pre-loaded, before receiving an AGENT_START event.
  * <p>
- * The class contains methods that should be overridden by extending classes in order to intercept initialization and
- * parent change.
- * <p>
- * The class also contains methods that, <i>by default</i>, are registered as event handlers for agent events. Other
- * handlers may be registered so these methods (<code>at*</code>) are not guaranteed to be called when the event occurs.
- * It is the choice of the developer of the extending class if events are to be handled by overriding these methods or
- * by registering new handlers. There are events for which default handlers are not registered (e.g. AGENT_MESSAGE).
- * <p>
- * The class also serves as a relay to access some package-accessible functionality from {@link CompositeAgent}.
+ * The class {@link AgentComponent} itself contains various methods that may be of use for any specific component. These
+ * methods are <code>protected</code>, as they should be accessible only from the inside of the component, not from the
+ * outside. These methods are enumerated below:
+ * <ul>
+ * <li>Methods that are called when events happen. These methods should be overridden by extending classes in order to
+ * intercept initialization (constructor, <code>componentInitializer()</code>, <code>preload()</code>), parent change (
+ * <code>parentChangeNotifier()</code>), and other events. The class contains methods that, <i>by default</i>, are
+ * registered as event handlers for some agent events (agent start/stop, simulation start/pause, before/after move).
+ * Other handlers may be registered instead by the implementation, so these methods ( <code>at*()</code>) are not
+ * guaranteed to be called when the event occurs. It is the choice of the developer of the extending class if events are
+ * to be handled by overriding these methods or by registering new handlers. There are events for which default handlers
+ * are not registered (e.g. AGENT_MESSAGE).
+ * 
+ * <li>Methods to access component creation data: <code>getComponentName()</code> and <code>getComponentData()</code>.
+ * 
+ * <li>Methods that relay to access some package-accessible functionality from {@link CompositeAgent}:
+ * <code>getAgentName()</code>, <code>getParent()</code>, <code>getPlatformLink()</code> -- retrieves an {@link Object}
+ * that can be casted to the specific implementation of what the platform offers in order to access platform-specific
+ * functionality; <code>getAgentComponent()</code> -- retrieve an agent component by name.
+ * 
+ * <li>Methods for event handling: <code>postAgentEvent()</code> to post a new agent event to the agent's event queue;
+ * and <code>registerHandler()</code> to register handlers for agent events. These handlers are the handlers associated
+ * to <i>this</i> component.
+ * 
+ * <li>Functionality specific to other commonly-used components:
+ * <ul>
+ * 
+ * <li>visualization: the method <code>getAgentLog()</code> retrieves the {@link Logger} implementation used by the
+ * agent, relying the call to the {@link VisualizableComponent} of the agent (if any).
+ * 
+ * <li>messaging: the methods <code>registerMessageReceiver</code>, <code>sendMessage</code> and
+ * <code>getComponentEndpoint</code> call methods in the {@link MessagingComponent} of the agent (if any) to register a
+ * handler for messages sent to a particular internal endpoint; to send a message; or to compute the endpoint of
+ * <i>this</i> component.
+ * </ul>
+ * </ul>
  * <p>
  * TODO: implement mechanisms to enable caching of component references, invalidating the cache only at specific agent
  * events; add the event COMPONENT_CHANGE.
@@ -576,7 +603,7 @@ public abstract class AgentComponent implements Serializable
 	 * when the specified {@link AgentEventType} appears.
 	 * <p>
 	 * Important note: The registered handler is the handler specific to <b>this</b> component (therefore it is
-	 * sufficient to have only one). All components of the agent may contain (at most) a handler for the same event.
+	 * sufficient to have only one). Each component of the agent may contain (at most) a handler for the same event.
 	 * <p>
 	 * Should a handler for the same event already exist, the old handler will be discarded. A reference to it will be
 	 * returned.
@@ -633,7 +660,7 @@ public abstract class AgentComponent implements Serializable
 	
 	/**
 	 * Handles the registration of an event handler for messages to a target (inside the agent) with the specified
-	 * prefix.
+	 * prefix (elements of the internal path of the endpoint).
 	 * <p>
 	 * If the component has a parent and a {@link MessagingComponent} exists, the handler will be registered with the
 	 * messaging component. Otherwise, the handler be registered to receive any messages, regardless of prefix. In the
@@ -642,7 +669,7 @@ public abstract class AgentComponent implements Serializable
 	 * @param receiver
 	 *            - the receiving {@link AgentEventHandler} instance.
 	 * @param prefixElements
-	 *            - the target prefix, as separate elements of the path.
+	 *            - the target prefix, as separate elements of the internal path.
 	 * @return <code>true</code> if the registration was successful; <code>false</code> if the handler was registered as
 	 *         a general message handler.
 	 */

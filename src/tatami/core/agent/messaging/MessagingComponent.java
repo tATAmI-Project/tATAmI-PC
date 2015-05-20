@@ -19,16 +19,11 @@ import tatami.core.util.platformUtils.PlatformUtils;
  * of such a component in the {@link CompositeAgent} modifies its behavior: without any messaging component, received
  * messages are notified as agent events to all components of the agent; with it, messages are passed to the messaging
  * component, which then should route them to the appropriate receivers. // TODO: mention this in CompositeAgent.
- * <p>
- * The class should be extended by any component that offers to the agent services of communication with other agents.
- * Extending classes should override the <code>parentChangeNotifier</code> method to register an event handler for
- * {@link AgentEventType#AGENT_MESSAGE}.
  * 
- * <h2>Endpoints</h2>
- * The communication is abstracted internally to the agent as exchanging messages between endpoints, where each endpoint
- * is identified by a {@link String} address composed of multiple elements separated by slashes (by default
- * {@link #ADDRESS_SEPARATOR}={@value #ADDRESS_SEPARATOR}). This means that an endpoint may be identified by an URI (if
- * the {@link MessagingComponent} implementation supports it), or, for instance, by an address of the type
+ * <h2>Endpoints</h2> The communication is abstracted internally to the agent as exchanging messages between endpoints,
+ * where each endpoint is identified by a {@link String} address composed of multiple elements separated by slashes (by
+ * default {@link #ADDRESS_SEPARATOR}={@value #ADDRESS_SEPARATOR}). This means that an endpoint may be identified by an
+ * URI (if the {@link MessagingComponent} implementation supports it), or, for instance, by an address of the type
  * "Agent1/Visualization" (this will work with Jade, where agents are addressable by name).
  * <p>
  * Messages are sent from one endpoint to another, and contain a {@link String}. Specific implementations may parse the
@@ -39,6 +34,12 @@ import tatami.core.util.platformUtils.PlatformUtils;
  * <b>IMPORTANT NOTE:</b> An agent address (returned by {@link #getAgentAddress}) concatenated with an internal path
  * should result in a complete path. Internal paths should begin with a slash. Otherwise, the predefined methods for
  * parsing and assembling endpoint paths may not work correctly.
+ * 
+ * <h2>Using messaging features</h2>
+ * In principle, other components should not need to call the [implementation of the] MessagingComponent explicitly.
+ * Functionality of the messaging component should be used by means of the protected methods in {@link AgentComponent},
+ * such as <code>registerMessageReceiver</code>, <code>sendMessage</code> and <code>getComponentEndpoint</code>.
+ * Messages will be signaled, as they are processed from the agent's event queue, by means of the specified receivers.
  * 
  * <h2>Extending this class</h2>
  * The abstract class implements some basic methods for working with slash-delimited addresses, and offers the method
@@ -53,7 +54,9 @@ import tatami.core.util.platformUtils.PlatformUtils;
  * <li>it should implement the {@link #sendMessage(String, String, String)} method that sends a message to another
  * agent.
  * <li>when a message is received, the implementation should call the {@link #receiveMessage} of the parent, that will
- * pack the information into an {@link AgentEvent} instance and post it in the event queue.
+ * pack the information into an {@link AgentEvent} instance and post it in the event queue. After the event is picked
+ * from the event queue, {@link MessagingComponent} will use the <code>handleMessage()</code> method to distribute the
+ * message to receiving components.
  * </ul>
  * 
  * 
@@ -203,6 +206,11 @@ public abstract class MessagingComponent extends AgentComponent
 	
 	/**
 	 * Handles a message received by the agent. This method should be overridden for specific implementations.
+	 * <p>
+	 * The method dispatches the message to handlers that have registered for the target endpoint (or for endpoints
+	 * including (are prefixes of) the target endpoint), by means of
+	 * {@link #registerMessageReceiver(AgentEventHandler, String...)} or <code>registerMessageReceiver()</code> in
+	 * {@link AgentComponent}.
 	 * 
 	 * @param event
 	 *            - the event corresponding to the message.
