@@ -8,12 +8,8 @@ import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
-<<<<<<< HEAD
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.CompositeAgent;
-=======
-import tatami.core.agent.messaging.MessagingComponent;
->>>>>>> refs/heads/tATAmI-2/cosmin
 
 /**
  * An {@link AgentComponent} implementation that sends messages to other agents.
@@ -41,11 +37,7 @@ public class PingTestComponent extends AgentComponent
 		{
 			tick++;
 			
-<<<<<<< HEAD
 			sendMessage("ping no " + tick, thisAgent, otherAgent);
-=======
-			doSend(tick);
->>>>>>> refs/heads/tATAmI-2/cosmin
 		}
 		
 	}
@@ -107,15 +99,28 @@ public class PingTestComponent extends AgentComponent
 	}
 	
 	@Override
+	protected void componentInitializer()
+	{
+		super.componentInitializer();
+		
+		AgentEventHandler allEventHandler = new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				getAgentLog().li("agent [] event: []", thisAgent, event.getType());
+				
+				if(event.getType() == AgentEventType.AGENT_START)
+					atAgentStart(event);
+			}
+		};
+		for(AgentEventType eventType : AgentEventType.values())
+			registerHandler(eventType, allEventHandler);
+	}
+	
+	@Override
 	protected void atAgentStart(AgentEvent event)
 	{
 		super.atAgentStart(event);
-		
-		if(getParent() != null)
-		{
-			messenger = (MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT);
-			thisAgent = getAgentName();
-		}
 		
 		registerMessageReceiver(new AgentEventHandler() {
 			@Override
@@ -126,34 +131,21 @@ public class PingTestComponent extends AgentComponent
 		}, "");
 		
 		pingTimer = new Timer();
-	}
-	
-	@Override
-	protected void atSimulationStart(AgentEvent event)
-	{
-		super.atSimulationStart(event);
-		System.out.println("here");
 		pingTimer.schedule(new Pinger(), PING_INITIAL_DELAY, PING_PERIOD);
 	}
 	
 	@Override
-	protected void atAgentStop(AgentEvent event)
+	protected void parentChangeNotifier(CompositeAgent oldParent)
 	{
-<<<<<<< HEAD
 		super.parentChangeNotifier(oldParent);
 		
 		if(getParent() != null)
 		{
 			thisAgent = getAgentName();
 		}
-=======
-		super.atAgentStop(event);
-		pingTimer.cancel();
->>>>>>> refs/heads/tATAmI-2/cosmin
 	}
 	
 	/**
-<<<<<<< HEAD
 	 * Relay.
 	 */
 	@Override
@@ -162,16 +154,4 @@ public class PingTestComponent extends AgentComponent
 	{
 		return super.sendMessage(content, sourceEndpoint, targetAgent, targetPathElements);
 	}
-=======
-	 * Send the ping.
-	 * 
-	 * @param tick - tick no.
-	 */
-	protected void doSend(int tick)
-	{
-		getAgentLog().trace("Sending ping");
-		sendMessage("ping no " + tick, thisAgent, otherAgent);
-	}
-	
->>>>>>> refs/heads/tATAmI-2/cosmin
 }
