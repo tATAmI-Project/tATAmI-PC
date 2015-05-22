@@ -214,6 +214,7 @@ public class Boot
 		if(platforms.isEmpty())
 		{
 			// load default platform
+			//StandardPlatformType platform = StandardPlatformType.DEFAULT;
 			StandardPlatformType platform = StandardPlatformType.DEFAULT;
 			try
 			{

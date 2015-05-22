@@ -10,6 +10,10 @@
  You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
 ------------------------------------------------------------------------------- -->
 
+'''towards Agent Technologies for Ambient Intelligence'''
+
+* The goal of the project is to be a flexible platform for the development, deployment, simulation, visualization and control of multi-agent systems, especially with a focus on AmI applications.
+
 '''[https://github.com/tATAmI-Project/tATAmI-PC/wiki Project Wiki]'''
 
 '''[http://tatami-project.github.com/tATAmI-PC Project site, with javadoc]''' 
