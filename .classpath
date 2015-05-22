@@ -27,6 +27,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="libs/Gel.jar"/>
 	<classpathentry kind="lib" path="libs/net.xqhs.WindowLayout.jar"/>
+	<classpathentry kind="lib" path="libs/java_websocket.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="libs/Logging.jar" sourcepath="libs/Logging.jar">
 		<attributes>
