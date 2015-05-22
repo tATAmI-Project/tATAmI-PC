@@ -9,6 +9,10 @@ import main.java.org.java_websocket.WebSocketImpl;
 import main.java.org.java_websocket.drafts.Draft;
 import main.java.org.java_websocket.drafts.Draft_17;
 import net.xqhs.util.XML.XMLTree.XMLNode;
+import net.xqhs.util.logging.Logger;
+import net.xqhs.util.logging.LoggerSimple.Level;
+import net.xqhs.util.logging.Unit;
+import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.simulation.AgentManager;
 import tatami.simulation.BootSettingsManager;
@@ -78,6 +82,15 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	 */
 	HashMap<String, WebSocketMessagingComponent> mAgents;
 	
+	
+	/** the logger */
+	Logger log;
+	
+	/**
+	 * Name of the unit for logging purposes
+	 */
+	String COMMUNICATION_UNIT="Communication Platform";
+	
 
 	/**
 	 * 
@@ -102,6 +115,8 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	@Override
 	public WebSocketMessagingPlatform setConfig(XMLNode configuration,
 			BootSettingsManager settings) {
+		
+		log = (UnitComponentExt) new UnitComponentExt().setUnitName(COMMUNICATION_UNIT).setLogLevel(Level.ALL);
 
 		mAgents = new HashMap<String, WebSocketMessagingComponent>();
 
@@ -136,8 +151,11 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 				mServer.start();
 				
 			} catch (UnknownHostException e) {
+				log.error("Communication server could not be started");
 				e.printStackTrace();
 			}
+			
+			log.info("Communication server started");
 		}
 		// FIXME
 		try
@@ -147,6 +165,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 		{
 			e.printStackTrace();
 		}
+		
 
 		if ((componentType & CLIENT) == CLIENT) {
 			
@@ -162,6 +181,8 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 			mClient = new AutobahnClient( d, uri );
 			mClientThread = new Thread( mClient );
 			mClientThread.start();
+			
+			log.info("Communication client started");
 		}
 		return true;
 	}
@@ -177,6 +198,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 			mClientThread.join();
 			return true;
 		} catch ( InterruptedException e ) {
+			log.error("Communication client could not be stopped");
 			e.printStackTrace();
 			return false;
 		}
