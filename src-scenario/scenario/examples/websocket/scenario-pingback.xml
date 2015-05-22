@@ -18,7 +18,7 @@
 		localHost="127.0.0.1" localPort="9002" />
 
 	<scen:platform>
-		<scen:parameter name="name" value="general" />
+		<scen:parameter name="name" value="websocket" />
 	</scen:platform>
 
 	<scen:initial>
@@ -27,9 +27,10 @@
 				<scen:component name="parametric" />
 				<scen:component name="visualizable" />
 				<scen:component name="messaging" />
-				<scen:component name="testing"
-					classpath="scenario.examples.PingTestComponent">
+								<scen:component name="testing"
+					classpath="scenario.examples.PingBackTestComponent">
 					<scen:parameter name="other agent" value="AgentB" />
+					<scen:parameter name="initiator" value="true" />
 				</scen:component>
 				<scen:parameter name="loader" value="composite" />
 				<scen:parameter name="name" value="AgentA" />
@@ -39,7 +40,7 @@
 				<scen:component name="visualizable" />
 				<scen:component name="messaging" />
 				<scen:component name="testing"
-					classpath="scenario.examples.PingTestComponent">
+					classpath="scenario.examples.PingBackTestComponent">
 					<scen:parameter name="other agent" value="AgentA" />
 				</scen:component>
 				<scen:parameter name="loader" value="composite" />

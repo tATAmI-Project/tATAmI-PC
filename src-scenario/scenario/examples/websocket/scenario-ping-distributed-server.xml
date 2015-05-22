@@ -15,7 +15,7 @@
 	xsi:schemaLocation="http://www.example.org/scenarioSchema3 ../../../../../src-schema/scenarioSchema3.xsd ">
 
 	<scen:platform>
-		<scen:parameter name="name" value="general" />
+		<scen:parameter name="name" value="websocket" />
 	</scen:platform>
 
 	<scen:initial>

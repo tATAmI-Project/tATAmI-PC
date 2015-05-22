@@ -1,7 +1,6 @@
-package tatami.communication;
+package tatami.websocket;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import main.java.org.java_websocket.client.WebSocketClient;
@@ -38,6 +37,7 @@ public class AutobahnClient extends WebSocketClient {
 	 */
 	@Override
 	public void onOpen(ServerHandshake handshakedata) {
+		// nothing to do
 	}
 	
 	/**
@@ -75,6 +75,7 @@ public class AutobahnClient extends WebSocketClient {
 	 */
 	@Override
 	public void onClose(int code, String reason, boolean remote) {
+		// nothing to do
 	}
 
 	@Override

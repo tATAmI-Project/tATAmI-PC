@@ -1,4 +1,4 @@
-package tatami.communication;
+package tatami.websocket;
 
 
 import java.net.URI;
@@ -9,9 +9,7 @@ import main.java.org.java_websocket.WebSocketImpl;
 import main.java.org.java_websocket.drafts.Draft;
 import main.java.org.java_websocket.drafts.Draft_17;
 import net.xqhs.util.XML.XMLTree.XMLNode;
-import net.xqhs.util.logging.Logger;
 import net.xqhs.util.logging.LoggerSimple.Level;
-import net.xqhs.util.logging.Unit;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.simulation.AgentManager;
@@ -84,12 +82,12 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	
 	
 	/** the logger */
-	Logger log;
+	UnitComponentExt log;
 	
 	/**
 	 * Name of the unit for logging purposes
 	 */
-	String COMMUNICATION_UNIT="Communication Platform";
+	protected final static String COMMUNICATION_UNIT="websock";
 	
 
 	/**
@@ -104,12 +102,12 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	 */
 	@Override
 	public String getName() {
-		return StandardPlatformType.GENERAL.toString();
+		return StandardPlatformType.WEBSOCKET.toString();
 	}
 
 	/**
-	 * Configure the cuurent platform
-	 * @param configuration 
+	 * Configure the current platform
+	 * @param configuration The configuration node in the scenario file.
 	 * @param settings The settings provided by the boot component
 	 */
 	@Override
@@ -196,10 +194,11 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 		try {
 			mClient.close();
 			mClientThread.join();
+			log.doExit();
 			return true;
 		} catch ( InterruptedException e ) {
-			log.error("Communication client could not be stopped");
-			e.printStackTrace();
+			log.error("Communication client could not be stopped: ", e);
+			log.doExit();
 			return false;
 		}
 	}
@@ -221,18 +220,20 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink 
 	}
 	
 	/**
+	 * Method called from inside the agents, when agents are loaded on the platform.
 	 * 
-	 * @param agentName
-	 * @param messagingComponent
+	 * @param agentName The name of the agent
+	 * @param messagingComponent The component to call when messages are received.
 	 */
 	public void register(String agentName, WebSocketMessagingComponent messagingComponent){
 		mAgents.put(agentName, messagingComponent);
 	}
 
 	/**
-	 * Method called when an agent is loaded
-	 * @param containerName 
-	 * @param agentManager
+	 * Method called to load an agent.
+	 * 
+	 * @param containerName The name of the container in which to load the agent. 
+	 * @param agentManager The agent, represented by means of the {@link AgentManager} interface.
 	 */
 	@Override
 	public boolean loadAgent(String containerName, AgentManager agentManager) {

@@ -1,4 +1,4 @@
-package tatami.communication;
+package tatami.websocket;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -15,6 +15,9 @@ import main.java.org.java_websocket.server.WebSocketServer;
  */
 public class AutobahnServer extends WebSocketServer {
 	
+	/**
+	 * Number of connected clients.
+	 */
 	int mCounter = 0;
 	
 	/**
@@ -64,6 +67,7 @@ public class AutobahnServer extends WebSocketServer {
 	 */
 	@Override
 	public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+		// nothing to do
 	}
 
 	/**

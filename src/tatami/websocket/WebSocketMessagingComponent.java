@@ -1,4 +1,4 @@
-package tatami.communication;
+package tatami.websocket;
 
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.messaging.MessagingComponent;

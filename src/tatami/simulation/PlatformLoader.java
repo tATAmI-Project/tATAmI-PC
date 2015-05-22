@@ -41,7 +41,7 @@ public interface PlatformLoader
 		/**
 		 * 
 		 */
-		GENERAL("tatami.communication.WebSocketMessagingPlatform"),
+		WEBSOCKET("tatami.websocket.WebSocketMessagingPlatform"),
 		
 		;
 		
