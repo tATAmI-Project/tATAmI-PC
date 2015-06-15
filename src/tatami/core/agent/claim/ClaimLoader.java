@@ -39,7 +39,7 @@ public class ClaimLoader
 	/**
 	 * Specifies if chaching should be enabled (see {@link ClaimLoader}).
 	 */
-	protected static boolean							cachingEnabled		= false;
+	protected static boolean							cachingEnabled		= true;
 	/**
 	 * The source folder for scenario files. FIXME this should be specified elsewhere?
 	 */
