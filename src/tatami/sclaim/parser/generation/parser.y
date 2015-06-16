@@ -9,10 +9,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
 
-import tatami.core.interfaces.Logger;
-import tatami.core.util.logging.Log;
-import sclaim.constructs.basic.*;
-import sclaim.constructs.goal_driven.simons_and_garella.*;
+import net.xqhs.util.logging.Logger;
+import net.xqhs.util.logging.UnitComponentExt;
+import net.xqhs.util.logging.logging.Logging;
+import tatami.core.util.platformUtils.PlatformUtils;
+import tatami.sclaim.constructs.basic.*;
 %}
 
 %token VARIABLE AFFECTABLE_VARIABLE CONSTANT STRING_LITERAL THIS PARENT
@@ -22,7 +23,7 @@ import sclaim.constructs.goal_driven.simons_and_garella.*;
 %token CONDITION FORALLK WHILE
 %token ADDK READK REMOVEK
 %token IF THEN ELSE
-%token INPUT OUTPUT
+%token INPUT OUTPUT PRINT
 %token IN OUT OPEN ACID NEW
 %token WAIT
 %token AGOAL MGOAL PGOAL
@@ -321,13 +322,23 @@ input_function
 			//log.info("in_function -> '(' INPUT argument_list ')'");
 			$$ = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.INPUT ,new String("input"),$3.claimConstructVector));
 		}
+	;
 
 output_function
 	: '(' OUTPUT argument_list ')'
 		{
-			//log.info("in_function -> '(' OUTPUT argument_list ')'");
+			//log.info("output_function -> '(' OUTPUT argument_list ')'");
 			$$ = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.OUTPUT ,new String("output"),$3.claimConstructVector));
 		}
+	;
+
+print_function
+	: '(' PRINT argument_list ')'
+		{
+			//log.info("print_function -> '(' PRINT argument_list ')'");
+			$$ = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.PRINT ,new String("print"),$3.claimConstructVector));
+		}
+	;
 
 in_function
 	: '(' IN argument_list ')'
@@ -417,6 +428,11 @@ language_function //that can appear anywhere inside the behavior
 			//log.info("language_function -> output_function");
 			$$ = $1;
 		}
+	| print_function
+		{
+			//log.info("language_function -> print_function");
+			$$ = $1;
+		}
 	| in_function
 		{
 			//log.info("language_function -> in_function");
@@ -481,19 +497,19 @@ goal
 	: '(' AGOAL name argument ACHIEVE proposition_list ')'
 		{
 			//log.info("goal -> '(' AGOAL name proposition_list ')'");
-			$$ = new ParserSClaimVal(new ClaimaGoal(ClaimConstructType.AGOAL, $3.sval, $6.claimConstructVector, $4.ival));
+			//$$ = new ParserSClaimVal(new ClaimaGoal(ClaimConstructType.AGOAL, $3.sval, $6.claimConstructVector, $4.ival));
 		}
 	| '(' MGOAL name priority MAINTAIN proposition_list TARGET proposition_list ')'
 		{
-			$$ = new ParserSClaimVal(new ClaimmGoal(ClaimConstructType.MGOAL, $3.sval, $6.claimConstructVector, $8.claimConstructVector, Integer.parseInt(((ClaimValue) $4.obj).toString())));	
+			//$$ = new ParserSClaimVal(new ClaimmGoal(ClaimConstructType.MGOAL, $3.sval, $6.claimConstructVector, $8.claimConstructVector, Integer.parseInt(((ClaimValue) $4.obj).toString())));	
 		}
 	| '(' MGOAL name priority MAINTAIN proposition_list ')'
 		{
-			$$ = $$ = new ParserSClaimVal(new ClaimmGoal(ClaimConstructType.MGOAL, $3.sval, $6.claimConstructVector, null, Integer.parseInt(((ClaimValue) $4.obj).toString())));
+			//$$ = $$ = new ParserSClaimVal(new ClaimmGoal(ClaimConstructType.MGOAL, $3.sval, $6.claimConstructVector, null, Integer.parseInt(((ClaimValue) $4.obj).toString())));
 		}
 	| '(' PGOAL name priority ACTION proposition ')'
 		{
-			$$ = new ParserSClaimVal(new ClaimpGoal(ClaimConstructType.PGOAL, $3.sval, $6.claimConstruct, Integer.parseInt(((ClaimValue) $4.obj).toString())));
+			//$$ = new ParserSClaimVal(new ClaimpGoal(ClaimConstructType.PGOAL, $3.sval, $6.claimConstruct, Integer.parseInt(((ClaimValue) $4.obj).toString())));
 		}
 	;
 	
@@ -760,7 +776,8 @@ agent_specification
 private static String unitName = "parser";
 
 /** the logger */
-public Logger log = Log.getLogger(unitName);
+public Logger log = (UnitComponentExt) new UnitComponentExt().setUnitName(unitName).setLoggerType(
+						PlatformUtils.platformLogType());
 
 /** a reference to the agent structure returned by the parser */
 public ClaimAgentDefinition parsedAgent;
@@ -826,12 +843,12 @@ public ParserSClaim(String filePathAndName) {
 	lexer = new Yylex(new FileReader(filePathAndName), this);
   } catch (FileNotFoundException e) {
 	log.error("The file specified as argument could not be opened. Make sure that you have correctly written the name and the path!");
-	Log.exitLogger(unitName);
+	Logging.exitLogger(unitName);
   }
   catch (Exception e)
   {
 	log.error("The name of the file to be parsed was not specified.");
-    Log.exitLogger(unitName);
+    Logging.exitLogger(unitName);
   }
 }
 
@@ -858,11 +875,11 @@ public ClaimAgentDefinition parse() {
 
   if(parsingResult == 0) {
     log.info("Parsing successfully finished! The agent with the class \""+parsedAgent.getClassName()+"\" is ready to be run.");
-    Log.exitLogger(unitName);
+    Logging.exitLogger(unitName);
     return parsedAgent;
   }
   else {
-    Log.exitLogger(unitName);
+    Logging.exitLogger(unitName);
     return null;
   }
 }

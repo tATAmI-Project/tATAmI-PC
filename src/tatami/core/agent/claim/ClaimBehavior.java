@@ -256,6 +256,9 @@ public class ClaimBehavior
 		case OUTPUT:
 			handleOutput(args);
 			return true;
+		case PRINT:
+			handlePrint(args);
+			return true;
 		case WAIT:
 			handleWait(args);
 			return true;
@@ -523,6 +526,12 @@ public class ClaimBehavior
 			myAgentGUI.doOutput((String) outputComponent.getValue(), outV);
 		
 		log.trace("The output [] was written on []", outputV, (String) outputComponent.getValue());
+		return true;
+	}
+	
+	protected boolean handlePrint(Vector<ClaimConstruct> args)
+	{
+		//log.trace("The message [] was printed on []", ,);
 		return true;
 	}
 	
