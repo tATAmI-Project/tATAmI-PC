@@ -1,18 +1,19 @@
 package tatami.core.agent.kb;
 
 import net.xqhs.graphs.context.ContextPattern;
-import net.xqhs.graphs.graph.Edge;
-import net.xqhs.graphs.graph.Graph;
-import net.xqhs.graphs.representation.text.TextGraphRepresentation;
 import tatami.core.agent.AgentComponent;
-import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.kb.simple.SimpleKB;
-import tatami.core.agent.kb.simple.SimpleKnowledge;
-import tatami.core.agent.parametric.AgentParameterName;
-import tatami.core.agent.parametric.ParametricComponent;
 
+/** Class describing the cognitive component of an agent.
+ * @author Tudor
+ *
+ */
 public class CognitiveComponent extends AgentComponent // TODO implement to be used as ContextComponent parent
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	/**
 	 * The agent's knowledge base. It cannot be changed (i.e. create a different instance)
 	 * throughout the agent's lifecycle. It can only be accessed by this level of the agent, which
@@ -20,12 +21,16 @@ public class CognitiveComponent extends AgentComponent // TODO implement to be u
 	 */
 	private final KnowledgeBase	knowledgeBase	= new SimpleKB();
 	
+	/**
+	 * Constructor with no arguments.
+	 */
 	public CognitiveComponent()
 	{
 		super(AgentComponentName.COGNITIVE_COMPONENT);
 	}
 	
-	public void addPattern(ContextPattern pattern)
+	@SuppressWarnings("javadoc")
+	public void addPattern(@SuppressWarnings("unused") ContextPattern pattern)
 	{
 		// TODO
 	}

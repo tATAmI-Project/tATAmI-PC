@@ -47,6 +47,11 @@ public class SimpleKnowledge implements KnowledgeDescription, Serializable
 	{
 	}
 	
+	/**
+	 * CONSTRUCTOR
+	 * @param type - type
+	 * @param klFields - knowledge fields
+	 */
 	public SimpleKnowledge(String type, String... klFields)
 	{
 		knowledgeType = type;
@@ -54,18 +59,29 @@ public class SimpleKnowledge implements KnowledgeDescription, Serializable
 			knowledgeParts.add(field);
 	}
 	
+	/**
+	 * @param type - type
+	 * @param simpleKn - knowledge parts
+	 */
 	public SimpleKnowledge(String type, ArrayList<String> simpleKn)
 	{
 		knowledgeType = type;
 		knowledgeParts = simpleKn;
 	}
 	
+	/**
+	 * @param kl - initial knowledge
+	 */
 	public SimpleKnowledge(SimpleKnowledge kl)
 	{
 		this.knowledgeType = kl.knowledgeType;
 		this.knowledgeParts.addAll(kl.knowledgeParts);
 	}
 	
+	/** Verifies if another knowledge record matches this one
+	 * @param kl - simple knowledge record
+	 * @return - true if the knowledge records are equal, false otherwise
+	 */
 	public boolean equals(SimpleKnowledge kl)
 	{
 		if(kl.knowledgeType.equals(this.knowledgeType))
@@ -98,6 +114,7 @@ public class SimpleKnowledge implements KnowledgeDescription, Serializable
 	// GET & SET
 	/**
 	 * get knowledge type
+	 * @return String object describing the knowledge type
 	 */
 	public String getKnowledgeType()
 	{
@@ -106,22 +123,33 @@ public class SimpleKnowledge implements KnowledgeDescription, Serializable
 	
 	/**
 	 * get knowledge content
+	 * @return returns a List<String> containing the knowledge parts
 	 */
 	public List<String> getSimpleKnowledge()
 	{
 		return this.knowledgeParts;
 	}
 	
+	/** Sets the knowledge type of the simple knowledge record
+	 * @param _knowledgeType - String describing the knowledge type
+	 */
 	public void setKnowledgeType(String _knowledgeType)
 	{
 		this.knowledgeType = _knowledgeType;
 	}
 	
+	/** Sets the knowledge parts of the knowledge record
+	 * @param _simpleKnowledge - the values to be set
+	 */
 	public void setSimpleKnowledge(List<String> _simpleKnowledge)
 	{
 		this.knowledgeParts = _simpleKnowledge;
 	}
 	
+	/** Sets the knowledge fiels at position index with the value field
+	 * @param index - the position of the field to be set
+	 * @param field - the value to be set
+	 */
 	public void setSimpleKnowledgeAtField(int index, String field)
 	{
 		this.knowledgeParts.set(index, field);
