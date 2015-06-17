@@ -12,17 +12,23 @@
 package tatami.core.agent.claim;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Vector;
 
 import net.xqhs.util.logging.DumbLogger;
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventType;
+import tatami.core.agent.kb.CognitiveComponent;
+import tatami.core.agent.kb.KnowledgeBase;
+import tatami.core.agent.kb.KnowledgeBase.KnowledgeDescription;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.visualization.AgentGui;
@@ -625,111 +631,46 @@ public class ClaimBehavior
 	
 	protected boolean handleKnowledgeManagement(ClaimFunctionType construct, Vector<ClaimConstruct> args)
 	{
-		// KnowledgeBase kb = claimComponent.getKBase();
-		// CognitiveComponent cognitive = claimComponent.getCognitive();
-		// boolean isCognitive = (cognitive != null);
-		//
-		// String knowledge = constructs2OneStrings(((ClaimStructure) args.get(0)).getFields(), 1);
-		//
-		// switch(construct)
-		// {
-		// case ADDK:
-		// // function "add knowledge"
-		// {
-		// // after addK there's always knowledge (pattern condition will be after condition)
-		// // TODO emma move this to condition
-		// if(knowledge.substring(0, knowledge.indexOf(" ")).equals("pattern"))
-		// {
-		// knowledge = knowledge.substring(knowledge.indexOf(" ") + 1);
-		// ContextPattern CP = new ContextPattern();
-		// claimComponent.getCognitive().addPattern(
-		// (ContextPattern) new TextGraphRepresentation(CP).readRepresentation(new ContentHolder<String>(
-		// knowledge)));
-		// }
-		// else
-		// {
-		// // since it is not a pattern, it should not contain ?variables -> we should get their value from
-		// // symbolTable
-		// String[] elements = knowledge.split(" ");
-		// knowledge = "";
-		// for(String element : elements)
-		// {
-		// if(element.startsWith("?") && st.containsSymbol(new ClaimVariable(element.substring(1))))
-		// {
-		// knowledge += st.get(new ClaimVariable(element.substring(1))).getValue().toString() + " ";
-		// }
-		// else
-		// {
-		// knowledge += element + " ";
-		// }
-		// }
-		//
-		// kb.add(
-		// new TextGraphRepresentation(new SimpleGraph()).readRepresentation(new ContentHolder<String>(
-		// knowledge)));
-		// }
-		// log.info(" adds new knowledge " + knowledge + " in behavior " + this.cbd.getName());
-		// return true;
-		// }
-		//
-		// case READK:
-		// // function "check if agent already has the knowledge"
-		// // If yes : return true, also put the value of variable in knowledge pattern into the symbol table
-		// {
-		// // after readK there's always a pattern
-		// @SuppressWarnings("unused")
-		// ClaimStructure knowledgeStruct = (ClaimStructure) args.get(0); // struct knowledge <kl type> <kl fields>
-		//
-		// /* replace all ClaimVariables (represented as ?<name>) with an index if they are not already stored */
-		// HashMap<Integer, ClaimVariable> intToVariable = new HashMap<Integer, ClaimVariable>();
-		// knowledge = constructsAndMaps(knowledgeStruct.getFields(), intToVariable, 1);
-		//
-		// GraphPattern CP = new GraphPattern();
-		// TextGraphRepresentation repr = new TextGraphRepresentation(CP);
-		// repr.readRepresentation(new ContentHolder<String>(knowledge));
-		//
-		// Match m = kb.read(CP);
-		// if(m == null)
-		// return false;
-		//
-		// for(Node node : CP.getNodes())
-		// if(node instanceof NodeP)
-		// {
-		// Node rez = m.getMatchedGraphNode(node);
-		// if(!st.containsSymbol(intToVariable.get(((NodeP) node).genericIndex())))
-		// {
-		// st.put(intToVariable.get(((NodeP) node).genericIndex()), new ClaimValue(rez.getLabel()));
-		// }
-		// }
-		// return true;
-		// }
-		//
-		// case REMOVEK:
-		// // function "remove knowledge" TODO remove patterns
-		// {
-		// String[] elements = knowledge.split(" ");
-		// knowledge = "";
-		// for(String element : elements)
-		// {
-		// if(element.startsWith("?") && st.containsSymbol(new ClaimVariable(element.substring(1))))
-		// {
-		// knowledge += st.get(new ClaimVariable(element.substring(1))).getValue().toString() + " ";
-		// }
-		// else
-		// {
-		// knowledge += element + " ";
-		// }
-		// }
-		// claimComponent.getCognitive().remove(knowledge);
-		// return true;
-		// }
-		//
-		// default:
-		// // should not be here
-		// return true; // unreachable code
-		// }
-		
-		return true;
+		KnowledgeBase kb = claimComponent.getKBase();
+		switch(construct)
+		{
+		case ADDK:
+		// function "add knowledge"
+		{
+			// after addK there's always a structure of knowledge
+			SimpleKnowledge newKl = structure2Knowledge((ClaimStructure) args.get(0));
+			
+			// add knowledge to the knowledge base of agent
+			kb.add(newKl);
+			log.info(" added new knowledge " + newKl.printlnKnowledge() + " in behavior "
+					+ this.cbd.getName());
+			return true;
+		}
+		case READK:
+		// function "check if agent already has the knowledge"
+		// If yes : return true, also put the value of variable in knowledge pattern into the symbol table
+		{
+			// after readK there's always a structure of knowledge
+			ClaimStructure knowledgeStruct = (ClaimStructure) args.get(0); // struct knowledge <kl type> <kl fields>
+			SimpleKnowledge pattern = structure2Knowledge(knowledgeStruct);
+			KnowledgeDescription result = kb.getFirst(pattern);
+			// FIXME: support multiple types
+			if(result == null)
+				return false; // knowledge was not found
+			return readValues(knowledge2Structure((SimpleKnowledge) result).getFields(), knowledgeStruct.getFields(), 0);
+		}
+		case REMOVEK:
+		// function "remove knowledge"
+		{
+			ClaimStructure knowledgeStruct = (ClaimStructure) args.get(0); // struct knowledge <kl type> <kl fields>
+			SimpleKnowledge pattern = structure2Knowledge(knowledgeStruct);
+			kb.remove(pattern);
+			return true;
+		}
+		default:
+			// should not be here
+			return true; // unreachable code
+		}
 	}
 	
 	/**
@@ -737,34 +678,75 @@ public class ClaimBehavior
 	 */
 	protected void handleForAllK(ClaimForAllK construct)
 	{
-		// ClaimStructure knowledgeStruct = construct.getStructure();
-		// Vector<ClaimConstruct> statements = construct.getStatements();
-		//
-		// // replace all ClaimVariables (represented as ?<name>) with an index
-		// HashMap<Integer, ClaimVariable> intToVariable = new HashMap<Integer, ClaimVariable>();
-		// String knowledge = constructsAndMaps(knowledgeStruct.getFields(), intToVariable, 1);
-		//
-		// GraphPattern CP = new GraphPattern();
-		// TextGraphRepresentation repr = new TextGraphRepresentation(CP);
-		// repr.readRepresentation(new ContentHolder<String>(knowledge));
-		//
-		// List<Match> matches = claimComponent.getCognitive().readAll(CP);
-		// for(Match match : matches)
-		// {
-		// st = new SymbolTable(st);
-		//
-		// for(Node node : CP.getNodes())
-		// if(node instanceof NodeP)
-		// {
-		// Node rez = match.getMatchedGraphNode(node);
-		// int genericIndex = ((NodeP) node).genericIndex();
-		// st.put(intToVariable.get(genericIndex), new ClaimValue(rez.toString()));
-		// }
-		// for(ClaimConstruct claimConstruct : construct.getStatements())
-		// handleStatement(claimConstruct);
-		//
-		// st = st.prev;
-		// }
+		ClaimStructure klStructure = construct.getStructure();
+		Vector<ClaimConstruct> statements = construct.getStatements();
+		
+		// map of pairs <Variable, value> used to bind fields in knowledge pattern that haven't been bound (variable)
+		HashMap<ClaimVariable, ClaimValue> map = new HashMap<ClaimVariable, ClaimValue>();
+		boolean matches = false;
+		
+		Vector<ClaimConstruct> klStructureFields = klStructure.getFields();
+		Collection<KnowledgeDescription> knowledge = claimComponent.getKBase().getAll(structure2Knowledge(klStructure));
+		// type
+		String knowledgeType = (String) ((ClaimValue) klStructureFields.get(1)).getValue();
+		// fields
+		for(KnowledgeDescription kd : knowledge)
+		{
+			SimpleKnowledge klToMatch = (SimpleKnowledge) kd; // FIXME: support other types
+			// if found knowledge that has the same type
+			if(knowledgeType.equals(klToMatch.getKnowledgeType())) // FIXME: this is currently superfluous
+			{
+				matches = true;
+				// map.clear(); // not needed, in order to be able to make the verification for previously bound
+				// variables in this forAllK, by verifying which variables were unbound at the beginning of the
+				// execution
+				for(int j = 2; j < klStructureFields.size(); j++)
+				{
+					ClaimVariable fieldVariable = ((ClaimVariable) klStructureFields.get(j));
+					ClaimValue value = getVariableValue(fieldVariable);
+					// check if fieldVariable is in the symbol table or not
+					// if variable is bound (value != null) and doesn't match with the knowledge, return false
+					if(value != null)
+					{
+						if(!map.containsKey(fieldVariable))
+						{
+							if(!((String) value.getValue()).equals(klToMatch.getSimpleKnowledge().get(j - 2)))
+							{
+								matches = false;
+								continue;
+							}
+						}
+						else
+						{
+							map.put(fieldVariable, new ClaimValue(klToMatch.getSimpleKnowledge().get(j - 2)));
+						}
+					}
+					// if not, bind with value in the knowledge base
+					else
+					{
+						map.put(fieldVariable, new ClaimValue(klToMatch.getSimpleKnowledge().get(j - 2)));
+					}
+				}
+				
+				// if the pattern matches, put into behavior's symbol table all pairs <variable, value> that has been
+				// found
+				if(matches)
+				{
+					Set<Entry<ClaimVariable, ClaimValue>> set = map.entrySet();
+					for(Iterator<Entry<ClaimVariable, ClaimValue>> it = set.iterator(); it.hasNext();)
+					{
+						Map.Entry<ClaimVariable, ClaimValue> entry = it.next();
+						st.put(entry.getKey(), entry.getValue());
+					}
+					for(ClaimConstruct statement : statements)
+						handleStatement(statement);
+					/*
+					 * // reset all variables bound in this procedure to null for(Iterator<Entry<ClaimVariable,
+					 * ClaimValue>> it = set.iterator(); it.hasNext();) { Map.Entry<ClaimVariable, ClaimValue> entry =
+					 * it.next(); st.put(entry.getKey(), null); }
+					 */}
+			}
+		}
 	}
 	
 	/**
@@ -947,11 +929,12 @@ public class ClaimBehavior
 	protected ClaimStructure knowledge2Structure(SimpleKnowledge knowledge)
 	{
 		ClaimStructure ret = new ClaimStructure();
-		/*
-		 * ClaimStructure ret = new ClaimStructure(cbd); Vector<ClaimConstruct> fields = new Vector<ClaimConstruct>();
-		 * fields.add(new ClaimValue("knowledge")); fields.add(new ClaimValue(knowledge.getKnowledgeType())); for(Object
-		 * fieldValue : knowledge.getSimpleKnowledge()) fields.add(new ClaimValue(fieldValue)); ret.setFields(fields);
-		 */
+		Vector<ClaimConstruct> fields = new Vector<ClaimConstruct>();
+		fields.add(new ClaimValue("knowledge"));
+		fields.add(new ClaimValue(knowledge.getKnowledgeType()));
+		for(Object fieldValue : knowledge.getSimpleKnowledge())
+			fields.add(new ClaimValue(fieldValue));
+		ret.setFields(fields);
 		return ret;
 	}
 	
@@ -987,14 +970,7 @@ public class ClaimBehavior
 		 * Assigned variables are replaced by their values; Re-assignables and unassigned variables are kept as
 		 * {@link ClaimVariable} instances.
 		 */
-		KEEP_UNISTANTIATED,
-		/**
-		 * All variables are kept as {@link ClaimVariable} instances.
-		 * <p>
-		 * <b>Warning</b> this should not be used, as we have re-assignable variables.
-		 */
-		@Deprecated
-		KEEP_ALL
+		KEEP_UNISTANTIATED
 	}
 	
 	/**
@@ -1046,9 +1022,6 @@ public class ClaimBehavior
 					else
 						args.add(value);
 					break;
-				case KEEP_ALL:
-					args.add(cons);
-					break;
 				}
 				break;
 			case VALUE:
@@ -1080,7 +1053,7 @@ public class ClaimBehavior
 	protected Vector<Object> constructs2Objects(List<ClaimConstruct> constructs, int ignore)
 	{
 		Vector<Object> args = new Vector<Object>();
-		for(ClaimConstruct arg : flattenConstructs(constructs, ignore, KeepVariables.KEEP_ALL))
+		for(ClaimConstruct arg : flattenConstructs(constructs, ignore, KeepVariables.KEEP_NONE))
 			if(arg != null)
 				if(arg instanceof ClaimValue)
 					args.add(((ClaimValue) arg).getValue());

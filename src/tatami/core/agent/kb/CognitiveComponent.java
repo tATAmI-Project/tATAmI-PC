@@ -20,27 +20,9 @@ public class CognitiveComponent extends AgentComponent // TODO implement to be u
 	 */
 	private final KnowledgeBase	knowledgeBase	= new SimpleKB();
 	
-	public CognitiveComponent(CompositeAgent parent)
+	public CognitiveComponent()
 	{
-		super(parent, AgentComponentName.COGNITIVE_COMPONENT);
-		
-		if(parentAgent.hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
-		{
-			ParametricComponent parametricComponent = (ParametricComponent)parentAgent
-					.getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT);
-			if(parametricComponent.hasPar(AgentParameterName.KNOWLEDGE))
-			{
-				Graph kg = TextGraphRepresentation.readRepresentation(
-						parametricComponent.parVal(AgentParameterName.KNOWLEDGE), null, null);// new
-				// UnitConfigData().setName("agent ["+agentName+"] k reader").setLevel(Level.ALL));
-				for(Edge edge : kg.getEdges())
-				{
-					SimpleKnowledge k = new SimpleKnowledge(edge.getLabel(), edge.getFrom()
-							.getLabel(), edge.getTo().getLabel());
-					knowledgeBase.add(k);
-				}
-			}
-		}
+		super(AgentComponentName.COGNITIVE_COMPONENT);
 	}
 	
 	public void addPattern(ContextPattern pattern)
@@ -53,7 +35,7 @@ public class CognitiveComponent extends AgentComponent // TODO implement to be u
 	 * 
 	 * @return the knowledge base.
 	 */
-	protected KnowledgeBase getKB()
+	public KnowledgeBase getKB()
 	{
 		return knowledgeBase;
 	}

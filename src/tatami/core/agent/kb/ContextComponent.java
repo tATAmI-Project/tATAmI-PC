@@ -33,7 +33,7 @@ import tatami.core.agent.AgentComponent;
 import tatami.sclaim.constructs.basic.ClaimValue;
 
 @SuppressWarnings("javadoc")
-public class ContextComponent extends AgentComponent { // TODO extend Cognitive Component
+public class ContextComponent extends CognitiveComponent { // TODO extend Cognitive Component
 
 	/**
 	 * The serial UID.
@@ -48,7 +48,7 @@ public class ContextComponent extends AgentComponent { // TODO extend Cognitive 
 	 */
 	public ContextComponent() 
 	{
-		super(AgentComponentName.COGNITIVE_COMPONENT);
+		super();
 	
 		// make ticker
 		TimeKeeper ticker = new IntTimeKeeper();

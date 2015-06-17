@@ -208,15 +208,15 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	 */
 	protected KnowledgeBase getKBase()
 	{
-		// return getCognitive().getKnowledge();
-		// TODO
-		return null;
+		return getCognitive().getKB();
 	}
 	
 	protected CognitiveComponent getCognitive()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		AgentComponent cg = getAgentComponent(AgentComponentName.COGNITIVE_COMPONENT);
+		if(cg == null)
+			throw new IllegalStateException("No cognitive component");
+		return (CognitiveComponent) cg;
 	}
 	
 	/**

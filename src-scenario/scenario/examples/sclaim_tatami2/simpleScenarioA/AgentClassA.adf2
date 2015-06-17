@@ -5,7 +5,14 @@
 		)
 		
 		(reactive rcv
-			(receive (struct message echoBack))
+			(receive (struct message ?msgContent))
+			
+			//testing the knowledge base:
+			(addK (struct knowledge received echo))
+			(addK (struct knowledge received ?msgContent))
+			(forAllK (struct knowledge received ??var)
+				(removeK (struct knowledge received ?var))
+			)
 		)
 	)
 )

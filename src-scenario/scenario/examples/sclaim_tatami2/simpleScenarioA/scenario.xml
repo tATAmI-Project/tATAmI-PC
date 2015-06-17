@@ -25,6 +25,7 @@
 				<scen:component name="parametric" />
 				<scen:component name="visualizable" />
 				<scen:component name="messaging" />
+				<scen:component name="cognitive" />
 				<scen:component name="s_claim">
 					<scen:parameter name="class" value="AgentClassA" />
 				</scen:component>
