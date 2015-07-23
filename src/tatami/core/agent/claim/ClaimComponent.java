@@ -52,15 +52,15 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	 * The name of the component parameter specifying a java code attachment for the agent.
 	 */
 	protected final static String	JAVA_CODE_COMPONENT_PARAMETER	= "java-code";
-
+	
 	/**
 	 * Name of the variable which holds the name of this agent.
 	 */
-	protected static final String	THIS_VARIABLE	= "this";
+	protected static final String	THIS_VARIABLE					= "this";
 	/**
 	 * Name of the variable which holds the name of the parent of this agent.
 	 */
-	protected static final String	PARENT_VARIABLE	= "parent";
+	protected static final String	PARENT_VARIABLE					= "parent";
 	
 	/**
 	 * @author Andrei Olaru
@@ -96,6 +96,11 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	protected SymbolTable			st;
 	
 	/**
+	 * Creation data for the component, containing component parameters.
+	 */
+	protected ComponentCreationData creationData;
+	
+	/**
 	 * Default constructor.
 	 */
 	public ClaimComponent()
@@ -104,7 +109,8 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	}
 	
 	@Override
-	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, List<String> agentPackages, Logger log)
+	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, List<String> agentPackages,
+			Logger log)
 	{
 		if(!super.preload(parameters, scenarioNode, agentPackages, log))
 			return false;
@@ -114,9 +120,11 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 		
 		cad = ClaimLoader.fillCAD(adfClass, javaCodeAttachments, agentPackages, log);
 		
+		creationData = parameters;
+		
 		st = new SymbolTable(null, cad.getParameters());
 		st.setLogLink(log);
-
+		
 		// retrieve parameters specified in the agent
 		if(cad.getParameters() != null)
 		{
@@ -144,16 +152,21 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 			{
 				if(st.get(agentParam) == null) // not yet added
 				{
-					AgentParameterName registeredParam = AgentParameterName.getName(agentParam.getName());
-					
-					if(registeredParam != null) // is a registered agent parameter
-						if(parametric.hasPar(registeredParam))
-							st.put(agentParam, new ClaimValue(parametric.parVal(registeredParam)));
-						else
-							getAgentLog().error("registered agent parameter [" + agentParam + "] not found");
-					else if(parametric.getUnregisteredParameters().isSet(agentParam.getName()))
-						st.put(agentParam,
-								new ClaimValue(parametric.getUnregisteredParameters().get(agentParam.getName())));
+					if(parametric != null)
+					{
+						AgentParameterName registeredParam = AgentParameterName.getName(agentParam.getName());
+						
+						if(registeredParam != null) // is a registered agent parameter
+							if(parametric.hasPar(registeredParam))
+								st.put(agentParam, new ClaimValue(parametric.parVal(registeredParam)));
+							else
+								getAgentLog().error("registered agent parameter [" + agentParam + "] not found");
+						else if(parametric.getUnregisteredParameters().isSet(agentParam.getName()))
+							st.put(agentParam,
+									new ClaimValue(parametric.getUnregisteredParameters().get(agentParam.getName())));
+					}
+					if((creationData != null) && creationData.isSet(agentParam.getName()))
+						st.put(agentParam, new ClaimValue(creationData.getObject(agentParam.getName())));
 				}
 			}
 		}
