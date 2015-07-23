@@ -4,11 +4,13 @@ import tatami.amilab.util.SimpleKestrelClient;
 import tatami.core.agent.AgentComponent;
 
 /**
- * Component that gets data from AmILab.
+ * {@link AgentComponent} that gets data from AmILab.
  * 
  * @author Claudiu-Mihai Toma
  */
-public class AmILabComponent extends AgentComponent {
+//FIXME: Write a bit more...
+public class AmILabComponent extends AgentComponent
+{
 
 	/**
 	 * The serial UID.
@@ -45,18 +47,20 @@ public class AmILabComponent extends AgentComponent {
 	 * Measurements queue.
 	 */
 	public static final String KESTREL_MEASUREMENTS_QUEUE = "measurements";
-	
+
 	/**
 	 * Kestrel client used to communicate with the server.
 	 */
 	private SimpleKestrelClient kestrelClient;
-	
+
 	/**
 	 * Enum that defines data types given by AmILab.
+	 * 
 	 * @author Claudiu-Mihai Toma
 	 *
 	 */
-	public static enum AmILabDataType {
+	public static enum AmILabDataType
+	{
 		/**
 		 * RGB image
 		 */
@@ -65,40 +69,45 @@ public class AmILabComponent extends AgentComponent {
 		/**
 		 * Depth image
 		 */
-		DEPTH_IMAGE("image_depth"),
+		IMAGE_DEPTH("image_depth"),
 
 		/**
 		 * Skeleton
 		 */
 		SKELETON,
-		
+
 		;
-		
+
 		/**
 		 * Name of the data type.
 		 */
 		private String type;
-		
+
 		/**
 		 * Default constructor.
 		 */
-		private AmILabDataType(){
-			type=null;
+		private AmILabDataType()
+		{
+			type = null;
 		}
-		
+
 		/**
 		 * Constructor that sets the type.
+		 * 
 		 * @param type
 		 */
-		private AmILabDataType(String type){
-			this.type=type;
+		private AmILabDataType(String type)
+		{
+			this.type = type;
 		}
-		
+
 		/**
 		 * Type getter.
+		 * 
 		 * @return type of this instance
 		 */
-		public String getType(){
+		public String getType()
+		{
 			return type;
 		}
 	}
@@ -106,40 +115,64 @@ public class AmILabComponent extends AgentComponent {
 	/**
 	 * Default constructor.
 	 */
-	protected AmILabComponent() {
+	public AmILabComponent()
+	{
 		super(AgentComponentName.AMILAB_COMPONENT);
 		kestrelQueueName = KESTREL_AI_MAS_QUEUE;
-		kestrelClient = new SimpleKestrelClient(KESTREL_MASTER_SERVER_IP, KESTREL_SERVER_PORT);
+		kestrelClient = new SimpleKestrelClient(KESTREL_LOCAL_SERVER_IP, KESTREL_SERVER_PORT);
 	}
-	
 
 	/**
-	 * Constructor that requires the Kestrel queue name.
+	 * Constructor that requires the Kestrel queue name as well as server IP and
+	 * port.
 	 * 
+	 * @param serverIP
+	 *            - server IP address as string
+	 * @param serverPort
+	 *            - server port
 	 * @param kestrelQueueName
 	 *            - name of the Kestrel queue used by this instance of
 	 *            {@link AmILabComponent}
 	 */
-	protected AmILabComponent(String kestrelQueueName) {
+	public AmILabComponent(String serverIP, int serverPort, String kestrelQueueName)
+	{
 		super(AgentComponentName.AMILAB_COMPONENT);
 		this.kestrelQueueName = kestrelQueueName;
-		kestrelClient = new SimpleKestrelClient(KESTREL_MASTER_SERVER_IP, KESTREL_SERVER_PORT);
+		// FIXME: Check if connection is established.
+		kestrelClient = new SimpleKestrelClient(serverIP, serverPort);
 	}
 
 	/**
 	 * Gets data form Kestrel server.
-	 * @param dataType - type of data required
+	 * 
+	 * @param dataType
+	 *            - type of data required
 	 * @return data as JSON string
 	 */
-	public String get(AmILabDataType dataType) {
+	public String get(AmILabDataType dataType)
+	{
 		String data = null;
 		String type = dataType.getType();
-		
-		do{
-			data = kestrelClient.peek(kestrelQueueName);
-		}while (data == null || data.contains(type));
-		
+
+		do
+		{
+			data = kestrelClient.get(kestrelQueueName);
+			System.out.println(data);
+		} while (data == null || !data.contains(type));
+
+		// TODO: Extract data from JSON
 		return data;
 	}
-	
+
+	/**
+	 * Pushes a message to the Kestrel queue.
+	 * 
+	 * @param message
+	 *            - message to be pushed
+	 */
+	//TODO: Relevant only for testing?
+	public void set(String message)
+	{
+		kestrelClient.set(kestrelQueueName, message);
+	}
 }

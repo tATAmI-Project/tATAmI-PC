@@ -6,6 +6,7 @@ import java.util.Map;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
+import tatami.amilab.AmILabComponent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.claim.ClaimComponent;
@@ -142,7 +143,7 @@ public abstract class AgentComponent implements Serializable
 		S_CLAIM_COMPONENT(AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".claim.ClaimComponent"),
 
 		/**
-		 * The name of a component extending {@link tatami.amilab.AmILabComponent}.
+		 * The name of a component extending {@link AmILabComponent}.
 		 */
 		AMILAB_COMPONENT,
 		
