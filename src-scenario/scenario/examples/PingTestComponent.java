@@ -111,6 +111,8 @@ public class PingTestComponent extends AgentComponent
 				
 				if(event.getType() == AgentEventType.AGENT_START)
 					atAgentStart(event);
+				if(event.getType() == AgentEventType.SIMULATION_START)
+					atSimulationStart(event);
 			}
 		};
 		for(AgentEventType eventType : AgentEventType.values())
@@ -131,6 +133,12 @@ public class PingTestComponent extends AgentComponent
 		}, "");
 		
 		pingTimer = new Timer();
+	}
+	
+	@Override
+	protected void atSimulationStart(AgentEvent event)
+	{
+		super.atSimulationStart(event);
 		pingTimer.schedule(new Pinger(), PING_INITIAL_DELAY, PING_PERIOD);
 	}
 	
