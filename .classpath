@@ -2,22 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="var" path="M2_REPO/junit/junit/4.10/junit-4.10.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-api/1.6.4/slf4j-api-1.6.4.jar"/>
-	<classpathentry kind="var" path="M2_REPO/ch/qos/logback/logback-core/1.0.0/logback-core-1.0.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/ch/qos/logback/logback-classic/1.0.0/logback-classic-1.0.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/twitter/finagle-kestrel/3.0.0/finagle-kestrel-3.0.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/twitter/finagle-core/3.0.0/finagle-core-3.0.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/twitter/util-hashing/3.0.0/util-hashing-3.0.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/twitter/util-core/3.0.0/util-core-3.0.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/org/scala-lang/scala-library/2.8.1/scala-library-2.8.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/io/netty/netty/3.4.0.Alpha1/netty-3.4.0.Alpha1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/twitter/util-collection/3.0.0/util-collection-3.0.0.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/google/guava/guava/11.0.2/guava-11.0.2.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/google/code/findbugs/jsr305/1.3.9/jsr305-1.3.9.jar"/>
-	<classpathentry kind="var" path="M2_REPO/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/twitter/finagle-memcached/3.0.0/finagle-memcached-3.0.0.jar"/>
 	<classpathentry kind="lib" path="libs/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="libs/Config.jar"/>
 	<classpathentry kind="lib" path="libs/Gel.jar"/>
@@ -30,5 +14,21 @@
 	<classpathentry kind="lib" path="libs/Logging.jar"/>
 	<classpathentry kind="lib" path="libs/net.xqhs.WindowLayout.jar"/>
 	<classpathentry kind="lib" path="libs/net.xqhs.XML.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/finagle-core-3.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/finagle-kestrel-3.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/finagle-memcached-3.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/guava-11.0.2.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/hamcrest-core-1.1.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/jsr305-1.3.9.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/junit-4.10.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/logback-classic-1.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/logback-core-1.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/netty-3.4.0.Alpha1.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/scala-library-2.8.1.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/slf4j-api-1.6.4.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/util-collection-3.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/util-core-3.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/util-hashing-3.0.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
