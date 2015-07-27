@@ -8,7 +8,7 @@ import tatami.core.agent.AgentComponent;
  * 
  * @author Claudiu-Mihai Toma
  */
-//FIXME: Write a bit more...
+// FIXME: Write a bit more...
 public class AmILabComponent extends AgentComponent
 {
 
@@ -16,12 +16,6 @@ public class AmILabComponent extends AgentComponent
 	 * The serial UID.
 	 */
 	private static final long serialVersionUID = 7762026334280094146L;
-
-	/**
-	 * The Kestrel queue that is created on the AmILab Kestrel server. If this
-	 * queue exists, it will be used.
-	 */
-	private String kestrelQueueName;
 
 	/**
 	 * Server IP.
@@ -47,6 +41,12 @@ public class AmILabComponent extends AgentComponent
 	 * Measurements queue.
 	 */
 	public static final String KESTREL_MEASUREMENTS_QUEUE = "measurements";
+
+	/**
+	 * The Kestrel queue that is created on the AmILab Kestrel server. If this
+	 * queue exists, it will be used.
+	 */
+	private String kestrelQueueName;
 
 	/**
 	 * Kestrel client used to communicate with the server.
@@ -143,7 +143,23 @@ public class AmILabComponent extends AgentComponent
 	}
 
 	/**
-	 * Gets data form Kestrel server.
+	 * Gets data from Kestrel queue. If the queue is empty it returns
+	 * {@code null}.
+	 * 
+	 * @return first element in the Kestrel queue
+	 */
+	public String get()
+	{
+		String data = null;
+
+		data = kestrelClient.get(kestrelQueueName);
+
+		// TODO: Extract data from JSON
+		return data;
+	}
+
+	/**
+	 * Gets data specific from Kestrel queue.
 	 * 
 	 * @param dataType
 	 *            - type of data required
@@ -170,7 +186,7 @@ public class AmILabComponent extends AgentComponent
 	 * @param message
 	 *            - message to be pushed
 	 */
-	//TODO: Relevant only for testing?
+	// TODO: Relevant only for testing?
 	public void set(String message)
 	{
 		kestrelClient.set(kestrelQueueName, message);
