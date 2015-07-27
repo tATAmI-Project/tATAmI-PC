@@ -21,9 +21,9 @@ public class FeederConsumerComponent extends AmILabComponent
 	{
 		super.atSimulationStart(event);
 		
-		set("message1");
-		set("message2");
-		set("message3");
+		set("message_1");
+		set("message_2");
+		set("message_3");
 		
 		try
 		{
