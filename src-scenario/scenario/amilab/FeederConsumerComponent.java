@@ -15,28 +15,41 @@ public class FeederConsumerComponent extends AmILabComponent
 	 * The serial UID.
 	 */
 	private static final long serialVersionUID = 7753773976224362270L;
-	
+
+	/**
+	 * Number of useless entries.
+	 */
+	private static final int USELESS_DATA_COUNT = 5000;
+
+	/**
+	 * Useless data.
+	 */
+	private static final String USELESS_DATA = "useless data";
+
+	/**
+	 * Depth data.
+	 */
+	private static final String DEPTH_DATA = "image_depth data";
+
+	/**
+	 * Waiting time.
+	 */
+	private static final long WAIT = 5000;
+
 	@Override
 	protected void atSimulationStart(AgentEvent event)
 	{
 		super.atSimulationStart(event);
-		
-		set("message_1");
-		set("message_2");
-		set("message_3");
-		
-		try
+
+		clearQueue();
+
+		for (int i = 0; i < USELESS_DATA_COUNT; i++)
 		{
-			Thread.sleep(100);
-		} catch (InterruptedException e)
-		{
-			e.printStackTrace();
+			set(USELESS_DATA);
 		}
-		
-		String message;
-		do{
-			message = get();
-			System.out.println(message);
-		}while(message!=null);
+
+		set(DEPTH_DATA);
+
+		System.out.println(get(AmILabDataType.IMAGE_DEPTH, WAIT));
 	}
 }

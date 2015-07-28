@@ -1,5 +1,6 @@
 package tatami.amilab;
 
+import sun.util.resources.CurrencyNames_zh_TW;
 import tatami.amilab.util.SimpleKestrelClient;
 import tatami.core.agent.AgentComponent;
 
@@ -159,7 +160,7 @@ public class AmILabComponent extends AgentComponent
 	}
 
 	/**
-	 * Gets data specific from Kestrel queue.
+	 * Gets specific data from Kestrel queue.
 	 * 
 	 * @param dataType
 	 *            - type of data required
@@ -167,17 +168,65 @@ public class AmILabComponent extends AgentComponent
 	 */
 	public String get(AmILabDataType dataType)
 	{
+		return get(dataType, true);
+	}
+
+	/**
+	 * Gets specific data from Kestrel queue.
+	 * 
+	 * @param dataType
+	 *            - type of data required
+	 * @param wait
+	 *            - {@code true} for blocking effect; {@code false} otherwise
+	 *            (can return {@code null})
+	 * @return data as JSON string
+	 */
+	public String get(AmILabDataType dataType, boolean wait)
+	{
+
 		String data = null;
 		String type = dataType.getType();
 
 		do
 		{
 			data = kestrelClient.get(kestrelQueueName);
-			System.out.println(data);
-		} while (data == null || !data.contains(type));
+		} while (wait && (data == null || !data.contains(type)));
 
 		// TODO: Extract data from JSON
-		return data;
+		return data.contains(type) ? data : null;
+	}
+
+	/**
+	 * Gets specific data from Kestrel queue.
+	 * 
+	 * @param dataType
+	 *            - type of data required
+	 * @param wait
+	 *            - amount of milliseconds to wait for a queue element (can
+	 *            return {@code null}); {@code -1} for blocking effect
+	 * @return data as JSON string
+	 */
+	public String get(AmILabDataType dataType, long wait)
+	{
+		if (wait == -1)
+			return get(dataType);
+
+		String data = null;
+		String type = dataType.getType();
+		long startingTime = System.currentTimeMillis();
+		long currentTime;
+		long currentWait;
+
+		do
+		{
+			data = kestrelClient.get(kestrelQueueName);
+
+			currentTime = System.currentTimeMillis();
+			currentWait = currentTime - startingTime;
+		} while (currentWait < wait && (data == null || !data.contains(type)));
+
+		// TODO: Extract data from JSON
+		return data.contains(type) ? data : null;
 	}
 
 	/**
@@ -190,5 +239,17 @@ public class AmILabComponent extends AgentComponent
 	public void set(String message)
 	{
 		kestrelClient.set(kestrelQueueName, message);
+	}
+
+	/**
+	 * Clears Kestrel queue.
+	 */
+	protected void clearQueue()
+	{
+		String data = null;
+		do
+		{
+			data = get();
+		} while (data != null);
 	}
 }
