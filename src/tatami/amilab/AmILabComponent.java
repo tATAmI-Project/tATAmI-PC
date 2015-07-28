@@ -1,6 +1,5 @@
 package tatami.amilab;
 
-import sun.util.resources.CurrencyNames_zh_TW;
 import tatami.amilab.util.SimpleKestrelClient;
 import tatami.core.agent.AgentComponent;
 
@@ -95,11 +94,11 @@ public class AmILabComponent extends AgentComponent
 		/**
 		 * Constructor that sets the type.
 		 * 
-		 * @param type
+		 * @param dataType
 		 */
-		private AmILabDataType(String type)
+		private AmILabDataType(String dataType)
 		{
-			this.type = type;
+			type = dataType;
 		}
 
 		/**
@@ -131,14 +130,14 @@ public class AmILabComponent extends AgentComponent
 	 *            - server IP address as string
 	 * @param serverPort
 	 *            - server port
-	 * @param kestrelQueueName
+	 * @param queueName
 	 *            - name of the Kestrel queue used by this instance of
 	 *            {@link AmILabComponent}
 	 */
-	public AmILabComponent(String serverIP, int serverPort, String kestrelQueueName)
+	public AmILabComponent(String serverIP, int serverPort, String queueName)
 	{
 		super(AgentComponentName.AMILAB_COMPONENT);
-		this.kestrelQueueName = kestrelQueueName;
+		kestrelQueueName = queueName;
 		// FIXME: Check if connection is established.
 		kestrelClient = new SimpleKestrelClient(serverIP, serverPort);
 	}
