@@ -1,5 +1,8 @@
 package tatami.amilab;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import tatami.amilab.util.SimpleKestrelClient;
 import tatami.core.agent.AgentComponent;
 
@@ -35,7 +38,7 @@ public class AmILabComponent extends AgentComponent
 	/**
 	 * Default Kestrel queue name.
 	 */
-	public static final String KESTREL_AI_MAS_QUEUE = "AI_MAS_QUEUE";
+	public static final String KESTREL_AMILAB_COMPONENT_QUEUE = "AMILAB_COMPONENT_QUEUE";
 
 	/**
 	 * Measurements queue.
@@ -43,15 +46,31 @@ public class AmILabComponent extends AgentComponent
 	public static final String KESTREL_MEASUREMENTS_QUEUE = "measurements";
 
 	/**
+	 * The time used to reduce thread's CPU consumption.
+	 */
+	private static final int TIME_TO_SLEEP = 50;
+
+	/**
 	 * The Kestrel queue that is created on the AmILab Kestrel server. If this
 	 * queue exists, it will be used.
 	 */
-	private String kestrelQueueName;
+	// TODO: Remove this or just make another constructor.
+	protected String kestrelQueueName;
 
 	/**
 	 * Kestrel client used to communicate with the server.
 	 */
-	private SimpleKestrelClient kestrelClient;
+	protected SimpleKestrelClient kestrelClient;
+
+	/**
+	 * Internal buffer.
+	 */
+	protected AmILabInternalBuffer internalBuffer;
+
+	/**
+	 * Thread that feeds the internal and external buffers.
+	 */
+	protected AmILabThread kestrelGatherer;
 
 	/**
 	 * Enum that defines data types given by AmILab.
@@ -113,13 +132,129 @@ public class AmILabComponent extends AgentComponent
 	}
 
 	/**
+	 * The data from the Kestrel queue is moved into the internal buffer.
+	 * 
+	 * @author Claudiu-Mihai Toma
+	 *
+	 */
+	// FIXME: This Class may suffer major modifications or may even be removed.
+	private class AmILabInternalBuffer
+	{
+
+		/**
+		 * Default Constructor.
+		 */
+		public AmILabInternalBuffer()
+		{
+			data = new HashMap<AmILabDataType, String>();
+		}
+
+		/**
+		 * Structure behind the {@link AmILabInternalBuffer}.
+		 */
+		private Map<AmILabDataType, String> data;
+
+		/**
+		 * Returns most recent data of the given {@link AmILabDataType} type.
+		 * 
+		 * @param type
+		 *            - type of data required
+		 * @return most recent data
+		 */
+		public String get(AmILabDataType type)
+		{
+			return data.get(type);
+		}
+
+		/**
+		 * Adds information in the internal buffer.
+		 * 
+		 * @param type
+		 *            - type of data
+		 * @param information
+		 *            - data to be added
+		 */
+		public void add(AmILabDataType type, String information)
+		{
+			data.put(type, information);
+		}
+	}
+
+	/**
+	 * Thread that populates the internal buffer.
+	 * 
+	 * @author Claudiu-Mihai Toma
+	 *
+	 */
+	private class AmILabThread extends Thread
+	{
+		/**
+		 * Holds the state of the thread.
+		 */
+		private boolean running;
+
+		/**
+		 * Default constructor.
+		 */
+		public AmILabThread()
+		{
+			super("AmILabThread");
+			running = true;
+		}
+
+		/**
+		 * Stops the thread.
+		 */
+		public void stopThread()
+		{
+			running = false;
+		}
+
+		@Override
+		public void run()
+		{
+			while (running)
+			{
+				// Receive data from Kestrel queue, which resides on the Kestrel
+				// server.
+				String kestrelJSON;
+				kestrelJSON = kestrelClient.get(kestrelQueueName);
+
+				// Get type of data.
+				AmILabDataType dataType = null;
+				for (AmILabDataType itDataType : AmILabDataType.values())
+				{
+					if (kestrelJSON.contains(itDataType.getType()))
+					{
+						dataType = itDataType;
+						break;
+					}
+				}
+
+				// Message has no known type or is corrupt.
+				if (dataType == null)
+					return;
+
+				// TODO: Extract data from JSON, maybe even deserialize.
+				internalBuffer.add(dataType, kestrelJSON);
+
+				try
+				{
+					Thread.sleep(TIME_TO_SLEEP);
+				} catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	/**
 	 * Default constructor.
 	 */
 	public AmILabComponent()
 	{
-		super(AgentComponentName.AMILAB_COMPONENT);
-		kestrelQueueName = KESTREL_AI_MAS_QUEUE;
-		kestrelClient = new SimpleKestrelClient(KESTREL_LOCAL_SERVER_IP, KESTREL_SERVER_PORT);
+		this(KESTREL_LOCAL_SERVER_IP, KESTREL_SERVER_PORT, KESTREL_AMILAB_COMPONENT_QUEUE);
 	}
 
 	/**
@@ -137,9 +272,15 @@ public class AmILabComponent extends AgentComponent
 	public AmILabComponent(String serverIP, int serverPort, String queueName)
 	{
 		super(AgentComponentName.AMILAB_COMPONENT);
+		// Set up connection.
 		kestrelQueueName = queueName;
 		// FIXME: Check if connection is established.
 		kestrelClient = new SimpleKestrelClient(serverIP, serverPort);
+
+		// Start internal buffer and thread.
+		internalBuffer=new AmILabInternalBuffer();
+		kestrelGatherer = new AmILabThread();
+		kestrelGatherer.start();
 	}
 
 	/**
@@ -148,14 +289,10 @@ public class AmILabComponent extends AgentComponent
 	 * 
 	 * @return first element in the Kestrel queue
 	 */
+	// TODO: Relevant only for testing.
 	public String get()
 	{
-		String data = null;
-
-		data = kestrelClient.get(kestrelQueueName);
-
-		// TODO: Extract data from JSON
-		return data;
+		return kestrelClient.get(kestrelQueueName);
 	}
 
 	/**
@@ -167,7 +304,7 @@ public class AmILabComponent extends AgentComponent
 	 */
 	public String get(AmILabDataType dataType)
 	{
-		return get(dataType, true);
+		return get(dataType, -1);
 	}
 
 	/**
@@ -182,17 +319,10 @@ public class AmILabComponent extends AgentComponent
 	 */
 	public String get(AmILabDataType dataType, boolean wait)
 	{
+		// Convert boolean to integer.
+		int waitInt = wait ? -1 : 0;
 
-		String data = null;
-		String type = dataType.getType();
-
-		do
-		{
-			data = kestrelClient.get(kestrelQueueName);
-		} while (wait && (data == null || !data.contains(type)));
-
-		// TODO: Extract data from JSON
-		return data.contains(type) ? data : null;
+		return get(dataType, waitInt);
 	}
 
 	/**
@@ -207,25 +337,27 @@ public class AmILabComponent extends AgentComponent
 	 */
 	public String get(AmILabDataType dataType, long wait)
 	{
-		if (wait == -1)
-			return get(dataType);
+		// Set up parameter for infinite wait case.
+		boolean infiniteWait = (wait == -1) ? true : false;
+
+		if (wait < 0 && wait != -1)
+			throw new IllegalArgumentException("Second argument [" + wait + "] is not a valid argument.");
 
 		String data = null;
-		String type = dataType.getType();
 		long startingTime = System.currentTimeMillis();
 		long currentTime;
 		long currentWait;
 
+		// Try to get data within the time limit.
 		do
 		{
-			data = kestrelClient.get(kestrelQueueName);
-
+			// TODO: Make thread safe.
+			data = internalBuffer.get(dataType);
 			currentTime = System.currentTimeMillis();
 			currentWait = currentTime - startingTime;
-		} while (currentWait < wait && (data == null || !data.contains(type)));
+		} while ((currentWait < wait || infiniteWait) && data == null);
 
-		// TODO: Extract data from JSON
-		return data.contains(type) ? data : null;
+		return data;
 	}
 
 	/**
@@ -234,7 +366,7 @@ public class AmILabComponent extends AgentComponent
 	 * @param message
 	 *            - message to be pushed
 	 */
-	// TODO: Relevant only for testing?
+	// TODO: Relevant only for testing.
 	public void set(String message)
 	{
 		kestrelClient.set(kestrelQueueName, message);
@@ -243,12 +375,22 @@ public class AmILabComponent extends AgentComponent
 	/**
 	 * Clears Kestrel queue.
 	 */
-	protected void clearQueue()
+	// TODO: Relevant only for testing.
+	public void clearQueue()
 	{
 		String data = null;
 		do
 		{
 			data = get();
 		} while (data != null);
+	}
+
+	/**
+	 * Stops the internal thread.
+	 */
+	// TODO: Relevant only for testing.
+	public void stopInternalThread()
+	{
+		kestrelGatherer.stopThread();
 	}
 }

@@ -21,7 +21,7 @@ public class AmILabComponentTester
 	{
 		// Create component.
 		AmILabComponent tester = new AmILabComponent(AmILabComponent.KESTREL_LOCAL_SERVER_IP,
-				AmILabComponent.KESTREL_SERVER_PORT, AmILabComponent.KESTREL_AI_MAS_QUEUE);
+				AmILabComponent.KESTREL_SERVER_PORT, AmILabComponent.KESTREL_AMILAB_COMPONENT_QUEUE);
 		
 		//Push some data.
 		tester.set("a");
