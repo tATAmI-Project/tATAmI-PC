@@ -145,7 +145,7 @@ public abstract class AgentComponent implements Serializable
 		/**
 		 * The name of a component extending {@link AmILabComponent}.
 		 */
-		AMILAB_COMPONENT,
+		AMILAB_COMPONENT("tatami.amilab.AmILabComponent"),
 		
 		/**
 		 * TEMPORARY type for testing. TODO: remove this type.

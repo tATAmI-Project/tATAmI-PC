@@ -48,7 +48,8 @@ public class AmILabComponent extends AgentComponent
 	/**
 	 * The time used to reduce thread's CPU consumption.
 	 */
-	private static final int TIME_TO_SLEEP = 50;
+	// TODO: Make it 50.
+	private static final int TIME_TO_SLEEP = 0;
 
 	/**
 	 * The Kestrel queue that is created on the AmILab Kestrel server. If this
@@ -83,7 +84,7 @@ public class AmILabComponent extends AgentComponent
 		/**
 		 * RGB image
 		 */
-		RGB_IMAGE,
+		RGB_IMAGE("image_rgb"),
 
 		/**
 		 * Depth image
@@ -93,7 +94,7 @@ public class AmILabComponent extends AgentComponent
 		/**
 		 * Skeleton
 		 */
-		SKELETON,
+		SKELETON("skeleton"),
 
 		;
 
@@ -215,10 +216,21 @@ public class AmILabComponent extends AgentComponent
 		{
 			while (running)
 			{
+				try
+				{
+					Thread.sleep(TIME_TO_SLEEP);
+				} catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
+
 				// Receive data from Kestrel queue, which resides on the Kestrel
 				// server.
 				String kestrelJSON;
 				kestrelJSON = kestrelClient.get(kestrelQueueName);
+
+				if (kestrelJSON == null)
+					continue;
 
 				// Get type of data.
 				AmILabDataType dataType = null;
@@ -233,18 +245,10 @@ public class AmILabComponent extends AgentComponent
 
 				// Message has no known type or is corrupt.
 				if (dataType == null)
-					return;
+					continue;
 
 				// TODO: Extract data from JSON, maybe even deserialize.
 				internalBuffer.add(dataType, kestrelJSON);
-
-				try
-				{
-					Thread.sleep(TIME_TO_SLEEP);
-				} catch (InterruptedException e)
-				{
-					e.printStackTrace();
-				}
 			}
 		}
 	}
@@ -278,7 +282,7 @@ public class AmILabComponent extends AgentComponent
 		kestrelClient = new SimpleKestrelClient(serverIP, serverPort);
 
 		// Start internal buffer and thread.
-		internalBuffer=new AmILabInternalBuffer();
+		internalBuffer = new AmILabInternalBuffer();
 		kestrelGatherer = new AmILabThread();
 		kestrelGatherer.start();
 	}
