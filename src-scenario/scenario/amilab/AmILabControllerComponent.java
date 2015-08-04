@@ -50,6 +50,7 @@ public class AmILabControllerComponent extends AgentComponent
 		super.atSimulationStart(event);
 
 		AmILabComponent amilab = (AmILabComponent) getAgentComponent(AgentComponentName.AMILAB_COMPONENT);
+		amilab.startInternalBuffer();
 
 		for (int i = 0; i < USELESS_DATA_COUNT; i++)
 		{
@@ -60,6 +61,6 @@ public class AmILabControllerComponent extends AgentComponent
 
 		System.out.println(amilab.get(AmILabDataType.IMAGE_DEPTH, WAIT));
 		
-		amilab.stopInternalThread();
+		amilab.stopInternalBuffer();
 	}
 }

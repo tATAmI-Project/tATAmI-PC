@@ -1,12 +1,15 @@
 package tatami.amilab;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import tatami.amilab.AmILabComponent.AmILabDataType;
 
-public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<Perception>>
+public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<Perception>>implements Observer
 {
 	private static final int ZERO_ELEMENTS = 0;
 
@@ -25,6 +28,7 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 
 	public AmILabBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType)
 	{
+		types = new ArrayList<AmILabDataType>();
 		types.addAll(desiredTypes);
 		limitType = desiredLimitType;
 		numberOfElements = ZERO_ELEMENTS;
@@ -39,9 +43,9 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 		}
 	}
 
-	public void put(AmILabDataType type, Perception perception)
+	public void put(Perception perception)
 	{
-		get(type).add(perception);
+		get(perception.getType()).add(perception);
 	}
 
 	public Perception peekElement(AmILabDataType type)
@@ -52,5 +56,12 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	public Perception getElement(AmILabDataType type)
 	{
 		return get(type).poll();
+	}
+
+	@Override
+	public void update(Observable o, Object arg)
+	{
+		Perception perception = (Perception) arg;
+		put(perception);
 	}
 }

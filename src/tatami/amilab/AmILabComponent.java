@@ -3,6 +3,8 @@ package tatami.amilab;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Observable;
+import java.util.Queue;
 
 import tatami.amilab.AmILabBuffer.LimitType;
 import tatami.amilab.util.SimpleKestrelClient;
@@ -140,6 +142,7 @@ public class AmILabComponent extends AgentComponent
 	 * @author Claudiu-Mihai Toma
 	 *
 	 */
+	// private class AmILabThread extends Observable implements Runnable
 	private class AmILabThread extends Thread
 	{
 		/**
@@ -152,7 +155,6 @@ public class AmILabComponent extends AgentComponent
 		 */
 		public AmILabThread()
 		{
-			super("AmILabThread");
 			running = true;
 		}
 
@@ -163,6 +165,15 @@ public class AmILabComponent extends AgentComponent
 		{
 			running = false;
 		}
+
+		/**
+		 * Checks if the thread is alive.
+		 * 
+		 * @return {@code true} if alive, {@code false} otherwise
+		 */
+		/*
+		 * public boolean isAlive() { return running; }
+		 */
 
 		@Override
 		public void run()
@@ -200,8 +211,10 @@ public class AmILabComponent extends AgentComponent
 				if (dataType == null)
 					continue;
 
-				// TODO: Extract data from JSON, maybe even deserialize.
-				internalBuffer.put(dataType, new Perception(dataType, 0, kestrelJSON));
+				// TODO: Extract information from JSON, maybe even deserialize.
+				internalBuffer.put(new Perception(dataType, 0, kestrelJSON));
+
+				//notifyObservers(new Perception(dataType, 0, kestrelJSON));
 			}
 		}
 	}
@@ -238,7 +251,6 @@ public class AmILabComponent extends AgentComponent
 		List<AmILabDataType> types = new ArrayList<AmILabDataType>(Arrays.asList(AmILabDataType.values()));
 		internalBuffer = new AmILabBuffer(types, LimitType.UNLIMITED);
 		kestrelGatherer = new AmILabThread();
-		kestrelGatherer.start();
 	}
 
 	/**
@@ -301,6 +313,7 @@ public class AmILabComponent extends AgentComponent
 		if (wait < 0 && wait != -1)
 			throw new IllegalArgumentException("Second argument [" + wait + "] is not a valid argument.");
 
+		Queue<Perception> dataQueue = internalBuffer.get(dataType);
 		String data = null;
 		long startingTime = System.currentTimeMillis();
 		long currentTime;
@@ -309,11 +322,14 @@ public class AmILabComponent extends AgentComponent
 		// Try to get data within the time limit.
 		do
 		{
-			// TODO: Make thread safe.
-			data = internalBuffer.getElement(dataType).getData();
 			currentTime = System.currentTimeMillis();
 			currentWait = currentTime - startingTime;
-		} while ((currentWait < wait || infiniteWait) && data == null);
+		} while ((currentWait < wait || infiniteWait) && dataQueue.isEmpty());
+
+		if (dataQueue.isEmpty())
+			return null;
+
+		data = dataQueue.peek().getData();
 
 		return data;
 	}
@@ -347,8 +363,35 @@ public class AmILabComponent extends AgentComponent
 	 * Stops the internal thread.
 	 */
 	// TODO: Relevant only for testing.
+	public void startInternalThread()
+	{
+		kestrelGatherer.start();
+	}
+
+	/**
+	 * Stops the internal thread.
+	 */
+	// TODO: Relevant only for testing.
 	public void stopInternalThread()
 	{
 		kestrelGatherer.stopThread();
+	}
+
+	/**
+	 * Starts the internal buffer.
+	 */
+	public void startInternalBuffer()
+	{
+		if (!kestrelGatherer.isAlive())
+			startInternalThread();
+	}
+
+	/**
+	 * Starts the internal buffer.
+	 */
+	public void stopInternalBuffer()
+	{
+		if (kestrelGatherer.isAlive())
+			stopInternalThread();
 	}
 }
