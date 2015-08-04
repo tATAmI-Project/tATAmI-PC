@@ -1,8 +1,10 @@
 package tatami.amilab;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import tatami.amilab.AmILabBuffer.LimitType;
 import tatami.amilab.util.SimpleKestrelClient;
 import tatami.core.agent.AgentComponent;
 
@@ -66,7 +68,7 @@ public class AmILabComponent extends AgentComponent
 	/**
 	 * Internal buffer.
 	 */
-	protected AmILabInternalBuffer internalBuffer;
+	protected AmILabBuffer internalBuffer;
 
 	/**
 	 * Thread that feeds the internal and external buffers.
@@ -129,55 +131,6 @@ public class AmILabComponent extends AgentComponent
 		public String getType()
 		{
 			return type;
-		}
-	}
-
-	/**
-	 * The data from the Kestrel queue is moved into the internal buffer.
-	 * 
-	 * @author Claudiu-Mihai Toma
-	 *
-	 */
-	// FIXME: This Class may suffer major modifications or may even be removed.
-	private class AmILabInternalBuffer
-	{
-
-		/**
-		 * Default Constructor.
-		 */
-		public AmILabInternalBuffer()
-		{
-			data = new HashMap<AmILabDataType, String>();
-		}
-
-		/**
-		 * Structure behind the {@link AmILabInternalBuffer}.
-		 */
-		private Map<AmILabDataType, String> data;
-
-		/**
-		 * Returns most recent data of the given {@link AmILabDataType} type.
-		 * 
-		 * @param type
-		 *            - type of data required
-		 * @return most recent data
-		 */
-		public String get(AmILabDataType type)
-		{
-			return data.get(type);
-		}
-
-		/**
-		 * Adds information in the internal buffer.
-		 * 
-		 * @param type
-		 *            - type of data
-		 * @param information
-		 *            - data to be added
-		 */
-		public void add(AmILabDataType type, String information)
-		{
-			data.put(type, information);
 		}
 	}
 
@@ -248,7 +201,7 @@ public class AmILabComponent extends AgentComponent
 					continue;
 
 				// TODO: Extract data from JSON, maybe even deserialize.
-				internalBuffer.add(dataType, kestrelJSON);
+				internalBuffer.put(dataType, new Perception(dataType, 0, kestrelJSON));
 			}
 		}
 	}
@@ -282,7 +235,8 @@ public class AmILabComponent extends AgentComponent
 		kestrelClient = new SimpleKestrelClient(serverIP, serverPort);
 
 		// Start internal buffer and thread.
-		internalBuffer = new AmILabInternalBuffer();
+		List<AmILabDataType> types = new ArrayList<AmILabDataType>(Arrays.asList(AmILabDataType.values()));
+		internalBuffer = new AmILabBuffer(types, LimitType.UNLIMITED);
 		kestrelGatherer = new AmILabThread();
 		kestrelGatherer.start();
 	}
@@ -356,7 +310,7 @@ public class AmILabComponent extends AgentComponent
 		do
 		{
 			// TODO: Make thread safe.
-			data = internalBuffer.get(dataType);
+			data = internalBuffer.getElement(dataType).getData();
 			currentTime = System.currentTimeMillis();
 			currentWait = currentTime - startingTime;
 		} while ((currentWait < wait || infiniteWait) && data == null);
