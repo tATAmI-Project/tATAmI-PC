@@ -61,7 +61,14 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	@Override
 	public void update(Observable o, Object arg)
 	{
+		// Extract perception.
 		Perception perception = (Perception) arg;
+		
+		// Check existence of perception type.
+		if (get(perception.getType()) == null)
+			return;
+
+		// Add perception.
 		put(perception);
 	}
 }

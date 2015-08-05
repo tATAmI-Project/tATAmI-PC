@@ -19,7 +19,7 @@ public class AmILabControllerComponent extends AgentComponent
 	/**
 	 * Number of useless entries.
 	 */
-	private static final int USELESS_DATA_COUNT = 10000;
+	private static final int USELESS_DATA_COUNT = 2000;
 
 	/**
 	 * Useless data.
@@ -34,7 +34,7 @@ public class AmILabControllerComponent extends AgentComponent
 	/**
 	 * Waiting time.
 	 */
-	private static final long WAIT = 5000;
+	private static final long WAIT = 3000;
 
 	/**
 	 * 
@@ -50,17 +50,33 @@ public class AmILabControllerComponent extends AgentComponent
 		super.atSimulationStart(event);
 
 		AmILabComponent amilab = (AmILabComponent) getAgentComponent(AgentComponentName.AMILAB_COMPONENT);
+		amilab.clearQueue();
 		amilab.startInternalBuffer();
 
 		for (int i = 0; i < USELESS_DATA_COUNT; i++)
 		{
 			amilab.set(USELESS_DATA);
+			// amilab.set(DEPTH_DATA);
 		}
 
 		amilab.set(DEPTH_DATA);
 
+		long startingTime = System.currentTimeMillis();
 		System.out.println(amilab.get(AmILabDataType.IMAGE_DEPTH, WAIT));
-		
+		long endingTime = System.currentTimeMillis();
+		System.out.println(endingTime - startingTime);
+
+		System.out.println(amilab.isInternalThreadAlive());
 		amilab.stopInternalBuffer();
+		try
+		{
+			Thread.sleep(10);
+		} catch (InterruptedException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// FIXME: This sometimes returns true.
+		System.out.println(amilab.isInternalThreadAlive());
 	}
 }

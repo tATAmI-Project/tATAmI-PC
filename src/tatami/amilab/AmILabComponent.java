@@ -3,7 +3,6 @@ package tatami.amilab;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Observable;
 import java.util.Queue;
 
 import tatami.amilab.AmILabBuffer.LimitType;
@@ -50,12 +49,6 @@ public class AmILabComponent extends AgentComponent
 	public static final String KESTREL_MEASUREMENTS_QUEUE = "measurements";
 
 	/**
-	 * The time used to reduce thread's CPU consumption.
-	 */
-	// TODO: Make it 50.
-	private static final int TIME_TO_SLEEP = 0;
-
-	/**
 	 * The Kestrel queue that is created on the AmILab Kestrel server. If this
 	 * queue exists, it will be used.
 	 */
@@ -76,6 +69,11 @@ public class AmILabComponent extends AgentComponent
 	 * Thread that feeds the internal and external buffers.
 	 */
 	protected AmILabThread kestrelGatherer;
+
+	/**
+	 * Thread that feeds the internal and external buffers.
+	 */
+	protected Thread supportThread;
 
 	/**
 	 * Enum that defines data types given by AmILab.
@@ -137,89 +135,6 @@ public class AmILabComponent extends AgentComponent
 	}
 
 	/**
-	 * Thread that populates the internal buffer.
-	 * 
-	 * @author Claudiu-Mihai Toma
-	 *
-	 */
-	// private class AmILabThread extends Observable implements Runnable
-	private class AmILabThread extends Thread
-	{
-		/**
-		 * Holds the state of the thread.
-		 */
-		private boolean running;
-
-		/**
-		 * Default constructor.
-		 */
-		public AmILabThread()
-		{
-			running = true;
-		}
-
-		/**
-		 * Stops the thread.
-		 */
-		public void stopThread()
-		{
-			running = false;
-		}
-
-		/**
-		 * Checks if the thread is alive.
-		 * 
-		 * @return {@code true} if alive, {@code false} otherwise
-		 */
-		/*
-		 * public boolean isAlive() { return running; }
-		 */
-
-		@Override
-		public void run()
-		{
-			while (running)
-			{
-				try
-				{
-					Thread.sleep(TIME_TO_SLEEP);
-				} catch (InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-
-				// Receive data from Kestrel queue, which resides on the Kestrel
-				// server.
-				String kestrelJSON;
-				kestrelJSON = kestrelClient.get(kestrelQueueName);
-
-				if (kestrelJSON == null)
-					continue;
-
-				// Get type of data.
-				AmILabDataType dataType = null;
-				for (AmILabDataType itDataType : AmILabDataType.values())
-				{
-					if (kestrelJSON.contains(itDataType.getType()))
-					{
-						dataType = itDataType;
-						break;
-					}
-				}
-
-				// Message has no known type or is corrupt.
-				if (dataType == null)
-					continue;
-
-				// TODO: Extract information from JSON, maybe even deserialize.
-				internalBuffer.put(new Perception(dataType, 0, kestrelJSON));
-
-				//notifyObservers(new Perception(dataType, 0, kestrelJSON));
-			}
-		}
-	}
-
-	/**
 	 * Default constructor.
 	 */
 	public AmILabComponent()
@@ -247,10 +162,9 @@ public class AmILabComponent extends AgentComponent
 		// FIXME: Check if connection is established.
 		kestrelClient = new SimpleKestrelClient(serverIP, serverPort);
 
-		// Start internal buffer and thread.
-		List<AmILabDataType> types = new ArrayList<AmILabDataType>(Arrays.asList(AmILabDataType.values()));
-		internalBuffer = new AmILabBuffer(types, LimitType.UNLIMITED);
-		kestrelGatherer = new AmILabThread();
+		// Make preparations from internal thread.
+		kestrelGatherer = new AmILabThread(kestrelClient, kestrelQueueName);
+		supportThread = new Thread(kestrelGatherer);
 	}
 
 	/**
@@ -360,21 +274,33 @@ public class AmILabComponent extends AgentComponent
 	}
 
 	/**
-	 * Stops the internal thread.
+	 * Starts the internal thread.
 	 */
-	// TODO: Relevant only for testing.
-	public void startInternalThread()
+	protected void startInternalThread()
 	{
-		kestrelGatherer.start();
+		supportThread.start();
 	}
 
 	/**
-	 * Stops the internal thread.
+	 * Stops the internal thread. The user MUST call this if any kind of buffers
+	 * are used.
 	 */
-	// TODO: Relevant only for testing.
+	// TODO: Think of a way so that the user must not call this function. Maybe
+	// a "clearBuffers" method.
 	public void stopInternalThread()
 	{
 		kestrelGatherer.stopThread();
+	}
+
+	/**
+	 * Checks if the internal thread is alive.
+	 * 
+	 * @return state of internal thread
+	 */
+	// TODO: Relevant only for testing.
+	public boolean isInternalThreadAlive()
+	{
+		return kestrelGatherer.isAlive();
 	}
 
 	/**
@@ -382,16 +308,27 @@ public class AmILabComponent extends AgentComponent
 	 */
 	public void startInternalBuffer()
 	{
+		resetInternalBuffer();
+		kestrelGatherer.addObserver(internalBuffer);
+
 		if (!kestrelGatherer.isAlive())
 			startInternalThread();
 	}
 
 	/**
-	 * Starts the internal buffer.
+	 * Stops the internal buffer.
 	 */
 	public void stopInternalBuffer()
 	{
-		if (kestrelGatherer.isAlive())
-			stopInternalThread();
+		kestrelGatherer.deleteObserver(internalBuffer);
+	}
+
+	/**
+	 * Sets (resets) internal buffer.
+	 */
+	protected void resetInternalBuffer()
+	{
+		List<AmILabDataType> types = new ArrayList<AmILabDataType>(Arrays.asList(AmILabDataType.values()));
+		internalBuffer = new AmILabBuffer(types, LimitType.UNLIMITED);
 	}
 }
