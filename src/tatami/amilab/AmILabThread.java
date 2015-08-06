@@ -22,7 +22,7 @@ import tatami.amilab.util.SimpleKestrelClient;
  * @author Claudiu-Mihai Toma
  *
  */
-class AmILabThread extends Observable implements Runnable
+public class AmILabThread extends Observable implements Runnable
 {
 	/**
 	 * The time used to reduce thread's CPU consumption.
@@ -79,10 +79,11 @@ class AmILabThread extends Observable implements Runnable
 
 	/**
 	 * Checks if the thread is alive.
+	 * <p>
+	 * FIXME: This may need a Thread.sleep().
 	 * 
 	 * @return {@code true} if alive, {@code false} otherwise
 	 */
-	// FIXME: This may need a Thread.sleep().
 	public boolean isAlive()
 	{
 		return running;

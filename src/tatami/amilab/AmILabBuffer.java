@@ -20,32 +20,118 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import tatami.amilab.AmILabComponent.AmILabDataType;
 
+/**
+ * Buffer that gets populated by an {@link AmILabThread}.
+ * 
+ * @author Claudiu-Mihai Toma
+ *
+ */
 public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<Perception>>implements Observer
 {
-	private static final int ZERO_ELEMENTS = 0;
+	/**
+	 * The serial UID.
+	 */
+	private static final long serialVersionUID = 3139672506480731805L;
 
+	/**
+	 * Zero
+	 */
+	private static final long ZERO = 0;
+
+	/**
+	 * Used for unlimited buffers.
+	 */
+	private static final long NO_LIMIT = -1;
+
+	/**
+	 * List of {@link AmILabDataType}s the buffer keeps track of.
+	 */
 	private List<AmILabDataType> types;
 
+	/**
+	 * The {@link LimitType} of this buffer.
+	 */
 	private LimitType limitType;
 
-	private int numberOfElements;
+	/**
+	 * The value of the actual limit. Will be treated differently for every
+	 * {@link LimitType}.
+	 */
+	private long limit;
 
+	/**
+	 * Flag is {@code true} if old elements are overwritten.
+	 */
 	private boolean overwrite;
 
+	/**
+	 * Types of limits.
+	 * 
+	 * @author Claudiu-Mihai Toma
+	 *
+	 */
 	public enum LimitType
 	{
-		UNLIMITED, TIME, SIZE, MEMORY_SIZE, SIZE_PER_TYPE,
+		/**
+		 * No limits. Default value.
+		 */
+		UNLIMITED,
+
+		/**
+		 * Time limit. Buffer is always active.
+		 */
+		TIME,
+
+		/**
+		 * Maximum number of elements.
+		 */
+		SIZE,
+
+		/**
+		 * TBD: Maximum memory size.
+		 */
+		MEMORY_SIZE,
+
+		/**
+		 * Maximum number of elements for every type.
+		 */
+		SIZE_PER_TYPE,
 	}
 
-	public AmILabBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType)
+	/**
+	 * Default constructor. Creates an unlimited buffer.
+	 * 
+	 * @param desiredTypes
+	 *            - list of types to keep track of
+	 */
+	public AmILabBuffer(List<AmILabDataType> desiredTypes)
+	{
+		this(desiredTypes, LimitType.UNLIMITED, NO_LIMIT);
+	}
+
+	/**
+	 * Constructs a buffer based on given specifications.
+	 * 
+	 * @param desiredTypes
+	 *            - list of types to keep track of
+	 * @param desiredLimitType
+	 *            - type of buffer
+	 * @param desiredLimit
+	 *            - numerical value of limit; the value is irrelevant if the
+	 *            buffer is unlimited
+	 */
+	public AmILabBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType, long desiredLimit)
 	{
 		types = new ArrayList<AmILabDataType>();
 		types.addAll(desiredTypes);
 		limitType = desiredLimitType;
-		numberOfElements = ZERO_ELEMENTS;
+		limit = desiredLimit;
 		addQueues();
 	}
 
+	/**
+	 * Adds queues for every specific type.
+	 */
 	private void addQueues()
 	{
 		for (AmILabDataType type : types)
@@ -54,19 +140,53 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 		}
 	}
 
+	/**
+	 * Puts {@link Perception} in the internal structure.
+	 * <p>
+	 * TODO: Make private?
+	 * <p>
+	 * TODO: Here goes all the magic: switch case.
+	 * 
+	 * @param perception
+	 *            - only {@link AmILabDataType}s that the buffer keeps track of
+	 */
 	public void put(Perception perception)
 	{
 		get(perception.getType()).add(perception);
 	}
 
+	/**
+	 * Peeks element of given {@link AmILabDataType}.
+	 * 
+	 * @param type
+	 *            - type of data
+	 * @return first element; does not remove it from internal structure
+	 */
 	public Perception peekElement(AmILabDataType type)
 	{
 		return get(type).peek();
 	}
 
+	/**
+	 * Gets element of given {@link AmILabDataType}.
+	 * 
+	 * @param type
+	 *            - type of data
+	 * @return first element; removes it from internal structure
+	 */
 	public Perception getElement(AmILabDataType type)
 	{
 		return get(type).poll();
+	}
+
+	/**
+	 * Gets {@link LimitType} of this buffer.
+	 * 
+	 * @return {@link LimitType} of this buffer
+	 */
+	public LimitType getLimitType()
+	{
+		return limitType;
 	}
 
 	@Override

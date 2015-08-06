@@ -23,10 +23,11 @@ import tatami.core.agent.AgentComponent;
 
 /**
  * {@link AgentComponent} that gets data from AmILab.
+ * <p>
+ * FIXME: Write a bit more...
  * 
  * @author Claudiu-Mihai Toma
  */
-// FIXME: Write a bit more...
 public class AmILabComponent extends AgentComponent
 {
 
@@ -61,10 +62,16 @@ public class AmILabComponent extends AgentComponent
 	public static final String KESTREL_MEASUREMENTS_QUEUE = "measurements";
 
 	/**
+	 * Size of the internal buffer.
+	 */
+	private static final long INTERNAL_BUFFER_SIZE = 1;
+
+	/**
 	 * The Kestrel queue that is created on the AmILab Kestrel server. If this
 	 * queue exists, it will be used.
+	 * <p>
+	 * TODO: Remove this or just make another constructor.
 	 */
-	// TODO: Remove this or just make another constructor.
 	protected String kestrelQueueName;
 
 	/**
@@ -272,22 +279,23 @@ public class AmILabComponent extends AgentComponent
 		if (internalBuffer == null)
 			System.out.print("not ");
 		System.out.println("active");
-		
+
 		if (dataQueue.isEmpty())
 			return null;
 
 		data = dataQueue.peek().getData();
-		
+
 		return data;
 	}
 
 	/**
 	 * Pushes a message to the Kestrel queue.
+	 * <p>
+	 * TODO: Relevant only for testing.
 	 * 
 	 * @param message
 	 *            - message to be pushed
 	 */
-	// TODO: Relevant only for testing.
 	public void set(String message)
 	{
 		kestrelClient.set(kestrelQueueName, message);
@@ -295,8 +303,9 @@ public class AmILabComponent extends AgentComponent
 
 	/**
 	 * Clears Kestrel queue.
+	 * <p>
+	 * TODO: Relevant only for testing.
 	 */
-	// TODO: Relevant only for testing.
 	public void clearQueue()
 	{
 		String data = null;
@@ -318,9 +327,10 @@ public class AmILabComponent extends AgentComponent
 	/**
 	 * Stops the internal thread. The user MUST call this if any kind of buffers
 	 * are used.
+	 * <p>
+	 * TODO: Think of a way so that the user must not call this function. Maybe
+	 * a "clearBuffers" or "closeBuffers" method.
 	 */
-	// TODO: Think of a way so that the user must not call this function. Maybe
-	// a "clearBuffers" method.
 	public void stopInternalThread()
 	{
 		kestrelGatherer.stopThread();
@@ -328,10 +338,11 @@ public class AmILabComponent extends AgentComponent
 
 	/**
 	 * Checks if the internal thread is alive.
+	 * <p>
+	 * TODO: Relevant only for testing.
 	 * 
 	 * @return state of internal thread
 	 */
-	// TODO: Relevant only for testing.
 	public boolean isInternalThreadAlive()
 	{
 		return kestrelGatherer.isAlive();
@@ -364,6 +375,6 @@ public class AmILabComponent extends AgentComponent
 	protected void resetInternalBuffer()
 	{
 		List<AmILabDataType> types = new ArrayList<AmILabDataType>(Arrays.asList(AmILabDataType.values()));
-		internalBuffer = new AmILabBuffer(types, LimitType.UNLIMITED);
+		internalBuffer = new AmILabBuffer(types, LimitType.SIZE_PER_TYPE, INTERNAL_BUFFER_SIZE);
 	}
 }
