@@ -26,9 +26,17 @@ class AmILabThread extends Observable implements Runnable
 {
 	/**
 	 * The time used to reduce thread's CPU consumption.
+	 * <p>
+	 * TODO: Make it 50 (or something not zero).
 	 */
-	// TODO: Make it 50 (or something not zero).
 	private static final int TIME_TO_SLEEP = 0;
+
+	/**
+	 * Default timestamp.
+	 * <p>
+	 * TODO: Add correct timestamp.
+	 */
+	public static final int DEFAULT_TIMESTAMP = 0;
 
 	/**
 	 * Holds the state of the thread.
@@ -106,27 +114,42 @@ class AmILabThread extends Observable implements Runnable
 			String kestrelJSON;
 			kestrelJSON = kestrelClient.get(kestrelQueueName);
 
-			if (kestrelJSON == null)
-				continue;
-
 			// Get type of data.
-			AmILabDataType dataType = null;
-			for (AmILabDataType itDataType : AmILabDataType.values())
-			{
-				if (kestrelJSON.contains(itDataType.getType()))
-				{
-					dataType = itDataType;
-					break;
-				}
-			}
+			AmILabDataType dataType = getTypeOfData(kestrelJSON);
 
 			// Message has no known type or is corrupt.
 			if (dataType == null)
 				continue;
 
-			// TODO: Extract information from JSON, maybe even deserialize.
+			// TODO: Extract information from JSON, maybe even deserialize. Make
+			// it a static method.
 			setChanged();
-			notifyObservers(new Perception(dataType, 0, kestrelJSON));
+			notifyObservers(new Perception(dataType, DEFAULT_TIMESTAMP, kestrelJSON));
 		}
+	}
+
+	/**
+	 * Gets type of data.
+	 * 
+	 * @param data
+	 *            - JSON string from the Kestrel queue
+	 * @return type of given data
+	 */
+	public static AmILabDataType getTypeOfData(String data)
+	{
+		if (data == null)
+			return null;
+
+		AmILabDataType dataType = null;
+		for (AmILabDataType itDataType : AmILabDataType.values())
+		{
+			if (data.contains(itDataType.getType()))
+			{
+				dataType = itDataType;
+				break;
+			}
+		}
+
+		return dataType;
 	}
 }

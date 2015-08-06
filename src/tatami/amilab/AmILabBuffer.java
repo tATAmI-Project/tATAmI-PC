@@ -74,7 +74,7 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	{
 		// Extract perception.
 		Perception perception = (Perception) arg;
-		
+
 		// Check existence of perception type.
 		if (get(perception.getType()) == null)
 			return;

@@ -13,6 +13,7 @@ package tatami.amilab;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
@@ -175,7 +176,9 @@ public class AmILabComponent extends AgentComponent
 
 		// Make preparations from internal thread.
 		kestrelGatherer = new AmILabThread(kestrelClient, kestrelQueueName);
-		supportThread = new Thread(kestrelGatherer);
+
+		// Initialize internal buffer.
+		internalBuffer = null;
 	}
 
 	/**
@@ -184,7 +187,6 @@ public class AmILabComponent extends AgentComponent
 	 * 
 	 * @return first element in the Kestrel queue
 	 */
-	// TODO: Relevant only for testing.
 	public String get()
 	{
 		return kestrelClient.get(kestrelQueueName);
@@ -238,7 +240,13 @@ public class AmILabComponent extends AgentComponent
 		if (wait < 0 && wait != -1)
 			throw new IllegalArgumentException("Second argument [" + wait + "] is not a valid argument.");
 
-		Queue<Perception> dataQueue = internalBuffer.get(dataType);
+		Queue<Perception> dataQueue;
+		// Support inactive internal buffer.
+		if (internalBuffer != null)
+			dataQueue = internalBuffer.get(dataType);
+		else
+			dataQueue = new LinkedList<Perception>();
+
 		String data = null;
 		long startingTime = System.currentTimeMillis();
 		long currentTime;
@@ -249,13 +257,27 @@ public class AmILabComponent extends AgentComponent
 		{
 			currentTime = System.currentTimeMillis();
 			currentWait = currentTime - startingTime;
+
+			if (internalBuffer == null)
+			{
+				data = get();
+				AmILabDataType typeOfData = AmILabThread.getTypeOfData(data);
+				if (dataType.equals(typeOfData))
+					dataQueue.add(new Perception(dataType, AmILabThread.DEFAULT_TIMESTAMP, data));
+			}
+
 		} while ((currentWait < wait || infiniteWait) && dataQueue.isEmpty());
 
+		System.out.print("internal buffer state: ");
+		if (internalBuffer == null)
+			System.out.print("not ");
+		System.out.println("active");
+		
 		if (dataQueue.isEmpty())
 			return null;
 
 		data = dataQueue.peek().getData();
-
+		
 		return data;
 	}
 
@@ -289,6 +311,7 @@ public class AmILabComponent extends AgentComponent
 	 */
 	protected void startInternalThread()
 	{
+		supportThread = new Thread(kestrelGatherer);
 		supportThread.start();
 	}
 
@@ -332,6 +355,7 @@ public class AmILabComponent extends AgentComponent
 	public void stopInternalBuffer()
 	{
 		kestrelGatherer.deleteObserver(internalBuffer);
+		internalBuffer = null;
 	}
 
 	/**

@@ -30,7 +30,7 @@ public class AmILabControllerComponent extends AgentComponent
 	/**
 	 * Number of useless entries.
 	 */
-	private static final int USELESS_DATA_COUNT = 2000;
+	private static final int USELESS_DATA_COUNT = 1000;
 
 	/**
 	 * Useless data.
@@ -61,33 +61,39 @@ public class AmILabControllerComponent extends AgentComponent
 		super.atSimulationStart(event);
 
 		AmILabComponent amilab = (AmILabComponent) getAgentComponent(AgentComponentName.AMILAB_COMPONENT);
-		amilab.clearQueue();
-		amilab.startInternalBuffer();
-
-		for (int i = 0; i < USELESS_DATA_COUNT; i++)
+		for (int iter = 0; iter < 10; iter++)
 		{
-			amilab.set(USELESS_DATA);
-			// amilab.set(DEPTH_DATA);
+			System.out.println();
+			amilab.clearQueue();
+			if (iter%2 == 0)
+				amilab.startInternalBuffer();
+
+			for (int i = 0; i < USELESS_DATA_COUNT; i++)
+			{
+				amilab.set(USELESS_DATA);
+				// amilab.set(DEPTH_DATA);
+			}
+
+			amilab.set(DEPTH_DATA);
+
+			long startingTime = System.currentTimeMillis();
+			System.out.println("data: " + amilab.get(AmILabDataType.IMAGE_DEPTH, WAIT));
+			long endingTime = System.currentTimeMillis();
+			System.out.println("time taken: " + (endingTime - startingTime));
+
+			System.out.println("IB active before stopping: " + amilab.isInternalThreadAlive());
+			amilab.stopInternalBuffer();
+			// Needs sleep to fully stop. May include in documentation.
+			try
+			{
+				Thread.sleep(10);
+			} catch (InterruptedException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			// FIXME: This sometimes returns true.
+			System.out.println("IB active after stopping: " + amilab.isInternalThreadAlive());
 		}
-
-		amilab.set(DEPTH_DATA);
-
-		long startingTime = System.currentTimeMillis();
-		System.out.println(amilab.get(AmILabDataType.IMAGE_DEPTH, WAIT));
-		long endingTime = System.currentTimeMillis();
-		System.out.println(endingTime - startingTime);
-
-		System.out.println(amilab.isInternalThreadAlive());
-		amilab.stopInternalBuffer();
-		try
-		{
-			Thread.sleep(10);
-		} catch (InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// FIXME: This sometimes returns true.
-		System.out.println(amilab.isInternalThreadAlive());
 	}
 }
