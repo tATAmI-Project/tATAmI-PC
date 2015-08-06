@@ -375,6 +375,6 @@ public class AmILabComponent extends AgentComponent
 	protected void resetInternalBuffer()
 	{
 		List<AmILabDataType> types = new ArrayList<AmILabDataType>(Arrays.asList(AmILabDataType.values()));
-		internalBuffer = new AmILabBuffer(types, LimitType.SIZE_PER_TYPE, INTERNAL_BUFFER_SIZE);
+		internalBuffer = new AmILabBuffer(types, kestrelGatherer, LimitType.SIZE_PER_TYPE, INTERNAL_BUFFER_SIZE);
 	}
 }

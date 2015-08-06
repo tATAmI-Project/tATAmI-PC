@@ -34,14 +34,9 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	private static final long serialVersionUID = 3139672506480731805L;
 
 	/**
-	 * Zero
-	 */
-	private static final long ZERO = 0;
-
-	/**
 	 * Used for unlimited buffers.
 	 */
-	private static final long NO_LIMIT = -1;
+	public static final long NO_LIMIT = -1;
 
 	/**
 	 * List of {@link AmILabDataType}s the buffer keeps track of.
@@ -65,6 +60,11 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	private boolean overwrite;
 
 	/**
+	 * Reference to observed thread.
+	 */
+	private Observable observedThread;
+
+	/**
 	 * Types of limits.
 	 * 
 	 * @author Claudiu-Mihai Toma
@@ -78,24 +78,24 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 		UNLIMITED,
 
 		/**
-		 * Time limit. Buffer is always active.
-		 */
-		TIME,
-
-		/**
 		 * Maximum number of elements.
 		 */
 		SIZE,
 
 		/**
-		 * TBD: Maximum memory size.
-		 */
-		MEMORY_SIZE,
-
-		/**
 		 * Maximum number of elements for every type.
 		 */
 		SIZE_PER_TYPE,
+
+		/**
+		 * Time limit. Buffer is always active.
+		 */
+		TIME,
+
+		/**
+		 * TBD: Maximum memory size.
+		 */
+		MEMORY_SIZE,
 	}
 
 	/**
@@ -103,10 +103,12 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	 * 
 	 * @param desiredTypes
 	 *            - list of types to keep track of
+	 * @param observableThread
+	 *            - reference to observed thread
 	 */
-	public AmILabBuffer(List<AmILabDataType> desiredTypes)
+	public AmILabBuffer(List<AmILabDataType> desiredTypes, Observable observableThread)
 	{
-		this(desiredTypes, LimitType.UNLIMITED, NO_LIMIT);
+		this(desiredTypes, observableThread, LimitType.UNLIMITED, NO_LIMIT);
 	}
 
 	/**
@@ -114,17 +116,26 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	 * 
 	 * @param desiredTypes
 	 *            - list of types to keep track of
+	 * @param observableThread
+	 *            - reference to observed thread
 	 * @param desiredLimitType
 	 *            - type of buffer
 	 * @param desiredLimit
-	 *            - numerical value of limit; the value is irrelevant if the
-	 *            buffer is unlimited
+	 *            - numerical value of limit; the value for {@code UNLIMITED}
+	 *            must be {@code NO_LIMIT} ({@code -1})
 	 */
-	public AmILabBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType, long desiredLimit)
+	public AmILabBuffer(List<AmILabDataType> desiredTypes, Observable observableThread, LimitType desiredLimitType,
+			long desiredLimit)
 	{
 		types = new ArrayList<AmILabDataType>();
 		types.addAll(desiredTypes);
+		observedThread = observableThread;
 		limitType = desiredLimitType;
+
+		if (!(desiredLimit > 0 && !limitType.equals(LimitType.UNLIMITED)
+				|| desiredLimit == NO_LIMIT && limitType.equals(LimitType.UNLIMITED)))
+			throw new IllegalArgumentException("Forth argument [" + desiredLimit + "] is not a valid argument.");
+
 		limit = desiredLimit;
 		addQueues();
 	}
@@ -152,6 +163,35 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	 */
 	public void put(Perception perception)
 	{
+		switch (limitType)
+		{
+		case UNLIMITED:
+			break;
+
+		case SIZE:
+			// Adding the last element.
+			if (getTotalSize() + 1 == limit)
+				stopObserving();
+			break;
+
+		case SIZE_PER_TYPE:
+			// Can add element to its queue?
+			if (getSizeForType(perception.getType()) == limit)
+				return;
+			// Adding the last element.
+			if (getTotalSize() + 1 == limit * types.size())
+				stopObserving();
+			break;
+
+		case TIME:
+			break;
+
+		case MEMORY_SIZE:
+			break;
+
+		default:
+			break;
+		}
 		get(perception.getType()).add(perception);
 	}
 
@@ -187,6 +227,39 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	public LimitType getLimitType()
 	{
 		return limitType;
+	}
+
+	/**
+	 * Computes total size of structure.
+	 * 
+	 * @return total size of structure
+	 */
+	private long getTotalSize()
+	{
+		long totalSize = 0;
+		for (AmILabDataType type : types)
+			totalSize += get(type).size();
+		return totalSize;
+	}
+
+	/**
+	 * Gets size of a specific queue.
+	 * 
+	 * @param type
+	 *            - type of the queue
+	 * @return size of queue
+	 */
+	private long getSizeForType(AmILabDataType type)
+	{
+		return get(type).size();
+	}
+
+	/**
+	 * Cuts connection with the observable thread.
+	 */
+	private void stopObserving()
+	{
+		observedThread.deleteObserver(this);
 	}
 
 	@Override
