@@ -234,7 +234,7 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	 * 
 	 * @return total size of structure
 	 */
-	private long getTotalSize()
+	protected long getTotalSize()
 	{
 		long totalSize = 0;
 		for (AmILabDataType type : types)
@@ -249,7 +249,7 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	 *            - type of the queue
 	 * @return size of queue
 	 */
-	private long getSizeForType(AmILabDataType type)
+	protected long getSizeForType(AmILabDataType type)
 	{
 		return get(type).size();
 	}
@@ -257,7 +257,7 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	/**
 	 * Cuts connection with the observable thread.
 	 */
-	private void stopObserving()
+	protected void stopObserving()
 	{
 		observedThread.deleteObserver(this);
 	}

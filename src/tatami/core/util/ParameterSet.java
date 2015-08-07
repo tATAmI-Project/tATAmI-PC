@@ -137,7 +137,7 @@ public class ParameterSet extends Config implements Serializable
 	 * 
 	 * @param name
 	 *            - the name of the searched entry.
-	 * @return the value associated with the name, or <code>null</code> if the name is nout found.
+	 * @return the value associated with the name, or <code>null</code> if the name is not found.
 	 */
 	public Object getObject(String name)
 	{

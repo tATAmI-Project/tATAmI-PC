@@ -17,9 +17,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import net.xqhs.util.XML.XMLTree.XMLNode;
+import net.xqhs.util.logging.Logger;
 import tatami.amilab.AmILabBuffer.LimitType;
 import tatami.amilab.util.SimpleKestrelClient;
 import tatami.core.agent.AgentComponent;
+import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
  * {@link AgentComponent} that gets data from AmILab.
@@ -60,6 +63,24 @@ public class AmILabComponent extends AgentComponent
 	 * Measurements queue.
 	 */
 	public static final String KESTREL_MEASUREMENTS_QUEUE = "measurements";
+
+	/**
+	 * The name of the parameter in the component parameter set that corresponds
+	 * to the IP.
+	 */
+	private static final String IP = "IP";
+
+	/**
+	 * The name of the parameter in the component parameter set that corresponds
+	 * to the name of the PORT.
+	 */
+	private static final String PORT = "port";
+
+	/**
+	 * The name of the parameter in the component parameter set that corresponds
+	 * to the name of the queue name.
+	 */
+	private static final String QUEUE_NAME = "queue-name";
 
 	/**
 	 * Size of the internal buffer.
@@ -158,34 +179,7 @@ public class AmILabComponent extends AgentComponent
 	 */
 	public AmILabComponent()
 	{
-		this(KESTREL_LOCAL_SERVER_IP, KESTREL_SERVER_PORT, KESTREL_AMILAB_COMPONENT_QUEUE);
-	}
-
-	/**
-	 * Constructor that requires the Kestrel queue name as well as server IP and
-	 * port.
-	 * 
-	 * @param serverIP
-	 *            - server IP address as string
-	 * @param serverPort
-	 *            - server port
-	 * @param queueName
-	 *            - name of the Kestrel queue used by this instance of
-	 *            {@link AmILabComponent}
-	 */
-	public AmILabComponent(String serverIP, int serverPort, String queueName)
-	{
 		super(AgentComponentName.AMILAB_COMPONENT);
-		// Set up connection.
-		kestrelQueueName = queueName;
-		// FIXME: Check if connection is established.
-		kestrelClient = new SimpleKestrelClient(serverIP, serverPort);
-
-		// Make preparations from internal thread.
-		kestrelGatherer = new AmILabThread(kestrelClient, kestrelQueueName);
-
-		// Initialize internal buffer.
-		internalBuffer = null;
 	}
 
 	/**
@@ -275,6 +269,7 @@ public class AmILabComponent extends AgentComponent
 
 		} while ((currentWait < wait || infiniteWait) && dataQueue.isEmpty());
 
+		// TODO: Remove testing prints.
 		System.out.print("internal buffer state: ");
 		if (internalBuffer == null)
 			System.out.print("not ");
@@ -376,5 +371,34 @@ public class AmILabComponent extends AgentComponent
 	{
 		List<AmILabDataType> types = new ArrayList<AmILabDataType>(Arrays.asList(AmILabDataType.values()));
 		internalBuffer = new AmILabBuffer(types, kestrelGatherer, LimitType.SIZE_PER_TYPE, INTERNAL_BUFFER_SIZE);
+	}
+
+	@Override
+	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
+	{
+		if (!super.preload(parameters, scenarioNode, log))
+			return false;
+
+		try
+		{
+			kestrelQueueName = getComponentData().get(QUEUE_NAME);
+			// Set up connection.
+			kestrelClient = new SimpleKestrelClient(getComponentData().get(IP),
+					Integer.parseInt(getComponentData().get(PORT)));
+			// Tests connection.
+			kestrelClient.peek(kestrelQueueName);
+		} catch (Exception e)
+		{
+			log.error("Load AmILabComponent failed: " + PlatformUtils.printException(e));
+			return false;
+		}
+
+		// Make preparations for internal thread.
+		kestrelGatherer = new AmILabThread(kestrelClient, kestrelQueueName);
+
+		// Initialize internal buffer.
+		internalBuffer = null;
+
+		return true;
 	}
 }

@@ -24,7 +24,11 @@
 				<scen:component name="parametric" />
 				<scen:component name="visualizable" />
 				<scen:component name="messaging" />
-				<scen:component name="amilab" />
+				<scen:component name="amilab" >
+					<scen:parameter name="IP" value="127.0.0.1" />
+					<scen:parameter name="port" value="22133" />
+					<scen:parameter name="queue-name" value="AMILAB_COMPONENT_QUEUE" />
+				</scen:component>
 				<scen:component name="testing"
 					classpath="scenario.amilab.AmILabControllerComponent"/>
 				<scen:parameter name="loader" value="composite" />
