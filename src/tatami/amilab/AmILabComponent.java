@@ -385,7 +385,7 @@ public class AmILabComponent extends AgentComponent
 			// Set up connection.
 			kestrelClient = new SimpleKestrelClient(getComponentData().get(IP),
 					Integer.parseInt(getComponentData().get(PORT)));
-			// Tests connection.
+			// Test connection.
 			kestrelClient.peek(kestrelQueueName);
 		} catch (Exception e)
 		{

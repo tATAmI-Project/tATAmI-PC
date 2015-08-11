@@ -31,5 +31,6 @@
 	<classpathentry kind="lib" path="libs-kestrel/util-collection-3.0.0.jar"/>
 	<classpathentry kind="lib" path="libs-kestrel/util-core-3.0.0.jar"/>
 	<classpathentry kind="lib" path="libs-kestrel/util-hashing-3.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-json/jackson-all-1.9.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

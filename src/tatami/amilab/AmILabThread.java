@@ -11,7 +11,13 @@
  ******************************************************************************/
 package tatami.amilab;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Observable;
+
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import tatami.amilab.AmILabComponent.AmILabDataType;
 import tatami.amilab.util.SimpleKestrelClient;
@@ -37,6 +43,11 @@ public class AmILabThread extends Observable implements Runnable
 	 * TODO: Add correct timestamp.
 	 */
 	public static final int DEFAULT_TIMESTAMP = 0;
+
+	/**
+	 * Timestamp string found in JSONs.
+	 */
+	public static final String TIMESTAMP = "created_at";
 
 	/**
 	 * Holds the state of the thread.
@@ -122,10 +133,12 @@ public class AmILabThread extends Observable implements Runnable
 			if (dataType == null)
 				continue;
 
+			Perception perception = null;
+
 			// TODO: Extract information from JSON, maybe even deserialize. Make
 			// it a static method.
 			setChanged();
-			notifyObservers(new Perception(dataType, DEFAULT_TIMESTAMP, kestrelJSON));
+			notifyObservers(createPerception(dataType, kestrelJSON));
 		}
 	}
 
@@ -152,5 +165,48 @@ public class AmILabThread extends Observable implements Runnable
 		}
 
 		return dataType;
+	}
+
+	/**
+	 * Gets timestamp from a JSON.
+	 * 
+	 * @param JSON
+	 *            - entry from an AmILab Kestrel queue
+	 * @return time of creation in Unix time; {@code -1} if timestamp could not be
+	 *         extracted
+	 */
+	public static long getTimestamp(String JSON)
+	{
+		HashMap<?, ?> parsedJson = null;
+		long timestamp;
+		try
+		{
+			parsedJson = new ObjectMapper().readValue(JSON, HashMap.class);
+			timestamp = Long.parseLong((String) parsedJson.get(TIMESTAMP));
+		} catch (Exception e)
+		{
+			return -1;
+		}
+
+		return timestamp;
+	}
+
+	/**
+	 * Creates a perception from given parameters.
+	 * 
+	 * @param dataType
+	 *            - type of data
+	 * @param JSON
+	 *            - entry from an AmILab Kestrel queue
+	 * @return new {@link Perception} object
+	 */
+	public static Perception createPerception(AmILabDataType dataType, String JSON)
+	{
+		long timestamp = getTimestamp(JSON);
+		if (timestamp == -1)
+		{
+			return null;
+		}
+		return new Perception(dataType, timestamp, JSON);
 	}
 }
