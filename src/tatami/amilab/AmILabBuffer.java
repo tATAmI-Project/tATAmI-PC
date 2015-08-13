@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import tatami.amilab.AmILabComponent.AmILabDataType;
@@ -184,6 +185,14 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 			break;
 
 		case TIME:
+			// Remove old entries.
+			for (Queue<Perception> queue : values())
+			{
+				while (queue.peek() != null && (System.currentTimeMillis() - queue.peek().getTimestamp() > limit))
+				{
+					queue.poll();
+				}
+			}
 			break;
 
 		case MEMORY_SIZE:

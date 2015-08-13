@@ -262,9 +262,9 @@ public class AmILabComponent extends AgentComponent
 			if (internalBuffer == null)
 			{
 				data = get();
-				AmILabDataType typeOfData = AmILabThread.getTypeOfData(data);
-				if (dataType.equals(typeOfData))
-					dataQueue.add(new Perception(dataType, AmILabThread.DEFAULT_TIMESTAMP, data));
+				Perception perception = AmILabThread.createPerception(data);
+				if (perception != null && dataType.equals(perception.getType()))
+					dataQueue.add(perception);
 			}
 
 		} while ((currentWait < wait || infiniteWait) && dataQueue.isEmpty());

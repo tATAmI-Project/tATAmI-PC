@@ -11,12 +11,9 @@
  ******************************************************************************/
 package tatami.amilab;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Observable;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import tatami.amilab.AmILabComponent.AmILabDataType;
@@ -48,6 +45,11 @@ public class AmILabThread extends Observable implements Runnable
 	 * Timestamp string found in JSONs.
 	 */
 	public static final String TIMESTAMP = "created_at";
+
+	/**
+	 * Data type string found in JSONs.
+	 */
+	public static final String DATA_TYPE = "type";
 
 	/**
 	 * Holds the state of the thread.
@@ -126,19 +128,15 @@ public class AmILabThread extends Observable implements Runnable
 			String kestrelJSON;
 			kestrelJSON = kestrelClient.get(kestrelQueueName);
 
-			// Get type of data.
-			AmILabDataType dataType = getTypeOfData(kestrelJSON);
+			// Create perception from raw JSON.
+			Perception perception = createPerception(kestrelJSON);
 
-			// Message has no known type or is corrupt.
-			if (dataType == null)
+			if (perception == null)
 				continue;
 
-			Perception perception = null;
-
-			// TODO: Extract information from JSON, maybe even deserialize. Make
-			// it a static method.
+			// Send perception to all buffers.
 			setChanged();
-			notifyObservers(createPerception(dataType, kestrelJSON));
+			notifyObservers(perception);
 		}
 	}
 
@@ -157,7 +155,7 @@ public class AmILabThread extends Observable implements Runnable
 		AmILabDataType dataType = null;
 		for (AmILabDataType itDataType : AmILabDataType.values())
 		{
-			if (data.contains(itDataType.getType()))
+			if (data.equals(itDataType.getType()))
 			{
 				dataType = itDataType;
 				break;
@@ -172,8 +170,8 @@ public class AmILabThread extends Observable implements Runnable
 	 * 
 	 * @param JSON
 	 *            - entry from an AmILab Kestrel queue
-	 * @return time of creation in Unix time; {@code -1} if timestamp could not be
-	 *         extracted
+	 * @return time of creation in Unix time; {@code -1} if timestamp could not
+	 *         be extracted
 	 */
 	public static long getTimestamp(String JSON)
 	{
@@ -194,19 +192,35 @@ public class AmILabThread extends Observable implements Runnable
 	/**
 	 * Creates a perception from given parameters.
 	 * 
-	 * @param dataType
-	 *            - type of data
 	 * @param JSON
 	 *            - entry from an AmILab Kestrel queue
 	 * @return new {@link Perception} object
 	 */
-	public static Perception createPerception(AmILabDataType dataType, String JSON)
+	public static Perception createPerception(String JSON)
 	{
-		long timestamp = getTimestamp(JSON);
-		if (timestamp == -1)
+		HashMap<?, ?> parsedJson = null;
+		long timestamp;
+		String dataTypeString = null;
+		AmILabDataType dataType = null;
+		try
+		{
+			// Parse JSON into a tree. Intermediate nodes are HashMaps. Leafs are strings.
+			// TODO: Check if leafs are strings.
+			parsedJson = new ObjectMapper().readValue(JSON, HashMap.class);
+			timestamp = Long.parseLong((String) parsedJson.get(TIMESTAMP));
+			dataTypeString = (String) parsedJson.get(DATA_TYPE);
+			dataType = getTypeOfData(dataTypeString);
+		} catch (Exception e)
 		{
 			return null;
 		}
+
+		if (dataType == null)
+		{
+			return null;
+		}
+
+		// TODO: Extract information from JSON, maybe even deserialize.
 		return new Perception(dataType, timestamp, JSON);
 	}
 }
