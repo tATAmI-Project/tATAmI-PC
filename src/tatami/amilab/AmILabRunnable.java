@@ -20,19 +20,20 @@ import tatami.amilab.AmILabComponent.AmILabDataType;
 import tatami.amilab.util.SimpleKestrelClient;
 
 /**
- * Thread that populates buffers. Without buffers it dies.
+ * Runnable that populates buffers. Without buffers it dies.
  * 
  * @author Claudiu-Mihai Toma
  *
  */
-public class AmILabThread extends Observable implements Runnable
+public class AmILabRunnable extends Observable implements Runnable
 {
 	/**
 	 * The time used to reduce thread's CPU consumption.
 	 * <p>
 	 * TODO: Make it 50 (or something not zero).
 	 */
-	private static final int TIME_TO_SLEEP = 0;
+	// private static final int TIME_TO_SLEEP = 0;
+	private static final int TIME_TO_SLEEP = 50;
 
 	/**
 	 * Default timestamp.
@@ -75,7 +76,7 @@ public class AmILabThread extends Observable implements Runnable
 	 * @param queueName
 	 *            - name of the queue
 	 */
-	public AmILabThread(SimpleKestrelClient client, String queueName)
+	public AmILabRunnable(SimpleKestrelClient client, String queueName)
 	{
 		running = false;
 		kestrelClient = client;
@@ -127,6 +128,10 @@ public class AmILabThread extends Observable implements Runnable
 			// server.
 			String kestrelJSON;
 			kestrelJSON = kestrelClient.get(kestrelQueueName);
+
+			// Testing
+			// TODO: Remove this
+			System.out.println(kestrelJSON);
 
 			// Create perception from raw JSON.
 			Perception perception = createPerception(kestrelJSON);
@@ -204,7 +209,8 @@ public class AmILabThread extends Observable implements Runnable
 		AmILabDataType dataType = null;
 		try
 		{
-			// Parse JSON into a tree. Intermediate nodes are HashMaps. Leafs are strings.
+			// Parse JSON into a tree. Intermediate nodes are HashMaps. Leafs
+			// are strings.
 			// TODO: Check if leafs are strings.
 			parsedJson = new ObjectMapper().readValue(JSON, HashMap.class);
 			timestamp = Long.parseLong((String) parsedJson.get(TIMESTAMP));

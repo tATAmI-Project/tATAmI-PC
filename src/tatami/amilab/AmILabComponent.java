@@ -103,15 +103,15 @@ public class AmILabComponent extends AgentComponent
 	/**
 	 * Internal buffer.
 	 */
-	protected AmILabBuffer internalBuffer;
+	protected AmILabMutableBuffer internalBuffer;
 
 	/**
-	 * Thread that feeds the internal and external buffers.
+	 * Runnable that feeds the internal and external buffers.
 	 */
-	protected AmILabThread kestrelGatherer;
+	protected AmILabRunnable kestrelGatherer;
 
 	/**
-	 * Thread that feeds the internal and external buffers.
+	 * Support thread for the {@link AmILabRunnable}.
 	 */
 	protected Thread supportThread;
 
@@ -244,7 +244,7 @@ public class AmILabComponent extends AgentComponent
 		Queue<Perception> dataQueue;
 		// Support inactive internal buffer.
 		if (internalBuffer != null)
-			dataQueue = internalBuffer.get(dataType);
+			dataQueue = internalBuffer.getQueue(dataType);
 		else
 			dataQueue = new LinkedList<Perception>();
 
@@ -262,7 +262,7 @@ public class AmILabComponent extends AgentComponent
 			if (internalBuffer == null)
 			{
 				data = get();
-				Perception perception = AmILabThread.createPerception(data);
+				Perception perception = AmILabRunnable.createPerception(data);
 				if (perception != null && dataType.equals(perception.getType()))
 					dataQueue.add(perception);
 			}
@@ -370,7 +370,81 @@ public class AmILabComponent extends AgentComponent
 	protected void resetInternalBuffer()
 	{
 		List<AmILabDataType> types = new ArrayList<AmILabDataType>(Arrays.asList(AmILabDataType.values()));
-		internalBuffer = new AmILabBuffer(types, kestrelGatherer, LimitType.SIZE_PER_TYPE, INTERNAL_BUFFER_SIZE);
+		internalBuffer = startCyclicMutableBuffer(types, LimitType.SIZE_PER_TYPE, INTERNAL_BUFFER_SIZE);
+	}
+
+	/**
+	 * 
+	 * @param desiredTypes
+	 *            - list of types to keep track of
+	 * @param desiredLimitType
+	 *            - type of buffer
+	 * @param desiredLimit
+	 *            - numerical value of limit; the value for {@code UNLIMITED}
+	 *            must be {@code NO_LIMIT} ({@code -1})
+	 * @param notificationTarget
+	 *            - target to be notified
+	 * @return the buffer; note that it may not be full
+	 */
+	public AmILabBuffer startBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType, long desiredLimit,
+			NotificationTarget notificationTarget)
+	{
+		return new AmILabBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, false,
+				notificationTarget);
+	}
+
+	/**
+	 * 
+	 * @param desiredTypes
+	 *            - list of types to keep track of
+	 * @param desiredLimitType
+	 *            - type of buffer
+	 * @param desiredLimit
+	 *            - numerical value of limit; the value for {@code UNLIMITED}
+	 *            must be {@code NO_LIMIT} ({@code -1})
+	 * @param notificationTarget
+	 *            - target to be notified
+	 * @return the buffer; note that it may not be full
+	 */
+	public AmILabMutableBuffer startMutableBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType,
+			long desiredLimit, NotificationTarget notificationTarget)
+	{
+		return new AmILabMutableBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, false,
+				notificationTarget);
+	}
+
+	/**
+	 * 
+	 * @param desiredTypes
+	 *            - list of types to keep track of
+	 * @param desiredLimitType
+	 *            - type of buffer
+	 * @param desiredLimit
+	 *            - numerical value of limit; the value for {@code UNLIMITED}
+	 *            must be {@code NO_LIMIT} ({@code -1})
+	 * @return the buffer; note that it may not be full
+	 */
+	public AmILabBuffer startCyclicBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType,
+			long desiredLimit)
+	{
+		return new AmILabBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, true, null);
+	}
+
+	/**
+	 * 
+	 * @param desiredTypes
+	 *            - list of types to keep track of
+	 * @param desiredLimitType
+	 *            - type of buffer
+	 * @param desiredLimit
+	 *            - numerical value of limit; the value for {@code UNLIMITED}
+	 *            must be {@code NO_LIMIT} ({@code -1})
+	 * @return the buffer; note that it may not be full
+	 */
+	public AmILabMutableBuffer startCyclicMutableBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType,
+			long desiredLimit)
+	{
+		return new AmILabMutableBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, true, null);
 	}
 
 	@Override
@@ -394,7 +468,7 @@ public class AmILabComponent extends AgentComponent
 		}
 
 		// Make preparations for internal thread.
-		kestrelGatherer = new AmILabThread(kestrelClient, kestrelQueueName);
+		kestrelGatherer = new AmILabRunnable(kestrelClient, kestrelQueueName);
 
 		// Initialize internal buffer.
 		internalBuffer = null;

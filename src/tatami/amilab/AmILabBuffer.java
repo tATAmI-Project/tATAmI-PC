@@ -14,6 +14,7 @@ package tatami.amilab;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Queue;
@@ -22,18 +23,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import tatami.amilab.AmILabComponent.AmILabDataType;
 
 /**
- * Buffer that gets populated by an {@link AmILabThread}.
+ * Buffer that gets populated by an {@link AmILabRunnable}.
  * 
  * @author Claudiu-Mihai Toma
  *
  */
-public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<Perception>>implements Observer
+public class AmILabBuffer implements Observer
 {
-	/**
-	 * The serial UID.
-	 */
-	private static final long serialVersionUID = 3139672506480731805L;
-
 	/**
 	 * Used for unlimited buffers.
 	 */
@@ -50,8 +46,7 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	private LimitType limitType;
 
 	/**
-	 * The value of the actual limit. Will be treated differently for every
-	 * {@link LimitType}.
+	 * The value of the actual limit. Will be treated differently for every {@link LimitType}.
 	 */
 	private long limit;
 
@@ -61,9 +56,24 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	private boolean overwrite;
 
 	/**
+	 * Starting time.
+	 */
+	private long startingTime;
+
+	/**
 	 * Reference to observed thread.
 	 */
 	private Observable observedThread;
+
+	/**
+	 * Actual data container.
+	 */
+	protected Map<AmILabDataType, ConcurrentLinkedQueue<Perception>> buffer;
+
+	/**
+	 * Notification target.
+	 */
+	private NotificationTarget target;
 
 	/**
 	 * Types of limits.
@@ -100,19 +110,6 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	}
 
 	/**
-	 * Default constructor. Creates an unlimited buffer.
-	 * 
-	 * @param desiredTypes
-	 *            - list of types to keep track of
-	 * @param observableThread
-	 *            - reference to observed thread
-	 */
-	public AmILabBuffer(List<AmILabDataType> desiredTypes, Observable observableThread)
-	{
-		this(desiredTypes, observableThread, LimitType.UNLIMITED, NO_LIMIT);
-	}
-
-	/**
 	 * Constructs a buffer based on given specifications.
 	 * 
 	 * @param desiredTypes
@@ -122,16 +119,26 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	 * @param desiredLimitType
 	 *            - type of buffer
 	 * @param desiredLimit
-	 *            - numerical value of limit; the value for {@code UNLIMITED}
-	 *            must be {@code NO_LIMIT} ({@code -1})
+	 *            - numerical value of limit; the value for {@code UNLIMITED} must be {@code NO_LIMIT} ({@code -1})
+	 * @param overwriteData
+	 *            - {@code true} if data is continuously overwritten; {@code false} if the updating stops once the limit
+	 *            is reached
+	 *            <p>
+	 *            This parameter has no effect on unlimited buffers.
+	 * @param notificationTarget
+	 *            - target to be notified
 	 */
 	public AmILabBuffer(List<AmILabDataType> desiredTypes, Observable observableThread, LimitType desiredLimitType,
-			long desiredLimit)
+			long desiredLimit, boolean overwriteData, NotificationTarget notificationTarget)
 	{
+		startingTime = System.currentTimeMillis();
+		buffer = new HashMap<AmILabDataType, ConcurrentLinkedQueue<Perception>>();
 		types = new ArrayList<AmILabDataType>();
 		types.addAll(desiredTypes);
 		observedThread = observableThread;
 		limitType = desiredLimitType;
+		overwrite = overwriteData;
+		target = notificationTarget;
 
 		if (!(desiredLimit > 0 && !limitType.equals(LimitType.UNLIMITED)
 				|| desiredLimit == NO_LIMIT && limitType.equals(LimitType.UNLIMITED)))
@@ -148,7 +155,7 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	{
 		for (AmILabDataType type : types)
 		{
-			put(type, new ConcurrentLinkedQueue<Perception>());
+			buffer.put(type, new ConcurrentLinkedQueue<Perception>());
 		}
 	}
 
@@ -161,8 +168,9 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	 * 
 	 * @param perception
 	 *            - only {@link AmILabDataType}s that the buffer keeps track of
+	 * @return {@code true} if the operation is successful; {@code false} otherwise
 	 */
-	public void put(Perception perception)
+	protected boolean put(Perception perception)
 	{
 		switch (limitType)
 		{
@@ -171,28 +179,51 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 
 		case SIZE:
 			// Adding the last element.
-			if (getTotalSize() + 1 == limit)
-				stopObserving();
+			if (getTotalSize() + 1 >= limit)
+				if (overwrite)
+					// TODO: What do I do? :| What elements do i delete? Global
+					// oldest by timestamp?
+					;
+				else
+					// TODO: Must I remove excess elements?
+					stopObserving();
 			break;
 
 		case SIZE_PER_TYPE:
 			// Can add element to its queue?
-			if (getSizeForType(perception.getType()) == limit)
-				return;
+			while (getSizeForType(perception.getType()) > limit)
+			{
+				getElement(perception.getType());
+			}
+
+			if (getSizeForType(perception.getType()) >= limit)
+				if (overwrite)
+					getElement(perception.getType());
+				else
+					return false;
+
 			// Adding the last element.
-			if (getTotalSize() + 1 == limit * types.size())
-				stopObserving();
+			if (getTotalSize() + 1 >= limit * types.size())
+				if (!overwrite)
+					// TODO: Must I remove excess elements?
+					stopObserving();
 			break;
 
 		case TIME:
-			// Remove old entries.
-			for (Queue<Perception> queue : values())
-			{
-				while (queue.peek() != null && (System.currentTimeMillis() - queue.peek().getTimestamp() > limit))
-				{
-					queue.poll();
-				}
-			}
+			// TODO: Users can break the flow if they add elements. Sort elements by timestamp?
+			if (!overwrite)
+			{ // Perception is too old.
+				if (perception.getTimestamp() - startingTime < 0)
+					return false;
+				else
+					// Perception is too new.
+					if (perception.getTimestamp() - startingTime > limit)
+					stopObserving();
+			} else
+				// Remove old entries.
+				for (Queue<Perception> queue : buffer.values())
+					while (queue.peek() != null && (System.currentTimeMillis() - queue.peek().getTimestamp() > limit))
+						queue.remove();
 			break;
 
 		case MEMORY_SIZE:
@@ -201,7 +232,7 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 		default:
 			break;
 		}
-		get(perception.getType()).add(perception);
+		return buffer.get(perception.getType()).add(perception);
 	}
 
 	/**
@@ -213,11 +244,11 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	 */
 	public Perception peekElement(AmILabDataType type)
 	{
-		return get(type).peek();
+		return buffer.get(type).peek();
 	}
 
 	/**
-	 * Gets element of given {@link AmILabDataType}.
+	 * Gets element of given {@link AmILabDataType}. The element is removed from the queue.
 	 * 
 	 * @param type
 	 *            - type of data
@@ -225,7 +256,7 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	 */
 	public Perception getElement(AmILabDataType type)
 	{
-		return get(type).poll();
+		return buffer.get(type).poll();
 	}
 
 	/**
@@ -247,7 +278,7 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	{
 		long totalSize = 0;
 		for (AmILabDataType type : types)
-			totalSize += get(type).size();
+			totalSize += buffer.get(type).size();
 		return totalSize;
 	}
 
@@ -260,25 +291,50 @@ public class AmILabBuffer extends HashMap<AmILabDataType, ConcurrentLinkedQueue<
 	 */
 	protected long getSizeForType(AmILabDataType type)
 	{
-		return get(type).size();
+		return buffer.get(type).size();
 	}
 
 	/**
-	 * Cuts connection with the observable thread.
+	 * Cuts connection with the observable thread and notifies the notification target.
+	 * <p>
+	 * TODO: Update this comment.
 	 */
 	protected void stopObserving()
+	{
+		stopBuffer();
+		if (target != null)
+			target.notify(buffer);
+	}
+
+	/**
+	 * The buffer stops updating.
+	 */
+	public void stopBuffer()
 	{
 		observedThread.deleteObserver(this);
 	}
 
+	/**
+	 * Method called by the observable thread. This method has no effect if called by the user.
+	 * 
+	 * @param o
+	 *            - the observable thread
+	 * @param arg
+	 *            - valid perception instance
+	 */
 	@Override
 	public void update(Observable o, Object arg)
 	{
+		// This prevents the user from effectively calling this method.
+		// TODO: Test this!
+		if (!observedThread.equals(o))
+			return;
+
 		// Extract perception.
 		Perception perception = (Perception) arg;
 
 		// Check existence of perception type.
-		if (get(perception.getType()) == null)
+		if (buffer.get(perception.getType()) == null)
 			return;
 
 		// Add perception.
