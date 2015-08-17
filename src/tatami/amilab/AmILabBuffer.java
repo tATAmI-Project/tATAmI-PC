@@ -13,6 +13,7 @@ package tatami.amilab;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -178,24 +179,29 @@ public class AmILabBuffer implements Observer
 			break;
 
 		case SIZE:
+			// Remove excess elements.
+			while (getTotalSize() > limit)
+				removeOldestEntry();
+
+			// Overwrite an element.
+			if (getTotalSize() >= limit)
+				if (overwrite)
+					removeOldestEntry();
+				else
+					return false;
+
 			// Adding the last element.
 			if (getTotalSize() + 1 >= limit)
-				if (overwrite)
-					// TODO: What do I do? :| What elements do i delete? Global
-					// oldest by timestamp?
-					;
-				else
-					// TODO: Must I remove excess elements?
+				if (!overwrite)
 					stopObserving();
 			break;
 
 		case SIZE_PER_TYPE:
-			// Can add element to its queue?
+			// Remove excess elements.
 			while (getSizeForType(perception.getType()) > limit)
-			{
 				getElement(perception.getType());
-			}
 
+			// Overwrite an element.
 			if (getSizeForType(perception.getType()) >= limit)
 				if (overwrite)
 					getElement(perception.getType());
@@ -205,12 +211,10 @@ public class AmILabBuffer implements Observer
 			// Adding the last element.
 			if (getTotalSize() + 1 >= limit * types.size())
 				if (!overwrite)
-					// TODO: Must I remove excess elements?
 					stopObserving();
 			break;
 
 		case TIME:
-			// TODO: Users can break the flow if they add elements. Sort elements by timestamp?
 			if (!overwrite)
 			{ // Perception is too old.
 				if (perception.getTimestamp() - startingTime < 0)
@@ -274,7 +278,7 @@ public class AmILabBuffer implements Observer
 	 * 
 	 * @return total size of structure
 	 */
-	protected long getTotalSize()
+	public long getTotalSize()
 	{
 		long totalSize = 0;
 		for (AmILabDataType type : types)
@@ -289,9 +293,42 @@ public class AmILabBuffer implements Observer
 	 *            - type of the queue
 	 * @return size of queue
 	 */
-	protected long getSizeForType(AmILabDataType type)
+	public long getSizeForType(AmILabDataType type)
 	{
 		return buffer.get(type).size();
+	}
+
+	/**
+	 * Removes oldest perception (with the smallest timestamp).
+	 */
+	public void removeOldestEntry()
+	{
+		Perception perception = null;
+		Queue<Perception> oldPerceptions = new LinkedList<Perception>();
+		// Gather oldest perceptions (one per queue).
+		for (Queue<Perception> queue : buffer.values())
+		{
+			perception = queue.poll();
+			if (perception != null)
+			{
+				oldPerceptions.add(perception);
+			}
+		}
+
+		// Determine oldest perception.
+		Perception oldestPerception = oldPerceptions.poll();
+		if (oldestPerception == null)
+			return;
+
+		while (!oldPerceptions.isEmpty())
+		{
+			perception = oldPerceptions.remove();
+			if (oldestPerception.getTimestamp() > perception.getTimestamp())
+				oldestPerception = perception;
+		}
+
+		// Remove oldest perception.
+		buffer.get(oldestPerception.getType()).remove();
 	}
 
 	/**

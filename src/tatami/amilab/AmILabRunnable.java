@@ -63,8 +63,7 @@ public class AmILabRunnable extends Observable implements Runnable
 	private SimpleKestrelClient kestrelClient;
 
 	/**
-	 * The Kestrel queue that is created on the AmILab Kestrel server. If this
-	 * queue exists, it will be used.
+	 * The Kestrel queue that is created on the AmILab Kestrel server. If this queue exists, it will be used.
 	 */
 	protected String kestrelQueueName;
 
@@ -136,11 +135,10 @@ public class AmILabRunnable extends Observable implements Runnable
 			// Create perception from raw JSON.
 			Perception perception = createPerception(kestrelJSON);
 
-			if (perception == null)
-				continue;
+			if (perception != null)
+				setChanged();
 
 			// Send perception to all buffers.
-			setChanged();
 			notifyObservers(perception);
 		}
 	}
@@ -175,8 +173,7 @@ public class AmILabRunnable extends Observable implements Runnable
 	 * 
 	 * @param JSON
 	 *            - entry from an AmILab Kestrel queue
-	 * @return time of creation in Unix time; {@code -1} if timestamp could not
-	 *         be extracted
+	 * @return time of creation in Unix time; {@code -1} if timestamp could not be extracted
 	 */
 	public static long getTimestamp(String JSON)
 	{

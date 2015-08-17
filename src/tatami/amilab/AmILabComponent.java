@@ -126,7 +126,7 @@ public class AmILabComponent extends AgentComponent
 		/**
 		 * RGB image
 		 */
-		RGB_IMAGE("image_rgb"),
+		IMAGE_RGB("image_rgb"),
 
 		/**
 		 * Depth image
