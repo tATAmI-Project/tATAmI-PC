@@ -228,10 +228,8 @@ public class AmILabBuffer implements Observer
 
 		case MEMORY_SIZE:
 			break;
-
-		default:
-			break;
 		}
+
 		return buffer.get(perception.getType()).add(perception);
 	}
 
@@ -328,9 +326,7 @@ public class AmILabBuffer implements Observer
 	}
 
 	/**
-	 * Cuts connection with the observable thread and notifies the notification target.
-	 * <p>
-	 * TODO: Update this comment.
+	 * Cuts connection with the observable thread and notifies the notification target (if there is any).
 	 */
 	protected void stopObserving()
 	{

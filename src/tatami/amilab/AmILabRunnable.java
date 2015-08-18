@@ -83,7 +83,8 @@ public class AmILabRunnable extends Observable implements Runnable
 	/**
 	 * Checks if the thread is alive.
 	 * <p>
-	 * FIXME: This may need a Thread.sleep() because it may sometimes return {@code true} shortly after being stopped.
+	 * FIXME: This may need a Thread.sleep() because it may sometimes return {@code true} shortly after being stopped or
+	 * {@code false} shortly after started.
 	 * 
 	 * @return {@code true} if alive, {@code false} otherwise
 	 */
@@ -115,8 +116,6 @@ public class AmILabRunnable extends Observable implements Runnable
 			if (perception != null)
 			{
 				setChanged();
-				// TODO: Remove this.
-				System.out.println(perception.getType().toString() + " " + perception.getTimestamp());
 			}
 
 			// Send perception to all buffers.

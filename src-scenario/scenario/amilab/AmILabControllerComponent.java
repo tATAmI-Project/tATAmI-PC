@@ -11,8 +11,16 @@
  ******************************************************************************/
 package scenario.amilab;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import tatami.amilab.AmILabBuffer;
+import tatami.amilab.AmILabBuffer.LimitType;
 import tatami.amilab.AmILabComponent;
 import tatami.amilab.AmILabComponent.AmILabDataType;
+import tatami.amilab.NotificationTarget;
 import tatami.amilab.Perception;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
@@ -29,6 +37,11 @@ public class AmILabControllerComponent extends AgentComponent
 	private static final long serialVersionUID = 5909313431564468753L;
 
 	/**
+	 * Testing limit.
+	 */
+	private static final long LIMIT = 30 * 1000;
+
+	/**
 	 * Default constructor.
 	 */
 	public AmILabControllerComponent()
@@ -43,15 +56,37 @@ public class AmILabControllerComponent extends AgentComponent
 
 		AmILabComponent amilab = (AmILabComponent) getAgentComponent(AgentComponentName.AMILAB_COMPONENT);
 
-		Perception perception = null;
+		// Perception perception = null;
+		//
+		// perception = amilab.get(AmILabDataType.IMAGE_DEPTH);
+		// System.out.println(perception.getType() + " " + perception.getTimestamp());
+		//
+		// amilab.startInternalBuffer();
+		//
+		// perception = amilab.get(AmILabDataType.IMAGE_DEPTH);
+		// System.out.println(perception.getType() + " " + perception.getTimestamp());
 
-		perception = amilab.get(AmILabDataType.IMAGE_DEPTH);
-		System.out.println(perception.getType() + " " + perception.getTimestamp());
+		List<AmILabDataType> types = new ArrayList<AmILabDataType>();
+		types.add(AmILabDataType.IMAGE_DEPTH);
 
-		amilab.startInternalBuffer();
+		NotificationTarget notificator = new NotificationTarget()
+		{
+			@Override
+			public void notify(Map<AmILabDataType, ConcurrentLinkedQueue<Perception>> bufferResult)
+			{
+				// TODO: Do what?
+			}
+		};
 
-		perception = amilab.get(AmILabDataType.IMAGE_DEPTH);
-		System.out.println(perception.getType() + " " + perception.getTimestamp());
+		AmILabBuffer buffer = amilab.startBuffer(types, LimitType.TIME, LIMIT, notificator);
 
+		// TODO: Wait for what?
+		// while (!ready);
+
+		while (buffer.getTotalSize() != 0)
+		{
+			Perception perception = buffer.getElement(AmILabDataType.IMAGE_DEPTH);
+			System.out.println("testing: " + perception.getType() + " " + perception.getTimestamp());
+		}
 	}
 }

@@ -265,12 +265,6 @@ public class AmILabComponent extends AgentComponent
 
 		} while ((currentWait < wait || infiniteWait) && dataQueue.isEmpty());
 
-		// TODO: Remove testing prints.
-		System.out.print("internal buffer state: ");
-		if (internalBuffer == null)
-			System.out.print("not ");
-		System.out.println("active");
-
 		if (dataQueue.isEmpty())
 			return null;
 
@@ -324,7 +318,7 @@ public class AmILabComponent extends AgentComponent
 	/**
 	 * Checks if the internal thread is alive.
 	 * <p>
-	 * TODO: Relevant only for testing.
+	 * TODO: Public is relevant only for testing. Make it protected!
 	 * 
 	 * @return state of internal thread
 	 */
@@ -422,27 +416,38 @@ public class AmILabComponent extends AgentComponent
 	private AmILabBuffer createBuffer(AmILabBufferType bufferType, List<AmILabDataType> desiredTypes,
 			LimitType desiredLimitType, long desiredLimit, NotificationTarget notificationTarget)
 	{
-		if (!isInternalThreadAlive())
-			startInternalThread();
+		AmILabBuffer buffer = null;
 
 		switch (bufferType)
 		{
 		case BUFFER:
-			return new AmILabBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, false,
+			buffer = new AmILabBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, false,
 					notificationTarget);
+			break;
 
 		case MUTABLE_BUFFER:
-			return new AmILabMutableBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, false,
+			buffer = new AmILabMutableBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, false,
 					notificationTarget);
+			break;
 
 		case CYCLIC_BUFFER:
-			return new AmILabBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, true, null);
+			buffer = new AmILabBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, true, null);
+			break;
 
 		case CYCLIC_MUTABLE_BUFFER:
-			return new AmILabMutableBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, true, null);
+			buffer = new AmILabMutableBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, true, null);
+			break;
 		}
 
-		return null;
+		if (buffer == null)
+			return null;
+
+		kestrelGatherer.addObserver(buffer);
+
+		if (!isInternalThreadAlive())
+			startInternalThread();
+
+		return buffer;
 	}
 
 	/**
