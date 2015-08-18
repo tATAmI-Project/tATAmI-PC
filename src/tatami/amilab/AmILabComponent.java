@@ -373,15 +373,58 @@ public class AmILabComponent extends AgentComponent
 		internalBuffer = startCyclicMutableBuffer(types, LimitType.SIZE_PER_TYPE, INTERNAL_BUFFER_SIZE);
 	}
 
+	/**
+	 * {@code enum} used by the
+	 * {@link AmILabComponent#createBuffer(AmILabBufferType, List, LimitType, long, NotificationTarget) createBuffer}
+	 * helper method.
+	 * 
+	 * @author Claudiu-Mihai Toma
+	 *
+	 */
 	private enum AmILabBufferType
 	{
-		BUFFER, MUTABLE_BUFFER, CYCLIC_BUFFER, CYCLIC_MUTABLE_BUFFER
+		/**
+		 * Simple buffer.
+		 */
+		BUFFER,
+
+		/**
+		 * Simple buffer with setters.
+		 */
+		MUTABLE_BUFFER,
+
+		/**
+		 * Cyclic buffer.
+		 */
+		CYCLIC_BUFFER,
+
+		/**
+		 * Cyclic buffer with setters.
+		 */
+		CYCLIC_MUTABLE_BUFFER
 	}
 
-	// TODO: IMPORTANT!!! Make sure the gatherer is alive!!!
-	private AmILabBuffer bufferCreator(AmILabBufferType bufferType, List<AmILabDataType> desiredTypes,
+	/**
+	 * Creates a buffer based on the specifications. This is a helper method.
+	 * 
+	 * @param bufferType
+	 *            - type of the buffer
+	 * @param desiredTypes
+	 *            - list of types to keep track of
+	 * @param desiredLimitType
+	 *            - type of buffer
+	 * @param desiredLimit
+	 *            - numerical value of limit; the value for {@code UNLIMITED} must be {@code NO_LIMIT} ({@code -1})
+	 * @param notificationTarget
+	 *            - target to be notified
+	 * @return the buffer; note that it may not be full
+	 */
+	private AmILabBuffer createBuffer(AmILabBufferType bufferType, List<AmILabDataType> desiredTypes,
 			LimitType desiredLimitType, long desiredLimit, NotificationTarget notificationTarget)
 	{
+		if (!isInternalThreadAlive())
+			startInternalThread();
+
 		switch (bufferType)
 		{
 		case BUFFER:
@@ -391,6 +434,7 @@ public class AmILabComponent extends AgentComponent
 		case MUTABLE_BUFFER:
 			return new AmILabMutableBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, false,
 					notificationTarget);
+
 		case CYCLIC_BUFFER:
 			return new AmILabBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, true, null);
 
@@ -413,12 +457,10 @@ public class AmILabComponent extends AgentComponent
 	 *            - target to be notified
 	 * @return the buffer; note that it may not be full
 	 */
-	// TODO: Refactor functions. Make helper based on enum.
 	public AmILabBuffer startBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType, long desiredLimit,
 			NotificationTarget notificationTarget)
 	{
-		return new AmILabBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, false,
-				notificationTarget);
+		return createBuffer(AmILabBufferType.BUFFER, desiredTypes, desiredLimitType, desiredLimit, notificationTarget);
 	}
 
 	/**
@@ -436,8 +478,8 @@ public class AmILabComponent extends AgentComponent
 	public AmILabMutableBuffer startMutableBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType,
 			long desiredLimit, NotificationTarget notificationTarget)
 	{
-		return new AmILabMutableBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, false,
-				notificationTarget);
+		return (AmILabMutableBuffer) createBuffer(AmILabBufferType.MUTABLE_BUFFER, desiredTypes, desiredLimitType,
+				desiredLimit, notificationTarget);
 	}
 
 	/**
@@ -453,7 +495,7 @@ public class AmILabComponent extends AgentComponent
 	public AmILabBuffer startCyclicBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType,
 			long desiredLimit)
 	{
-		return new AmILabBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, true, null);
+		return createBuffer(AmILabBufferType.CYCLIC_BUFFER, desiredTypes, desiredLimitType, desiredLimit, null);
 	}
 
 	/**
@@ -469,7 +511,8 @@ public class AmILabComponent extends AgentComponent
 	public AmILabMutableBuffer startCyclicMutableBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType,
 			long desiredLimit)
 	{
-		return new AmILabMutableBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, true, null);
+		return (AmILabMutableBuffer) createBuffer(AmILabBufferType.CYCLIC_MUTABLE_BUFFER, desiredTypes,
+				desiredLimitType, desiredLimit, null);
 	}
 
 	@Override
