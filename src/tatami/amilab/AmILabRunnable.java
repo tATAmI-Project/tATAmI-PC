@@ -29,18 +29,8 @@ public class AmILabRunnable extends Observable implements Runnable
 {
 	/**
 	 * The time used to reduce thread's CPU consumption.
-	 * <p>
-	 * TODO: Make it 50 (or something not zero).
 	 */
-	// private static final int TIME_TO_SLEEP = 0;
-	private static final int TIME_TO_SLEEP = 50;
-
-	/**
-	 * Default timestamp.
-	 * <p>
-	 * TODO: Add correct timestamp.
-	 */
-	public static final int DEFAULT_TIMESTAMP = 0;
+	public static final int TIME_TO_SLEEP = 1 * 1000;
 
 	/**
 	 * Timestamp string found in JSONs.
@@ -93,7 +83,7 @@ public class AmILabRunnable extends Observable implements Runnable
 	/**
 	 * Checks if the thread is alive.
 	 * <p>
-	 * FIXME: This may need a Thread.sleep().
+	 * FIXME: This may need a Thread.sleep() because it may sometimes return {@code true} shortly after being stopped.
 	 * 
 	 * @return {@code true} if alive, {@code false} otherwise
 	 */
@@ -115,6 +105,24 @@ public class AmILabRunnable extends Observable implements Runnable
 				return;
 			}
 
+			// Receive data from Kestrel queue, which resides on the Kestrel server.
+			String kestrelJSON;
+			kestrelJSON = kestrelClient.get(kestrelQueueName);
+
+			// Create perception from raw JSON.
+			Perception perception = createPerception(kestrelJSON);
+
+			if (perception != null)
+			{
+				setChanged();
+				// TODO: Remove this.
+				System.out.println(perception.getType().toString() + " " + perception.getTimestamp());
+			}
+
+			// Send perception to all buffers.
+			notifyObservers(perception);
+
+			// TODO: Sleep here?
 			try
 			{
 				Thread.sleep(TIME_TO_SLEEP);
@@ -122,24 +130,6 @@ public class AmILabRunnable extends Observable implements Runnable
 			{
 				e.printStackTrace();
 			}
-
-			// Receive data from Kestrel queue, which resides on the Kestrel
-			// server.
-			String kestrelJSON;
-			kestrelJSON = kestrelClient.get(kestrelQueueName);
-
-			// Testing
-			// TODO: Remove this
-			System.out.println(kestrelJSON);
-
-			// Create perception from raw JSON.
-			Perception perception = createPerception(kestrelJSON);
-
-			if (perception != null)
-				setChanged();
-
-			// Send perception to all buffers.
-			notifyObservers(perception);
 		}
 	}
 
@@ -158,7 +148,7 @@ public class AmILabRunnable extends Observable implements Runnable
 		AmILabDataType dataType = null;
 		for (AmILabDataType itDataType : AmILabDataType.values())
 		{
-			if (data.equals(itDataType.getType()))
+			if (data.equals(itDataType.toString()))
 			{
 				dataType = itDataType;
 				break;
@@ -201,16 +191,14 @@ public class AmILabRunnable extends Observable implements Runnable
 	public static Perception createPerception(String JSON)
 	{
 		HashMap<?, ?> parsedJson = null;
-		long timestamp;
+		Long timestamp;
 		String dataTypeString = null;
 		AmILabDataType dataType = null;
 		try
 		{
-			// Parse JSON into a tree. Intermediate nodes are HashMaps. Leafs
-			// are strings.
-			// TODO: Check if leafs are strings.
+			// Parse JSON into a tree. Intermediate nodes are HashMaps. Leafs are strings or numbers.
 			parsedJson = new ObjectMapper().readValue(JSON, HashMap.class);
-			timestamp = Long.parseLong((String) parsedJson.get(TIMESTAMP));
+			timestamp = (Long) parsedJson.get(TIMESTAMP);
 			dataTypeString = (String) parsedJson.get(DATA_TYPE);
 			dataType = getTypeOfData(dataTypeString);
 		} catch (Exception e)
@@ -224,6 +212,6 @@ public class AmILabRunnable extends Observable implements Runnable
 		}
 
 		// TODO: Extract information from JSON, maybe even deserialize.
-		return new Perception(dataType, timestamp, JSON);
+		return new Perception(dataType, timestamp.longValue(), JSON);
 	}
 }

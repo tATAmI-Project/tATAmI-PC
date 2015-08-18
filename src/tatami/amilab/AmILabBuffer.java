@@ -162,10 +162,6 @@ public class AmILabBuffer implements Observer
 
 	/**
 	 * Puts {@link Perception} in the internal structure.
-	 * <p>
-	 * TODO: Make private?
-	 * <p>
-	 * TODO: Here goes all the magic: switch case.
 	 * 
 	 * @param perception
 	 *            - only {@link AmILabDataType}s that the buffer keeps track of
@@ -363,7 +359,6 @@ public class AmILabBuffer implements Observer
 	public void update(Observable o, Object arg)
 	{
 		// This prevents the user from effectively calling this method.
-		// TODO: Test this!
 		if (!observedThread.equals(o))
 			return;
 

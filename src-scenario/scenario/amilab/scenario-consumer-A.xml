@@ -25,7 +25,7 @@
 				<scen:component name="visualizable" />
 				<scen:component name="messaging" />
 				<scen:component name="amilab" >
-					<scen:parameter name="IP" value="172.16.7.143" />
+					<scen:parameter name="IP" value="ami-crunch-08.local" />
 					<scen:parameter name="port" value="22133" />
 					<scen:parameter name="queue-name" value="measurements" />
 				</scen:component>

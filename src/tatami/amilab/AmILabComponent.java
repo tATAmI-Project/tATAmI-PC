@@ -22,6 +22,7 @@ import net.xqhs.util.logging.Logger;
 import tatami.amilab.AmILabBuffer.LimitType;
 import tatami.amilab.util.SimpleKestrelClient;
 import tatami.core.agent.AgentComponent;
+import tatami.core.agent.AgentEvent;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
@@ -65,20 +66,17 @@ public class AmILabComponent extends AgentComponent
 	public static final String KESTREL_MEASUREMENTS_QUEUE = "measurements";
 
 	/**
-	 * The name of the parameter in the component parameter set that corresponds
-	 * to the IP.
+	 * The name of the parameter in the component parameter set that corresponds to the IP.
 	 */
 	private static final String IP = "IP";
 
 	/**
-	 * The name of the parameter in the component parameter set that corresponds
-	 * to the name of the PORT.
+	 * The name of the parameter in the component parameter set that corresponds to the name of the PORT.
 	 */
 	private static final String PORT = "port";
 
 	/**
-	 * The name of the parameter in the component parameter set that corresponds
-	 * to the name of the queue name.
+	 * The name of the parameter in the component parameter set that corresponds to the name of the queue name.
 	 */
 	private static final String QUEUE_NAME = "queue-name";
 
@@ -88,10 +86,7 @@ public class AmILabComponent extends AgentComponent
 	private static final long INTERNAL_BUFFER_SIZE = 1;
 
 	/**
-	 * The Kestrel queue that is created on the AmILab Kestrel server. If this
-	 * queue exists, it will be used.
-	 * <p>
-	 * TODO: Remove this or just make another constructor.
+	 * The Kestrel queue that is created on the AmILab Kestrel server. If this queue exists, it will be used.
 	 */
 	protected String kestrelQueueName;
 
@@ -163,12 +158,8 @@ public class AmILabComponent extends AgentComponent
 			type = dataType;
 		}
 
-		/**
-		 * Type getter.
-		 * 
-		 * @return type of this instance
-		 */
-		public String getType()
+		@Override
+		public String toString()
 		{
 			return type;
 		}
@@ -183,8 +174,7 @@ public class AmILabComponent extends AgentComponent
 	}
 
 	/**
-	 * Gets data from Kestrel queue. If the queue is empty it returns
-	 * {@code null}.
+	 * Gets data from Kestrel queue. If the queue is empty it returns {@code null}.
 	 * 
 	 * @return first element in the Kestrel queue
 	 */
@@ -200,7 +190,7 @@ public class AmILabComponent extends AgentComponent
 	 *            - type of data required
 	 * @return data as JSON string
 	 */
-	public String get(AmILabDataType dataType)
+	public Perception get(AmILabDataType dataType)
 	{
 		return get(dataType, -1);
 	}
@@ -211,11 +201,10 @@ public class AmILabComponent extends AgentComponent
 	 * @param dataType
 	 *            - type of data required
 	 * @param wait
-	 *            - {@code true} for blocking effect; {@code false} otherwise
-	 *            (can return {@code null})
+	 *            - {@code true} for blocking effect; {@code false} otherwise (can return {@code null})
 	 * @return data as JSON string
 	 */
-	public String get(AmILabDataType dataType, boolean wait)
+	public Perception get(AmILabDataType dataType, boolean wait)
 	{
 		// Convert boolean to integer.
 		int waitInt = wait ? -1 : 0;
@@ -229,11 +218,11 @@ public class AmILabComponent extends AgentComponent
 	 * @param dataType
 	 *            - type of data required
 	 * @param wait
-	 *            - amount of milliseconds to wait for a queue element (can
-	 *            return {@code null}); {@code -1} for blocking effect
+	 *            - amount of milliseconds to wait for a queue element (can return {@code null}); {@code -1} for
+	 *            blocking effect
 	 * @return data as JSON string
 	 */
-	public String get(AmILabDataType dataType, long wait)
+	public Perception get(AmILabDataType dataType, long wait)
 	{
 		// Set up parameter for infinite wait case.
 		boolean infiniteWait = (wait == -1) ? true : false;
@@ -265,6 +254,13 @@ public class AmILabComponent extends AgentComponent
 				Perception perception = AmILabRunnable.createPerception(data);
 				if (perception != null && dataType.equals(perception.getType()))
 					dataQueue.add(perception);
+				try
+				{
+					Thread.sleep(AmILabRunnable.TIME_TO_SLEEP);
+				} catch (InterruptedException e)
+				{
+					e.printStackTrace();
+				}
 			}
 
 		} while ((currentWait < wait || infiniteWait) && dataQueue.isEmpty());
@@ -278,9 +274,7 @@ public class AmILabComponent extends AgentComponent
 		if (dataQueue.isEmpty())
 			return null;
 
-		data = dataQueue.peek().getData();
-
-		return data;
+		return dataQueue.peek();
 	}
 
 	/**
@@ -320,11 +314,7 @@ public class AmILabComponent extends AgentComponent
 	}
 
 	/**
-	 * Stops the internal thread. The user MUST call this if any kind of buffers
-	 * are used.
-	 * <p>
-	 * TODO: Think of a way so that the user must not call this function. Maybe
-	 * a "clearBuffers" or "closeBuffers" method.
+	 * Stops the internal thread. The user MUST call this if any kind of buffers are used.
 	 */
 	public void stopInternalThread()
 	{
@@ -365,12 +355,50 @@ public class AmILabComponent extends AgentComponent
 	}
 
 	/**
+	 * Checks the state of the internal buffer.
+	 * 
+	 * @return {@code true} if the internal buffer is alive; {@code false} otherwise
+	 */
+	public boolean isInternalBufferAlive()
+	{
+		return internalBuffer != null;
+	}
+
+	/**
 	 * Sets (resets) internal buffer.
 	 */
 	protected void resetInternalBuffer()
 	{
 		List<AmILabDataType> types = new ArrayList<AmILabDataType>(Arrays.asList(AmILabDataType.values()));
 		internalBuffer = startCyclicMutableBuffer(types, LimitType.SIZE_PER_TYPE, INTERNAL_BUFFER_SIZE);
+	}
+
+	private enum AmILabBufferType
+	{
+		BUFFER, MUTABLE_BUFFER, CYCLIC_BUFFER, CYCLIC_MUTABLE_BUFFER
+	}
+
+	// TODO: IMPORTANT!!! Make sure the gatherer is alive!!!
+	private AmILabBuffer bufferCreator(AmILabBufferType bufferType, List<AmILabDataType> desiredTypes,
+			LimitType desiredLimitType, long desiredLimit, NotificationTarget notificationTarget)
+	{
+		switch (bufferType)
+		{
+		case BUFFER:
+			return new AmILabBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, false,
+					notificationTarget);
+
+		case MUTABLE_BUFFER:
+			return new AmILabMutableBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, false,
+					notificationTarget);
+		case CYCLIC_BUFFER:
+			return new AmILabBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, true, null);
+
+		case CYCLIC_MUTABLE_BUFFER:
+			return new AmILabMutableBuffer(desiredTypes, kestrelGatherer, desiredLimitType, desiredLimit, true, null);
+		}
+
+		return null;
 	}
 
 	/**
@@ -380,12 +408,12 @@ public class AmILabComponent extends AgentComponent
 	 * @param desiredLimitType
 	 *            - type of buffer
 	 * @param desiredLimit
-	 *            - numerical value of limit; the value for {@code UNLIMITED}
-	 *            must be {@code NO_LIMIT} ({@code -1})
+	 *            - numerical value of limit; the value for {@code UNLIMITED} must be {@code NO_LIMIT} ({@code -1})
 	 * @param notificationTarget
 	 *            - target to be notified
 	 * @return the buffer; note that it may not be full
 	 */
+	// TODO: Refactor functions. Make helper based on enum.
 	public AmILabBuffer startBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType, long desiredLimit,
 			NotificationTarget notificationTarget)
 	{
@@ -400,8 +428,7 @@ public class AmILabComponent extends AgentComponent
 	 * @param desiredLimitType
 	 *            - type of buffer
 	 * @param desiredLimit
-	 *            - numerical value of limit; the value for {@code UNLIMITED}
-	 *            must be {@code NO_LIMIT} ({@code -1})
+	 *            - numerical value of limit; the value for {@code UNLIMITED} must be {@code NO_LIMIT} ({@code -1})
 	 * @param notificationTarget
 	 *            - target to be notified
 	 * @return the buffer; note that it may not be full
@@ -420,8 +447,7 @@ public class AmILabComponent extends AgentComponent
 	 * @param desiredLimitType
 	 *            - type of buffer
 	 * @param desiredLimit
-	 *            - numerical value of limit; the value for {@code UNLIMITED}
-	 *            must be {@code NO_LIMIT} ({@code -1})
+	 *            - numerical value of limit; the value for {@code UNLIMITED} must be {@code NO_LIMIT} ({@code -1})
 	 * @return the buffer; note that it may not be full
 	 */
 	public AmILabBuffer startCyclicBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType,
@@ -437,8 +463,7 @@ public class AmILabComponent extends AgentComponent
 	 * @param desiredLimitType
 	 *            - type of buffer
 	 * @param desiredLimit
-	 *            - numerical value of limit; the value for {@code UNLIMITED}
-	 *            must be {@code NO_LIMIT} ({@code -1})
+	 *            - numerical value of limit; the value for {@code UNLIMITED} must be {@code NO_LIMIT} ({@code -1})
 	 * @return the buffer; note that it may not be full
 	 */
 	public AmILabMutableBuffer startCyclicMutableBuffer(List<AmILabDataType> desiredTypes, LimitType desiredLimitType,
@@ -474,5 +499,12 @@ public class AmILabComponent extends AgentComponent
 		internalBuffer = null;
 
 		return true;
+	}
+
+	@Override
+	protected void atAgentStop(AgentEvent event)
+	{
+		super.atAgentStop(event);
+		stopInternalThread();
 	}
 }

@@ -13,6 +13,7 @@ package scenario.amilab;
 
 import tatami.amilab.AmILabComponent;
 import tatami.amilab.AmILabComponent.AmILabDataType;
+import tatami.amilab.Perception;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 
@@ -23,32 +24,12 @@ import tatami.core.agent.AgentEvent;
 public class AmILabControllerComponent extends AgentComponent
 {
 	/**
-	 * 
+	 * Serial UID.
 	 */
 	private static final long serialVersionUID = 5909313431564468753L;
 
 	/**
-	 * Number of useless entries.
-	 */
-	private static final int USELESS_DATA_COUNT = 1000;
-
-	/**
-	 * Useless data.
-	 */
-	private static final String USELESS_DATA = "useless data";
-
-	/**
-	 * Depth data.
-	 */
-	private static final String DEPTH_DATA = "image_depth data";
-
-	/**
-	 * Waiting time.
-	 */
-	private static final long WAIT = 3000;
-
-	/**
-	 * 
+	 * Default constructor.
 	 */
 	public AmILabControllerComponent()
 	{
@@ -62,45 +43,15 @@ public class AmILabControllerComponent extends AgentComponent
 
 		AmILabComponent amilab = (AmILabComponent) getAgentComponent(AgentComponentName.AMILAB_COMPONENT);
 
-		// for (int iter = 0; iter < 10; iter++)
-		// {
-		// System.out.println();
-		// amilab.clearQueue();
-		// if (iter%2 == 0)
-		// amilab.startInternalBuffer();
-		//
-		// for (int i = 0; i < USELESS_DATA_COUNT; i++)
-		// {
-		// amilab.set(USELESS_DATA);
-		// // amilab.set(DEPTH_DATA);
-		// }
-		//
-		// amilab.set(DEPTH_DATA);
-		//
-		// long startingTime = System.currentTimeMillis();
-		// System.out.println("data: " + amilab.get(AmILabDataType.IMAGE_DEPTH,
-		// WAIT));
-		// long endingTime = System.currentTimeMillis();
-		// System.out.println("time taken: " + (endingTime - startingTime));
-		//
-		// System.out.println("IB active before stopping: " +
-		// amilab.isInternalThreadAlive());
-		// amilab.stopInternalBuffer();
-		// // Needs sleep to fully stop. May include in documentation.
-		// try
-		// {
-		// Thread.sleep(10);
-		// } catch (InterruptedException e)
-		// {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// // FIXME: This sometimes returns true.
-		// System.out.println("IB active after stopping: " +
-		// amilab.isInternalThreadAlive());
-		// }
-		
+		Perception perception = null;
+
+		perception = amilab.get(AmILabDataType.IMAGE_DEPTH);
+		System.out.println(perception.getType() + " " + perception.getTimestamp());
+
 		amilab.startInternalBuffer();
+
+		perception = amilab.get(AmILabDataType.IMAGE_DEPTH);
+		System.out.println(perception.getType() + " " + perception.getTimestamp());
 
 	}
 }
