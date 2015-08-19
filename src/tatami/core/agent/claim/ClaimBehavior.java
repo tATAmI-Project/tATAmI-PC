@@ -132,6 +132,9 @@ public class ClaimBehavior
 				st.clearSymbolTable(); // reinitialize symbol table
 				return;
 			}
+		// end of behavior: stop behavior and exit execution
+		currentStatement = 0;
+		st.clearSymbolTable(); // reinitialize symbol table
 	}
 	
 	/**
