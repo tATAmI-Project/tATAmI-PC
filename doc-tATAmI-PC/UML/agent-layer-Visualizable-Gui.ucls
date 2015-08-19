@@ -139,166 +139,190 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <association id="16">    
+  <dependency id="16">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="14"/>  
+  </dependency>  
+  <association id="17">    
     <end type="SOURCE" refId="10" navigable="false">      
-      <attribute id="17" name="myAgent">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </attribute>      
-      <multiplicity id="18" minimum="0" maximum="1">        
-        <position height="0" width="0" x="0" y="0"/>      
-      </multiplicity>    
+      <attribute id="18" name="claimComponent"/>      
+      <multiplicity id="19" minimum="0" maximum="1"/>    
     </end>    
     <end type="TARGET" refId="2" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <dependency id="19">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="2"/>  
-  </dependency>  
-  <dependency id="20">    
-    <end type="SOURCE" refId="15"/>    
-    <end type="TARGET" refId="14"/>  
-  </dependency>  
-  <dependency id="21">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="7"/>  
-  </dependency>  
-  <dependency id="22">    
-    <end type="SOURCE" refId="2"/>    
-    <end type="TARGET" refId="5"/>  
-  </dependency>  
+  <association id="20">    
+    <end type="SOURCE" refId="10" navigable="false">      
+      <attribute id="21" name="claimComponent"/>      
+      <multiplicity id="22" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="2" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
   <dependency id="23">    
     <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="3"/>  
+    <end type="TARGET" refId="1"/>  
   </dependency>  
   <dependency id="24">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="5"/>  
-  </dependency>  
-  <dependency id="25">    
     <end type="SOURCE" refId="2"/>    
     <end type="TARGET" refId="1"/>  
   </dependency>  
-  <dependency id="26">    
-    <end type="SOURCE" refId="12"/>    
+  <nesting id="25">    
+    <end type="SOURCE" refId="7"/>    
     <end type="TARGET" refId="8"/>  
+  </nesting>  
+  <dependency id="26">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="5"/>  
   </dependency>  
-  <dependency id="27">    
-    <end type="SOURCE" refId="4"/>    
-    <end type="TARGET" refId="1"/>  
-  </dependency>  
-  <association id="28">    
+  <association id="27">    
     <end type="SOURCE" refId="6" navigable="false">      
-      <attribute id="29" name="gui">        
+      <attribute id="28" name="gui">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
-      <multiplicity id="30" minimum="0" maximum="1">        
+      <multiplicity id="29" minimum="0" maximum="1">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="7" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
+  <dependency id="30">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="12"/>  
+  </dependency>  
   <dependency id="31">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="8"/>  
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="2"/>  
   </dependency>  
   <dependency id="32">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="5"/>  
-  </dependency>  
-  <dependency id="33">    
     <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="1"/>  
+    <end type="TARGET" refId="7"/>  
   </dependency>  
-  <nesting id="34">    
-    <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="8"/>  
-  </nesting>  
-  <nesting id="35">    
-    <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="9"/>  
-  </nesting>  
-  <realization id="36">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="9"/>  
-  </realization>  
-  <association id="37">    
+  <association id="33">    
     <end type="SOURCE" refId="12" navigable="false">      
-      <attribute id="38" name="inputConnections">        
+      <attribute id="34" name="inputConnections">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
-      <multiplicity id="39" minimum="0" maximum="2147483647">        
+      <multiplicity id="35" minimum="0" maximum="2147483647">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="9" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
+  <dependency id="36">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <dependency id="37">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="38">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="39">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
   <dependency id="40">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <dependency id="41">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <dependency id="42">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="6"/>  
+  </dependency>  
+  <dependency id="43">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="44">    
     <end type="SOURCE" refId="2"/>    
     <end type="TARGET" refId="1"/>  
   </dependency>  
-  <generalization id="41">    
-    <end type="SOURCE" refId="13"/>    
-    <end type="TARGET" refId="12"/>  
-  </generalization>  
-  <association id="42">    
+  <association id="45">    
     <end type="SOURCE" refId="1" navigable="false">      
-      <attribute id="43" name="gui">        
+      <attribute id="46" name="gui">        
         <position height="15" width="23" x="624" y="591"/>      
       </attribute>      
-      <multiplicity id="44" minimum="0" maximum="1">        
+      <multiplicity id="47" minimum="0" maximum="1">        
         <position height="15" width="21" x="621" y="576"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="7" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <dependency id="45">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="5"/>  
-  </dependency>  
-  <nesting id="46">    
+  <realization id="48">    
+    <end type="SOURCE" refId="12"/>    
+    <end type="TARGET" refId="7"/>  
+  </realization>  
+  <generalization id="49">    
     <end type="SOURCE" refId="13"/>    
-    <end type="TARGET" refId="14"/>  
-  </nesting>  
-  <dependency id="47">    
-    <end type="SOURCE" refId="15"/>    
     <end type="TARGET" refId="12"/>  
+  </generalization>  
+  <association id="50">    
+    <end type="SOURCE" refId="12" navigable="false">      
+      <attribute id="51" name="defaultInputListener"/>      
+      <multiplicity id="52" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="9" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="53">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="8"/>  
   </dependency>  
-  <association id="48">    
+  <association id="54">    
     <end type="SOURCE" refId="2" navigable="false">      
-      <attribute id="49" name="behaviors">        
+      <attribute id="55" name="behaviors">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
-      <multiplicity id="50" minimum="0" maximum="2147483647">        
+      <multiplicity id="56" minimum="0" maximum="2147483647">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="10" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <dependency id="51">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="5"/>  
-  </dependency>  
-  <realization id="52">    
-    <end type="SOURCE" refId="12"/>    
-    <end type="TARGET" refId="7"/>  
+  <realization id="57">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="9"/>  
   </realization>  
-  <dependency id="53">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="6"/>  
+  <nesting id="58">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="9"/>  
+  </nesting>  
+  <dependency id="59">    
+    <end type="SOURCE" refId="12"/>    
+    <end type="TARGET" refId="8"/>  
   </dependency>  
-  <dependency id="54">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="11"/>  
-  </dependency>  
-  <dependency id="55">    
+  <association id="60">    
+    <end type="SOURCE" refId="12" navigable="false">      
+      <attribute id="61" name="externalDefaultInputListener"/>      
+      <multiplicity id="62" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="9" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="63">    
     <end type="SOURCE" refId="2"/>    
     <end type="TARGET" refId="1"/>  
   </dependency>  
+  <dependency id="64">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <nesting id="65">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="14"/>  
+  </nesting>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
     sort-features="false" accessors="true" visibility="true">    
     <attributes public="true" package="true" protected="true" private="true" static="true"/>    

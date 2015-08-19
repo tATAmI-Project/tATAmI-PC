@@ -37,7 +37,7 @@ public class PCVisualizationGui extends PCDefaultAgentGui
 		c.gridy = 1;
 		c.gridwidth = 2;
 		window.add(centralLogDisplay, c);
-		components.put(VisualizationComponent.CENTRAL_LOG.toString(), centralLogDisplay);
+		addComponent(VisualizationComponent.CENTRAL_LOG.toString(), centralLogDisplay);
 		
 		TextArea graphDisplay = new TextArea();
 		graphDisplay.setMinimumSize(new Dimension(100, 100));
@@ -45,7 +45,7 @@ public class PCVisualizationGui extends PCDefaultAgentGui
 		c.gridy = 1;
 		c.gridwidth = 1;
 		window.add(graphDisplay, c);
-		components.put(VisualizationComponent.AGENT_GRAPH.toString(), graphDisplay);
+		addComponent(VisualizationComponent.AGENT_GRAPH.toString(), graphDisplay);
 		
 		window.setVisible(true);
 	}

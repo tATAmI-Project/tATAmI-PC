@@ -70,10 +70,10 @@ public class GroupCoordonatorAgentGui2 extends PCDefaultAgentGui{
 		con_ta.setMinimumSize(new Dimension(400, 125));
 		window.add(con_ta, c);
 		
-		components.put(DebateGroupComponents.PROOPINION.toString(), pro_ta);
-		components.put(DebateGroupComponents.CONOPINION.toString(), con_ta);
-		components.put(DebateGroupComponents.PROS.toString(), pro_name);
-		components.put(DebateGroupComponents.CONS.toString(), pro_name);
+		addComponent(DebateGroupComponents.PROOPINION.toString(), pro_ta);
+		addComponent(DebateGroupComponents.CONOPINION.toString(), con_ta);
+		addComponent(DebateGroupComponents.PROS.toString(), pro_name);
+		addComponent(DebateGroupComponents.CONS.toString(), pro_name);
 	}
 	
 	@Override
@@ -84,25 +84,25 @@ public class GroupCoordonatorAgentGui2 extends PCDefaultAgentGui{
 		
 		if(compName.compareTo(DebateGroupComponents.CLEAR.toString()) == 0){
 			
-			component = components.get(DebateGroupComponents.PROOPINION.toString());
+			component = getComponent(DebateGroupComponents.PROOPINION.toString());
 			if(component != null && component instanceof TextArea){
 				TextArea ta = (TextArea)component;
 				ta.setText(null);
 			}
-			component = components.get(DebateGroupComponents.CONOPINION.toString());
+			component = getComponent(DebateGroupComponents.CONOPINION.toString());
 			if(component != null && component instanceof TextArea){
 				TextArea ta = (TextArea)component;
 				ta.setText(null);
 			}
 		}
 		else {
-			if(!components.containsKey(compName))
+			if(getComponent(compName) == null)
 			{
 				System.err.println("component [" + componentName + "] not found."); // FIXME: get a log from somewhere
 				return;
 			}
 			
-			component = components.get(compName);
+			component = getComponent(compName);
 			if(component instanceof TextArea)
 			{
 				if(arguments.size() > 0)

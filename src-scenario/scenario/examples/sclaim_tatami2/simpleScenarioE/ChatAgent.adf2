@@ -37,7 +37,7 @@
 		(forAllK (struct knowledge msg ??direction ??sequence ??message)	// go through all messages
 			(assembleOutput ??direction ??sequence ??message ??output)		// put them in the ?output variable; ARTIFICIAL: ?output will be overwritten
 		)
-		(output chatlog ??output)										// display
+		(output chatlog ??output 1)										// display
 	)
 		
 )

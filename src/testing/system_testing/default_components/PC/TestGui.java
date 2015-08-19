@@ -34,9 +34,9 @@ public class TestGui extends PCDefaultAgentGui
 	protected void buildGUI()
 	{
 		JButton theButton = new JButton("Press to exit");
-		components.put(BUTTON_NAME, theButton);
+		addComponent(BUTTON_NAME, theButton);
 		window.add(theButton);
 		
-		components.put(DefaultComponent.AGENT_LOG.toString(), new TextArea()); // will not be used
+		addComponent(DefaultComponent.AGENT_LOG.toString(), new TextArea()); // will not be used
 	}
 }

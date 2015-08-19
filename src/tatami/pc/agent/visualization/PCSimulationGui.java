@@ -45,28 +45,28 @@ public class PCSimulationGui extends PCDefaultAgentGui
 		box.setLayout(new BoxLayout(box, BoxLayout.LINE_AXIS));
 		JButton create = new JButton("Create agents");
 		box.add(create);
-		components.put(SimulationComponent.CREATE.toString(), create);
+		addComponent(SimulationComponent.CREATE.toString(), create);
 		
 		JButton start = new JButton("and Start");
 		box.add(start);
-		components.put(SimulationComponent.START.toString(), start);
+		addComponent(SimulationComponent.START.toString(), start);
 		
 		JLabel displayedTime = new JLabel();
 		displayedTime.setText("--:--.-");
 		box.add(displayedTime);
-		components.put(SimulationComponent.TIME.toString(), displayedTime);
+		addComponent(SimulationComponent.TIME.toString(), displayedTime);
 		
 		JButton pause = new JButton("Pause");
 		box.add(pause);
-		components.put(SimulationComponent.PAUSE.toString(), pause);
+		addComponent(SimulationComponent.PAUSE.toString(), pause);
 		
 		JButton clear = new JButton("Clear agents");
 		box.add(clear);
-		components.put(SimulationComponent.CLEAR.toString(), clear);
+		addComponent(SimulationComponent.CLEAR.toString(), clear);
 		
 		JButton stop = new JButton("Exit");
 		box.add(stop);
-		components.put(SimulationComponent.EXIT.toString(), stop);
+		addComponent(SimulationComponent.EXIT.toString(), stop);
 		
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
