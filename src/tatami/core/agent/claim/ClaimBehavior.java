@@ -57,7 +57,7 @@ import tatami.sclaim.constructs.basic.ClaimWhile;
  * 
  * @author Nguyen Thi Thuy Nga
  * @author Andrei Olaru
- * 
+ * 		
  */
 public class ClaimBehavior
 {
@@ -322,8 +322,9 @@ public class ClaimBehavior
 	 * This deletes the agent with the name specified as the first element of the vector received as argument, from the
 	 * outside.
 	 * 
-	 * @param - args the arguments of the call to "open" construct. The first element of the vector is the name of the
-	 *        agent.
+	 * @param -
+	 *            args the arguments of the call to "open" construct. The first element of the vector is the name of the
+	 *            agent.
 	 * @return - whether the deletion was successful or not
 	 */
 	
@@ -448,12 +449,12 @@ public class ClaimBehavior
 		
 		if(received == null)
 			return false;
-		
+			
 		ClaimStructure toBind = (ClaimStructure) args.get(args.size() - 1); // the last part is the message
 		
 		if(!readValues(received.getFields(), toBind.getFields(), 0))
 		{ // the message does not match the pattern
-		
+			
 			log.trace("message not matching pattern []", content);
 			return false;
 		}
@@ -487,12 +488,12 @@ public class ClaimBehavior
 		ClaimConstruct a0 = args.get(0);
 		String inputComponent = ((a0.getType() == ClaimConstructType.VARIABLE) ? st.get((ClaimVariable) a0)
 				: (ClaimValue) a0).toString();
-		
+				
 		if(activationEvent.getType() == AgentEventType.GUI_INPUT)
 			// FIXME this will make all inputs in the behavior active
 			// input is active
-			if(activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME).equals(
-					inputComponent))
+			if(activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME)
+					.equals(inputComponent))
 				receivedInput = (Vector<Object>) activationEvent
 						.getParameter(VisualizableComponent.GUI_ARGUMENTS_EVENT_PARAMETER_NAME);
 			else
@@ -501,7 +502,7 @@ public class ClaimBehavior
 		else
 			// input is passive
 			receivedInput = claimComponent.getVisualizable().inputFromGUI(inputComponent);
-		
+			
 		Vector<ClaimConstruct> sourceArgs = objects2values(receivedInput);
 		Vector<ClaimConstruct> destinationArgs = new Vector<ClaimConstruct>(args);
 		destinationArgs.remove(0); // this is the name of the component
@@ -531,16 +532,14 @@ public class ClaimBehavior
 		Vector<Object> outV = new Vector<Object>();
 		for(ClaimValue output : outputV)
 			outV.add(output.getValue());
-		if(myAgentGUI != null)
-			myAgentGUI.doOutput((String) outputComponent.getValue(), outV);
-		
-		log.trace("The output [] was written on []", outputV, (String) outputComponent.getValue());
+		claimComponent.getVisualizable().outputToGUI((String) outputComponent.getValue(), outV);
+		log.trace("The output [] was written on []", outputV, outputComponent.getValue());
 		return true;
 	}
 	
 	protected boolean handlePrint(Vector<ClaimConstruct> args)
 	{
-		//log.trace("The message [] was printed on []", ,);
+		// log.trace("The message [] was printed on []", ,);
 		return true;
 	}
 	
@@ -614,9 +613,9 @@ public class ClaimBehavior
 		}
 		
 		boolean returnValue = false;
-		Vector<ClaimConstruct> arguments = new Vector<ClaimConstruct>(flattenConstructs(args, 0,
-				KeepVariables.KEEP_NONE));
-		
+		Vector<ClaimConstruct> arguments = new Vector<ClaimConstruct>(
+				flattenConstructs(args, 0, KeepVariables.KEEP_NONE));
+				
 		log.trace("invoking code attachment function [] with arguments: []", functionName, arguments);
 		try
 		{
@@ -645,8 +644,7 @@ public class ClaimBehavior
 			
 			// add knowledge to the knowledge base of agent
 			kb.add(newKl);
-			log.info(" added new knowledge " + newKl.printlnKnowledge() + " in behavior "
-					+ this.cbd.getName());
+			log.info(" added new knowledge " + newKl.printlnKnowledge() + " in behavior " + this.cbd.getName());
 			return true;
 		}
 		case READK:
@@ -660,7 +658,8 @@ public class ClaimBehavior
 			// FIXME: support multiple types
 			if(result == null)
 				return false; // knowledge was not found
-			return readValues(knowledge2Structure((SimpleKnowledge) result).getFields(), knowledgeStruct.getFields(), 0);
+			return readValues(knowledge2Structure((SimpleKnowledge) result).getFields(), knowledgeStruct.getFields(),
+					0);
 		}
 		case REMOVEK:
 		// function "remove knowledge"
@@ -881,16 +880,17 @@ public class ClaimBehavior
 			return false;
 		}
 		
-		if(!((destType == ClaimConstructType.VALUE || destType == ClaimConstructType.VARIABLE) && (sourceType == ClaimConstructType.VALUE || sourceType == ClaimConstructType.VARIABLE)))
+		if(!((destType == ClaimConstructType.VALUE || destType == ClaimConstructType.VARIABLE)
+				&& (sourceType == ClaimConstructType.VALUE || sourceType == ClaimConstructType.VARIABLE)))
 			return false;
-		
+			
 		ClaimValue destValue = (destType == ClaimConstructType.VALUE) ? (ClaimValue) destField
 				: getVariableValue((ClaimVariable) destField);
 		ClaimValue sourceValue = (sourceType == ClaimConstructType.VALUE) ? (ClaimValue) sourceField
 				: getVariableValue((ClaimVariable) sourceField);
 		boolean assignable = (destType == ClaimConstructType.VARIABLE)
 				&& ((destValue == null) || ((ClaimVariable) destField).isAssignable());
-		
+				
 		if(assignable)
 		{
 			if((sourceValue != null) && ((destValue == null) || !destValue.getValue().equals(sourceValue.getValue())))
@@ -964,15 +964,14 @@ public class ClaimBehavior
 		 * Transforms all variables to values; unassigned / uninstantiated variables will be transformed to
 		 * <code>null</code>.
 		 */
-		KEEP_NONE,
-		/**
-		 * Just like <code>KEEP_NONE</code>, but keeps reassignable variables as {@link ClaimVariable} instances.
-		 */
-		KEEP_REASSIGNABLE,
-		/**
-		 * Assigned variables are replaced by their values; Re-assignables and unassigned variables are kept as
-		 * {@link ClaimVariable} instances.
-		 */
+		KEEP_NONE, /**
+					 * Just like <code>KEEP_NONE</code>, but keeps reassignable variables as {@link ClaimVariable}
+					 * instances.
+					 */
+		KEEP_REASSIGNABLE, /**
+							 * Assigned variables are replaced by their values; Re-assignables and unassigned variables
+							 * are kept as {@link ClaimVariable} instances.
+							 */
 		KEEP_UNISTANTIATED
 	}
 	
@@ -988,7 +987,7 @@ public class ClaimBehavior
 	 *            : what to do with variables: transform to values (or <code>null</code>, if uninstantiated); keep only
 	 *            uninstantiated variables (with the purpose of instantiating them); or keep all variables (with the
 	 *            purpose of changing their value).
-	 * 
+	 * 			
 	 * @return the values of the constructs or uninstantiated variables
 	 */
 	protected Vector<ClaimConstruct> flattenConstructs(List<ClaimConstruct> constructs, int ignore,
@@ -1000,7 +999,7 @@ public class ClaimBehavior
 		{
 			if(toIgnore-- > 0)
 				continue;
-			
+				
 			ClaimConstructType constructType = cons.getType();
 			switch(constructType)
 			{
