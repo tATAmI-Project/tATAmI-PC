@@ -26,7 +26,6 @@ import net.xqhs.util.logging.DumbLogger;
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventType;
-import tatami.core.agent.kb.CognitiveComponent;
 import tatami.core.agent.kb.KnowledgeBase;
 import tatami.core.agent.kb.KnowledgeBase.KnowledgeDescription;
 import tatami.core.agent.kb.simple.SimpleKnowledge;

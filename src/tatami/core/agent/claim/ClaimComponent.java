@@ -42,7 +42,7 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	/**
 	 * The serial version UID.
 	 */
-	private static final long		serialVersionUID				= 0L;
+	private static final long serialVersionUID = 0L;
 	
 	/**
 	 * The name of the component parameter specifying the S-Claim class for the agent.
@@ -56,11 +56,11 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	/**
 	 * Name of the variable which holds the name of this agent.
 	 */
-	protected static final String	THIS_VARIABLE					= "this";
+	protected static final String	THIS_VARIABLE	= "this";
 	/**
 	 * Name of the variable which holds the name of the parent of this agent.
 	 */
-	protected static final String	PARENT_VARIABLE					= "parent";
+	protected static final String	PARENT_VARIABLE	= "parent";
 	
 	/**
 	 * @author Andrei Olaru
@@ -84,7 +84,7 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	/**
 	 * The list of behaviors of the agent.
 	 */
-	protected Vector<ClaimBehavior>	behaviors	= null;
+	protected Vector<ClaimBehavior> behaviors = null;
 	
 	/**
 	 * The agent definition describing this agent.
@@ -114,14 +114,17 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	{
 		if(!super.preload(parameters, scenarioNode, agentPackages, log))
 			return false;
-		
+			
+		// get adf class and java code parameters
 		String adfClass = parameters.get(AGENT_CLASS_COMPONENT_PARAMETER);
 		Collection<String> javaCodeAttachments = parameters.getValues(JAVA_CODE_COMPONENT_PARAMETER);
 		
+		// create CAD
 		cad = ClaimLoader.fillCAD(adfClass, javaCodeAttachments, agentPackages, log);
 		
 		creationData = parameters;
 		
+		// create symbol table
 		st = new SymbolTable(null, cad.getParameters());
 		st.setLogLink(log);
 		
@@ -143,8 +146,9 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 		
 		st.setLogLink(getAgentLog());
 		
-		ParametricComponent parametric = (ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT);
-		
+		ParametricComponent parametric = (ParametricComponent) getAgentComponent(
+				AgentComponentName.PARAMETRIC_COMPONENT);
+				
 		// retrieve parameters specified in the agent
 		if(cad.getParameters() != null)
 		{
@@ -172,8 +176,9 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 		}
 		
 		// bind value for "this" parameter (agent's local name)
-		st.put(new ClaimVariable(THIS_VARIABLE), new ClaimValue(parametric.parVal(AgentParameterName.AGENT_NAME)));
-		
+		if(parametric != null)
+			st.put(new ClaimVariable(THIS_VARIABLE), new ClaimValue(parametric.parVal(AgentParameterName.AGENT_NAME)));
+			
 		behaviors = new Vector<ClaimBehavior>();
 		// create behaviors
 		for(ClaimBehaviorDefinition cbd : cad.getBehaviors())
@@ -224,6 +229,11 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 		return getCognitive().getKB();
 	}
 	
+	/**
+	 * Allows direct access to the cognitive component. If there is none, an exception is thrown.
+	 * 
+	 * @return a reference to the cognitive component.
+	 */
 	protected CognitiveComponent getCognitive()
 	{
 		AgentComponent cg = getAgentComponent(AgentComponentName.COGNITIVE_COMPONENT);
