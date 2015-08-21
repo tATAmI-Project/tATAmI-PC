@@ -11,16 +11,17 @@
  ******************************************************************************/
 package scenario.amilab;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.io.IOException;
+import java.util.HashMap;
 
-import tatami.amilab.AmILabBuffer;
-import tatami.amilab.AmILabBuffer.LimitType;
+import javax.xml.bind.DatatypeConverter;
+
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+
 import tatami.amilab.AmILabComponent;
 import tatami.amilab.AmILabComponent.AmILabDataType;
-import tatami.amilab.NotificationTarget;
 import tatami.amilab.Perception;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
@@ -39,7 +40,7 @@ public class AmILabControllerComponent extends AgentComponent
 	/**
 	 * Testing limit.
 	 */
-	private static final long LIMIT = 30 * 1000;
+	private static final long LIMIT = 0;
 
 	/**
 	 * Default constructor.
@@ -49,6 +50,39 @@ public class AmILabControllerComponent extends AgentComponent
 		super(AgentComponentName.TESTING_COMPONENT);
 	}
 
+	/**
+	 * Extracts an image from a perception.
+	 * 
+	 * @param data
+	 *            - an image depth perception
+	 * @return the image as a byte array
+	 */
+	public static byte[] getImageBytes(Perception data)
+	{
+		HashMap<?, ?> parsedJson = null;
+		try
+		{
+			parsedJson = new ObjectMapper().readValue(data.getData(), HashMap.class);
+			HashMap<?, ?> imageDepth = (HashMap<?, ?>) parsedJson.get("image_depth");
+			String image = (String) imageDepth.get("image");
+			image = image.substring(0, image.length() - 2);
+			return DatatypeConverter.parseBase64Binary(image);
+		} catch (JsonParseException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	@Override
 	protected void atSimulationStart(AgentEvent event)
 	{
@@ -56,37 +90,13 @@ public class AmILabControllerComponent extends AgentComponent
 
 		AmILabComponent amilab = (AmILabComponent) getAgentComponent(AgentComponentName.AMILAB_COMPONENT);
 
-		// Perception perception = null;
-		//
-		// perception = amilab.get(AmILabDataType.IMAGE_DEPTH);
-		// System.out.println(perception.getType() + " " + perception.getTimestamp());
-		//
-		// amilab.startInternalBuffer();
-		//
-		// perception = amilab.get(AmILabDataType.IMAGE_DEPTH);
-		// System.out.println(perception.getType() + " " + perception.getTimestamp());
+		Perception data = null;
+		byte[] image = null;
 
-		List<AmILabDataType> types = new ArrayList<AmILabDataType>();
-		types.add(AmILabDataType.IMAGE_DEPTH);
-
-		NotificationTarget notificator = new NotificationTarget()
+		while (true)
 		{
-			@Override
-			public void notify(Map<AmILabDataType, ConcurrentLinkedQueue<Perception>> bufferResult)
-			{
-				// TODO: Do what?
-			}
-		};
-
-		AmILabBuffer buffer = amilab.startBuffer(types, LimitType.TIME, LIMIT, notificator);
-
-		// TODO: Wait for what?
-		// while (!ready);
-
-		while (buffer.getTotalSize() != 0)
-		{
-			Perception perception = buffer.getElement(AmILabDataType.IMAGE_DEPTH);
-			System.out.println("testing: " + perception.getType() + " " + perception.getTimestamp());
+			data = amilab.get(AmILabDataType.IMAGE_DEPTH);
+			image = getImageBytes(data);
 		}
 	}
 }
