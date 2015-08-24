@@ -11,9 +11,15 @@
  ******************************************************************************/
 package scenario.amilab;
 
+import java.awt.BorderLayout;
 import java.io.IOException;
 import java.util.HashMap;
 
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.Border;
 import javax.xml.bind.DatatypeConverter;
 
 import org.codehaus.jackson.JsonParseException;
@@ -37,10 +43,8 @@ public class AmILabControllerComponent extends AgentComponent
 	 */
 	private static final long serialVersionUID = 5909313431564468753L;
 
-	/**
-	 * Testing limit.
-	 */
-	private static final long LIMIT = 0;
+	private static final int	IMAGE_DEPTH_WIDTH	= 640;
+	private static final int	IMAGE_DEPTH_HEIGHT	= 480;
 
 	/**
 	 * Default constructor.
@@ -63,9 +67,10 @@ public class AmILabControllerComponent extends AgentComponent
 		try
 		{
 			parsedJson = new ObjectMapper().readValue(data.getData(), HashMap.class);
+			if (!parsedJson.get("sensor_id").equals("daq-01"))
+				return null;
 			HashMap<?, ?> imageDepth = (HashMap<?, ?>) parsedJson.get("image_depth");
 			String image = (String) imageDepth.get("image");
-			image = image.substring(0, image.length() - 2);
 			return DatatypeConverter.parseBase64Binary(image);
 		} catch (JsonParseException e)
 		{
@@ -91,12 +96,26 @@ public class AmILabControllerComponent extends AgentComponent
 		AmILabComponent amilab = (AmILabComponent) getAgentComponent(AgentComponentName.AMILAB_COMPONENT);
 
 		Perception data = null;
-		byte[] image = null;
 
+		JFrame frame = new JFrame();
+		frame.setSize(IMAGE_DEPTH_WIDTH, IMAGE_DEPTH_HEIGHT);
+		frame.setVisible(true);
+
+		JLabel label = new JLabel();
+		frame.add(label);
+
+		byte[] imageBytes = null;
+		ImageIcon icon = null;
+
+		amilab.startInternalBuffer();
 		while (true)
 		{
 			data = amilab.get(AmILabDataType.IMAGE_DEPTH);
-			image = getImageBytes(data);
+			imageBytes = getImageBytes(data);
+			if (imageBytes == null)
+				continue;
+			icon = new ImageIcon(imageBytes);
+			label.setIcon(icon);
 		}
 	}
 }

@@ -225,7 +225,7 @@ public class AmILabComponent extends AgentComponent
 	public Perception get(AmILabDataType dataType, long wait)
 	{
 		// Set up parameter for infinite wait case.
-		boolean infiniteWait = (wait == -1) ? true : false;
+		boolean infiniteWait = (wait == -1);
 
 		if (wait < 0 && wait != -1)
 			throw new IllegalArgumentException("Second argument [" + wait + "] is not a valid argument.");
