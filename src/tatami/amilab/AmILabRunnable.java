@@ -30,7 +30,7 @@ public class AmILabRunnable extends Observable implements Runnable
 	/**
 	 * The time used to reduce thread's CPU consumption.
 	 */
-	public static final int TIME_TO_SLEEP = 200;
+	public static final int TIME_TO_SLEEP = 0;
 
 	/**
 	 * Timestamp string found in JSONs.

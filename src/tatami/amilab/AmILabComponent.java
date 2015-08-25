@@ -308,7 +308,7 @@ public class AmILabComponent extends AgentComponent
 	}
 
 	/**
-	 * Stops the internal thread. The user MUST call this if any kind of buffers are used.
+	 * Stops the internal thread.
 	 */
 	public void stopInternalThread()
 	{
