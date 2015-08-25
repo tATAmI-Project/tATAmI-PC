@@ -17,7 +17,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,11 +26,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.xml.bind.DatatypeConverter;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import sun.security.krb5.internal.ccache.CredentialsCache;
 import tatami.amilab.AmILabComponent;
 import tatami.amilab.AmILabComponent.AmILabDataType;
 import tatami.amilab.Perception;
@@ -49,11 +45,29 @@ public class AmILabControllerComponent extends AgentComponent
 	 */
 	private static final long serialVersionUID = 5909313431564468753L;
 
-	private static final int	IMAGE_DEPTH_WIDTH	= 640;
-	private static final int	IMAGE_DEPTH_HEIGHT	= 480;
-	private static final double	RESIZE_FACTOR		= 0.73;
-	private static final int	NB_CAMERAS			= 4;
+	/**
+	 * Image depth width.
+	 */
+	private static final int IMAGE_DEPTH_WIDTH = 640;
 
+	/**
+	 * Image depth height.
+	 */
+	private static final int IMAGE_DEPTH_HEIGHT = 480;
+
+	/**
+	 * Resize factor in interval [0,1]. Resize factor 1 means no change.
+	 */
+	private static final double RESIZE_FACTOR = 0.73;
+
+	/**
+	 * Number of used cameras.
+	 */
+	private static final int NB_CAMERAS = 4;
+
+	/**
+	 * Camera index that just got a new image.
+	 */
 	private int crtCamera;
 
 	/**
@@ -75,8 +89,11 @@ public class AmILabControllerComponent extends AgentComponent
 		Perception data = null;
 
 		JFrame frame = new JFrame();
+		// Align frames.
 		frame.setLayout(new FlowLayout());
+		// Full screen.
 		frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+		// Make it visible.
 		frame.setVisible(true);
 
 		List<JLabel> labels = new ArrayList<JLabel>();
@@ -101,6 +118,7 @@ public class AmILabControllerComponent extends AgentComponent
 			imageBytes = getImageBytes(data);
 			if (imageBytes == null)
 				continue;
+
 			icon = new ImageIcon(imageBytes);
 			scaledIcon = new ImageIcon(getScaledImage(icon.getImage(), (int) (RESIZE_FACTOR * IMAGE_DEPTH_WIDTH),
 					(int) (RESIZE_FACTOR * IMAGE_DEPTH_HEIGHT)));
@@ -109,18 +127,29 @@ public class AmILabControllerComponent extends AgentComponent
 		}
 	}
 
-	public static Image getScaledImage(Image srcImg, int w, int h)
+	/**
+	 * Scales an {@link Image} based on given parameters.
+	 * 
+	 * @param srcImg
+	 *            - image to be scaled
+	 * @param width
+	 *            - required width
+	 * @param height
+	 *            - required height
+	 * @return scaled {@link Image}
+	 */
+	public static Image getScaledImage(Image srcImg, int width, int height)
 	{
-		BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+		BufferedImage resizedImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2 = resizedImg.createGraphics();
 		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		g2.drawImage(srcImg, 0, 0, w, h, null);
+		g2.drawImage(srcImg, 0, 0, width, height, null);
 		g2.dispose();
 		return resizedImg;
 	}
 
 	/**
-	 * Extracts an image from a perception.
+	 * Extracts an image from a perception. It also sets the camera from which the perception came.
 	 * 
 	 * @param data
 	 *            - an image depth perception
@@ -142,17 +171,8 @@ public class AmILabControllerComponent extends AgentComponent
 			// HashMap<?, ?> imageDepth = (HashMap<?, ?>) parsedJson.get(AmILabDataType.IMAGE_RGB.toString());
 			String image = (String) imageDepth.get("image");
 			return DatatypeConverter.parseBase64Binary(image);
-		} catch (JsonParseException e)
+		} catch (Exception e)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e)
-		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
