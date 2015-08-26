@@ -33,6 +33,8 @@ import tatami.amilab.AmILabComponent.AmILabDataType;
 import tatami.amilab.Perception;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
+import tatami.core.agent.AgentEvent.AgentEventHandler;
+import tatami.core.agent.messaging.MessagingComponent;
 
 /**
  * @author Claudiu-Mihai Toma
@@ -109,6 +111,26 @@ public class AmILabControllerComponent extends AgentComponent
 		byte[] imageBytes = null;
 		ImageIcon icon = null;
 		ImageIcon scaledIcon = null;
+
+		// // acest-agent/aplicatie/amilab -- bla --> client1/aplicatie/amilab
+		// sendMessage("bla", getComponentEndpoint("aplicatie", "amilab"), "client1", "aplicatie", "amilab");
+		//
+		// // pe client1 inregistrez handler pentru orice vine la /aplicatie/amilab
+		// registerMessageReceiver(new AgentEventHandler()
+		// {
+		// @Override
+		// public void handleEvent(AgentEvent event)
+		// {
+		// // TODO Auto-generated method stub
+		// // receive
+		// String content = (String) event.getParameter(MessagingComponent.CONTENT_PARAMETER);
+		// String sender = (String) event.getParameter(MessagingComponent.SOURCE_PARAMETER);
+		// String receiver = (String) event.getParameter(MessagingComponent.DESTINATION_PARAMETER);
+		//
+		// // reply
+		// sendMessage("reply", receiver, sender);
+		// }
+		// }, "aplicatie", "amilab");
 
 		amilab.startInternalBuffer();
 		while (true)
