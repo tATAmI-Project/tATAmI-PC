@@ -13,6 +13,20 @@ import tatami.simulation.AgentManager;
 import tatami.simulation.LocalDeploymentPlatform;
 import tatami.simulation.PlatformLoader;
 
+/**
+ * This test / example class show how messages can be sent between agents and what methods are available.
+ * <p>
+ * There are two agents. At the start, one ({@value #NAME_A}) sends to the other ({@value #NAME_B}) a "hello" message. A
+ * reply is sent with the content "hello back" (this happens between endpoints "/testing") and then a new message from
+ * the second agent to the first agent is sent to to the endpoint "testing/final" to signal the end of the execution.
+ * Both agents then exit.
+ * <p>
+ * Here one can see examples of methods offered by {@link AgentComponent}: <code>registerMessageReceiver</code>,
+ * <code>sendMessage</code>, <code>sendMessageToEndpoint</code>, <code>sendReply</code> and
+ * <code>getComponentEndpoint</code>.
+ * 
+ * @author Andrei Olaru
+ */
 public class MessagingCompositeAgent
 {
 	/**
@@ -42,13 +56,6 @@ public class MessagingCompositeAgent
 						{
 							getAgentLog().info("final message received from []",
 									event.getParameter(MessagingComponent.SOURCE_PARAMETER));
-//							try
-//							{
-//								Thread.sleep(500);
-//							} catch(InterruptedException e)
-//							{
-//								e.printStackTrace();
-//							}
 							postAgentEvent(new AgentEvent(AgentEventType.AGENT_STOP));
 						}
 					}, "testing", "final");
@@ -73,6 +80,12 @@ public class MessagingCompositeAgent
 				protected String thisComponentEndpoint()
 				{
 					return getComponentEndpoint("testing");
+				}
+				
+				@Override
+				protected void postAgentEvent(AgentEvent event)
+				{
+					super.postAgentEvent(event);
 				}
 				
 				@Override
@@ -120,23 +133,27 @@ public class MessagingCompositeAgent
 							sendMessageToEndpoint("ending",
 									(String) event.getParameter(MessagingComponent.DESTINATION_PARAMETER),
 									(String) event.getParameter(MessagingComponent.SOURCE_PARAMETER) + "/final");
-//							try
-//							{
-//								Thread.sleep(500);
-//							} catch(InterruptedException e)
-//							{
-//								e.printStackTrace();
-//							}
 							postAgentEvent(new AgentEvent(AgentEventType.AGENT_STOP));
 						}
 					}, "testing");
 				}
 				
 				@Override
-				protected void atAgentStart(AgentEvent event)
+				protected boolean sendReply(String content, AgentEvent replyTo)
 				{
-					super.atAgentStart(event);
-					sendMessage("hello", getComponentEndpoint("testing"), NAME_A, "testing");
+					return super.sendReply(content, replyTo);
+				}
+				
+				@Override
+				protected boolean sendMessageToEndpoint(String content, String sourceEndpoint, String targetEndpoint)
+				{
+					return super.sendMessageToEndpoint(content, sourceEndpoint, targetEndpoint);
+				}
+				
+				@Override
+				protected void postAgentEvent(AgentEvent event)
+				{
+					super.postAgentEvent(event);
 				}
 				
 				@Override
@@ -154,6 +171,12 @@ public class MessagingCompositeAgent
 		}
 	}
 	
+	/**
+	 * Main method.
+	 * 
+	 * @param args
+	 *            - not used.
+	 */
 	public static void main(String[] args)
 	{
 		AgentManager A = new TestAgentA();
@@ -173,5 +196,13 @@ public class MessagingCompositeAgent
 			e.printStackTrace();
 		}
 		A.start();
+		try
+		{
+			Thread.sleep(1500);
+		} catch(InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+		p.stop();
 	}
 }
