@@ -200,12 +200,6 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 			default:
 				getAgentLog().error("behavior activation type [] cannot be handled.", b.getActivationType());
 			}
-			
-			// TODO
-			// if(cbd.getBehaviorType().equals(ClaimBehaviorType.REACTIVE))
-			// // register wb service
-			// if(getWebService() != null)
-			// getWebService().registerWSBehavior();
 		}
 	}
 	
@@ -278,64 +272,4 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 		return super.sendMessage(content, getComponentEndpoint(Vocabulary.CLAIM.toString()), targetAgent,
 				Vocabulary.CLAIM.toString());
 	}
-	
-	// public void matchStatement(final String source, final String content)
-	// {
-	// if(!content.contains("struct message"))
-	// return;
-	//
-	// for(final ClaimBehavior cb : behaviors)
-	// {
-	// if(cb.getBehaviorType().equals(ClaimBehaviorType.REACTIVE))
-	// {
-	// if(cb.getCurrentStatement() instanceof ClaimFunctionCall)
-	// {
-	// ClaimFunctionCall cf = (ClaimFunctionCall) cb.getCurrentStatement();
-	// if(cf.getFunctionType().equals(ClaimFunctionType.RECEIVE))
-	// {
-	// Vector<ClaimConstruct> cc = cf.getArguments();
-	// String[] elem = cc.get(cc.size() - 1).toString().split(" ");
-	//
-	// boolean pass = true;
-	// for(String e : elem)
-	// {
-	// if(!e.contains("?") && !content.contains(e))
-	// {
-	// pass = false;
-	// }
-	// }
-	//
-	// if(pass)
-	// {
-	// if(elem.length == content.split(" ").length)
-	// {
-	// registerHandler(AgentEventType.AGENT_REACTIVE_BEHAVIOR, new AgentEventHandler() {
-	// @Override
-	// public void handleEvent(AgentEvent event)
-	// {
-	// try
-	// {
-	// Thread.sleep(6000);
-	// } catch(InterruptedException e)
-	// {
-	// e.printStackTrace();
-	// }
-	//
-	// (new Thread() {
-	// public void run()
-	// {
-	// cb.actionOnReceive(source, content);
-	// }
-	// }).start();
-	// }
-	// });
-	// postAgentEvent(new AgentEvent(AgentEventType.AGENT_REACTIVE_BEHAVIOR));
-	// }
-	// }
-	// }
-	// }
-	// }
-	// }
-	//
-	// }
 }
