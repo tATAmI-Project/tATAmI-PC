@@ -343,39 +343,32 @@ public abstract class MessagingComponent extends AgentComponent
 	
 	/**
 	 * Gets the address of the agent, as it is specific to the implementation.
+	 * <p>
+	 * The default implementation calls {@link #getAgentAddress(String)}.
 	 * 
 	 * @return the address of the parent agent, if any; <code>null</code> otherwise.
 	 */
 	public String getAgentAddress()
 	{
-		return getAgentName();
+		return getAgentAddress(getAgentName());
 	}
-	
-	/**
-	 * The method produces the string address of an agent on the same platform, being provided with the agent name and
-	 * container. // FIXME: what if the container information is out of date.
-	 * <p>
-	 * This address can subsequently be suffixed with more path elements by using
-	 * {@link #makePathHelper(String, String...)}.
-	 * 
-	 * @param agentName
-	 *            - the name of the target agent.
-	 * @param containerName
-	 *            - the container of the target agent
-	 * @return the string address of the target agent.
-	 */
-	public abstract String getAgentAddress(String agentName, String containerName);
 	
 	/**
 	 * The method produces the string address of an agent on the same platform, being provided with the agent name.
 	 * <p>
 	 * This address can subsequently be suffixed with more path elements by using {@link #makePath(String, String...)}.
+	 * <p>
+	 * The default implementation returns the agent name, as given by the agent.
 	 * 
 	 * @param agentName
 	 *            - the name of the target agent.
 	 * @return the string address of the target agent.
 	 */
-	public abstract String getAgentAddress(String agentName);
+	@SuppressWarnings("static-method")
+	public String getAgentAddress(String agentName)
+	{
+		return agentName;
+	}
 	
 	/**
 	 * The method extracts, from the complete endpoint path, the elements of the path, after the address of the agent
@@ -400,11 +393,12 @@ public abstract class MessagingComponent extends AgentComponent
 	}
 	
 	/**
-	 * The method extracts, from the complete endpoint path, the remaining internal address, after the address of the
-	 * agent itself and also eliminating a specified prefix.
+	 * The method extracts, from the complete endpoint path referring to this agent, the remaining internal address,
+	 * after the address of the agent itself and also eliminating a specified prefix.
 	 * 
 	 * @param event
-	 *            - the event to extract the address from (contains a complete destination endpoint).
+	 *            - the event to extract the address from (contains a complete destination endpoint). The message must
+	 *            be addressed to this agent.
 	 * @param prefixToRemove
 	 *            - prefix to remove from the address. The prefix must be an internal path (starting with slash, but not
 	 *            ending with slash).

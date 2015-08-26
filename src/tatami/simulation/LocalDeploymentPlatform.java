@@ -28,15 +28,9 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 		private static final long	serialVersionUID	= 1L;
 		
 		@Override
-		public String getAgentAddress(String agentName, String containerName)
-		{
-			return agentName;
-		}
-		
-		@Override
 		public String getAgentAddress(String agentName)
 		{
-			return getAgentAddress(agentName, null);
+			return agentName;
 		}
 
 		@Override
