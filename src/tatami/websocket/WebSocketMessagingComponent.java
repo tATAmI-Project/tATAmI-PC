@@ -1,12 +1,13 @@
 package tatami.websocket;
 
 import tatami.core.agent.AgentEvent;
-import tatami.core.agent.messaging.MessagingComponent;
+import tatami.core.agent.messaging.NameBasedMessagingComponent;
 
 /**
  * 
  */
-public class WebSocketMessagingComponent extends MessagingComponent{
+public class WebSocketMessagingComponent extends NameBasedMessagingComponent
+{
 	
 	/**
 	 * 
@@ -19,12 +20,6 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 	WebSocketMessagingPlatform platform;
 	
 	/**
-	 * 
-	 */
-	public WebSocketMessagingComponent(){
-	}
-	
-	/**
 	 * Method called when an agent starts
 	 */
 	@Override
@@ -34,60 +29,53 @@ public class WebSocketMessagingComponent extends MessagingComponent{
 		
 		if(!(getPlatformLink() instanceof WebSocketMessagingPlatform))
 			throw new IllegalStateException("Platform Link is not of expected type");
-		platform = (WebSocketMessagingPlatform)getPlatformLink();
+		platform = (WebSocketMessagingPlatform) getPlatformLink();
 		platform.register(getAgentName(), this);
-
+		
 	}
 	
 	/**
 	 * Obtain a link to the platform
 	 */
 	@Override
-	protected Object getPlatformLink() {
+	protected Object getPlatformLink()
+	{
 		return super.getPlatformLink();
-	}
-
-	/**
-	 * Returns the agent name
-	 */
-	@Override
-	public String getAgentAddress(String agentName, String containerName) {
-		return agentName;
-	}
-	
-	/**
-	 * Returns the agent's address
-	 */
-	@Override
-	public String getAgentAddress(String agentName){
-		return getAgentAddress(agentName, null);
 	}
 	
 	/**
 	 * Pass the message to the agent implementation
-	 * @param source  -Source
-	 * @param target - Target
-	 * @param message - Content
+	 * 
+	 * @param source
+	 *            -Source
+	 * @param target
+	 *            - Target
+	 * @param message
+	 *            - Content
 	 */
-	public void onMessage(String source, String target, String message){
+	public void onMessage(String source, String target, String message)
+	{
 		receiveMessage(source, target, message);
 	}
-
+	
 	/**
 	 * Method called from the agent when it needs to send a message
 	 */
 	@Override
-	public boolean sendMessage(String target, String source, String content) {
-		try{
-			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING, "Seding message: " + source + "::" + target + "::" + content);
+	public boolean sendMessage(String target, String source, String content)
+	{
+		try
+		{
+			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
+					"Seding message: " + source + "::" + target + "::" + content);
 			platform.mClient.send(source + "::" + target + "::" + content);
 			return true;
-		}
-		catch(Exception e){
+		} catch(Exception e)
+		{
 			e.printStackTrace();
 		}
 		
 		return false;
 	}
-
+	
 }

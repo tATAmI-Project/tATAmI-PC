@@ -10,6 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.messaging.MessagingComponent;
+import tatami.core.agent.messaging.NameBasedMessagingComponent;
 import tatami.simulation.PlatformLoader.PlatformLink;
 
 /**
@@ -24,7 +25,7 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 	 * 
 	 * @author Andrei Olaru
 	 */
-	public static class SimpleLocalMessaging extends MessagingComponent
+	public static class SimpleLocalMessaging extends NameBasedMessagingComponent
 	{
 		/**
 		 * The serial UID.
@@ -32,15 +33,8 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 		private static final long serialVersionUID = 1L;
 		
 		@Override
-		public String getAgentAddress(String agentName)
-		{
-			return agentName;
-		}
-		
-		@Override
 		public boolean sendMessage(String target, String source, String content)
 		{
-			// FIXME do checks
 			if(!(getPlatformLink() instanceof LocalDeploymentPlatform))
 				throw new IllegalStateException("Platform Link is not of expected type");
 			LocalDeploymentPlatform p = ((LocalDeploymentPlatform) getPlatformLink());
@@ -72,7 +66,14 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 				else
 					targetComponent.receiveMessage(source, target, content);
 			}
-			// FIXME else error
+			else
+				try
+				{
+					getAgentLog().error("No messaging component registered for name [].", targetElements[0]);
+				} catch(NullPointerException e)
+				{
+					// nothing
+				}
 			return true;
 		}
 		

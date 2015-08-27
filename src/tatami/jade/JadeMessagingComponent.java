@@ -5,6 +5,7 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.messaging.MessagingComponent;
+import tatami.core.agent.messaging.NameBasedMessagingComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
@@ -12,7 +13,7 @@ import tatami.core.util.platformUtils.PlatformUtils;
  * 
  * @author Andrei Olaru
  */
-public class JadeMessagingComponent extends MessagingComponent
+public class JadeMessagingComponent extends NameBasedMessagingComponent
 {
 	/**
 	 * The serial UID.
@@ -62,18 +63,6 @@ public class JadeMessagingComponent extends MessagingComponent
 	protected void receiveMessage(String source, String destination, String content)
 	{
 		super.receiveMessage(source, destination, content);
-	}
-	
-	@Override
-	public String getAgentAddress(String agentName, String containerName)
-	{
-		return agentName;
-	}
-	
-	@Override
-	public String getAgentAddress(String agentName)
-	{
-		return agentName;
 	}
 	
 	@Override
