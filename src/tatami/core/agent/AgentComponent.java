@@ -732,6 +732,8 @@ public abstract class AgentComponent implements Serializable
 	
 	/**
 	 * Method that relays the sending of a message, without the need to interact with the messaging component directly.
+	 * This version of the method converts the target agent name to an agent address and assembles it with the elements
+	 * of the target internal path.
 	 * 
 	 * @param content
 	 *            - the content of the message.
@@ -751,5 +753,45 @@ public abstract class AgentComponent implements Serializable
 		if(msgr != null)
 			return msgr.sendMessage(msgr.makePath(targetAgent, targetPathElements), sourceEndpoint, content);
 		return false;
+	}
+	
+	/**
+	 * Method that relays the sending of a message, without the need to interact with the messaging component directly.
+	 * This version of the method takes the complete target endpoint.
+	 * 
+	 * @param content
+	 *            - the content of the message.
+	 * @param sourceEndpoint
+	 *            - the source endpoint, as a complete path. See {@link #getComponentEndpoint(String...)}.
+	 * @param targetEndpoint
+	 *            - the destination endpoint, as a complete path. Such a path could be generated using
+	 *            {@link MessagingComponent#makePath(String, String...)}.
+	 * @param targetPathElements
+	 *            - elements in the internal path of the target.
+	 * @return <code>true</code> if the message has been successfully sent.
+	 */
+	protected boolean sendMessageToEndpoint(String content, String sourceEndpoint, String targetEndpoint)
+	{
+		MessagingComponent msgr = (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
+		if(msgr != null)
+			return msgr.sendMessage(targetEndpoint, sourceEndpoint, content);
+		return false;
+	}
+	
+	/**
+	 * Facilitates the sending of a message in reply to a previous message, just by reversing the source and destination
+	 * endpoints and adding the content.
+	 * 
+	 * @param content
+	 *            - the content of the new message.
+	 * @param replyTo
+	 *            - the message to reply to. From this message the source and destination endpoints are taken and
+	 *            reversed into the new message.
+	 * @return <code>true</code> if the message has been successfully sent.
+	 */
+	protected boolean sendReply(String content, AgentEvent replyTo)
+	{
+		return sendMessageToEndpoint(content, (String) replyTo.getParameter(MessagingComponent.DESTINATION_PARAMETER),
+				(String) replyTo.getParameter(MessagingComponent.SOURCE_PARAMETER));
 	}
 }
