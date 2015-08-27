@@ -1,14 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2015 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
- * 
- * This file is part of tATAmI-PC.
- * 
- * tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
- * 
- * tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************/
 package tatami.core.agent.messaging;
 
 import java.util.HashMap;
@@ -29,7 +18,7 @@ import tatami.core.util.platformUtils.PlatformUtils;
  * The messaging component should handle all communication between the agent and other agents. Note that the existence
  * of such a component in the {@link CompositeAgent} modifies its behavior: without any messaging component, received
  * messages are notified as agent events to all components of the agent; with it, messages are passed to the messaging
- * component, which then should route them to the appropriate receivers. // TODO: mention this in CompositeAgent.
+ * component, which then should route them to the appropriate receivers.
  * 
  * <h2>Endpoints</h2> The communication is abstracted internally to the agent as exchanging messages between endpoints,
  * where each endpoint is identified by a {@link String} address composed of multiple elements separated by slashes (by
@@ -46,19 +35,21 @@ import tatami.core.util.platformUtils.PlatformUtils;
  * should result in a complete path. Internal paths should begin with a slash. Otherwise, the predefined methods for
  * parsing and assembling endpoint paths may not work correctly.
  * 
- * <h2>Using messaging features</h2>
- * In principle, other components should not need to call the [implementation of the] MessagingComponent explicitly.
- * Functionality of the messaging component should be used by means of the protected methods in {@link AgentComponent},
- * such as <code>registerMessageReceiver</code>, <code>sendMessage</code> and <code>getComponentEndpoint</code>.
- * Messages will be signaled, as they are processed from the agent's event queue, by means of the specified receivers.
+ * <h2>Using messaging features</h2> In principle, other components should not need to call the [implementation of the]
+ * MessagingComponent explicitly. Functionality of the messaging component should be used by means of the protected
+ * methods in {@link AgentComponent}, such as <code>registerMessageReceiver</code>, <code>sendMessage</code> and
+ * <code>getComponentEndpoint</code>. Messages will be signaled, as they are processed from the agent's event queue, by
+ * means of the specified receivers.
  * 
- * <h2>Extending this class</h2>
- * The abstract class implements some basic methods for working with slash-delimited addresses, and offers the method
- * for registering message handlers. The class also eases the task of posting agent events to the agent thread, by means
- * of the method {@link #receiveMessage} that should be called by extending classes.
+ * <h2>Extending this class</h2> The abstract class implements some basic methods for working with slash-delimited
+ * addresses, and offers the method for registering message handlers. The class also eases the task of posting agent
+ * events to the agent thread, by means of the method {@link #receiveMessage} that should be called by extending
+ * classes.
  * <p>
  * Basically, a class extending {@link MessagingComponent} should implement the following:
  * <ul>
+ * <li>if the messaging system uses agent names as their addresses, then it is recommended to extend the
+ * {@link NameBasedMessagingComponent} class.
  * <li>if it needs to access the platform containing the agent and implementing communication, it should do that after
  * {@link #atAgentStart} is called (at any point before this method is called the agent may not be loaded onto the
  * platform yet). To get a reference to the platform, by means of the {@link #getPlatformLink} method.
@@ -91,7 +82,7 @@ public abstract class MessagingComponent extends AgentComponent
 		/**
 		 * Activation state.
 		 */
-		boolean	isset;
+		boolean isset;
 		
 		/**
 		 * Default constructor.
@@ -112,56 +103,36 @@ public abstract class MessagingComponent extends AgentComponent
 	}
 	
 	/**
-	 * An implementation of the interface must be able to receive messages received by the agent.
-	 * 
-	 * @author Andrei Olaru
-	 */
-	public interface MessageReceiver
-	{
-		/**
-		 * Method invoked when a message is received that matches the registration of this instance.
-		 * 
-		 * @param source
-		 *            - the source endpoint.
-		 * @param target
-		 *            - the target endpoint.
-		 * @param content
-		 *            - the content of the message.
-		 */
-		void receiveMessage(String source, String target, String content);
-	}
-	
-	/**
 	 * The serial UID.
 	 */
-	private static final long						serialVersionUID		= -7541956285166819418L;
+	private static final long serialVersionUID = -7541956285166819418L;
 	
 	/**
 	 * The string separating elements of an endpoint address.
 	 */
-	public static final String						ADDRESS_SEPARATOR		= "/";
+	public static final String	ADDRESS_SEPARATOR		= "/";
 	/**
 	 * The name of the parameter in an {@link AgentEvent} associated with a message, that corresponds to the target
 	 * address of the message.
 	 */
-	public static final String						DESTINATION_PARAMETER	= "message address";
+	public static final String	DESTINATION_PARAMETER	= "message address";
 	/**
 	 * The name of the parameter in an {@link AgentEvent} associated with a message, that corresponds to the content of
 	 * the message.
 	 */
-	public static final String						CONTENT_PARAMETER		= "message content";
+	public static final String	CONTENT_PARAMETER		= "message content";
 	/**
 	 * The name of the parameter in an {@link AgentEvent} associated with a message, that corresponds to the source of
 	 * the message.
 	 */
-	public static final String						SOURCE_PARAMETER		= "message source";
+	public static final String	SOURCE_PARAMETER		= "message source";
 	
 	/**
 	 * The {@link Map} of {@link AgentEventHandler} instances that were registered with this component, associated with
 	 * their respective endpoints. Multiple handlers may be registered with the same endpoint. These handlers will be
 	 * invoked in no particular order. The endpoint is an internal path, rather than a complete path.
 	 */
-	protected Map<String, Set<AgentEventHandler>>	messageHandlers			= new HashMap<String, Set<AgentEventHandler>>();
+	protected Map<String, Set<AgentEventHandler>> messageHandlers = new HashMap<String, Set<AgentEventHandler>>();
 	
 	/**
 	 * Default constructor.
@@ -228,8 +199,7 @@ public abstract class MessagingComponent extends AgentComponent
 	 */
 	protected void handleMessage(AgentEvent event)
 	{
-		// FIXME: do checks
-		String destinationInternal = extractInternalAddress(event, "");
+		String destinationInternal = extractInternalDestination(event, "");
 		if(destinationInternal == null)
 		{
 			if(getAgentLog() != null)
@@ -237,7 +207,7 @@ public abstract class MessagingComponent extends AgentComponent
 			return;
 		}
 		if(destinationInternal.length() == 0)
-			// if no internal path, make it the root path (a corect internal path).
+			// if no internal path, make it the root path (a correct internal path).
 			destinationInternal = "/";
 		for(Map.Entry<String, Set<AgentEventHandler>> entry : messageHandlers.entrySet())
 		{
@@ -354,33 +324,22 @@ public abstract class MessagingComponent extends AgentComponent
 	
 	/**
 	 * Gets the address of the agent, as it is specific to the implementation.
+	 * <p>
+	 * The default implementation calls {@link #getAgentAddress(String)}.
 	 * 
 	 * @return the address of the parent agent, if any; <code>null</code> otherwise.
 	 */
 	public String getAgentAddress()
 	{
-		return getAgentName();
+		return getAgentAddress(getAgentName());
 	}
-	
-	/**
-	 * The method produces the string address of an agent on the same platform, being provided with the agent name and
-	 * container. // FIXME: what if the container information is out of date.
-	 * <p>
-	 * This address can subsequently be suffixed with more path elements by using
-	 * {@link #makePathHelper(String, String...)}.
-	 * 
-	 * @param agentName
-	 *            - the name of the target agent.
-	 * @param containerName
-	 *            - the container of the target agent
-	 * @return the string address of the target agent.
-	 */
-	public abstract String getAgentAddress(String agentName, String containerName);
 	
 	/**
 	 * The method produces the string address of an agent on the same platform, being provided with the agent name.
 	 * <p>
 	 * This address can subsequently be suffixed with more path elements by using {@link #makePath(String, String...)}.
+	 * <p>
+	 * In implementations where agents are addressed by name, the two are the same.
 	 * 
 	 * @param agentName
 	 *            - the name of the target agent.
@@ -389,21 +348,33 @@ public abstract class MessagingComponent extends AgentComponent
 	public abstract String getAgentAddress(String agentName);
 	
 	/**
-	 * The method extracts, from the complete endpoint path, the elements of the path, after the address of the agent
-	 * itself and also eliminating specified prefix elements.
+	 * The method returns the name of the agent associated with the given address.
+	 * <p>
+	 * In implementations where agents are addressed by name, the two are the same.
+	 * 
+	 * @param agentAddress
+	 *            - the address of the agent (external path).
+	 * @return the name of the agent associated with the address.
+	 */
+	public abstract String getAgentNameFromAddress(String agentAddress);
+	
+	/**
+	 * The method extracts, from the complete endpoint path referring to <b>this agent</b>, the elements of the path,
+	 * after the address of the agent itself and also eliminating specified prefix elements.
 	 * 
 	 * @param event
-	 *            - the event to extract the address from (contains a complete destination endpoint).
+	 *            - the event to extract the address from (contains a complete destination endpoint). The message must
+	 *            be addressed to this agent.
 	 * @param prefixElementsToRemove
 	 *            - elements of the prefix to remove from the address.
 	 * @return the elements that were extracted from the address, following the address of the agent and the specified
 	 *         prefix elements; <code>null</code> if an error occurred (address not in the current agent or prefix
 	 *         elements not part of the address in the specified order).
 	 */
-	public String[] extractInternalAddressElements(AgentEvent event, String... prefixElementsToRemove)
+	public String[] extractInternalDestinationElements(AgentEvent event, String... prefixElementsToRemove)
 	{
 		String prefix = makeInternalPath(prefixElementsToRemove);
-		String rem = extractInternalAddress(event, prefix);
+		String rem = extractInternalDestination(event, prefix);
 		String[] ret = null;
 		if(rem != null)
 			ret = (rem.startsWith(ADDRESS_SEPARATOR) ? rem.substring(1) : rem).split(ADDRESS_SEPARATOR);
@@ -411,17 +382,18 @@ public abstract class MessagingComponent extends AgentComponent
 	}
 	
 	/**
-	 * The method extracts, from the complete endpoint path, the remaining internal address, after the address of the
-	 * agent itself and also eliminating a specified prefix.
+	 * The method extracts, from the complete endpoint path referring to <b>this agent</b>, the remaining internal
+	 * address, after the address of the agent itself and also eliminating a specified prefix.
 	 * 
 	 * @param event
-	 *            - the event to extract the address from (contains a complete destination endpoint).
+	 *            - the event to extract the address from (contains a complete destination endpoint). The message must
+	 *            be addressed to this agent.
 	 * @param prefixToRemove
 	 *            - prefix to remove from the address. The prefix must be an internal path (starting with slash, but not
 	 *            ending with slash).
 	 * @return the remaining internal address (starting with slash).
 	 */
-	public String extractInternalAddress(AgentEvent event, String prefixToRemove)
+	public String extractInternalDestination(AgentEvent event, String prefixToRemove)
 	{
 		if(event == null)
 		{
@@ -473,6 +445,49 @@ public abstract class MessagingComponent extends AgentComponent
 		}
 		String content = (String) event.getParameter(CONTENT_PARAMETER);
 		return content;
+	}
+	
+	/**
+	 * The method extracts, from a complete endpoint address, the external path, which is the address of the agent
+	 * identified by the endpoint.
+	 * 
+	 * @param endpoint
+	 *            - the complete endpoint address.
+	 * @return the external path, or address of the agent.
+	 */
+	public abstract String extractAgentAddress(String endpoint);
+	
+	/**
+	 * The method extracts, from a complete endpoint address, the internal path. It should always begin with a slash.
+	 * <p>
+	 * The default implementation of the method uses {@link #extractAgentAddress(String)} to identify the external path
+	 * in the endpoint. Specific implementations may do this more efficiently.
+	 * 
+	 * @param endpoint
+	 *            - the complete endpoint address.
+	 * @return the internal part of the endpoint address.
+	 */
+	public String extractInternalAddress(String endpoint)
+	{
+		String externalPath = extractAgentAddress(endpoint);
+		if(!endpoint.startsWith(externalPath))
+			throw new IllegalStateException("Endpoint address does not start with agent address");
+		return endpoint.substring(externalPath.length());
+	}
+	
+	/**
+	 * Parses the result given by {@link #extractInternalAddress(String)} on the given endpoint and separates the
+	 * elements of the internal address (according to the {@link #ADDRESS_SEPARATOR}={@value #ADDRESS_SEPARATOR}).
+	 * 
+	 * @param endpoint
+	 *            - the complete endpoint address.
+	 * @return the separate elements of the internal path.
+	 */
+	public String[] extractInternalAddressElements(String endpoint)
+	{
+		String internalPath = extractInternalAddress(endpoint);
+		return (internalPath.startsWith(ADDRESS_SEPARATOR) ? internalPath.substring(1) : internalPath)
+				.split(ADDRESS_SEPARATOR);
 	}
 	
 	/**

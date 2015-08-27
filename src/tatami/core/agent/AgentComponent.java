@@ -1,14 +1,3 @@
-/*******************************************************************************
- * Copyright (C) 2015 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
- * 
- * This file is part of tATAmI-PC.
- * 
- * tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
- * 
- * tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************/
 package tatami.core.agent;
 
 import java.io.Serializable;
@@ -17,7 +6,6 @@ import java.util.Map;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
-import tatami.amilab.AmILabComponent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.claim.ClaimComponent;
@@ -152,11 +140,6 @@ public abstract class AgentComponent implements Serializable
 		 * The name of a component extending {@link ClaimComponent}.
 		 */
 		S_CLAIM_COMPONENT(AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".claim.ClaimComponent"),
-
-		/**
-		 * The name of a component extending {@link AmILabComponent}.
-		 */
-		AMILAB_COMPONENT("tatami.amilab.AmILabComponent"),
 		
 		/**
 		 * TEMPORARY type for testing. TODO: remove this type.
@@ -732,6 +715,8 @@ public abstract class AgentComponent implements Serializable
 	
 	/**
 	 * Method that relays the sending of a message, without the need to interact with the messaging component directly.
+	 * This version of the method converts the target agent name to an agent address and assembles it with the elements
+	 * of the target internal path.
 	 * 
 	 * @param content
 	 *            - the content of the message.
@@ -751,5 +736,45 @@ public abstract class AgentComponent implements Serializable
 		if(msgr != null)
 			return msgr.sendMessage(msgr.makePath(targetAgent, targetPathElements), sourceEndpoint, content);
 		return false;
+	}
+	
+	/**
+	 * Method that relays the sending of a message, without the need to interact with the messaging component directly.
+	 * This version of the method takes the complete target endpoint.
+	 * 
+	 * @param content
+	 *            - the content of the message.
+	 * @param sourceEndpoint
+	 *            - the source endpoint, as a complete path. See {@link #getComponentEndpoint(String...)}.
+	 * @param targetEndpoint
+	 *            - the destination endpoint, as a complete path. Such a path could be generated using
+	 *            {@link MessagingComponent#makePath(String, String...)}.
+	 * @param targetPathElements
+	 *            - elements in the internal path of the target.
+	 * @return <code>true</code> if the message has been successfully sent.
+	 */
+	protected boolean sendMessageToEndpoint(String content, String sourceEndpoint, String targetEndpoint)
+	{
+		MessagingComponent msgr = (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
+		if(msgr != null)
+			return msgr.sendMessage(targetEndpoint, sourceEndpoint, content);
+		return false;
+	}
+	
+	/**
+	 * Facilitates the sending of a message in reply to a previous message, just by reversing the source and destination
+	 * endpoints and adding the content.
+	 * 
+	 * @param content
+	 *            - the content of the new message.
+	 * @param replyTo
+	 *            - the message to reply to. From this message the source and destination endpoints are taken and
+	 *            reversed into the new message.
+	 * @return <code>true</code> if the message has been successfully sent.
+	 */
+	protected boolean sendReply(String content, AgentEvent replyTo)
+	{
+		return sendMessageToEndpoint(content, (String) replyTo.getParameter(MessagingComponent.DESTINATION_PARAMETER),
+				(String) replyTo.getParameter(MessagingComponent.SOURCE_PARAMETER));
 	}
 }
