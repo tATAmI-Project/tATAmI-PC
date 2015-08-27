@@ -1,5 +1,7 @@
 package testing.system_testing.default_components;
 
+import java.util.Arrays;
+
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
@@ -23,7 +25,8 @@ import tatami.simulation.PlatformLoader;
  * <p>
  * Here one can see examples of methods offered by {@link AgentComponent}: <code>registerMessageReceiver</code>,
  * <code>sendMessage</code>, <code>sendMessageToEndpoint</code>, <code>sendReply</code> and
- * <code>getComponentEndpoint</code>.
+ * <code>getComponentEndpoint</code>. Also it is shown how to process the elements in an endpoint, with help from
+ * methods in the messaging component.
  * 
  * @author Andrei Olaru
  */
@@ -130,9 +133,20 @@ public class MessagingCompositeAgent
 							{
 								e.printStackTrace();
 							}
+							
+							// here's how to do some endpoint processing.
+							MessagingComponent msg = (MessagingComponent) getAgentComponent(
+									AgentComponentName.MESSAGING_COMPONENT);
+							String targetAgent = msg.extractAgentAddress(
+									(String) event.getParameter(MessagingComponent.SOURCE_PARAMETER));
+							String[] targetElements = msg.extractInternalAddressElements(
+									(String) event.getParameter(MessagingComponent.SOURCE_PARAMETER));
+							String[] targetElementsNew = Arrays.copyOf(targetElements, targetElements.length + 1);
+							targetElementsNew[targetElements.length] = "final";
+							String target = msg.makePath(targetAgent, targetElementsNew);
+							
 							sendMessageToEndpoint("ending",
-									(String) event.getParameter(MessagingComponent.DESTINATION_PARAMETER),
-									(String) event.getParameter(MessagingComponent.SOURCE_PARAMETER) + "/final");
+									(String) event.getParameter(MessagingComponent.DESTINATION_PARAMETER), target);
 							postAgentEvent(new AgentEvent(AgentEventType.AGENT_STOP));
 						}
 					}, "testing");
@@ -148,6 +162,12 @@ public class MessagingCompositeAgent
 				protected boolean sendMessageToEndpoint(String content, String sourceEndpoint, String targetEndpoint)
 				{
 					return super.sendMessageToEndpoint(content, sourceEndpoint, targetEndpoint);
+				}
+				
+				@Override
+				protected AgentComponent getAgentComponent(AgentComponentName name)
+				{
+					return super.getAgentComponent(name);
 				}
 				
 				@Override
