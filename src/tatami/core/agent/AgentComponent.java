@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (C) 2015 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+ * 
+ * This file is part of tATAmI-PC.
+ * 
+ * tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+ * 
+ * tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package tatami.core.agent;
 
 import java.io.Serializable;
@@ -76,8 +87,8 @@ public abstract class AgentComponent implements Serializable
 	/**
 	 * The class UID.
 	 */
-	private static final long serialVersionUID = -8282262747231347473L;
-
+	private static final long	serialVersionUID	= -8282262747231347473L;
+	
 	/**
 	 * Alias of {@link ParameterSet}.
 	 * 
@@ -88,9 +99,9 @@ public abstract class AgentComponent implements Serializable
 		/**
 		 * The serial UID.
 		 */
-		private static final long serialVersionUID = 5069937206709568881L;
+		private static final long	serialVersionUID	= 5069937206709568881L;
 	}
-
+	
 	/**
 	 * Enumeration of available component names / functionalities. These are the standard types of components. Other
 	 * types of components may be added to an agent (TODO).
@@ -101,44 +112,42 @@ public abstract class AgentComponent implements Serializable
 	 * 
 	 * @author Andrei Olaru
 	 */
-	public static enum AgentComponentName
-	{
+	public static enum AgentComponentName {
 		/**
 		 * The name of a component extending {@link ParametricComponent}.
 		 */
 		PARAMETRIC_COMPONENT,
-
+		
 		/**
 		 * The name of a component extending {@link VisualizableComponent}.
 		 */
-		VISUALIZABLE_COMPONENT(
-				AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".visualization.VisualizableComponent"),
-
+		VISUALIZABLE_COMPONENT(AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".visualization.VisualizableComponent"),
+		
 		/**
 		 * The name of a component extending {@link CognitiveComponent}.
 		 */
 		COGNITIVE_COMPONENT(AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".kb.ContextComponent"),
-
+		
 		/**
 		 * The name of a component extending {@link MessagingComponent}.
 		 */
 		MESSAGING_COMPONENT,
-
+		
 		/**
 		 * The name of a component extending {@link MovementComponent}.
 		 */
 		MOVEMENT_COMPONENT,
-
+		
 		/**
 		 * The name of a component extending {@link WebserviceComponent}.
 		 */
 		WEBSERVICE_COMPONENT,
-
+		
 		/**
 		 * The name of a component extending {@link HierarchicalComponent}.
 		 */
 		HIERARCHICAL_COMPONENT,
-
+		
 		/**
 		 * The name of a component extending {@link ClaimComponent}.
 		 */
@@ -148,33 +157,33 @@ public abstract class AgentComponent implements Serializable
 		 * The name of a component extending {@link AmILabComponent}.
 		 */
 		AMILAB_COMPONENT("tatami.amilab.AmILabComponent"),
-
+		
 		/**
 		 * TEMPORARY type for testing. TODO: remove this type.
 		 */
 		TESTING_COMPONENT,
-
+		
 		;
-
+		
 		/**
 		 * Suffix for component classes.
 		 */
-		private static final String AGENT_COMPONENT_CLASS_SUFFIX = "Component";
+		private static final String	AGENT_COMPONENT_CLASS_SUFFIX	= "Component";
 		/**
 		 * Default parent package packages containing default component implementations.
 		 */
-		private static final String AGENT_COMPONENT_PACKAGE_ROOT = "tatami.core.agent";
-
+		private static final String	AGENT_COMPONENT_PACKAGE_ROOT	= "tatami.core.agent";
+		
 		/**
 		 * The fully qualified class name of the default component implementation.
 		 */
-		String componentClass;
-
+		String						componentClass;
+		
 		/**
 		 * The name of the component, as appearing in the scenario file.
 		 */
-		String componentName;
-
+		String						componentName;
+		
 		/**
 		 * Specifies the fully qualified class name of the component implementation.
 		 * 
@@ -187,7 +196,7 @@ public abstract class AgentComponent implements Serializable
 			componentClass = classname;
 			componentName = this.name().split("_")[0].toLowerCase();
 		}
-
+		
 		/**
 		 * Inferres the class of the component implementation based on the name of the component and constants in this
 		 * class.
@@ -201,7 +210,7 @@ public abstract class AgentComponent implements Serializable
 			componentClass = componentPackage + "." + componentName.substring(0, 1).toUpperCase()
 					+ componentName.substring(1) + AGENT_COMPONENT_CLASS_SUFFIX;
 		}
-
+		
 		/**
 		 * Gets the specified or inferred class name for the default implementation of the component.
 		 * 
@@ -211,7 +220,7 @@ public abstract class AgentComponent implements Serializable
 		{
 			return componentClass;
 		}
-
+		
 		/**
 		 * Gets the name of the component, as appearing in the scenario file.
 		 * 
@@ -221,7 +230,7 @@ public abstract class AgentComponent implements Serializable
 		{
 			return componentName;
 		}
-
+		
 		/**
 		 * Returns the {@link AgentComponentName} instance that corresponds to the specified name.
 		 * <p>
@@ -235,15 +244,15 @@ public abstract class AgentComponent implements Serializable
 		{
 			try
 			{
-				return AgentComponentName
-						.valueOf(componentName.toUpperCase() + "_" + AGENT_COMPONENT_CLASS_SUFFIX.toUpperCase());
-			} catch (Exception e)
+				return AgentComponentName.valueOf(componentName.toUpperCase() + "_"
+						+ AGENT_COMPONENT_CLASS_SUFFIX.toUpperCase());
+			} catch(Exception e)
 			{
 				return null;
 			}
 		}
 	}
-
+	
 	/**
 	 * The name of the component, as instance of {@link AgentComponentName}.
 	 */
@@ -262,7 +271,7 @@ public abstract class AgentComponent implements Serializable
 	 * The {@link AgentEventHandler} instances that respond to various events in the agent.
 	 */
 	private Map<AgentEventType, AgentEventHandler>	eventHandlers;
-
+	
 	/**
 	 * The constructor assigns the name to the component.
 	 * <p>
@@ -280,65 +289,59 @@ public abstract class AgentComponent implements Serializable
 	protected AgentComponent(AgentComponentName name)
 	{
 		componentName = name;
-
+		
 		// dummy component data, in case no other is preloaded
 		componentData = new ComponentCreationData();
 		componentData.ensureLocked();
-
+		
 		// register
 		eventHandlers = new HashMap<AgentEventType, AgentEventHandler>();
-		registerHandler(AgentEventType.AGENT_START, new AgentEventHandler()
-		{
+		registerHandler(AgentEventType.AGENT_START, new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
 				atAgentStart(event);
 			}
 		});
-		registerHandler(AgentEventType.SIMULATION_START, new AgentEventHandler()
-		{
+		registerHandler(AgentEventType.SIMULATION_START, new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
 				atSimulationStart(event);
 			}
 		});
-		registerHandler(AgentEventType.SIMULATION_PAUSE, new AgentEventHandler()
-		{
+		registerHandler(AgentEventType.SIMULATION_PAUSE, new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
 				atSimulationPause(event);
 			}
 		});
-		registerHandler(AgentEventType.AGENT_STOP, new AgentEventHandler()
-		{
+		registerHandler(AgentEventType.AGENT_STOP, new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
 				atAgentStop(event);
 			}
 		});
-		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler()
-		{
+		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
 				atBeforeAgentMove(event);
 			}
 		});
-		registerHandler(AgentEventType.AFTER_MOVE, new AgentEventHandler()
-		{
+		registerHandler(AgentEventType.AFTER_MOVE, new AgentEventHandler() {
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
 				atAfterAgentMove(event);
 			}
 		});
-
+		
 		componentInitializer();
 	}
-
+	
 	/**
 	 * Extending <b>anonymous</b> classes can override this method to perform actions when the component is created. The
 	 * method is called at the end of the constructor.
@@ -354,7 +357,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		// this class does not do anything here.
 	}
-
+	
 	/**
 	 * Extending classes should override this method to verify and pre-load component data, based on scenario data. The
 	 * component should perform agent-dependent initialization actions when
@@ -386,14 +389,14 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
 	{
-		if (parameters != null)
+		if(parameters != null)
 		{
 			parameters.ensureLocked();
 			componentData = parameters;
 		}
 		return true;
 	}
-
+	
 	/**
 	 * Extending classes can override this method to perform actions when the parent of the component changes, ot when
 	 * the component is effectively integrated (added) in the agent.
@@ -412,7 +415,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		// this class does not do anything here.
 	}
-
+	
 	/**
 	 * Method that is called by the default handler for {@link AgentEventType#AGENT_START}.
 	 * <p>
@@ -428,7 +431,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		// this class does not do anything here.
 	}
-
+	
 	/**
 	 * Method that is called by the default handler for {@link AgentEventType#SIMULATION_START}.
 	 * <p>
@@ -444,7 +447,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		// this class does not do anything here.
 	}
-
+	
 	/**
 	 * Method that is called by the default handler for {@link AgentEventType#SIMULATION_PAUSE}.
 	 * <p>
@@ -460,7 +463,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		// this class does not do anything here.
 	}
-
+	
 	/**
 	 * Method that is called by the default handler for {@link AgentEventType#AGENT_STOP}.
 	 * <p>
@@ -476,7 +479,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		// this class does not do anything here.
 	}
-
+	
 	/**
 	 * Method that is called by the default handler for {@link AgentEventType#BEFORE_MOVE}.
 	 * <p>
@@ -492,7 +495,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		// this class does not do anything here.
 	}
-
+	
 	/**
 	 * Method that is called by the default handler for {@link AgentEventType#AFTER_MOVE}.
 	 * <p>
@@ -508,7 +511,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		// this class does not do anything here.
 	}
-
+	
 	/**
 	 * Setter for the parent of the agent. If an agent instance is already a parent of this component,
 	 * <code>removeParent</code> must be called first.
@@ -525,7 +528,7 @@ public abstract class AgentComponent implements Serializable
 		parentAgent = parent;
 		parentChangeNotifier(oldParent);
 	}
-
+	
 	/**
 	 * Sets the parent of the component to <code>null</code>, effectively eliminating the component from the agent.
 	 * <p>
@@ -538,7 +541,7 @@ public abstract class AgentComponent implements Serializable
 		parentAgent = null;
 		parentChangeNotifier(oldParent);
 	}
-
+	
 	/**
 	 * The method calls the event handler of the component for the event which occurred.
 	 * <p>
@@ -549,10 +552,10 @@ public abstract class AgentComponent implements Serializable
 	 */
 	void signalAgentEvent(AgentEvent event)
 	{
-		if (eventHandlers.containsKey(event.getType()))
+		if(eventHandlers.containsKey(event.getType()))
 			eventHandlers.get(event.getType()).handleEvent(event);
 	}
-
+	
 	/**
 	 * @return the name of the component (instance of {@link AgentComponentName}).
 	 */
@@ -560,7 +563,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		return componentName;
 	}
-
+	
 	/**
 	 * @return the component initialization data. It cannot be modified, and it is guaranteed to not be
 	 *         <code>null</code>.
@@ -569,7 +572,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		return componentData;
 	}
-
+	
 	/**
 	 * Retrieves the parent of the component.
 	 * 
@@ -579,7 +582,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		return parentAgent;
 	}
-
+	
 	/**
 	 * Relay for calls to the method {@link CompositeAgent#getAgentName()}.
 	 * 
@@ -589,7 +592,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		return (parentAgent != null) ? parentAgent.getAgentName() : null;
 	}
-
+	
 	/**
 	 * Relay for calls to the method {@link CompositeAgent#getPlatformLink()}.
 	 * 
@@ -599,7 +602,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		return parentAgent.getPlatformLink();
 	}
-
+	
 	/**
 	 * Relay for calls to the method {@link CompositeAgent#getComponent(AgentComponentName)}.
 	 * 
@@ -611,7 +614,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		return (parentAgent != null) ? parentAgent.getComponent(name) : null;
 	}
-
+	
 	/**
 	 * Extending classes should use this method to register {@link AgentEventHandler} instances that would be invoked
 	 * when the specified {@link AgentEventType} appears.
@@ -631,13 +634,13 @@ public abstract class AgentComponent implements Serializable
 	protected AgentEventHandler registerHandler(AgentEventType event, AgentEventHandler handler)
 	{
 		AgentEventHandler oldHandler = null;
-		if (eventHandlers.containsKey(event))
+		if(eventHandlers.containsKey(event))
 		{
 			oldHandler = eventHandlers.get(event);
 			try
 			{
 				getAgentLog().warn("Handler for event [] overwritten with []; was []", event, handler, oldHandler);
-			} catch (NullPointerException e)
+			} catch(NullPointerException e)
 			{
 				// no log, it's ok.
 			}
@@ -645,7 +648,7 @@ public abstract class AgentComponent implements Serializable
 		eventHandlers.put(event, handler);
 		return oldHandler;
 	}
-
+	
 	/**
 	 * Relay for calls to the method in {@link CompositeAgent}.
 	 * 
@@ -654,10 +657,10 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected void postAgentEvent(AgentEvent event)
 	{
-		if (parentAgent != null)
+		if(parentAgent != null)
 			parentAgent.postAgentEvent(event);
 	}
-
+	
 	/**
 	 * @return the log of the agent, or <code>null</code> if one is not present or cannot be obtained.
 	 */
@@ -666,12 +669,12 @@ public abstract class AgentComponent implements Serializable
 		try
 		{
 			return ((VisualizableComponent) getAgentComponent(AgentComponentName.VISUALIZABLE_COMPONENT)).getLog();
-		} catch (NullPointerException e)
+		} catch(NullPointerException e)
 		{
 			return null;
 		}
 	}
-
+	
 	/**
 	 * Handles the registration of an event handler for messages to a target (inside the agent) with the specified
 	 * prefix (elements of the internal path of the endpoint).
@@ -691,7 +694,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		// TODO: if the messaging component disappears, register with the agent; if the messaging component appears,
 		// register with that.
-		if ((parentAgent != null) && (parentAgent.hasComponent(AgentComponentName.MESSAGING_COMPONENT)))
+		if((parentAgent != null) && (parentAgent.hasComponent(AgentComponentName.MESSAGING_COMPONENT)))
 		{
 			// the implementation somewhat non-intuitively uses the fact that the method in MessagingComponent that is
 			// used has the same name.
@@ -701,7 +704,7 @@ public abstract class AgentComponent implements Serializable
 		registerHandler(AgentEventType.AGENT_MESSAGE, receiver);
 		return false;
 	}
-
+	
 	/**
 	 * Retrieve the complete path of the endpoint of the current component, as specified by the component by means of
 	 * the path elements in arguments, and adding the agent's address. This method is meant to be used by components
@@ -720,13 +723,13 @@ public abstract class AgentComponent implements Serializable
 		{
 			return ((MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT))
 					.makeLocalPath(pathElements);
-		} catch (NullPointerException e)
+		} catch(NullPointerException e)
 		{
 			// messaging component not available
 			return null;
 		}
 	}
-
+	
 	/**
 	 * Method that relays the sending of a message, without the need to interact with the messaging component directly.
 	 * This version of the method converts the target agent name to an agent address and assembles it with the elements
@@ -747,11 +750,11 @@ public abstract class AgentComponent implements Serializable
 			String... targetPathElements)
 	{
 		MessagingComponent msgr = (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
-		if (msgr != null)
+		if(msgr != null)
 			return msgr.sendMessage(msgr.makePath(targetAgent, targetPathElements), sourceEndpoint, content);
 		return false;
 	}
-
+	
 	/**
 	 * Method that relays the sending of a message, without the need to interact with the messaging component directly.
 	 * This version of the method takes the complete target endpoint.
@@ -770,11 +773,11 @@ public abstract class AgentComponent implements Serializable
 	protected boolean sendMessageToEndpoint(String content, String sourceEndpoint, String targetEndpoint)
 	{
 		MessagingComponent msgr = (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
-		if (msgr != null)
+		if(msgr != null)
 			return msgr.sendMessage(targetEndpoint, sourceEndpoint, content);
 		return false;
 	}
-
+	
 	/**
 	 * Facilitates the sending of a message in reply to a previous message, just by reversing the source and destination
 	 * endpoints and adding the content.
