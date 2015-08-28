@@ -24,6 +24,36 @@ public class AmILabClient extends AgentComponent
 	private static final long serialVersionUID = -6787025838586743067L;
 
 	/**
+	 * Proximity request message.
+	 */
+	public static final String PROXIMITY_REQUEST = "PROXIMITY_REQUEST";
+
+	/**
+	 * Confirmation message. This agent is the closest one.
+	 */
+	public static final String CONFIRM = "CONFIRM";
+
+	/**
+	 * Decline message. This is not the closest agent.
+	 */
+	public static final String DECLINE = "DECLINE";
+
+	/**
+	 * AmILab path element.
+	 */
+	public static final String AMILAB_PATH_ELEMENT = "amilab";
+	
+	/**
+	 * Client path element.
+	 */
+	public static final String CLIENT_PATH_ELEMENT = "client";
+	
+	/**
+	 * Server path element.
+	 */
+	public static final String SERVER_PATH_ELEMENT = "server";
+	
+	/**
 	 * Default constructor.
 	 */
 	public AmILabClient()
@@ -106,8 +136,12 @@ public class AmILabClient extends AgentComponent
 					e.printStackTrace();
 				}
 
-				// Perform checks and calculations.
-				// proximity = newProximity;
+				long newProximity = processPerception(perception);
+
+				if (newProximity < 0)
+					continue;
+
+				proximity = newProximity;
 			}
 		}
 
@@ -117,6 +151,19 @@ public class AmILabClient extends AgentComponent
 		public void stopThread()
 		{
 			alive = false;
+		}
+
+		/**
+		 * Processes a skeleton {@link Perception} to obtain the current proximity.
+		 * 
+		 * @param perception
+		 *            - {@link Perception} to be processed
+		 * @return the value of the new proximity or {@code -1} if the perception is invalid
+		 */
+		private long processPerception(Perception perception)
+		{
+			// Perform checks and calculations.
+			return -1;
 		}
 	}
 
@@ -131,24 +178,34 @@ public class AmILabClient extends AgentComponent
 	}
 
 	/**
-	 * Register a message handler.
+	 * Register a message handler for a client.
 	 */
-	protected void registerMessanger()
+	protected void registerClientMessanger()
 	{
 		registerMessageReceiver(new AgentEventHandler()
 		{
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
-				// receive
 				String content = (String) event.getParameter(MessagingComponent.CONTENT_PARAMETER);
-				String sender = (String) event.getParameter(MessagingComponent.SOURCE_PARAMETER);
-				String receiver = (String) event.getParameter(MessagingComponent.DESTINATION_PARAMETER);
 
-				// reply
-				// sendMessage("reply", receiver, sender);
+				getAgentLog().info("message with content [] received", content);
+
+				if (content.equals(PROXIMITY_REQUEST))
+				{
+					sendReply(Long.toString(proximity), event);
+				}
+				if (content.equals(CONFIRM))
+				{
+					active = true;
+				}
+				if (content.equals(DECLINE))
+				{
+					active = false;
+				}
+
 			}
-		}, "application", "amilab");
+		}, AMILAB_PATH_ELEMENT, CLIENT_PATH_ELEMENT);
 	}
 
 	@Override
@@ -171,6 +228,8 @@ public class AmILabClient extends AgentComponent
 	{
 		super.atAgentStart(event);
 		proximityUpdaterThread.start();
+
+		registerClientMessanger();
 	}
 
 	@Override
@@ -178,6 +237,7 @@ public class AmILabClient extends AgentComponent
 	{
 		super.atAgentStop(event);
 		proximityUpdater.stopThread();
+		simulationIsOn = false;
 	}
 
 	@Override
@@ -185,13 +245,11 @@ public class AmILabClient extends AgentComponent
 	{
 		super.atSimulationStart(event);
 
-		registerMessanger();
-
 		while (simulationIsOn)
 		{
 			if (active)
 			{
-				// do stuff if it wasn't already doing it
+				System.out.println();
 			} else
 			{
 				// stop doing stuff
@@ -199,4 +257,33 @@ public class AmILabClient extends AgentComponent
 		}
 	}
 
+	@Override
+	protected boolean sendReply(String content, AgentEvent replyTo)
+	{
+		return super.sendReply(content, replyTo);
+	}
+
+	@Override
+	protected boolean sendMessageToEndpoint(String content, String sourceEndpoint, String targetEndpoint)
+	{
+		return super.sendMessageToEndpoint(content, sourceEndpoint, targetEndpoint);
+	}
+
+	@Override
+	protected AgentComponent getAgentComponent(AgentComponentName name)
+	{
+		return super.getAgentComponent(name);
+	}
+
+	@Override
+	protected void postAgentEvent(AgentEvent event)
+	{
+		super.postAgentEvent(event);
+	}
+
+	@Override
+	protected Logger getAgentLog()
+	{
+		return super.getAgentLog();
+	}
 }
