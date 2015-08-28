@@ -12,6 +12,7 @@
 package tatami.core.agent.claim;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,13 +25,14 @@ import java.util.Vector;
 
 import net.xqhs.util.logging.DumbLogger;
 import net.xqhs.util.logging.Logger;
+import net.xqhs.util.logging.LoggerSimple;
+import net.xqhs.util.logging.Unit;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.kb.KnowledgeBase;
 import tatami.core.agent.kb.KnowledgeBase.KnowledgeDescription;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
 import tatami.core.agent.messaging.MessagingComponent;
-import tatami.core.agent.visualization.AgentGui;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
 import tatami.sclaim.constructs.basic.ClaimCondition;
@@ -48,7 +50,18 @@ import tatami.sclaim.constructs.basic.ClaimWhile;
 /**
  * There is one {@link ClaimBehavior} instance for each behavior in a {@link ClaimComponent}.
  * <p>
- * A behavior is activated by an agent event.
+ * There are three types of behaviors: initial, reactive, proactive. A behavior is activated by an agent event. A
+ * behavior must have two parts (the separation is not emphasized in the adf source, however): the activation part and
+ * the body.
+ * <ul>
+ * <li>an initial behavior is activated at the start of the simulation, by {@link AgentEventType#SIMULATION_START}.
+ * There is usually no activation part, or there may be a set of <code>condition</code> statements.
+ * <li>a reactive behavior is activated by receiving a message or by activating an active input -- events
+ * {@link AgentEventType#AGENT_MESSAGE} and {@link AgentEventType#GUI_INPUT}, respectively. The activation begins with a
+ * <code>receive</code> or <code>input</code> statement and may continue with a set of <code>condition</code>
+ * statements.
+ * <li>proactive behaviors are TODO: proactive behaviors.
+ * </ul>
  * <p>
  * TODO: currently, a behavior is activated by one event and will be executed sequentially, without interruptions. The
  * Claim Component, as well as the whole agent, will wait for the completion of the behavior before processing any other
@@ -69,6 +82,9 @@ import tatami.sclaim.constructs.basic.ClaimWhile;
  * and the next cycle then follows (equivalent with the <code>continue</code> Java statement. // FIXME what about the
  * <code>while</code> statement?
  * <p>
+ * If the execution of the behavior stops in the body of the behavior, a warning will be issued (otherwise, a trace
+ * logging message will be issued).
+ * <p>
  * S-CLAIM statements are internally divided into simple statements (called function calls), which begin with the name
  * of the function and continue with a list of arguments of which none contains an executable function, and complex
  * statements, which inside them contain other executable statements. Complex statements are <code>if</code>,
@@ -76,13 +92,15 @@ import tatami.sclaim.constructs.basic.ClaimWhile;
  * Java function calls.
  * 
  * @author Nguyen Thi Thuy Nga
+ * @author Marius-Tudor Benea
  * @author Andrei Olaru
  * 		
  */
 public class ClaimBehavior
 {
 	/**
-	 * Constants used in converting S-CLAIM variables to objects.
+	 * Constants used in converting S-CLAIM variables to objects (in
+	 * {@link ClaimBehavior#flattenConstructs(List, int, KeepVariables)}).
 	 * 
 	 * @author Andrei Olaru
 	 */
@@ -128,9 +146,43 @@ public class ClaimBehavior
 	 */
 	protected AgentEvent				activationEvent	= null;
 	/**
-	 * The number (index) of the statement currently being processed.
+	 * Is <code>true</code> while the execution of the behavior is in its activation part, before beginning the body.
+	 */
+	protected boolean					activating;
+	// ============= What follows are elements for tracing and debugging, especially the trace() method.
+	/**
+	 * The number (index) of the statement currently being processed. This should only be used for debugging.
 	 */
 	protected int						currentStatement;
+	/**
+	 * If <code>true</code>, the tracing messages in the behavior will be buffered and the entire buffer ({@link #logBuffer} displayed at the end.
+	 */
+	protected boolean					bufferLog		= true;
+	/**
+	 * The buffer to hold the tracing messages.
+	 */
+	protected String					logBuffer		= null;
+	
+	/**
+	 * The list of agent names that should be debugged (output tracing messages), if {@link #debugAllAgents} is set to <code>false</code>.
+	 */
+	static final protected String[]	debuggedAgents		= new String[] {};
+	/**
+	 * If true, all agents will be traced, regardless of the value of {@link #debuggedAgents}.
+	 */
+	static final protected boolean	debugAllAgents		= true;
+	/**
+	 * The list of behavior names that should be debugged (output tracing messages), if {@link #debugAllAgents} is set to <code>false</code>.
+	 */
+	static final protected String[]	debuggedBehaviors	= new String[] {};
+	/**
+	 * If true, all behaviors will be traced, regardless of the value of {@link #debuggedBehaviors}.
+	 */
+	static final protected boolean	debugAllBehaviors	= true;
+	/**
+	 * The value is computed at the creation of the behavior to know if the behavior should be traced or not.
+	 */
+	protected boolean				isDebugging;
 	
 	/**
 	 * Creates an instance that manages the execution of a claim behavior, as described by its definition.
@@ -155,6 +207,86 @@ public class ClaimBehavior
 		if(log == null)
 			log = DumbLogger.get();
 		st.setLogLink(log);
+		
+		initDebugging();
+	}
+	
+	/**
+	 * Initializes the {@link #isDebugging} member to know if this particular behavior should be debugged or not.
+	 */
+	@SuppressWarnings("unused")
+	protected void initDebugging()
+	{
+		Arrays.sort(debuggedAgents);
+		Arrays.sort(debuggedBehaviors);
+		isDebugging = (debugAllAgents || Arrays.binarySearch(debuggedAgents, claimComponent.getAgentName()) > 0)
+				&& (debugAllBehaviors || Arrays.binarySearch(debuggedBehaviors, cbd.getName()) > 0);
+	}
+	
+	/**
+	 * Traces the execution of an S-CLAIM statement, in case the behavior is being debugged. If so, the arguments are
+	 * passed verbatim to {@link Logger#trace(String, Object...)}, with the exception that the message is prepended with
+	 * the statement counter.
+	 * 
+	 * @param message
+	 *            - the message to be displayed.
+	 * @param arguments
+	 *            - the objects to be inserted into the message.
+	 */
+	protected void trace(String message, Object... arguments)
+	{
+		if(isDebugging)
+		{
+			if(bufferLog)
+			{
+				logBuffer += "\t\t\t\t\t\t\t[" + currentStatement + "] " + compose(message, arguments) + "\n";
+			}
+			else
+				log.trace("\t\t\t [SCLAIM:" + cbd.getName() + ":" + currentStatement + "] " + message, arguments);
+		}
+	}
+	
+	/**
+	 * Creates a single logging message with the entire log of the behavior execution. See {@link #bufferLog}.
+	 * 
+	 * @param shorten
+	 *            - if <code>true</code>, the buffer will be reduced to one line, with no tabulation.
+	 */
+	protected void putLog(boolean shorten)
+	{
+		if(isDebugging && (logBuffer != null))
+		{
+			if(shorten)
+				logBuffer = logBuffer.replace('\n', '|').replace('\t', ' ');
+			log.trace("\t\t\t SCLAIM:" + cbd.getName() + " []", logBuffer);
+		}
+	}
+	
+	/**
+	 * Copy of the <code>compose</code> method in {@link Unit}.
+	 * 
+	 * @param message
+	 *            - message.
+	 * @param objects
+	 *            - arguments.
+	 * @return assemply.
+	 */
+	protected static String compose(String message, Object[] objects)
+	{
+		String[] parts = message.split(LoggerSimple.ARGUMENT_PLACEHOLDER, objects.length + 1);
+		// there are enough objects for all parts
+		// there may be more objects than parts
+		String ret = parts[0];
+		for(int i = 0; i < parts.length - 1; i++)
+		{
+			ret += LoggerSimple.ARGUMENT_BEGIN + objects[i] + LoggerSimple.ARGUMENT_END;
+			ret += parts[i + 1];
+		}
+		// deal with the rest of the objects
+		for(int i = parts.length - 1; i < objects.length; i++)
+			ret += LoggerSimple.ARGUMENT_BEGIN + objects[i] + LoggerSimple.ARGUMENT_END;
+			
+		return ret;
 	}
 	
 	/**
@@ -168,7 +300,7 @@ public class ClaimBehavior
 			return AgentEventType.SIMULATION_START;
 		case REACTIVE:
 		{
-			ClaimConstruct statement = cbd.getStatements().get(currentStatement);
+			ClaimConstruct statement = cbd.getStatements().firstElement();
 			if(statement.getType() != ClaimConstructType.FUNCTION_CALL)
 				throw new IllegalStateException("illegal start of behavior.");
 			switch(((ClaimFunctionCall) statement).getFunctionType())
@@ -203,17 +335,44 @@ public class ClaimBehavior
 	 *            - the {@link AgentEvent} that activates the behavior (according to the value of
 	 *            {@link #getActivationType()}).
 	 */
-	public void activate(AgentEvent activatingEvent)
+	public void execute(AgentEvent activatingEvent)
 	{
 		activationEvent = activatingEvent;
-		while(currentStatement < cbd.getStatements().size())
-			// the behavior stops whenever a statement returns false (for statements that are not nested
-			if(!handleStatement(cbd.getStatements().get(currentStatement++)))
-				// stop behavior and exit execution
+		activating = true;
+		boolean executionFailure = false;
+		if(bufferLog)
+			logBuffer = "\n";
+		trace("entering with event []", activatingEvent);
+		
+		for(ClaimConstruct statement : cbd.getStatements())
+		{ // the behavior stops whenever a statement returns false (for statements that are not nested)
+			if(!((statement.getType() == ClaimConstructType.CONDITION) || ((statement
+					.getType() == ClaimConstructType.FUNCTION_CALL)
+					&& ((((ClaimFunctionCall) statement).getFunctionType() == ClaimFunctionType.RECEIVE)
+							|| (((ClaimFunctionCall) statement).getFunctionType() == ClaimFunctionType.INPUT)))))
+				activating = false; // move into behavior body
+				
+			if(!handleStatement(statement))
+			{ // stop behavior and exit execution
+				executionFailure = !activating;
 				break;
+			}
+			currentStatement++;
+		}
 		// end of behavior: stop behavior and exit execution
 		currentStatement = 0;
 		st.clearSymbolTable(); // reinitialize symbol table
+		if(activating)
+			logBuffer = "activation failed.\n" + logBuffer;
+		if(executionFailure)
+			if(bufferLog)
+				log.warn("\t\t\t SCLAIM:[] [] behavior terminated (statement failure) at statement [].", cbd.getName(),
+						logBuffer, new Integer(currentStatement));
+			else
+				log.warn("behavior [] terminated (statement failure) at statement [].", cbd.getName(),
+						new Integer(currentStatement));
+		else if(bufferLog)
+			putLog(activating);
 	}
 	
 	/**
@@ -236,9 +395,8 @@ public class ClaimBehavior
 			boolean condition = handleCall(((ClaimIf) statement).getCondition());
 			if(condition)
 			{
-				log.trace("if condition satisfied ", new Integer(currentStatement));
+				trace("if condition satisfied.");
 				
-				// after "then" there's a true branch and a false branch
 				Vector<ClaimConstruct> trueBranch = ((ClaimIf) statement).getTrueBranch();
 				for(ClaimConstruct trueBranchStatement : trueBranch)
 					if(!handleStatement(trueBranchStatement))
@@ -246,6 +404,8 @@ public class ClaimBehavior
 			}
 			else
 			{
+				trace("if condition not satisfied.");
+				
 				Vector<ClaimConstruct> falseBranch = ((ClaimIf) statement).getFalseBranch();
 				if(falseBranch != null)
 					for(ClaimConstruct falseBranchStatement : falseBranch)
@@ -261,9 +421,9 @@ public class ClaimBehavior
 			break;
 		default:
 			log.warn("Unreachable area reached");
-			break;
+			return false;
 		}
-		return false;
+		return true; // normal exit from forAllK, while, if
 	}
 	
 	/**
@@ -387,6 +547,10 @@ public class ClaimBehavior
 		return true;
 	}
 	
+	/**
+	 * @param args
+	 * @return
+	 */
 	@SuppressWarnings("static-method")
 	protected boolean handleIn(Vector<ClaimConstruct> args)
 	{
@@ -428,8 +592,7 @@ public class ClaimBehavior
 	 * <p>
 	 * <code>(send agent-id (struct message field-1 field-2 ...))</code> - normal send
 	 * <p>
-	 * <code>(send (struct message field-1 field-2 ...))</code> - send a reply to the received message; web service
-	 * invocation
+	 * <code>(send (struct message field-1 field-2 ...))</code> - send a reply to the received message
 	 * <p>
 	 * TODO: - web service access
 	 * 
@@ -534,11 +697,11 @@ public class ClaimBehavior
 		if(!readValues(received.getFields(), toBind.getFields(), 0))
 		{ // the message does not match the pattern
 			
-			log.trace("message not matching pattern []", content);
+			trace("message [] not matching pattern []", content, toBind);
 			return false;
 		}
 		
-		log.trace("message received: []", content);
+		trace("message received: []", content);
 		// capture sender, if necessary
 		if(args.size() >= 2)
 			st.put((ClaimVariable) args.get(0), new ClaimValue(sender));
@@ -556,65 +719,68 @@ public class ClaimBehavior
 	 * will be copied to the elements in the construct.
 	 * <p>
 	 * The difference between active and passive inputs is done by looking if the behavior has been activated by an
-	 * input. If it has, the input is active.
+	 * input. If it has, and we are in the activation part of the behavior, then the input is active.
 	 * 
 	 * @param args
 	 *            - elements in the <code>input</code> construct.
-	 * @return <code>true</code> if the input has been activated. TODO: what that actually means
+	 * @return <code>true</code> if the input has been activated (for active inputs) and if value transfer happened with
+	 *         no errors.
 	 */
 	@SuppressWarnings("unchecked")
 	protected boolean handleInput(Vector<ClaimConstruct> args)
 	{
 		Vector<Object> receivedInput;
-		ClaimConstruct a0 = args.get(0);
-		String inputComponent = ((a0.getType() == ClaimConstructType.VARIABLE) ? st.get((ClaimVariable) a0)
-				: (ClaimValue) a0).toString();
+		
+		// get input component
+		ClaimConstruct arg0 = args.get(0);
+		String inputComponent = ((arg0.getType() == ClaimConstructType.VARIABLE) ? st.get((ClaimVariable) arg0)
+				: (ClaimValue) arg0).toString();
 				
-		if(activationEvent.getType() == AgentEventType.GUI_INPUT)
-			// FIXME this will make all inputs in the behavior active
-			// input is active
+		// get the input
+		if(activating)
+		{
+			// input is active / the behavior is input-activated
+			if(activationEvent.getType() != AgentEventType.GUI_INPUT)
+				throw new IllegalStateException(
+						"input cannot be in activation area if behavior is not input-activated");
 			if(activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME)
 					.equals(inputComponent))
 				receivedInput = (Vector<Object>) activationEvent
 						.getParameter(VisualizableComponent.GUI_ARGUMENTS_EVENT_PARAMETER_NAME);
 			else
-				// incorrect input activated
+			{
+				log.error("incorrect input activated: expected [] vs activated [].", inputComponent,
+						activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME));
 				return false;
+			}
+		}
 		else
 			// input is passive
 			receivedInput = claimComponent.getVisualizable().inputFromGUI(inputComponent);
 			
+		// must copy values from source (activated / read input) into destination (input construct elements)
+		
 		Vector<ClaimConstruct> sourceArgs = objects2values(receivedInput);
 		Vector<ClaimConstruct> destinationArgs = new Vector<ClaimConstruct>(args);
 		destinationArgs.remove(0); // this is the name of the component
-		destinationArgs.remove(0); // this is the extraneous element that should be removed FIXME
 		
-		log.trace("reading input from [] to []", sourceArgs, destinationArgs);
+		trace("reading input from [] to []", sourceArgs, destinationArgs);
 		return readValues(sourceArgs, destinationArgs);
 	}
 	
+	/**
+	 * The constructs outputs to the GUI.
+	 * 
+	 * @param args
+	 *            - elements in the <code>input</code> construct.
+	 * @return normally <code>true</code>, i.e. the output has been done correctly (output component was found).
+	 */
 	protected boolean handleOutput(Vector<ClaimConstruct> args)
 	{
-		ClaimValue outputComponent = (ClaimValue) args.get(0);
-		Vector<ClaimValue> outputV = new Vector<ClaimValue>();
-		
-		Iterator<ClaimConstruct> itArg = args.iterator();
-		itArg.next();
-		while(itArg.hasNext())
-		{
-			ClaimConstruct arg = itArg.next();
-			if(arg instanceof ClaimValue)
-				outputV.add((ClaimValue) arg);
-			else
-				outputV.add(this.st.get((ClaimVariable) arg));
-		}
-		
-		AgentGui myAgentGUI = null; // FIXME: myAgent.getVisualizable().getInteractivGUI();
-		Vector<Object> outV = new Vector<Object>();
-		for(ClaimValue output : outputV)
-			outV.add(output.getValue());
-		claimComponent.getVisualizable().outputToGUI((String) outputComponent.getValue(), outV);
-		log.trace("The output [] was written on []", outputV, outputComponent.getValue());
+		String outputComponent = (String) ((ClaimValue) args.get(0)).getValue();
+		Vector<Object> outputV = constructs2Objects(args, 1); // get all but the component name
+		claimComponent.getVisualizable().outputToGUI(outputComponent, outputV);
+		trace("output [] was written on []", outputV, outputComponent);
 		return true;
 	}
 	
@@ -848,7 +1014,7 @@ public class ClaimBehavior
 		Vector<ClaimConstruct> arguments = new Vector<ClaimConstruct>(
 				flattenConstructs(args, 0, KeepVariables.KEEP_NONE));
 				
-		log.trace("invoking code attachment function [] with arguments: []", functionName, arguments);
+		trace("invoking code attachment function [] with arguments: []", functionName, arguments);
 		try
 		{
 			returnValue = ((Boolean) method.invoke(null, arguments)).booleanValue();
@@ -859,6 +1025,7 @@ public class ClaimBehavior
 			log.error("function [] invocation failed: ", functionName, e);
 			e.printStackTrace(); // FIXME: put this into the log
 		}
+		trace("code attachment function result [] with arguments [].", returnValue ? "OK" : "fail", arguments);
 		
 		return returnValue;
 	}

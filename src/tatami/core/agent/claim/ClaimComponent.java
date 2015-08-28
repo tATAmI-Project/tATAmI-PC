@@ -210,7 +210,16 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 		
 		for(ClaimBehavior cb : behaviors)
 			if(cb.getActivationType().equals(AgentEventType.SIMULATION_START))
-				cb.activate(event);
+				cb.execute(event);
+	}
+	
+	/**
+	 * Relay to be used in {@link ClaimBehavior}.
+	 */
+	@Override
+	protected String getAgentName()
+	{
+		return super.getAgentName();
 	}
 	
 	/**
@@ -255,7 +264,7 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	{
 		for(ClaimBehavior b : behaviors)
 			if(b.getActivationType() == event.getType())
-				b.activate(event);
+				b.execute(event);
 	}
 	
 	/**
