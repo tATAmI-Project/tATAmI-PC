@@ -12,7 +12,7 @@
 -->
 <scen:scenario xmlns:scen="http://www.example.org/scenarioSchema3"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.example.org/scenarioSchema3 ../../../src-schema/scenarioSchema3.xsd ">
+	xsi:schemaLocation="http://www.example.org/scenarioSchema3 ../../../../src-schema/scenarioSchema3.xsd ">
 
 	<scen:platform>
 		<scen:parameter name="name" value="local" />
@@ -30,12 +30,12 @@
 					<scen:parameter name="queue-name" value="measurements" />
 				</scen:component>
 				<scen:component name="testing"
-					classpath="scenario.amilab.AmILabControllerComponent" />
+					classpath="scenario.amilab.app_demo.AmILabServer" >
+					<scen:parameter name="client" value="Master_Server" />
+				</scen:component>
 				<scen:parameter name="loader" value="composite" />
-				<scen:parameter name="name" value="AmILabData" />
+				<scen:parameter name="name" value="Master_Server" />
 			</scen:agent>
 		</scen:container>
 	</scen:initial>
 </scen:scenario>
-
-<!-- classpath="scenario.amilab.FeederConsumerComponent" /> -->

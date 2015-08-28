@@ -27,6 +27,11 @@ public class AmILabServer extends AmILabClient
 	private static final long serialVersionUID = 4167394821635837982L;
 
 	/**
+	 * Client parameter string.
+	 */
+	private static final String CLIENT = "client";
+
+	/**
 	 * List of client agents.
 	 */
 	protected List<String> clients;
@@ -42,6 +47,16 @@ public class AmILabServer extends AmILabClient
 	protected Map<String, Long> proximities;
 
 	/**
+	 * Runnable that does all the logic
+	 */
+	protected StoppableRunnable serverRunnable;
+
+	/**
+	 * Thread that runs the server runnable.
+	 */
+	protected Thread serverThread;
+
+	/**
 	 * Register a message handler for a server.
 	 */
 	protected void registerServerMessanger()
@@ -53,12 +68,14 @@ public class AmILabServer extends AmILabClient
 			{
 				String content = (String) event.getParameter(MessagingComponent.CONTENT_PARAMETER);
 
-				getAgentLog().info("message with content [] received", content);
+				getAgentLog().info("Server received message with content [] received", content);
 
 				MessagingComponent msg = (MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT);
 
 				String sender = msg
 						.extractAgentAddress((String) event.getParameter(MessagingComponent.SOURCE_PARAMETER));
+
+				getAgentLog().info("The above proximity is for []", sender);
 
 				if (responses.add(sender))
 				{
@@ -67,6 +84,35 @@ public class AmILabServer extends AmILabClient
 				}
 			}
 		}, AMILAB_PATH_ELEMENT, SERVER_PATH_ELEMENT);
+	}
+
+	/**
+	 * Send requests to all clients.
+	 */
+	protected void sendRequests()
+	{
+		for (String client : clients)
+		{
+			sendMessage(PROXIMITY_REQUEST, getComponentEndpoint(AMILAB_PATH_ELEMENT, SERVER_PATH_ELEMENT), client,
+					AMILAB_PATH_ELEMENT, CLIENT_PATH_ELEMENT);
+		}
+	}
+
+	/**
+	 * Receive answers from all clients.
+	 */
+	protected void receiveAnswers()
+	{
+		while (!receivedAllAnswers())
+		{
+			try
+			{
+				Thread.sleep(50);
+			} catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
@@ -79,6 +125,54 @@ public class AmILabServer extends AmILabClient
 		return responses.size() == clients.size();
 	}
 
+	/**
+	 * Determine closest client.
+	 * 
+	 * @return name of the closest client
+	 */
+	protected String getClosestClient()
+	{
+		String closestClient = null;
+		long smallestProximity = Long.MAX_VALUE;
+
+		for (Map.Entry<String, Long> client : proximities.entrySet())
+		{
+			long clientProximity = client.getValue().longValue();
+
+			if (clientProximity <= smallestProximity)
+			{
+				closestClient = client.getKey();
+				smallestProximity = clientProximity;
+			}
+		}
+		return closestClient;
+	}
+
+	/**
+	 * Send responses to all the clients.
+	 * 
+	 * @param closestClient
+	 *            - name of the closesc client
+	 */
+	protected void sendResponses(String closestClient)
+	{
+		// Announce the closest client first.
+		sendMessage(CONFIRM, getComponentEndpoint(AMILAB_PATH_ELEMENT, SERVER_PATH_ELEMENT), closestClient,
+				AMILAB_PATH_ELEMENT, CLIENT_PATH_ELEMENT);
+
+		// Send negative feedback to the other clients.
+		proximities.remove(closestClient);
+		for (String client : proximities.keySet())
+		{
+			sendMessage(DECLINE, getComponentEndpoint(AMILAB_PATH_ELEMENT, SERVER_PATH_ELEMENT), client,
+					AMILAB_PATH_ELEMENT, CLIENT_PATH_ELEMENT);
+
+		}
+
+		responses.clear();
+		proximities.clear();
+	}
+
 	@Override
 	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
 	{
@@ -89,6 +183,40 @@ public class AmILabServer extends AmILabClient
 		responses = new HashSet<String>();
 		proximities = new HashMap<String, Long>();
 
+		clients.add(getComponentData().get(CLIENT));
+
+		serverRunnable = new StoppableRunnable()
+		{
+			/**
+			 * The time between the "pings".
+			 */
+			private static final int TIME_TO_SLEEP = 50;
+
+			@Override
+			public void run()
+			{
+				while (!stopFlag)
+				{
+					sendRequests();
+					receiveAnswers();
+
+					String closestClient = getClosestClient();
+
+					sendResponses(closestClient);
+
+					try
+					{
+						Thread.sleep(TIME_TO_SLEEP);
+					} catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+
+		serverThread = new Thread(serverRunnable);
+
 		return true;
 	}
 
@@ -97,65 +225,16 @@ public class AmILabServer extends AmILabClient
 	{
 		super.atSimulationStart(event);
 
-		while (simulationIsOn)
-		{
-			// Send requests to all clients.
-			for (String client : clients)
-			{
-				sendMessage(PROXIMITY_REQUEST, getComponentEndpoint(AMILAB_PATH_ELEMENT, SERVER_PATH_ELEMENT), client,
-						AMILAB_PATH_ELEMENT, CLIENT_PATH_ELEMENT);
-			}
+		registerServerMessanger();
+		serverThread.start();
+	}
 
-			while (!receivedAllAnswers())
-			{
-				try
-				{
-					Thread.sleep(50);
-				} catch (InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-			}
+	@Override
+	protected void atAgentStop(AgentEvent event)
+	{
+		super.atAgentStop(event);
 
-			// Determine closest client.
-			String closestClient = null;
-			long smallestProximity = Long.MAX_VALUE;
-
-			for (Map.Entry<String, Long> client : proximities.entrySet())
-			{
-				long clientProximity = client.getValue().longValue();
-
-				if (clientProximity <= smallestProximity)
-				{
-					closestClient = client.getKey();
-					smallestProximity = clientProximity;
-				}
-			}
-
-			// Announce the closest client first.
-			sendMessage(PROXIMITY_REQUEST, getComponentEndpoint(AMILAB_PATH_ELEMENT, SERVER_PATH_ELEMENT),
-					closestClient, AMILAB_PATH_ELEMENT, CLIENT_PATH_ELEMENT);
-
-			// Send negative feedback to the other clients.
-			proximities.remove(closestClient);
-			for (String client : proximities.keySet())
-			{
-				sendMessage(DECLINE, getComponentEndpoint(AMILAB_PATH_ELEMENT, SERVER_PATH_ELEMENT), client,
-						AMILAB_PATH_ELEMENT, CLIENT_PATH_ELEMENT);
-
-			}
-
-			responses.clear();
-			proximities.clear();
-
-			try
-			{
-				Thread.sleep(1000);
-			} catch (InterruptedException e)
-			{
-				e.printStackTrace();
-			}
-		}
+		serverRunnable.stop();
 	}
 
 }

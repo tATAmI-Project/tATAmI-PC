@@ -136,17 +136,48 @@ public class AmILabControllerComponent extends AgentComponent
 		while (true)
 		{
 			data = amilab.get(AmILabDataType.IMAGE_DEPTH);
+			// data = amilab.get(AmILabDataType.IMAGE_DEPTH);
 			// data = amilab.get(AmILabDataType.IMAGE_RGB);
-			imageBytes = getImageBytes(data);
-			if (imageBytes == null)
-				continue;
+			data = amilab.get(AmILabDataType.SKELETON);
+			System.out.println(getProximity(data));
 
-			icon = new ImageIcon(imageBytes);
-			scaledIcon = new ImageIcon(getScaledImage(icon.getImage(), (int) (RESIZE_FACTOR * IMAGE_DEPTH_WIDTH),
-					(int) (RESIZE_FACTOR * IMAGE_DEPTH_HEIGHT)));
+			try
+			{
+				Thread.sleep(500);
+			} catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
 
-			labels.get(crtCamera - 1).setIcon(scaledIcon);
+			// imageBytes = getImageBytes(data);
+			// if (imageBytes == null)
+			// continue;
+			//
+			// icon = new ImageIcon(imageBytes);
+			// scaledIcon = new ImageIcon(getScaledImage(icon.getImage(), (int) (RESIZE_FACTOR * IMAGE_DEPTH_WIDTH),
+			// (int) (RESIZE_FACTOR * IMAGE_DEPTH_HEIGHT)));
+			//
+			// labels.get(crtCamera - 1).setIcon(scaledIcon);
 		}
+	}
+
+	public static double getProximity(Perception data)
+	{
+		HashMap<?, ?> parsedJson = null;
+		try
+		{
+			parsedJson = new ObjectMapper().readValue(data.getData(), HashMap.class);
+			HashMap<?, ?> skeleton = (HashMap<?, ?>) parsedJson.get("skeleton_3D");
+			HashMap<?, ?> torso = (HashMap<?, ?>) skeleton.get("torso");
+			Double proximity = (Double) torso.get("Z");
+
+			return proximity.doubleValue();
+
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return -0;
 	}
 
 	/**

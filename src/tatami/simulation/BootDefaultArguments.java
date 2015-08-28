@@ -16,12 +16,10 @@ import net.xqhs.windowLayout.grid.GridLayoutIndications;
 import tatami.core.agent.visualization.AgentGuiConfig;
 
 /**
- * This class traditionally contains settings for simulations, in order to
- * decouple it from Boot (making it easy to ignore changes in BootSettings when
- * committing).
+ * This class traditionally contains settings for simulations, in order to decouple it from Boot (making it easy to
+ * ignore changes in BootSettings when committing).
  * <p>
- * The functionality of this class was initially offered under the name of
- * BootSettings.
+ * The functionality of this class was initially offered under the name of BootSettings.
  * 
  * @author Andrei Olaru
  */
@@ -30,21 +28,15 @@ public class BootDefaultArguments
 	/**
 	 * The scenario file.
 	 */
-	static final String scenarioFileName = "src-scenario/scenario/amilab/scenario-consumer-A.xml";
-	// static final String scenarioFileName =
-	// "src-scenario/scenario/amilab/scenario-feeder-consumer-B.xml";
-	// static final String scenarioFileName =
-	// "src-scenario/scenario/examples/jade/simpleA/scenario.xml";
-	// static final String scenarioFileName =
-	// "src-scenario/scenario/s2014/SmartConference/smart_room_conference.xml";
-	// static final String scenarioFileName =
-	// "src-scenario/scenario/s2013/SmartRoom_EMAS/smart_room_emas.xml";
-	// static final String scenarioFileName =
-	// "src-scenario/scenario/s2014/SmartConference/timeline.xml";
-	// static final String scenarioFileName =
-	// "src-scenario/scenario/s2014/demo/smart_conference.xml";
-	// static final String scenarioFileName =
-	// "src-scenario/scenario/s2014/SmartConference/even_odd_scenario.xml";
+	static final String scenarioFileName = "src-scenario/scenario/amilab/app_demo/scenario-client-server.xml";
+//	 static final String scenarioFileName = "src-scenario/scenario/amilab/scenario-consumer-A.xml";
+	// static final String scenarioFileName = "src-scenario/scenario/amilab/scenario-feeder-consumer-B.xml";
+	// static final String scenarioFileName = "src-scenario/scenario/examples/jade/simpleA/scenario.xml";
+	// static final String scenarioFileName = "src-scenario/scenario/s2014/SmartConference/smart_room_conference.xml";
+	// static final String scenarioFileName = "src-scenario/scenario/s2013/SmartRoom_EMAS/smart_room_emas.xml";
+	// static final String scenarioFileName = "src-scenario/scenario/s2014/SmartConference/timeline.xml";
+	// static final String scenarioFileName = "src-scenario/scenario/s2014/demo/smart_conference.xml";
+	// static final String scenarioFileName = "src-scenario/scenario/s2014/SmartConference/even_odd_scenario.xml";
 
 	/**
 	 * Main (Jade) host.

@@ -1,5 +1,9 @@
 package scenario.amilab.app_demo;
 
+import java.util.HashMap;
+
+import org.codehaus.jackson.map.ObjectMapper;
+
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
 import tatami.amilab.AmILabComponent;
@@ -42,17 +46,17 @@ public class AmILabClient extends AgentComponent
 	 * AmILab path element.
 	 */
 	public static final String AMILAB_PATH_ELEMENT = "amilab";
-	
+
 	/**
 	 * Client path element.
 	 */
 	public static final String CLIENT_PATH_ELEMENT = "client";
-	
+
 	/**
 	 * Server path element.
 	 */
 	public static final String SERVER_PATH_ELEMENT = "server";
-	
+
 	/**
 	 * Default constructor.
 	 */
@@ -77,9 +81,9 @@ public class AmILabClient extends AgentComponent
 	protected long proximity;
 
 	/**
-	 * Local {@link ProximityUpdater}.
+	 * Updates the proximity.
 	 */
-	protected ProximityUpdater proximityUpdater;
+	protected StoppableRunnable proximityUpdater;
 
 	/**
 	 * Support thread for the local {@link ProximityUpdater}.
@@ -92,80 +96,14 @@ public class AmILabClient extends AgentComponent
 	protected AmILabComponent amilab;
 
 	/**
-	 * Runnable used to update the proximity.
-	 * 
-	 * @author Claudiu-Mihai Toma
-	 *
+	 * Runnable that does all the logic
 	 */
-	public class ProximityUpdater implements Runnable
-	{
-		/**
-		 * The time used to reduce thread's CPU consumption.
-		 */
-		private static final int TIME_TO_SLEEP = 50;
+	protected StoppableRunnable clientRunnable;
 
-		/**
-		 * State of the current {@link ProximityUpdater}.
-		 */
-		private boolean alive;
-
-		/**
-		 * Default constructor. Sets the internal state.
-		 */
-		public ProximityUpdater()
-		{
-			alive = false;
-		}
-
-		@Override
-		public void run()
-		{
-			Perception perception = null;
-
-			alive = true;
-
-			while (alive)
-			{
-				perception = getAmILabComponent().get(AmILabDataType.SKELETON);
-
-				try
-				{
-					Thread.sleep(TIME_TO_SLEEP);
-				} catch (InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-
-				long newProximity = processPerception(perception);
-
-				if (newProximity < 0)
-					continue;
-
-				proximity = newProximity;
-			}
-		}
-
-		/**
-		 * Stops the {@link Thread}.
-		 */
-		public void stopThread()
-		{
-			alive = false;
-		}
-
-		/**
-		 * Processes a skeleton {@link Perception} to obtain the current proximity.
-		 * 
-		 * @param perception
-		 *            - {@link Perception} to be processed
-		 * @return the value of the new proximity or {@code -1} if the perception is invalid
-		 */
-		private long processPerception(Perception perception)
-		{
-			// Perform checks and calculations.
-			return -1;
-		}
-	}
+	/**
+	 * Thread that runs the server runnable.
+	 */
+	protected Thread clientThread;
 
 	/**
 	 * Getter for the {@link AmILabComponent}.
@@ -189,7 +127,7 @@ public class AmILabClient extends AgentComponent
 			{
 				String content = (String) event.getParameter(MessagingComponent.CONTENT_PARAMETER);
 
-				getAgentLog().info("message with content [] received", content);
+				getAgentLog().info("Client received message with content [] received", content);
 
 				if (content.equals(PROXIMITY_REQUEST))
 				{
@@ -216,28 +154,100 @@ public class AmILabClient extends AgentComponent
 
 		active = false;
 		proximity = Long.MAX_VALUE;
-		amilab = (AmILabComponent) getAgentComponent(AgentComponentName.AMILAB_COMPONENT);
-		proximityUpdater = new ProximityUpdater();
+
+		proximityUpdater = new StoppableRunnable()
+		{
+			/**
+			 * The time used to reduce thread's CPU consumption.
+			 */
+			private static final int TIME_TO_SLEEP = 50;
+
+			/**
+			 * How many decimals to keep.
+			 */
+			private static final int DOUBLE_TO_LONG = 100;
+
+			@Override
+			public void run()
+			{
+				Perception perception = null;
+
+				while (!stopFlag)
+				{
+					perception = getAmILabComponent().get(AmILabDataType.SKELETON);
+
+					try
+					{
+						Thread.sleep(TIME_TO_SLEEP);
+					} catch (InterruptedException e)
+					{
+						e.printStackTrace();
+					}
+
+					long newProximity = processPerception(perception);
+
+					if (newProximity < 0)
+						continue;
+
+					proximity = newProximity;
+				}
+
+			}
+
+			/**
+			 * Processes a skeleton {@link Perception} to obtain the current proximity.
+			 * 
+			 * @param perception
+			 *            - {@link Perception} to be processed
+			 * @return the value of the new proximity or {@code -1} if the perception is invalid
+			 */
+			private long processPerception(Perception perception)
+			{
+				// Perform checks and calculations.
+				HashMap<?, ?> parsedJson = null;
+				try
+				{
+					parsedJson = new ObjectMapper().readValue(perception.getData(), HashMap.class);
+					HashMap<?, ?> skeleton = (HashMap<?, ?>) parsedJson.get("skeleton_3D");
+					HashMap<?, ?> torso = (HashMap<?, ?>) skeleton.get("torso");
+					double newProximity = ((Double) torso.get("Z")).doubleValue();
+
+					newProximity *= DOUBLE_TO_LONG;
+
+					return (long) newProximity;
+
+				} catch (Exception e)
+				{
+					e.printStackTrace();
+					return -1;
+				}
+			}
+
+		};
+
 		proximityUpdaterThread = new Thread(proximityUpdater);
 
+		clientRunnable = new StoppableRunnable()
+		{
+			@Override
+			public void run()
+			{
+				while (!stopFlag)
+				{
+					if (active)
+					{
+						getAgentLog().info("I'm active and I have proximity []", Long.toString(proximity));
+					} else
+					{
+						// stop doing stuff
+					}
+				}
+			}
+		};
+
+		clientThread = new Thread(clientRunnable);
+
 		return true;
-	}
-
-	@Override
-	protected void atAgentStart(AgentEvent event)
-	{
-		super.atAgentStart(event);
-		proximityUpdaterThread.start();
-
-		registerClientMessanger();
-	}
-
-	@Override
-	protected void atAgentStop(AgentEvent event)
-	{
-		super.atAgentStop(event);
-		proximityUpdater.stopThread();
-		simulationIsOn = false;
 	}
 
 	@Override
@@ -245,16 +255,20 @@ public class AmILabClient extends AgentComponent
 	{
 		super.atSimulationStart(event);
 
-		while (simulationIsOn)
-		{
-			if (active)
-			{
-				System.out.println();
-			} else
-			{
-				// stop doing stuff
-			}
-		}
+		amilab = (AmILabComponent) getAgentComponent(AgentComponentName.AMILAB_COMPONENT);
+		
+		registerClientMessanger();
+		proximityUpdaterThread.start();
+		clientThread.start();
+	}
+
+	@Override
+	protected void atAgentStop(AgentEvent event)
+	{
+		super.atAgentStop(event);
+
+		proximityUpdater.stop();
+		clientRunnable.stop();
 	}
 
 	@Override
