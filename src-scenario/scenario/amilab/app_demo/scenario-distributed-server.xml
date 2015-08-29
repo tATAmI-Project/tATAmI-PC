@@ -36,7 +36,7 @@
 				</scen:component>
 				<scen:component name="testing"
 					classpath="scenario.amilab.app_demo.AmILabServer" >
-					<scen:parameter name="clients" value="Client" />
+					<scen:parameter name="clients" value="Client Server" />
 				</scen:component>
 				<scen:parameter name="loader" value="composite" />
 				<scen:parameter name="name" value="Server" />
