@@ -1,6 +1,7 @@
 package testing.system_testing.basic_platforms;
 
 import tatami.simulation.Boot;
+import tatami.simulation.BootSettingsManager;
 
 /**
  * Tester for several cases of incompletely (not necessarily incorrectly) specified scenarios.
@@ -33,7 +34,8 @@ public class BasicPlatformTest
 	/**
 	 * Directory for scenario files.
 	 */
-	public final static String		DIR				= "src-scenario/scenario/examples/composite/platform/";
+	public final static String		DIR				= BootSettingsManager.SCENARIO_DIRECTORY
+															+ "scenario/examples/composite/platform/";
 	/**
 	 * Extension for scenario files.
 	 */

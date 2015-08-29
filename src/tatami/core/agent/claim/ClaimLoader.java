@@ -20,6 +20,7 @@ import java.util.Map;
 import net.xqhs.util.logging.Logger;
 import tatami.sclaim.constructs.basic.ClaimAgentDefinition;
 import tatami.sclaim.parser.Parser;
+import tatami.simulation.BootSettingsManager;
 
 /**
  * This class handles the loading of .adf2 files to {@link ClaimAgentDefinition} instances and the attachment of java
@@ -43,7 +44,7 @@ public class ClaimLoader
 	/**
 	 * The source folder for scenario files. FIXME this should be specified elsewhere?
 	 */
-	final protected static String						SOURCE_FOLDER		= "src-scenario";
+	final protected static String						SOURCE_FOLDER		= BootSettingsManager.SCENARIO_DIRECTORY;
 	
 	/**
 	 * Loads an S-Claim Agent Definition instance, or returns a pre-cached one (according to the settings).
@@ -72,7 +73,7 @@ public class ClaimLoader
 		{
 			for(String adfPath : agentPackages)
 			{
-				String path = SOURCE_FOLDER + "/" + adfPath.replace('.', '/') + "/" + agentClass + ".adf2";
+				String path = SOURCE_FOLDER + adfPath.replace('.', '/') + "/" + agentClass + ".adf2";
 				log.trace("trying adf path [" + path + "]");
 				File f = new File(path);
 				if(f.exists())

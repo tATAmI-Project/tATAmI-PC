@@ -3,6 +3,7 @@ package testing.system_testing.basic_platforms;
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.logging.Logging;
 import tatami.simulation.Boot;
+import tatami.simulation.BootSettingsManager;
 
 /**
  * Tests composite agents deployed on the Jade Platform.
@@ -20,7 +21,8 @@ public class JadePlatformTest
 	/**
 	 * Scenario file to use.
 	 */
-	public static final String	SCENARIO	= "src-scenario/scenario/examples/jade/simpleA/scenario"
+	public static final String	SCENARIO	= BootSettingsManager.SCENARIO_DIRECTORY
+													+ "scenario/examples/jade/simpleA/scenario"
 													+ (USE_CONFIG ? "-with-config" : "") + ".xml";
 	
 	/**
