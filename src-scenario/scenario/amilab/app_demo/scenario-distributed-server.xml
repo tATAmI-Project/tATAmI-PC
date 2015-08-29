@@ -14,6 +14,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.example.org/scenarioSchema3 ../../../../src-schema/scenarioSchema3.xsd ">
 
+<!--  
+	<scen:config mainHost="server client" mainPort="9002"
+		localHost="172.16.6.101" localPort="9002" />
+-->
+
 	<scen:platform>
 		<scen:parameter name="name" value="websocket" />
 	</scen:platform>
