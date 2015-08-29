@@ -59,7 +59,7 @@ public class VisualizableComponentTest extends Unit
 			protected void componentInitializer()
 			{
 				preload((ComponentCreationData) new ComponentCreationData().addObject(COMPONENT_PARAMETER_NAME,
-						agentParameters), null, null);
+						agentParameters), null, null, null);
 			}
 		});
 		
@@ -72,7 +72,7 @@ public class VisualizableComponentTest extends Unit
 				super.componentInitializer();
 				
 				preload((ComponentCreationData) new ComponentCreationData().add(VisualizableComponent.GUI_PARAMETER_NAME,
-						TestGui.class.getSimpleName()), null, null);
+						TestGui.class.getSimpleName()), null, null, null);
 			}
 		});
 		
