@@ -94,7 +94,7 @@ import tatami.sclaim.constructs.basic.ClaimWhile;
  * @author Nguyen Thi Thuy Nga
  * @author Marius-Tudor Benea
  * @author Andrei Olaru
- * 		
+ * 
  */
 public class ClaimBehavior
 {
@@ -139,12 +139,12 @@ public class ClaimBehavior
 	 * The {@link Logger} instance to use. It will never be <code>null</code>, though it may fall back to a
 	 * {@link DumbLogger}.
 	 */
-	protected transient Logger			log				= null;
+	protected transient Logger			log					= null;
 	/**
 	 * Information about how the behavior was activated. For future use, more activation records may be present.
 	 * Currently, only one is used.
 	 */
-	protected AgentEvent				activationEvent	= null;
+	protected AgentEvent				activationEvent		= null;
 	/**
 	 * Is <code>true</code> while the execution of the behavior is in its activation part, before beginning the body.
 	 */
@@ -155,34 +155,37 @@ public class ClaimBehavior
 	 */
 	protected int						currentStatement;
 	/**
-	 * If <code>true</code>, the tracing messages in the behavior will be buffered and the entire buffer ({@link #logBuffer} displayed at the end.
+	 * If <code>true</code>, the tracing messages in the behavior will be buffered and the entire buffer (
+	 * {@link #logBuffer} displayed at the end.
 	 */
-	protected boolean					bufferLog		= true;
+	protected boolean					bufferLog			= true;
 	/**
 	 * The buffer to hold the tracing messages.
 	 */
-	protected String					logBuffer		= null;
+	protected String					logBuffer			= null;
 	
 	/**
-	 * The list of agent names that should be debugged (output tracing messages), if {@link #debugAllAgents} is set to <code>false</code>.
+	 * The list of agent names that should be debugged (output tracing messages), if {@link #debugAllAgents} is set to
+	 * <code>false</code>.
 	 */
-	static final protected String[]	debuggedAgents		= new String[] {};
+	static final protected String[]		debuggedAgents		= new String[] {};
 	/**
 	 * If true, all agents will be traced, regardless of the value of {@link #debuggedAgents}.
 	 */
-	static final protected boolean	debugAllAgents		= true;
+	static final protected boolean		debugAllAgents		= true;
 	/**
-	 * The list of behavior names that should be debugged (output tracing messages), if {@link #debugAllAgents} is set to <code>false</code>.
+	 * The list of behavior names that should be debugged (output tracing messages), if {@link #debugAllAgents} is set
+	 * to <code>false</code>.
 	 */
-	static final protected String[]	debuggedBehaviors	= new String[] {};
+	static final protected String[]		debuggedBehaviors	= new String[] {};
 	/**
 	 * If true, all behaviors will be traced, regardless of the value of {@link #debuggedBehaviors}.
 	 */
-	static final protected boolean	debugAllBehaviors	= true;
+	static final protected boolean		debugAllBehaviors	= true;
 	/**
 	 * The value is computed at the creation of the behavior to know if the behavior should be traced or not.
 	 */
-	protected boolean				isDebugging;
+	protected boolean					isDebugging;
 	
 	/**
 	 * Creates an instance that manages the execution of a claim behavior, as described by its definition.
@@ -285,7 +288,7 @@ public class ClaimBehavior
 		// deal with the rest of the objects
 		for(int i = parts.length - 1; i < objects.length; i++)
 			ret += LoggerSimple.ARGUMENT_BEGIN + objects[i] + LoggerSimple.ARGUMENT_END;
-			
+		
 		return ret;
 	}
 	
@@ -346,10 +349,9 @@ public class ClaimBehavior
 		
 		for(ClaimConstruct statement : cbd.getStatements())
 		{ // the behavior stops whenever a statement returns false (for statements that are not nested)
-			if(!((statement.getType() == ClaimConstructType.CONDITION) || ((statement
-					.getType() == ClaimConstructType.FUNCTION_CALL)
-					&& ((((ClaimFunctionCall) statement).getFunctionType() == ClaimFunctionType.RECEIVE)
-							|| (((ClaimFunctionCall) statement).getFunctionType() == ClaimFunctionType.INPUT)))))
+			if(!((statement.getType() == ClaimConstructType.CONDITION) || ((statement.getType() == ClaimConstructType.FUNCTION_CALL) && ((((ClaimFunctionCall) statement)
+					.getFunctionType() == ClaimFunctionType.RECEIVE) || (((ClaimFunctionCall) statement)
+					.getFunctionType() == ClaimFunctionType.INPUT)))))
 				activating = false; // move into behavior body
 				
 			if(!handleStatement(statement))
@@ -369,8 +371,8 @@ public class ClaimBehavior
 				log.warn("\t\t\t SCLAIM:[] [] behavior terminated (statement failure) at statement [].", cbd.getName(),
 						logBuffer, new Integer(currentStatement));
 			else
-				log.warn("behavior [] terminated (statement failure) at statement [].", cbd.getName(),
-						new Integer(currentStatement));
+				log.warn("behavior [] terminated (statement failure) at statement [].", cbd.getName(), new Integer(
+						currentStatement));
 		else if(bufferLog)
 			putLog(activating);
 	}
@@ -623,7 +625,7 @@ public class ClaimBehavior
 			switch(activationEvent.getType())
 			{
 			case AGENT_MESSAGE:
-				// log.trace("replying to message ", lastMessage);
+				// trace("replying to message ", lastMessage);
 				replyMode = true;
 				// TODO
 				break;
@@ -663,7 +665,7 @@ public class ClaimBehavior
 		else
 		{
 			claimComponent.sendMessage(message.toString(), receiver);
-			log.info("sent ", message.toString());
+			trace("sent to [] message [].", receiver, message.toString());
 		}
 		return true;
 	}
@@ -691,17 +693,17 @@ public class ClaimBehavior
 		
 		if(received == null)
 			return false;
-			
+		
 		ClaimStructure toBind = (ClaimStructure) args.get(args.size() - 1); // the last part is the message
 		
 		if(!readValues(received.getFields(), toBind.getFields(), 0))
 		{ // the message does not match the pattern
-			
+		
 			trace("message [] not matching pattern []", content, toBind);
 			return false;
 		}
 		
-		trace("message received: []", content);
+		trace("message received from []: []", sender, content);
 		// capture sender, if necessary
 		if(args.size() >= 2)
 			st.put((ClaimVariable) args.get(0), new ClaimValue(sender));
@@ -735,16 +737,15 @@ public class ClaimBehavior
 		ClaimConstruct arg0 = args.get(0);
 		String inputComponent = ((arg0.getType() == ClaimConstructType.VARIABLE) ? st.get((ClaimVariable) arg0)
 				: (ClaimValue) arg0).toString();
-				
+		
 		// get the input
 		if(activating)
 		{
 			// input is active / the behavior is input-activated
 			if(activationEvent.getType() != AgentEventType.GUI_INPUT)
-				throw new IllegalStateException(
-						"input cannot be in activation area if behavior is not input-activated");
-			if(activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME)
-					.equals(inputComponent))
+				throw new IllegalStateException("input cannot be in activation area if behavior is not input-activated");
+			if(activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME).equals(
+					inputComponent))
 				receivedInput = (Vector<Object>) activationEvent
 						.getParameter(VisualizableComponent.GUI_ARGUMENTS_EVENT_PARAMETER_NAME);
 			else
@@ -757,7 +758,7 @@ public class ClaimBehavior
 		else
 			// input is passive
 			receivedInput = claimComponent.getVisualizable().inputFromGUI(inputComponent);
-			
+		
 		// must copy values from source (activated / read input) into destination (input construct elements)
 		
 		Vector<ClaimConstruct> sourceArgs = objects2values(receivedInput);
@@ -860,8 +861,7 @@ public class ClaimBehavior
 			// FIXME: support multiple types
 			if(result == null)
 				return false; // knowledge was not found
-			return readValues(knowledge2Structure((SimpleKnowledge) result).getFields(), knowledgeStruct.getFields(),
-					0);
+			return readValues(knowledge2Structure((SimpleKnowledge) result).getFields(), knowledgeStruct.getFields(), 0);
 		}
 		case REMOVEK:
 		// function "remove knowledge"
@@ -1011,9 +1011,9 @@ public class ClaimBehavior
 		}
 		
 		boolean returnValue = false;
-		Vector<ClaimConstruct> arguments = new Vector<ClaimConstruct>(
-				flattenConstructs(args, 0, KeepVariables.KEEP_NONE));
-				
+		Vector<ClaimConstruct> arguments = new Vector<ClaimConstruct>(flattenConstructs(args, 0,
+				KeepVariables.KEEP_NONE));
+		
 		trace("invoking code attachment function [] with arguments: []", functionName, arguments);
 		try
 		{
@@ -1064,17 +1064,16 @@ public class ClaimBehavior
 			return false;
 		}
 		
-		if(!((destType == ClaimConstructType.VALUE || destType == ClaimConstructType.VARIABLE)
-				&& (sourceType == ClaimConstructType.VALUE || sourceType == ClaimConstructType.VARIABLE)))
+		if(!((destType == ClaimConstructType.VALUE || destType == ClaimConstructType.VARIABLE) && (sourceType == ClaimConstructType.VALUE || sourceType == ClaimConstructType.VARIABLE)))
 			return false;
-			
+		
 		ClaimValue destValue = (destType == ClaimConstructType.VALUE) ? (ClaimValue) destField
 				: getVariableValue((ClaimVariable) destField);
 		ClaimValue sourceValue = (sourceType == ClaimConstructType.VALUE) ? (ClaimValue) sourceField
 				: getVariableValue((ClaimVariable) sourceField);
 		boolean assignable = (destType == ClaimConstructType.VARIABLE)
 				&& ((destValue == null) || ((ClaimVariable) destField).isAssignable());
-				
+		
 		if(assignable)
 		{
 			if((sourceValue != null) && ((destValue == null) || !destValue.getValue().equals(sourceValue.getValue())))
@@ -1205,7 +1204,7 @@ public class ClaimBehavior
 	 *            : what to do with variables: transform to values (or <code>null</code>, if uninstantiated); keep only
 	 *            uninstantiated variables (with the purpose of instantiating them); or keep all variables (with the
 	 *            purpose of changing their value).
-	 * 			
+	 * 
 	 * @return the values of the constructs or uninstantiated variables
 	 */
 	protected Vector<ClaimConstruct> flattenConstructs(List<ClaimConstruct> constructs, int ignore,
@@ -1217,7 +1216,7 @@ public class ClaimBehavior
 		{
 			if(toIgnore-- > 0)
 				continue;
-				
+			
 			ClaimConstructType constructType = cons.getType();
 			switch(constructType)
 			{
