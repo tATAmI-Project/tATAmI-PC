@@ -127,19 +127,23 @@ public class AmILabClient extends AgentComponent
 			{
 				String content = (String) event.getParameter(MessagingComponent.CONTENT_PARAMETER);
 
-				getAgentLog().info("Client received message with content [] received", content);
+				getAgentLog().info("Client received []", content);
 
 				if (content.equals(PROXIMITY_REQUEST))
 				{
 					sendReply(Long.toString(proximity), event);
+					getAgentLog().info("Client sent []", Long.toString(proximity));
+					return;
 				}
 				if (content.equals(CONFIRM))
 				{
 					active = true;
+					return;
 				}
 				if (content.equals(DECLINE))
 				{
 					active = false;
+					return;
 				}
 
 			}
@@ -229,6 +233,11 @@ public class AmILabClient extends AgentComponent
 
 		clientRunnable = new StoppableRunnable()
 		{
+			/**
+			 * The time between feedbacks.
+			 */
+			private static final int TIME_TO_SLEEP = 1000;
+
 			@Override
 			public void run()
 			{
@@ -236,10 +245,18 @@ public class AmILabClient extends AgentComponent
 				{
 					if (active)
 					{
-						getAgentLog().info("I'm active and I have proximity []", Long.toString(proximity));
+						// getAgentLog().info("I'm active and I have proximity []", Long.toString(proximity));
 					} else
 					{
-						// stop doing stuff
+						// getAgentLog().info("I'm inactive and I have proximity []", Long.toString(proximity));
+					}
+
+					try
+					{
+						Thread.sleep(TIME_TO_SLEEP);
+					} catch (InterruptedException e)
+					{
+						e.printStackTrace();
 					}
 				}
 			}
@@ -256,7 +273,7 @@ public class AmILabClient extends AgentComponent
 		super.atSimulationStart(event);
 
 		amilab = (AmILabComponent) getAgentComponent(AgentComponentName.AMILAB_COMPONENT);
-		
+
 		registerClientMessanger();
 		proximityUpdaterThread.start();
 		clientThread.start();

@@ -27,9 +27,14 @@ public class AmILabServer extends AmILabClient
 	private static final long serialVersionUID = 4167394821635837982L;
 
 	/**
-	 * Client parameter string.
+	 * Clients parameter string.
 	 */
-	private static final String CLIENT = "client";
+	private static final String CLIENTS = "clients";
+
+	/**
+	 * Client separator.
+	 */
+	private static final String CLIENT_SEPARATOR = " ";
 
 	/**
 	 * List of client agents.
@@ -68,14 +73,12 @@ public class AmILabServer extends AmILabClient
 			{
 				String content = (String) event.getParameter(MessagingComponent.CONTENT_PARAMETER);
 
-				getAgentLog().info("Server received message with content [] received", content);
-
 				MessagingComponent msg = (MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT);
 
 				String sender = msg
 						.extractAgentAddress((String) event.getParameter(MessagingComponent.SOURCE_PARAMETER));
 
-				getAgentLog().info("The above proximity is for []", sender);
+				getAgentLog().info("Server received [] from []", content, sender);
 
 				if (responses.add(sender))
 				{
@@ -105,6 +108,8 @@ public class AmILabServer extends AmILabClient
 	{
 		while (!receivedAllAnswers())
 		{
+			// getAgentLog().info("Server received [] answers and expects all []",
+			// Integer.toString(this.proximities.size()), Integer.toString(clients.size()));
 			try
 			{
 				Thread.sleep(50);
@@ -113,6 +118,9 @@ public class AmILabServer extends AmILabClient
 				e.printStackTrace();
 			}
 		}
+
+		getAgentLog().info("Server received [] from [] answers", Integer.toString(this.proximities.size()),
+				Integer.toString(clients.size()));
 	}
 
 	/**
@@ -183,14 +191,19 @@ public class AmILabServer extends AmILabClient
 		responses = new HashSet<String>();
 		proximities = new HashMap<String, Long>();
 
-		clients.add(getComponentData().get(CLIENT));
+		String[] clientsParam = getComponentData().get(CLIENTS).split(CLIENT_SEPARATOR);
+
+		for (String client : clientsParam)
+		{
+			clients.add(client);
+		}
 
 		serverRunnable = new StoppableRunnable()
 		{
 			/**
 			 * The time between the "pings".
 			 */
-			private static final int TIME_TO_SLEEP = 50;
+			private static final int TIME_TO_SLEEP = 1000;
 
 			@Override
 			public void run()
