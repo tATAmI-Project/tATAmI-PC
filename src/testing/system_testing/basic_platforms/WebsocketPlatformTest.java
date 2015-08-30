@@ -5,13 +5,13 @@ import tatami.simulation.Boot;
 /**
  * Platform testing a ping between agents communicating through WebSockets. Remember to press Create Agents and Start.
  */
-public class GeneralPlatformTest
+public class WebsocketPlatformTest
 {
 	
 	/**
 	 * The scenario.
 	 */
-	private static final String SCENARIO = "../../centralized/scenario-communication-empty-named-agents.xml";
+	private static final String SCENARIO = "../../websocket/scenario-ping";
 	
 	/**
 	 * The main method.
