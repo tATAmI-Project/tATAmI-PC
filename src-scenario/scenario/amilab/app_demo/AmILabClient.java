@@ -64,9 +64,14 @@ public class AmILabClient extends AgentComponent
 	public static final String SERVER_PATH_ELEMENT = "server";
 
 	/**
-	 * Name of the GUI button.
+	 * A happy face XD
 	 */
-	public static final String FEEDBACK = "Feedback";
+	public static final String HAPPY_FACE = "images/happy_face.png";
+
+	/**
+	 * A sad face :(
+	 */
+	public static final String SAD_FACE = "images/sad_face.ico";
 
 	/**
 	 * Default constructor.
@@ -95,17 +100,17 @@ public class AmILabClient extends AgentComponent
 	 * The {@link AgentGui} from the {@link VisualizableComponent}.
 	 */
 	protected AmILabGui gui;
-	
+
 	/**
 	 * Main label.
 	 */
 	protected JLabel label;
-	
+
 	/**
 	 * Image when active.
 	 */
 	protected ImageIcon onIcon;
-	
+
 	/**
 	 * Image when inactive.
 	 */
@@ -190,7 +195,7 @@ public class AmILabClient extends AgentComponent
 	{
 		return (VisualizableComponent) getAgentComponent(AgentComponentName.VISUALIZABLE_COMPONENT);
 	}
-	
+
 	/**
 	 * Gets the gui.
 	 * 
@@ -279,12 +284,10 @@ public class AmILabClient extends AgentComponent
 			}
 
 		};
+		
+		onIcon = new ImageIcon(HAPPY_FACE);
+		offIcon = new ImageIcon(SAD_FACE);
 
-		gui = getGui();
-		
-		label = gui.getLabel();
-		// TODO: Build onIcon and offIcon.
-		
 		proximityUpdaterThread = new Thread(proximityUpdater);
 
 		clientRunnable = new StoppableRunnable()
@@ -292,7 +295,7 @@ public class AmILabClient extends AgentComponent
 			/**
 			 * The time between feedbacks.
 			 */
-			private static final int TIME_TO_SLEEP = 1000;
+			private static final int TIME_TO_SLEEP = 500;
 
 			@Override
 			public void run()
@@ -331,6 +334,8 @@ public class AmILabClient extends AgentComponent
 		super.atSimulationStart(event);
 
 		amilab = (AmILabComponent) getAgentComponent(AgentComponentName.AMILAB_COMPONENT);
+		gui = getGui();
+		label = gui.getLabel();
 
 		registerClientMessanger();
 		proximityUpdaterThread.start();

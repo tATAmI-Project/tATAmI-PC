@@ -203,7 +203,7 @@ public class AmILabServer extends AmILabClient
 			/**
 			 * The time between the "pings".
 			 */
-			private static final int TIME_TO_SLEEP = 1000;
+			private static final int TIME_TO_SLEEP = 5000;
 
 			@Override
 			public void run()
