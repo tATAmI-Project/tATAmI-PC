@@ -29,7 +29,9 @@
 		<scen:container name="Container">
 			<scen:agent>
 				<scen:component name="parametric" />
-				<scen:component name="visualizable" />
+				<scen:component name="visualizable" >
+					<scen:parameter name="GUI" value="AmILabGui"/>
+				</scen:component>
 				<scen:component name="messaging" />
 				<scen:component name="amilab" >
 					<scen:parameter name="IP" value="ami-crunch-08.local" />
