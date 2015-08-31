@@ -2,10 +2,14 @@ package scenario.amilab.app_demo;
 
 import java.util.HashMap;
 
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+
 import org.codehaus.jackson.map.ObjectMapper;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
+import scenario.amilab.app_demo.PC.AmILabGui;
 import tatami.amilab.AmILabComponent;
 import tatami.amilab.AmILabComponent.AmILabDataType;
 import tatami.amilab.Perception;
@@ -13,6 +17,8 @@ import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.messaging.MessagingComponent;
+import tatami.core.agent.visualization.AgentGui;
+import tatami.core.agent.visualization.VisualizableComponent;
 
 /**
  * 
@@ -58,6 +64,11 @@ public class AmILabClient extends AgentComponent
 	public static final String SERVER_PATH_ELEMENT = "server";
 
 	/**
+	 * Name of the GUI button.
+	 */
+	public static final String FEEDBACK = "Feedback";
+
+	/**
 	 * Default constructor.
 	 */
 	public AmILabClient()
@@ -79,6 +90,26 @@ public class AmILabClient extends AgentComponent
 	 * Current distance to the subject.
 	 */
 	protected long proximity;
+
+	/**
+	 * The {@link AgentGui} from the {@link VisualizableComponent}.
+	 */
+	protected AmILabGui gui;
+	
+	/**
+	 * Main label.
+	 */
+	protected JLabel label;
+	
+	/**
+	 * Image when active.
+	 */
+	protected ImageIcon onIcon;
+	
+	/**
+	 * Image when inactive.
+	 */
+	protected ImageIcon offIcon;
 
 	/**
 	 * Updates the proximity.
@@ -148,6 +179,26 @@ public class AmILabClient extends AgentComponent
 
 			}
 		}, AMILAB_PATH_ELEMENT, CLIENT_PATH_ELEMENT);
+	}
+
+	/**
+	 * Gets the visualizable component of this agent.
+	 * 
+	 * @return the visualizable component
+	 */
+	protected VisualizableComponent getVisualizable()
+	{
+		return (VisualizableComponent) getAgentComponent(AgentComponentName.VISUALIZABLE_COMPONENT);
+	}
+	
+	/**
+	 * Gets the gui.
+	 * 
+	 * @return the gui
+	 */
+	protected AmILabGui getGui()
+	{
+		return (AmILabGui) getVisualizable().getGUI();
 	}
 
 	@Override
@@ -229,6 +280,11 @@ public class AmILabClient extends AgentComponent
 
 		};
 
+		gui = getGui();
+		
+		label = gui.getLabel();
+		// TODO: Build onIcon and offIcon.
+		
 		proximityUpdaterThread = new Thread(proximityUpdater);
 
 		clientRunnable = new StoppableRunnable()
@@ -246,9 +302,11 @@ public class AmILabClient extends AgentComponent
 					if (active)
 					{
 						// getAgentLog().info("I'm active and I have proximity []", Long.toString(proximity));
+						label.setIcon(onIcon);
 					} else
 					{
 						// getAgentLog().info("I'm inactive and I have proximity []", Long.toString(proximity));
+						label.setIcon(offIcon);
 					}
 
 					try
