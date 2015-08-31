@@ -1,5 +1,9 @@
 package scenario.amilab.app_demo;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 
 import javax.swing.ImageIcon;
@@ -71,7 +75,10 @@ public class AmILabClient extends AgentComponent
 	/**
 	 * A sad face :(
 	 */
-	public static final String SAD_FACE = "images/sad_face.ico";
+	// public static final String SAD_FACE = "images/sad_face.ico";
+	// public static final String SAD_FACE = "images/sad_face.jpeg";
+	// public static final String SAD_FACE = "images/sad_face.png";
+	public static final String SAD_FACE = "images/sad_face.jpg";
 
 	/**
 	 * Default constructor.
@@ -206,6 +213,41 @@ public class AmILabClient extends AgentComponent
 		return (AmILabGui) getVisualizable().getGUI();
 	}
 
+	/** Returns an ImageIcon, or null if the path was invalid. */
+	protected ImageIcon createImageIcon(String path, String description)
+	{
+		java.net.URL imgURL = getClass().getResource(path);
+		if (imgURL != null)
+		{
+			return new ImageIcon(imgURL, description);
+		} else
+		{
+			System.err.println("Couldn't find file: " + path);
+			return null;
+		}
+	}
+
+	/**
+	 * Scales an {@link Image} based on given parameters.
+	 * 
+	 * @param srcImg
+	 *            - image to be scaled
+	 * @param width
+	 *            - required width
+	 * @param height
+	 *            - required height
+	 * @return scaled {@link Image}
+	 */
+	public static Image getScaledImage(Image srcImg, int width, int height)
+	{
+		BufferedImage resizedImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g2 = resizedImg.createGraphics();
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g2.drawImage(srcImg, 0, 0, width, height, null);
+		g2.dispose();
+		return resizedImg;
+	}
+
 	@Override
 	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
 	{
@@ -284,9 +326,10 @@ public class AmILabClient extends AgentComponent
 			}
 
 		};
-		
-		onIcon = new ImageIcon(HAPPY_FACE);
-		offIcon = new ImageIcon(SAD_FACE);
+
+		int resize = 300;
+		onIcon =  new ImageIcon(getScaledImage(createImageIcon(HAPPY_FACE, HAPPY_FACE).getImage(), resize, resize));
+		offIcon =  new ImageIcon(getScaledImage(createImageIcon(SAD_FACE, SAD_FACE).getImage(), resize, resize));
 
 		proximityUpdaterThread = new Thread(proximityUpdater);
 

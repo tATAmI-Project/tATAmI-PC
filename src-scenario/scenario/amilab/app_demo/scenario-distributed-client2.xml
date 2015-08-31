@@ -18,6 +18,8 @@
 		<scen:parameter name="name" value="websocket" />
 	</scen:platform>
 
+	<scen:agentPackage>scenario.amilab.app_demo</scen:agentPackage>
+
 	<scen:initial>
 		<scen:container name="Container">
 			<scen:agent>

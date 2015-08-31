@@ -1,5 +1,7 @@
 package scenario.amilab.app_demo.PC;
 
+import java.awt.FlowLayout;
+
 import javax.swing.JLabel;
 
 import tatami.core.agent.visualization.AgentGuiConfig;
@@ -38,6 +40,10 @@ public class AmILabGui extends PCDefaultAgentGui
 	protected void buildGUI()
 	{
 		label = new JLabel();
+
+		int size = 320;
+		window.setSize(size, size);
+//		window.setLayout(new FlowLayout());
 		window.add(label);
 		components.put(MAIN_LABEL, label);
 	}
