@@ -32,7 +32,7 @@
 				<scen:component name="testing"
 					classpath="scenario.amilab.app_demo.AmILabClient" />
 				<scen:parameter name="loader" value="composite" />
-				<scen:parameter name="name" value="Client" />
+				<scen:parameter name="name" value="Client-1" />
 			</scen:agent>
 		</scen:container>
 	</scen:initial>

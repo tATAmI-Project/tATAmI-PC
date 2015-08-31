@@ -14,13 +14,6 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.example.org/scenarioSchema3 ../../../../src-schema/scenarioSchema3.xsd ">
 
-<!--  
-	<scen:config mainHost="server client" 
-				 mainPort="9002" 
-				 localHost="172.16.6.101" 
-				 localPort="9002" />
--->
-
 	<scen:platform>
 		<scen:parameter name="name" value="websocket" />
 	</scen:platform>
@@ -37,11 +30,9 @@
 					<scen:parameter name="queue-name" value="measurements" />
 				</scen:component>
 				<scen:component name="testing"
-					classpath="scenario.amilab.app_demo.AmILabServer" >
-					<scen:parameter name="clients" value="Client-1 Client-2 AmI-Server" />
-				</scen:component>
+					classpath="scenario.amilab.app_demo.AmILabClient" />
 				<scen:parameter name="loader" value="composite" />
-				<scen:parameter name="name" value="AmI-Server" />
+				<scen:parameter name="name" value="Client-2" />
 			</scen:agent>
 		</scen:container>
 	</scen:initial>
