@@ -20,7 +20,7 @@ public class RunScenarioE
 	{
 		String cp = RunScenarioE.class.getName();
 		String scenarioPath = BootSettingsManager.SCENARIO_DIRECTORY
-				+ cp.substring(0, cp.lastIndexOf(".")).replace(".", "/") + "/scenario.xml";
+				+ cp.substring(0, cp.lastIndexOf(".")).replace(".", "/") + "/scenarioE-tATAmI2.xml";
 		Boot.main(new String[] { scenarioPath });
 	}
 }
