@@ -42,8 +42,8 @@
 				</scen:component>
 				<scen:component name="testing"
 					classpath="scenario.amilab.app_demo.AmILabServer" >
-					<scen:parameter name="clients" value="AmI-Server" />
-					<!--<scen:parameter name="clients" value="Client-1 Client-2 AmI-Server" />-->
+					<scen:parameter name="clients" value="Client-1 Client-2 AmI-Server" />
+					<!--<scen:parameter name="clients" value="AmI-Server" />-->
 				</scen:component>
 				<scen:parameter name="loader" value="composite" />
 				<scen:parameter name="name" value="AmI-Server" />

@@ -1,8 +1,7 @@
 package scenario.amilab.app_demo.PC;
 
-import java.awt.FlowLayout;
-
 import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
 import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.pc.agent.visualization.PCDefaultAgentGui;
@@ -39,13 +38,22 @@ public class AmILabGui extends PCDefaultAgentGui
 	@Override
 	protected void buildGUI()
 	{
-		label = new JLabel();
+		label = new JLabel("", SwingConstants.CENTER);
 
-		int size = 320;
+		int size = 350;
 		window.setSize(size, size);
-//		window.setLayout(new FlowLayout());
+		// window.setLayout(new FlowLayout());
 		window.add(label);
 		components.put(MAIN_LABEL, label);
+	}
+
+	@Override
+	protected void placeWindow()
+	{
+		// WindowParameters protected constructors. How to set my custom dimensions?
+
+		// Without the super call the windows does not have a name
+		// super.placeWindow();
 	}
 
 	/**
