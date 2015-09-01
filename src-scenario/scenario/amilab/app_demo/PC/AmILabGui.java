@@ -50,7 +50,7 @@ public class AmILabGui extends PCDefaultAgentGui
 		window.setSize(size, size);
 		// window.setLayout(new FlowLayout());
 		window.add(label);
-		components.put(MAIN_LABEL, label);
+		addComponent(MAIN_LABEL, label);
 	}
 
 	@Override

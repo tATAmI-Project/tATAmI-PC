@@ -5,6 +5,7 @@ import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -249,9 +250,9 @@ public class AmILabClient extends AgentComponent
 	}
 
 	@Override
-	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
+	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, List<String> agentPackages, Logger log)
 	{
-		if (!super.preload(parameters, scenarioNode, log))
+		if (!super.preload(parameters, scenarioNode, agentPackages, log))
 			return false;
 
 		active = false;
