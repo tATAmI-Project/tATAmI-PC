@@ -58,6 +58,11 @@ public class AgentEvent extends Config
 		AGENT_MESSAGE(AgentSequenceType.UNORDERED),
 		
 		/**
+		 * Event occurs when an active input (see AgentGui) is activated by the user and the agent must react to it.
+		 */
+		GUI_INPUT(AgentSequenceType.UNORDERED),
+		
+		/**
 		 * Event occurs when the start of the simulation is requested by the user.
 		 */
 		SIMULATION_START(AgentSequenceType.UNORDERED),

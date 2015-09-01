@@ -103,7 +103,7 @@ public class DemoAgentOutputInputGUI implements AgentGui {
 	}
 
 	@Override
-	public Vector<Object> getinput(String componentName)
+	public Vector<Object> getInput(String componentName)
 	{
 		// TODO Auto-generated method stub
 		return null;

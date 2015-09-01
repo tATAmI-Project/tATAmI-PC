@@ -139,133 +139,133 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <association id="16">    
+  <dependency id="16">    
+    <end type="SOURCE" refId="10"/>    
+    <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <dependency id="17">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <dependency id="18">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="19">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <nesting id="20">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="14"/>  
+  </nesting>  
+  <association id="21">    
     <end type="SOURCE" refId="10" navigable="false">      
-      <attribute id="17" name="myAgent">        
+      <attribute id="22" name="claimComponent">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
-      <multiplicity id="18" minimum="0" maximum="1">        
+      <multiplicity id="23" minimum="0" maximum="1">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="2" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <dependency id="19">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="2"/>  
-  </dependency>  
-  <dependency id="20">    
+  <dependency id="24">    
     <end type="SOURCE" refId="15"/>    
     <end type="TARGET" refId="14"/>  
   </dependency>  
-  <dependency id="21">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="7"/>  
-  </dependency>  
-  <dependency id="22">    
-    <end type="SOURCE" refId="2"/>    
-    <end type="TARGET" refId="5"/>  
-  </dependency>  
-  <dependency id="23">    
-    <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="3"/>  
-  </dependency>  
-  <dependency id="24">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="5"/>  
-  </dependency>  
-  <dependency id="25">    
-    <end type="SOURCE" refId="2"/>    
-    <end type="TARGET" refId="1"/>  
-  </dependency>  
-  <dependency id="26">    
-    <end type="SOURCE" refId="12"/>    
-    <end type="TARGET" refId="8"/>  
-  </dependency>  
-  <dependency id="27">    
-    <end type="SOURCE" refId="4"/>    
-    <end type="TARGET" refId="1"/>  
-  </dependency>  
-  <association id="28">    
+  <association id="25">    
     <end type="SOURCE" refId="6" navigable="false">      
-      <attribute id="29" name="gui">        
+      <attribute id="26" name="gui">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
-      <multiplicity id="30" minimum="0" maximum="1">        
+      <multiplicity id="27" minimum="0" maximum="1">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="7" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <dependency id="31">    
+  <nesting id="28">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="8"/>  
+  </nesting>  
+  <dependency id="29">    
     <end type="SOURCE" refId="1"/>    
     <end type="TARGET" refId="8"/>  
   </dependency>  
-  <dependency id="32">    
+  <realization id="30">    
     <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="5"/>  
-  </dependency>  
-  <dependency id="33">    
+    <end type="TARGET" refId="9"/>  
+  </realization>  
+  <dependency id="31">    
     <end type="SOURCE" refId="10"/>    
     <end type="TARGET" refId="1"/>  
   </dependency>  
-  <nesting id="34">    
-    <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="8"/>  
-  </nesting>  
-  <nesting id="35">    
-    <end type="SOURCE" refId="7"/>    
-    <end type="TARGET" refId="9"/>  
-  </nesting>  
-  <realization id="36">    
+  <dependency id="32">    
     <end type="SOURCE" refId="10"/>    
-    <end type="TARGET" refId="9"/>  
-  </realization>  
-  <association id="37">    
+    <end type="TARGET" refId="2"/>  
+  </dependency>  
+  <dependency id="33">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="6"/>  
+  </dependency>  
+  <association id="34">    
     <end type="SOURCE" refId="12" navigable="false">      
-      <attribute id="38" name="inputConnections">        
+      <attribute id="35" name="externalDefaultInputListener">        
         <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
-      <multiplicity id="39" minimum="0" maximum="2147483647">        
+      <multiplicity id="36" minimum="0" maximum="1">        
         <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
     <end type="TARGET" refId="9" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <dependency id="40">    
+  <association id="37">    
+    <end type="SOURCE" refId="10" navigable="false">      
+      <attribute id="38" name="claimComponent">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="39" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="2" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <realization id="40">    
+    <end type="SOURCE" refId="12"/>    
+    <end type="TARGET" refId="7"/>  
+  </realization>  
+  <realization id="41">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="9"/>  
+  </realization>  
+  <dependency id="42">    
     <end type="SOURCE" refId="2"/>    
     <end type="TARGET" refId="1"/>  
   </dependency>  
-  <generalization id="41">    
-    <end type="SOURCE" refId="13"/>    
-    <end type="TARGET" refId="12"/>  
-  </generalization>  
-  <association id="42">    
-    <end type="SOURCE" refId="1" navigable="false">      
-      <attribute id="43" name="gui">        
-        <position height="15" width="23" x="624" y="591"/>      
+  <association id="43">    
+    <end type="SOURCE" refId="12" navigable="false">      
+      <attribute id="44" name="inputConnections">        
+        <position height="0" width="0" x="0" y="0"/>      
       </attribute>      
-      <multiplicity id="44" minimum="0" maximum="1">        
-        <position height="15" width="21" x="621" y="576"/>      
+      <multiplicity id="45" minimum="0" maximum="2147483647">        
+        <position height="0" width="0" x="0" y="0"/>      
       </multiplicity>    
     </end>    
-    <end type="TARGET" refId="7" navigable="true"/>    
+    <end type="TARGET" refId="9" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <dependency id="45">    
+  <dependency id="46">    
     <end type="SOURCE" refId="1"/>    
     <end type="TARGET" refId="5"/>  
   </dependency>  
-  <nesting id="46">    
-    <end type="SOURCE" refId="13"/>    
-    <end type="TARGET" refId="14"/>  
-  </nesting>  
   <dependency id="47">    
-    <end type="SOURCE" refId="15"/>    
-    <end type="TARGET" refId="12"/>  
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="1"/>  
   </dependency>  
   <association id="48">    
     <end type="SOURCE" refId="2" navigable="false">      
@@ -279,25 +279,49 @@
     <end type="TARGET" refId="10" navigable="true"/>    
     <display labels="true" multiplicity="true"/>  
   </association>  
-  <dependency id="51">    
-    <end type="SOURCE" refId="10"/>    
+  <association id="51">    
+    <end type="SOURCE" refId="12" navigable="false">      
+      <attribute id="52" name="defaultInputListener">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </attribute>      
+      <multiplicity id="53" minimum="0" maximum="1">        
+        <position height="0" width="0" x="0" y="0"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="9" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="54">    
+    <end type="SOURCE" refId="13"/>    
+    <end type="TARGET" refId="12"/>  
+  </generalization>  
+  <dependency id="55">    
+    <end type="SOURCE" refId="1"/>    
     <end type="TARGET" refId="5"/>  
   </dependency>  
-  <realization id="52">    
+  <nesting id="56">    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="9"/>  
+  </nesting>  
+  <dependency id="57">    
     <end type="SOURCE" refId="12"/>    
-    <end type="TARGET" refId="7"/>  
-  </realization>  
-  <dependency id="53">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="6"/>  
+    <end type="TARGET" refId="8"/>  
   </dependency>  
-  <dependency id="54">    
-    <end type="SOURCE" refId="1"/>    
-    <end type="TARGET" refId="11"/>  
-  </dependency>  
-  <dependency id="55">    
-    <end type="SOURCE" refId="2"/>    
-    <end type="TARGET" refId="1"/>  
+  <association id="58">    
+    <end type="SOURCE" refId="1" navigable="false">      
+      <attribute id="59" name="gui">        
+        <position height="15" width="23" x="624" y="591"/>      
+      </attribute>      
+      <multiplicity id="60" minimum="0" maximum="1">        
+        <position height="15" width="21" x="621" y="576"/>      
+      </multiplicity>    
+    </end>    
+    <end type="TARGET" refId="7" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <dependency id="61">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="12"/>  
   </dependency>  
   <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
     sort-features="false" accessors="true" visibility="true">    

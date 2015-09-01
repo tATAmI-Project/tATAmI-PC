@@ -23,7 +23,7 @@ public class ClaimValue extends ClaimConstruct
 	/**
 	 * Value to output in toString if there is no value (avoids a {@link NullPointerException}).
 	 */
-	private static final String	NULL_VALUE_OUTPUT	= "<null>";
+	public static final String	NULL_VALUE_OUTPUT	= "<null>";
 	
 	private Object value;
 	

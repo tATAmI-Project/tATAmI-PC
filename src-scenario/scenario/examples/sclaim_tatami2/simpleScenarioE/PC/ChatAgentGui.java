@@ -11,6 +11,7 @@
  ******************************************************************************/
 package scenario.examples.sclaim_tatami2.simpleScenarioE.PC;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.TextArea;
@@ -24,15 +25,12 @@ import javax.swing.JButton;
 import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.pc.agent.visualization.PCDefaultAgentGui;
 
-
 @SuppressWarnings("javadoc")
 public class ChatAgentGui extends PCDefaultAgentGui
 {
 	enum ChatComponents {
 		SEND, CHATTEXT, CHATLOG, MESSAGEINPUT
 	}
-	
-	InputListener	inputListener	= null;
 	
 	public ChatAgentGui(AgentGuiConfig configuration)
 	{
@@ -47,58 +45,48 @@ public class ChatAgentGui extends PCDefaultAgentGui
 		TextField tf = new TextField();
 		window.add(tf, c);
 		tf.setMinimumSize(new Dimension(150, 30));
-		components.put(ChatComponents.CHATTEXT.toString(), tf);
+		addComponent(ChatComponents.CHATTEXT.toString(), tf);
 		
 		c.gridx = 1;
 		TextArea ta = new TextArea();
 		ta.setEnabled(false);
 		window.add(ta, c);
 		ta.setMinimumSize(new Dimension(150, 100));
-		components.put(ChatComponents.CHATLOG.toString(), ta);
+		addComponent(ChatComponents.CHATLOG.toString(), ta);
 		
 		c.fill = GridBagConstraints.BOTH;
 		c.gridx = 2;
 		JButton sendButton = new JButton(ChatComponents.SEND.toString());
 		sendButton.addActionListener(new ActionListener() {
-			@SuppressWarnings("synthetic-access")
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				if(inputListener != null)
+				if(getListener() != null)
 				{
 					Vector<Object> args = new Vector<Object>(1);
-					args.add(((TextField)components.get(ChatComponents.CHATTEXT.toString())).getText());
-					inputListener.receiveInput(ChatComponents.MESSAGEINPUT.toString().toLowerCase(), args);
-					((TextField)components.get(ChatComponents.CHATTEXT.toString())).setText("");
+					args.add(((TextField) getComponent(ChatComponents.CHATTEXT.toString())).getText());
+					getListener().receiveInput(ChatComponents.MESSAGEINPUT.toString().toLowerCase(), args);
+					((TextField) getComponent(ChatComponents.CHATTEXT.toString())).setText("");
 				}
 				else
-					System.out.println("nobody to receive the input");
-				// FIXME else, a log should pick up an error
+					// FIXME else, a log should pick up the error
+					System.out.println(
+							"nobody to receive the input from [" + ChatComponents.MESSAGEINPUT.toString() + "]..");
 			}
 		});
+		addComponent(ChatComponents.SEND.toString(), sendButton);
+		addComponent(ChatComponents.MESSAGEINPUT.toString(), sendButton);
 		window.add(sendButton, c);
-		components.put(DefaultComponent.AGENT_NAME.toString(), sendButton);
+	}
+	
+	protected InputListener getListener()
+	{
+		return inputConnections.get(ChatComponents.MESSAGEINPUT.toString().toLowerCase());
 	}
 	
 	@Override
-	public void connectInput(String componentName, InputListener listener)
+	protected Component getComponent(String name)
 	{
-		System.out.println("connecting input [" + componentName + "]..");
-		if(componentName.equals(ChatComponents.MESSAGEINPUT.toString().toLowerCase()))
-		{
-			inputListener = listener;
-			System.out.println("...done");
-		}
-		else
-			super.connectInput(componentName, listener);
-	}
-	
-	@Override
-	public void doOutput(String componentName, Vector<Object> arguments)
-	{
-		if(componentName.compareToIgnoreCase(ChatComponents.CHATLOG.toString()) == 0)
-			super.doOutput(ChatComponents.CHATLOG.toString(), arguments);	// FIXME: artificial
-		else
-			super.doOutput(componentName, arguments);
+		return super.getComponent(name);
 	}
 }

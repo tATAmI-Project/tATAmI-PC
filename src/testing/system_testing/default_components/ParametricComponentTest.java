@@ -59,7 +59,7 @@ public class ParametricComponentTest extends Unit
 			protected void componentInitializer()
 			{
 				preload((ComponentCreationData) new ComponentCreationData().addObject(COMPONENT_PARAMETER_NAME,
-						agentParameters), null, null);
+						agentParameters), null, null, null);
 			}
 		});
 		

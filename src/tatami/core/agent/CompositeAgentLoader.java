@@ -137,7 +137,7 @@ public class CompositeAgentLoader implements AgentLoader
 			try
 			{
 				component = (AgentComponent) PlatformUtils.loadClassInstance(this, componentClass, new Object[0]);
-				log.trace("component [] loaded for agent [].", componentClass, agentCreationData.getAgentName());
+				log.trace("component [] created for agent []. pre-loading...", componentClass, agentCreationData.getAgentName());
 			} catch(Exception e)
 			{
 				log.error("Component [] failed to load; it will not be available for agent []:", componentClass,
@@ -157,8 +157,11 @@ public class CompositeAgentLoader implements AgentLoader
 				componentData
 						.addObject(ParametricComponent.COMPONENT_PARAMETER_NAME, agentCreationData.getParameters());
 			
-			if(component.preload(componentData, componentNode, log))
+			if(component.preload(componentData, componentNode, agentCreationData.getPackages(), log))
+			{
 				agentCreationData.getParameters().addObject(COMPONENT_PARAMETER_NAME, component);
+				log.trace("component [] pre-loaded for agent []", componentClass, agentCreationData.getAgentName());
+			}
 			else
 				log.error("Component [] failed pre-loading step; it will not be available for agent [].",
 						componentClass, agentCreationData.getAgentName());

@@ -26,6 +26,7 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 
 import net.xqhs.windowLayout.WindowLayout;
@@ -34,7 +35,40 @@ import tatami.core.agent.visualization.AgentGui;
 import tatami.core.agent.visualization.AgentGuiConfig;
 
 /**
- * Default agent GUI for the PC platform.
+ * Default agent GUI for the PC platform. It stores components as a map of {@link Component} instances associated with
+ * lower case {@link String} names,
+ * <p>
+ * This implementation has the following features:
+ * <ul>
+ * <li>It offers the required functionality (output and passive/active input), by means of methods such as
+ * {@link #doOutput(String, Vector)}, {@link #getInput(String)} and {@link #connectInput(String, InputListener)},
+ * respectively.
+ * <li>For easier use, this implementation treats component names in a case insensitive manner. It is <i>strongly
+ * recommended</i> that extending classes follow the same rule.
+ * <li>The class offers to extending classes methods for managing components ({@link #addComponent}} and {
+ * {@link #getComponent}} the already enforce the rule above. It is <i>strongly recommended</i> that extending classes
+ * use these methods instead of directly accessing the components map. For custom operations the map of components can
+ * be retrieved by means of <code>getComponentMap()</code>.
+ * <li>When the default listener is (re-)set, only those inputs that have not been already explicitly connected to an
+ * input will be connected to the default listener, even if some inputs were connected by means of {@link #connectInput}
+ * to the same listener. In order to achieve this, an internal, hidden, listener is used that redirects to the listener
+ * that is set as default.
+ * <li>As a consequence, at the moment, an input cannot be disconnected from a listener (i.e. revert to the default
+ * listener. TODO
+ * <li>By default, this implementation includes in the agent GUI the two default components --
+ * {@link tatami.core.agent.visualization.AgentGui.DefaultComponent#AGENT_NAME} and
+ * {@link tatami.core.agent.visualization.AgentGui.DefaultComponent#AGENT_LOG}.
+ * <li>The window is automatically placed according to the current (static) {@link WindowLayout} instance.
+ * <li>Some default functionality is already implemented, as follows:
+ * <ul>
+ * <li>For instances of {@link JButton}, output with a String argument changes the label, output with a Boolean argument
+ * enables / disables the button, output with a <code>null</code> argument disables the button, and connecting an input
+ * automatically connects pressing the button to calling the listener.
+ * <li>For instances of {@link JTextArea}, output with a String argument changes the contents, and if the second
+ * argument is a {@link Boolean} set to <code>true</code> or the String value "1", the contents is also scrolled down.
+ * <li>For instances of {@link JLabel}, output with a String argument changes the label.
+ * </ul>
+ * </ul>
  * 
  * @author Andrei Olaru
  */
@@ -43,7 +77,7 @@ public class PCDefaultAgentGui implements AgentGui
 	/**
 	 * The configuration for the GUI, containing parameters such as window name and type.
 	 */
-	protected AgentGuiConfig				config				= null;
+	protected AgentGuiConfig config = null;
 	
 	/**
 	 * Parameters for the window, as returned by the {@link WindowLayout}.
@@ -54,13 +88,29 @@ public class PCDefaultAgentGui implements AgentGui
 	 */
 	protected JFrame						window				= null;
 	/**
-	 * The components in the gui, identified by their name.
+	 * The components in the GUI, identified by their name. The keys will always be lower case.
 	 */
-	protected Map<String, Component>		components			= null;
+	private Map<String, Component>			components			= null;
 	/**
-	 * Connections between component names and {@link InputListener} instances responding to that input.
+	 * Connections between component names and {@link InputListener} instances responding to that input. The keys will
+	 * always be lower case.
 	 */
 	protected Map<String, InputListener>	inputConnections	= null;
+	
+	/**
+	 * The default input listener, as set by means of {@link #setDefaultListener(InputListener)}. This should not be
+	 * registered directly as a receiver for component input as it might not be possible to differentiate anymore if an
+	 * input is connected to a listener that is default or not, especially since the default listener may be used for
+	 * other inputs, as an intended (not default) listener. When a different default input listener is registered, it
+	 * must be clear which components where using the default listener. This is what {@link #defaultInputListener} is
+	 * used for.
+	 */
+	protected InputListener externalDefaultInputListener = null;
+	
+	/**
+	 * The listener to be used as default. All calls will be relayed to {@link #externalDefaultInputListener}, if any.
+	 */
+	protected InputListener defaultInputListener;
 	
 	/**
 	 * Creates and configures the GUI.
@@ -70,6 +120,15 @@ public class PCDefaultAgentGui implements AgentGui
 	 */
 	public PCDefaultAgentGui(AgentGuiConfig configuration)
 	{
+		defaultInputListener = new InputListener() {
+			@Override
+			public void receiveInput(String componentName, Vector<Object> arguments)
+			{
+				if(externalDefaultInputListener != null)
+					externalDefaultInputListener.receiveInput(componentName, arguments);
+			}
+		};
+		
 		config = configuration;
 		
 		components = new Hashtable<String, Component>();
@@ -97,7 +156,7 @@ public class PCDefaultAgentGui implements AgentGui
 		Component pic = new JLabel(config.getWindowName()); // future: should be a picture
 		pic.setPreferredSize(new Dimension(100, 100));
 		window.add(pic, c);
-		components.put(DefaultComponent.AGENT_NAME.toString(), pic);
+		addComponent(DefaultComponent.AGENT_NAME.toString(), pic);
 		
 		TextArea ta = new TextArea();
 		c.fill = GridBagConstraints.BOTH;
@@ -105,7 +164,7 @@ public class PCDefaultAgentGui implements AgentGui
 		c.gridwidth = 2;
 		window.add(ta, c);
 		ta.setMinimumSize(new Dimension(100, 100));
-		components.put(DefaultComponent.AGENT_LOG.toString(), ta);
+		addComponent(DefaultComponent.AGENT_LOG.toString(), ta);
 	}
 	
 	/**
@@ -113,11 +172,48 @@ public class PCDefaultAgentGui implements AgentGui
 	 */
 	protected void placeWindow()
 	{
-		params = (WindowLayout.staticLayout != null) ? WindowLayout.staticLayout.getWindow(config.getWindowType(),
-				config.getWindowName(), null) : WindowParameters.defaultParameters();
+		params = (WindowLayout.staticLayout != null)
+				? WindowLayout.staticLayout.getWindow(config.getWindowType(), config.getWindowName(), null)
+				: WindowParameters.defaultParameters();
 		params.setWindow(window, true);
 	}
-
+	
+	/**
+	 * The method adds a component to the map of components, ensuring to transform the component name to lower case.
+	 * 
+	 * @param name
+	 *            - the name of the component (will be transformed to lower case).
+	 * @param component
+	 *            - the component.
+	 * @return the old value associated to the key, if any.
+	 */
+	protected Component addComponent(String name, Component component)
+	{
+		return components.put(name.toLowerCase(), component);
+	}
+	
+	/**
+	 * The methods retrieves a component, ensuring to transform the component name to lower case.
+	 * 
+	 * @param name
+	 *            - the name of the component (will be transformed to lower case).
+	 * @return the {@link Component} associated with the name.
+	 */
+	protected Component getComponent(String name)
+	{
+		return components.get(name.toLowerCase());
+	}
+	
+	/**
+	 * <b>WARNING:</b> This method should only be used with caution.
+	 * 
+	 * @return the mapping of names to components.
+	 */
+	protected Map<String, Component> getComponentMap()
+	{
+		return components;
+	}
+	
 	@Override
 	public void close()
 	{
@@ -130,13 +226,13 @@ public class PCDefaultAgentGui implements AgentGui
 	@Override
 	public void doOutput(String componentName, Vector<Object> arguments)
 	{
-		if(!components.containsKey(componentName))
+		if(getComponent(componentName) == null)
 		{
 			System.err.println("component [" + componentName + "] not found."); // FIXME: get a log from somewhere
 			return;
 		}
 		
-		Component component = components.get(componentName);
+		Component component = getComponent(componentName);
 		if(arguments.isEmpty())
 			return;
 		Object arg0 = arguments.get(0);
@@ -147,7 +243,8 @@ public class PCDefaultAgentGui implements AgentGui
 		{
 			TextArea ta = (TextArea) component;
 			ta.setText((String) arg0);
-			if((arg1 != null) && (arg1 instanceof Boolean) && ((Boolean) arg1).booleanValue())
+			if((arg1 != null) && (((arg1 instanceof Boolean) && ((Boolean) arg1).booleanValue())
+					|| ((arg1 instanceof String) && (Integer.parseInt((String) arg1) == 1))))
 				ta.append(".");
 			ta.repaint();
 		}
@@ -160,7 +257,7 @@ public class PCDefaultAgentGui implements AgentGui
 		if(component instanceof JButton)
 		{
 			JButton button = (JButton) component;
-			if((arg0 == null) || ((arg0 instanceof Boolean) && (((Boolean) arg0).booleanValue())))
+			if((arg0 == null) || ((arg0 instanceof Boolean) && !((Boolean) arg0).booleanValue()))
 			{
 				button.setEnabled(false);
 			}
@@ -180,17 +277,17 @@ public class PCDefaultAgentGui implements AgentGui
 	@Override
 	public void connectInput(String componentName, InputListener listener)
 	{
-		if(!components.containsKey(componentName))
+		if(getComponent(componentName) == null)
 		{
 			System.err.println("component [" + componentName + "] not found."); // FIXME: get a log from somewhere
 			return;
 		}
-		inputConnections.put(componentName, listener);
-		Component component = components.get(componentName);
+		inputConnections.put(componentName.toLowerCase(), listener);
+		Component component = getComponent(componentName);
 		if(component instanceof JButton)
 			((JButton) component).addActionListener(new ActionListener() {
-				String			comp	= null;
-				InputListener	list	= null;
+				String comp = null;
+				InputListener list = null;
 				
 				public ActionListener init(String compName, InputListener inputList)
 				{
@@ -208,7 +305,24 @@ public class PCDefaultAgentGui implements AgentGui
 	}
 	
 	@Override
-	public Vector<Object> getinput(String componentName)
+	public void setDefaultListener(InputListener listener)
+	{
+		reconnectDefault();
+		externalDefaultInputListener = listener;
+	}
+	
+	/**
+	 * Reconnects all components not associated with a listener to the default listener.
+	 */
+	protected void reconnectDefault()
+	{
+		for(String component : components.keySet())
+			if(!inputConnections.containsKey(component))
+				connectInput(component, defaultInputListener);
+	}
+	
+	@Override
+	public Vector<Object> getInput(String componentName)
 	{
 		// TODO Auto-generated method stub
 		return null;

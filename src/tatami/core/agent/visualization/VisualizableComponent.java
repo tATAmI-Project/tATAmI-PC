@@ -11,7 +11,11 @@
  ******************************************************************************/
 package tatami.core.agent.visualization;
 
+import java.util.Vector;
+
 import net.xqhs.util.config.Config;
+import net.xqhs.util.config.Config.ConfigLockedException;
+import net.xqhs.util.logging.DumbLogger;
 import net.xqhs.util.logging.Logger;
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.ReportingEntity;
@@ -27,6 +31,7 @@ import tatami.core.agent.movement.MovementComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.AgentGui.DefaultComponent;
+import tatami.core.agent.visualization.AgentGui.InputListener;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
@@ -40,7 +45,7 @@ import tatami.core.util.platformUtils.PlatformUtils;
  * 
  * @author Andrei Olaru
  */
-public class VisualizableComponent extends AgentComponent implements ReportingEntity
+public class VisualizableComponent extends AgentComponent implements ReportingEntity, InputListener
 {
 	/**
 	 * Class UID.
@@ -97,6 +102,22 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	 * The name of the parameter in the component parameter set that corresponds to the type of the window.
 	 */
 	public static final String				WINDOW_TYPE_PARAMETER_NAME	= "window-type";
+	
+	/**
+	 * The name of the parameter in the event corresponding to GUI input, designating the name of the activated GUI
+	 * component.
+	 */
+	public static final String				GUI_COMPONENT_EVENT_PARAMETER_NAME	= "component";
+	/**
+	 * The name of the parameter in the event corresponding to GUI input, containing arguments (information about the
+	 * GUI event).
+	 */
+	public static final String				GUI_ARGUMENTS_EVENT_PARAMETER_NAME	= "arguments";
+	
+	/**
+	 * Debug constant to disable reporting (lowers quantity of messages). Normally should be set to <code>false</code>.
+	 */
+	private static final boolean			DEBUG_DISABLE_REPORTING				= true;
 	
 	/**
 	 * The logging {@link Unit}.
@@ -157,16 +178,6 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	{
 		super.atAgentStart(event);
 		
-		try
-		{
-			if(getComponentData().isSet(GUI_PARAMETER_NAME))
-				guiConfig.setGuiClass(getComponentData().get(GUI_PARAMETER_NAME),
-						((ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT))
-								.parVals(AgentParameterName.AGENT_PACKAGE));
-		} catch(NullPointerException e)
-		{
-			// it's ok, no parametric component
-		}
 		resetVisualization();
 		registerMessageHandlers();
 	}
@@ -189,7 +200,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			String destination = mvmt.extractDestination(event);
 			if(!destination.equals(getCurrentContainer()))
 			{
-				getLog().info("moving to [" + destination.toString() + "]");
+				getLog().info("moving to []", destination.toString());
 				setCurrentContainer(destination.toString());
 				removeVisualization();
 			}
@@ -202,7 +213,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		super.atAfterAgentMove(event);
 		
 		resetVisualization();
-		getLog().info(getAgentName() + ": arrived after move");
+		getLog().info("arrived after move");
 	}
 	
 	/**
@@ -218,7 +229,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			{
 				String parent = ((MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT)).extractContent(event);
 				setVisualizationParent(parent);
-				getLog().info("visualization root received: [" + parent + "]");
+				getLog().info("visualization root received: []", parent);
 			}
 		}, Vocabulary.VISUALIZATION.toString(), Vocabulary.VISUALIZATION_MONITOR.toString()))
 			getLog().warn("No messaging component present");
@@ -246,22 +257,39 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	{
 		// configure log / logging Unit
 		loggingUnit = (UnitComponentExt) new UnitComponentExt().setUnitName(getAgentName()).setLogEnsureNew()
-				.setLogReporter(this).setLoggerType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL)
-				.setLoggerType(PlatformUtils.platformLogType());
+				.setLoggerType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL);
+		if(!DEBUG_DISABLE_REPORTING)
+			loggingUnit.setLogReporter(this);
 		
 		// load GUI
 		try
 		{
-			gui = (AgentGui) PlatformUtils.loadClassInstance(this, guiConfig.guiClassName, guiConfig);
+			if(getComponentData().isSet(GUI_PARAMETER_NAME))
+				guiConfig.setGuiClass(getComponentData().get(GUI_PARAMETER_NAME),
+						((ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT))
+								.parVals(AgentParameterName.AGENT_PACKAGE), getLog());
+		} catch(NullPointerException e)
+		{
+			// it's ok, no parametric component
+			getLog().warn("Failed to set GUI class");
+		}
+		
+		try
+		{
+			gui = (AgentGui) PlatformUtils.loadClassInstance(this, guiConfig.getGuiClass(), guiConfig);
 		} catch(Exception e)
 		{
-			getLog().error("Load GUI failed: " + PlatformUtils.printException(e));
+			getLog().error("Load GUI failed: []", PlatformUtils.printException(e));
 		}
 		
 		if(gui != null)
+		{
 			loggingUnit.setLogDisplay(new Log2AgentGui(gui, DefaultComponent.AGENT_LOG.toString()));
+			gui.setDefaultListener(this);
+		}
 		
-		getLog().trace("visualization started on platform " + PlatformUtils.getPlatform());
+		getLog().trace("visualization started on platform [] with GUI class []", guiConfig.guiClassName,
+				PlatformUtils.getPlatform());
 	}
 	
 	/**
@@ -349,17 +377,28 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	}
 	
 	/**
-	 * Getter for the log.
+	 * Getter for the log. It never returns <code>null</code>, but in faulty cases it might returned a
+	 * {@link DumbLogger} instance.
 	 * 
 	 * @return the log, as a {@link Logger} instance.
 	 */
 	public Logger getLog()
 	{
+		if(loggingUnit != null)
 		return loggingUnit;
+		return DumbLogger.get();
 	}
 	
 	/**
-	 * Getter for the GUI.
+	 * Getter for the GUI. This method should only be used for advanced applications where direct access to the GUI is
+	 * necessary. Otherwise, the GUI should be used by means of the methods {@link #outputToGUI(String, Vector)} and
+	 * {@link #inputFromGUI(String)}, together with receiving GUI events from the agent event mechanism.
+	 * <p>
+	 * IMPORTANT NOTE: registering input receivers via {@link AgentGui#connectInput} should only be used if it is not
+	 * desired to receive GUI input events via the agent event mechanism. By default, {@link VisualizableComponent}
+	 * registers a default handler for all GUI events and posts these events to the event queue. If an input is
+	 * overridden (via this method) the events generated by the specified GUI component will not pass through the event
+	 * queue anymore (and will therefore not be available to other components).
 	 * 
 	 * @return the GUI, as an {@link AgentGui} instance.
 	 */
@@ -369,13 +408,47 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	}
 	
 	/**
-	 * Relays calls to the underlying {@link AgentComponent} instance in order to avoid synthetic access warnings for
-	 * event handlers.
+	 * Relay for {@link AgentGui#doOutput(String, Vector)}.
+	 * 
+	 * @param guiComponentName
+	 *            - the name of the component.
+	 * @param arguments
+	 *            - the information to transmit.
+	 */
+	public void outputToGUI(String guiComponentName, Vector<Object> arguments)
+	{
+		gui.doOutput(guiComponentName, arguments);
+	}
+	
+	/**
+	 * Relay for {@link AgentGui#getInput(String)}.
+	 * 
+	 * @param guiComponentName
+	 *            - the name of the component.
+	 * @return the received information.
+	 */
+	public Vector<Object> inputFromGUI(String guiComponentName)
+	{
+		return gui.getInput(guiComponentName);
+	}
+	
+	/**
+	 * method that receives active input events in the GUI (by default).
 	 */
 	@Override
-	protected String getAgentName()
+	public void receiveInput(String componentName, Vector<Object> arguments)
 	{
-		return super.getAgentName();
+		AgentEvent event = new AgentEvent(AgentEventType.GUI_INPUT);
+		try
+		{
+			event.addParameter(GUI_COMPONENT_EVENT_PARAMETER_NAME, componentName);
+			event.addParameter(GUI_ARGUMENTS_EVENT_PARAMETER_NAME, arguments);
+		} catch(ConfigLockedException e)
+	{
+			// can't get here
+			throw new IllegalStateException("should not be here");
+		}
+		postAgentEvent(event);
 	}
 	
 	/**
@@ -397,12 +470,6 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	protected void setCurrentContainer(String containerName)
 	{
 		currentContainer = containerName;
-	}
-	
-	@Override
-	protected ComponentCreationData getComponentData()
-	{
-		return super.getComponentData();
 	}
 	
 	/**

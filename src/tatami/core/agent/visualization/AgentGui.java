@@ -16,8 +16,9 @@ import java.util.Vector;
 /**
  * This class models the GUI of an agent (and a GUI in general) so as to make it platform-independent.
  * <p>
- * It models the GUI as a set of components that can perform input and/or output. Components are logical units that can
- * contain one or more controls and that can correspond to non-disjoint sets of controls.
+ * It models the GUI as a set of components that can perform input and/or output. These components (also called GUI
+ * components) are different from agent components. Components are logical units that can contain one or more controls
+ * and that can correspond to non-disjoint sets of controls.
  * <p>
  * There are three types of functionalities that can be associated to a component:
  * <ul>
@@ -133,7 +134,7 @@ public interface AgentGui
 	 *            - the name of the component.
 	 * @return the received information.
 	 */
-	public Vector<Object> getinput(String componentName);
+	public Vector<Object> getInput(String componentName);
 	
 	/**
 	 * Connects a component, as active input, to an implementation of {@link InputListener}. The input will invoke the
@@ -147,6 +148,16 @@ public interface AgentGui
 	public void connectInput(String componentName, InputListener listener);
 	
 	/**
+	 * Registers an implementation of {@link InputListener} to be used for all active inputs <b>not otherwise
+	 * connected</b> via {@link #connectInput(String, InputListener)}. The inputs will invoke the
+	 * <code>receiveInput()</code> method of the implementation whenever it is the case.
+	 * 
+	 * @param listener
+	 *            - the {@link InputListener} implementation to be invoked on activation. <code>null</code> can be used.
+	 */
+	public void setDefaultListener(InputListener listener);
+	
+	/**
 	 * Instructs the GUI to unload, effectively closing the GUI.
 	 */
 	public void close();
@@ -154,7 +165,7 @@ public interface AgentGui
 	/**
 	 * The method executes a task in the background of the GUI, as specified by the implementation. This is useful, for
 	 * instance, for taking tasks off the Swing EDT.(DemointeractivGUI.setTitle(getAgentName());
-			
+	 * 
 	 * <p>
 	 * Implementations are expected to start another thread for executing the work.
 	 * 

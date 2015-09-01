@@ -41,6 +41,10 @@ public class BootSettingsManager extends Config
 {
 	// /////////////////// scenario
 	/**
+	 * The default directory for scenarios.
+	 */
+	public static final String		SCENARIO_DIRECTORY	= "src-scenario/";
+	/**
 	 * The schema for scenario files.
 	 */
 	protected String				SCENARIO_SCHEMA		= "src-schema/scenarioSchema3.xsd";
@@ -233,7 +237,7 @@ public class BootSettingsManager extends Config
 			}
 			
 			log.info("scenario:");
-			log.trace(scenarioTree.toString());
+			log.info(scenarioTree.toString());
 			
 			// TODO: make this jade-independent
 			XMLNode configNode = (scenarioTree.getRoot().getNodeIterator("config").hasNext() ? scenarioTree.getRoot()

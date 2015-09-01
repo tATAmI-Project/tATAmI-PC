@@ -29,22 +29,17 @@ import net.xqhs.graphs.context.Instant.TimeKeeper;
 import net.xqhs.graphs.graph.Edge;
 import net.xqhs.graphs.graph.Graph;
 import net.xqhs.graphs.graph.GraphComponent;
-import net.xqhs.graphs.graph.Node;
 import net.xqhs.graphs.graph.SimpleGraph;
 import net.xqhs.graphs.matcher.GraphMatcherQuick;
 import net.xqhs.graphs.matcher.GraphMatchingProcess;
 import net.xqhs.graphs.matcher.Match;
 import net.xqhs.graphs.matcher.MonitorPack;
-import net.xqhs.graphs.pattern.EdgeP;
 import net.xqhs.graphs.pattern.GraphPattern;
-import net.xqhs.graphs.pattern.NodeP;
 import net.xqhs.graphs.representation.text.TextGraphRepresentation;
 import net.xqhs.graphs.util.ContentHolder;
-import tatami.core.agent.AgentComponent;
-import tatami.sclaim.constructs.basic.ClaimValue;
 
 @SuppressWarnings("javadoc")
-public class ContextComponent extends AgentComponent { // TODO extend Cognitive Component
+public class ContextComponent extends CognitiveComponent { // TODO extend Cognitive Component
 
 	/**
 	 * The serial UID.
@@ -59,7 +54,7 @@ public class ContextComponent extends AgentComponent { // TODO extend Cognitive 
 	 */
 	public ContextComponent() 
 	{
-		super(AgentComponentName.COGNITIVE_COMPONENT);
+		super();
 	
 		// make ticker
 		TimeKeeper ticker = new IntTimeKeeper();
