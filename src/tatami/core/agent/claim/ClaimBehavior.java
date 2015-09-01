@@ -787,9 +787,21 @@ public class ClaimBehavior
 	
 	// ==================================== EXECUTION MONITORING & CONTROL
 	
+	/**
+	 * The primitive prints out the given arguments to the console.
+	 * 
+	 * @param args
+	 *            - elements in the <code>print</code> construct.
+	 * @return always returns <code>true</code>.
+	 */
 	protected boolean handlePrint(Vector<ClaimConstruct> args)
 	{
-		// log.trace("The message [] was printed on []", ,);
+		Object[] outputV = constructs2Objects(args, 0).toArray();
+		String msg = compose("", outputV);
+		
+		System.out.println(msg);
+		
+		trace("The message [] was printed on console", msg);
 		return true;
 	}
 	
@@ -834,41 +846,72 @@ public class ClaimBehavior
 	
 	// ==================================== KNOWLEDGE MANAGEMENT
 	
+	/**
+	 * Method that handles all knowledge management primitives (except <code>forAllK</code>), namely <code>addK</code>,
+	 * <code>readK</code> and <code>removeK</code>.
+	 * <p>
+	 * For <code>addK</code> and <code>removeK</code>, the method only affects the knowledge base, and nothing else. A
+	 * <code>readK</code> call affects both the execution (the return value influences the control flow of the behavior)
+	 * and the symbol table of the behavior (the primitive can bind variables to values found in the knowledge base).
+	 * <p>
+	 * Considering a knowledge management primitive <code>KP</code>, the construct is always of the form
+	 * <code>(KP (struct knowledge arg1 arg2 arg3 ...))</code>
+	 * 
+	 * @param construct
+	 *            - the construct that was used in the code.
+	 * @param args
+	 *            - the arguments received by the construct.
+	 * @return for <code>addK</code> and <code>removeK</code>, always <code>true</code>; for <code>readK</code>, returns
+	 *         <code>true</code> if a matching piece of knowledge was found, and <code>false</code> otherwise (no
+	 *         matching knowledge found).
+	 */
 	protected boolean handleKnowledgeManagement(ClaimFunctionType construct, Vector<ClaimConstruct> args)
 	{
 		KnowledgeBase kb = claimComponent.getKBase();
+		
+		// the primitive is always followed by the piece of knowledge (may be a pattern).
+		// TODO: support multiple types of knowledge, not just SimpleKnowledge.
+		ClaimStructure kStruct = (ClaimStructure) args.get(0);
+		SimpleKnowledge k = structure2Knowledge(kStruct);
+		
 		switch(construct)
 		{
 		case ADDK:
 		// function "add knowledge"
 		{
-			// after addK there's always a structure of knowledge
-			SimpleKnowledge newKl = structure2Knowledge((ClaimStructure) args.get(0));
+			if(kb.add(k))
+				trace("added new knowledge [].", k.getTextRepresentation());
+			else
+				trace("adding knowledge [] had no effect.", k.getTextRepresentation());
 			
-			// add knowledge to the knowledge base of agent
-			kb.add(newKl);
-			log.info(" added new knowledge " + newKl.printlnKnowledge() + " in behavior " + this.cbd.getName());
 			return true;
 		}
 		case READK:
 		// function "check if agent already has the knowledge"
 		// If yes : return true, also put the value of variable in knowledge pattern into the symbol table
 		{
-			// after readK there's always a structure of knowledge
-			ClaimStructure knowledgeStruct = (ClaimStructure) args.get(0); // struct knowledge <kl type> <kl fields>
-			SimpleKnowledge pattern = structure2Knowledge(knowledgeStruct);
-			KnowledgeDescription result = kb.getFirst(pattern);
-			// FIXME: support multiple types
-			if(result == null)
-				return false; // knowledge was not found
-			return readValues(knowledge2Structure((SimpleKnowledge) result).getFields(), knowledgeStruct.getFields(), 0);
+			// first find the result
+			KnowledgeDescription result = kb.getFirst(k);
+			if(result != null)
+			{ // then [attempt to] bind the variables
+				if(readValues(knowledge2Structure((SimpleKnowledge) result).getFields(), kStruct.getFields(), 0))
+				{
+					trace("knowledge [] read into [].", k.getTextRepresentation(), kStruct);
+					return true;
+				}
+				trace("knowledge [] could not be matched into [].", k.getTextRepresentation(), kStruct);
+				return false;
+			}
+			trace("no knowledge matching pattern [] was found.", k);
+			return false; // knowledge was not found
 		}
 		case REMOVEK:
 		// function "remove knowledge"
 		{
-			ClaimStructure knowledgeStruct = (ClaimStructure) args.get(0); // struct knowledge <kl type> <kl fields>
-			SimpleKnowledge pattern = structure2Knowledge(knowledgeStruct);
-			kb.remove(pattern);
+			if(kb.remove(k))
+				trace("removed knowledge [].", k.getTextRepresentation());
+			else
+				trace("removing knowledge [] had no effect.", k.getTextRepresentation());
 			return true;
 		}
 		default:
@@ -878,25 +921,38 @@ public class ClaimBehavior
 	}
 	
 	/**
-	 * Read all records of knowledge in the knowledge base that match the pattern. Used in forAllK function.
+	 * Read all records of knowledge in the knowledge base that match the pattern. For each possible match, execute the
+	 * subordinate statements (forming a cycle).
+	 * <p>
+	 * As the cycle can be executed an undetermined number of times, it is recommended that any variable that is not
+	 * bound when entering the <code>forAllK</code> construct is a re-assignable variable. // TODO implement this
+	 * <p>
+	 * Otherwise, if the first cycle succeeds, it will make a first binding for the variables, and then at the second
+	 * cycle the re-binding will fail, leading to a non-intuitive behavior where the cycle will only be performed once
+	 * although more matches exist. By failing early (before executing the first cycle and before binding any variables,
+	 * the behavior is consistent: either no cycle is performed, either all of them are performed).
+	 * 
+	 * @param construct
+	 *            - the entire description of the <code>forAllK</code> construct.
 	 */
 	protected void handleForAllK(ClaimForAllK construct)
 	{
-		ClaimStructure klStructure = construct.getStructure();
+		ClaimStructure kStruct = construct.getStructure();
 		Vector<ClaimConstruct> statements = construct.getStatements();
 		
-		// map of pairs <Variable, value> used to bind fields in knowledge pattern that haven't been bound (variable)
+		// map of pairs <Variable, value> used to bind fields in knowledge pattern that can be assigned (are
+		// reassignable).
 		HashMap<ClaimVariable, ClaimValue> map = new HashMap<ClaimVariable, ClaimValue>();
 		boolean matches = false;
 		
-		Vector<ClaimConstruct> klStructureFields = klStructure.getFields();
-		Collection<KnowledgeDescription> knowledge = claimComponent.getKBase().getAll(structure2Knowledge(klStructure));
-		// type
-		String knowledgeType = (String) ((ClaimValue) klStructureFields.get(1)).getValue();
+		Vector<ClaimConstruct> klStructureFields = kStruct.getFields();
+		
+		// FIXME: support other types of knowledge, other than SimpleKnowledge.
+		Collection<KnowledgeDescription> knowledge = claimComponent.getKBase().getAll(structure2Knowledge(kStruct));
 		// fields
 		for(KnowledgeDescription kd : knowledge)
 		{
-			SimpleKnowledge klToMatch = (SimpleKnowledge) kd; // FIXME: support other types
+			SimpleKnowledge klToMatch = (SimpleKnowledge) kd; 
 			// if found knowledge that has the same type
 			if(knowledgeType.equals(klToMatch.getKnowledgeType())) // FIXME: this is currently superfluous
 			{
@@ -955,10 +1011,11 @@ public class ClaimBehavior
 	
 	/**
 	 * Create a {@link SimpleKnowledge} instance from a {@link ClaimStructure}.
+	 * // TODO: support other types of knowledge, other than SimpleKnowledge.
 	 * 
 	 * @param knowledge
 	 *            : a structure <code>(struct knowledge knowledge-type knowledge-field-1 knowledge-field-2 ...)</code>
-	 * @return : Knowledge built from Structure
+	 * @return : a {@link SimpleKnowledge} instance build from the structure.
 	 */
 	protected SimpleKnowledge structure2Knowledge(ClaimStructure knowledge)
 	{
