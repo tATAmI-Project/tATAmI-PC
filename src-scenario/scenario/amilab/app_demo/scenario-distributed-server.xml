@@ -33,6 +33,7 @@
 				<scen:component name="parametric" />
 				<scen:component name="visualizable" >
 					<scen:parameter name="GUI" value="AmILabGui"/>
+					<scen:parameter name="window-type" value="amilab-gui"/>
 				</scen:component>
 				<scen:component name="messaging" />
 				<scen:component name="amilab" >
@@ -42,8 +43,8 @@
 				</scen:component>
 				<scen:component name="testing"
 					classpath="scenario.amilab.app_demo.AmILabServer" >
-					<scen:parameter name="clients" value="Client-1 Client-2 AmI-Server" />
-					<!--<scen:parameter name="clients" value="AmI-Server" />-->
+					<scen:parameter name="clients" value="AmI-Server" />
+					<!--<scen:parameter name="clients" value="Client-1 Client-2 AmI-Server" />-->
 				</scen:component>
 				<scen:parameter name="loader" value="composite" />
 				<scen:parameter name="name" value="AmI-Server" />

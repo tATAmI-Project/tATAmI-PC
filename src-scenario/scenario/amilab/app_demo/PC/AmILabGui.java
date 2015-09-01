@@ -3,6 +3,7 @@ package scenario.amilab.app_demo.PC;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
+import net.xqhs.windowLayout.WindowLayout;
 import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.pc.agent.visualization.PCDefaultAgentGui;
 
@@ -23,6 +24,11 @@ public class AmILabGui extends PCDefaultAgentGui
 	 * Name of the main label.
 	 */
 	public static final String MAIN_LABEL = "main_label";
+	
+	/**
+	 * The type of the window, to be given to WindowLayout.
+	 */
+	public static final String WINDOW_TYPE = "amilab-gui";
 
 	/**
 	 * Creates and configures the GUI.
@@ -53,7 +59,7 @@ public class AmILabGui extends PCDefaultAgentGui
 		// WindowParameters protected constructors. How to set my custom dimensions?
 
 		// Without the super call the windows does not have a name
-		// super.placeWindow();
+		 super.placeWindow();
 	}
 
 	/**

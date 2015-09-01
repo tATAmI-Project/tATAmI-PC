@@ -13,6 +13,7 @@ package tatami.simulation;
 
 import net.xqhs.windowLayout.LayoutIndications.BarPosition;
 import net.xqhs.windowLayout.grid.GridLayoutIndications;
+import scenario.amilab.app_demo.PC.AmILabGui;
 import tatami.core.agent.visualization.AgentGuiConfig;
 
 /**
@@ -83,6 +84,8 @@ public class BootDefaultArguments
 	.indicateWindow(SimulationManager.WINDOW_TYPE, 10, 4)
 
 	.indicateWindowPosition(SimulationManager.WINDOW_NAME, 0, 0)
+	
+	.indicateWindow(AmILabGui.WINDOW_TYPE, 10, 6)
 
 	.indicateBar(BarPosition.LEFT, 100, 0)
 
