@@ -15,12 +15,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.Vector;
 
 import net.xqhs.util.logging.DumbLogger;
@@ -100,7 +97,7 @@ public class ClaimBehavior
 {
 	/**
 	 * Constants used in converting S-CLAIM variables to objects (in
-	 * {@link ClaimBehavior#flattenConstructs(List, int, KeepVariables)}).
+	 * {@link ClaimBehavior#evaluateConstruct(List, KeepVariables)}).
 	 * 
 	 * @author Andrei Olaru
 	 */
@@ -117,10 +114,15 @@ public class ClaimBehavior
 		KEEP_REASSIGNABLE,
 		
 		/**
-		 * Assigned variables are replaced by their values; Re-assignables and unassigned variables are kept as
+		 * Assigned variables are replaced by their values; Re-assignable and unassigned variables are kept as
 		 * {@link ClaimVariable} instances.
 		 */
-		KEEP_UNISTANTIATED
+		KEEP_ASSIGNABLE,
+		
+		/**
+		 * All variables are kept as they are.
+		 */
+		KEEP_ALL,
 	}
 	
 	/**
@@ -924,8 +926,8 @@ public class ClaimBehavior
 	 * Read all records of knowledge in the knowledge base that match the pattern. For each possible match, execute the
 	 * subordinate statements (forming a cycle).
 	 * <p>
-	 * As the cycle can be executed an undetermined number of times, it is recommended that any variable that is not
-	 * bound when entering the <code>forAllK</code> construct is a re-assignable variable. // TODO implement this
+	 * As the cycle can be executed an undetermined number of times, it is required that any variable that is not bound
+	 * when entering the <code>forAllK</code> construct is a re-assignable variable. // TODO implement this
 	 * <p>
 	 * Otherwise, if the first cycle succeeds, it will make a first binding for the variables, and then at the second
 	 * cycle the re-binding will fail, leading to a non-intuitive behavior where the cycle will only be performed once
@@ -934,84 +936,56 @@ public class ClaimBehavior
 	 * 
 	 * @param construct
 	 *            - the entire description of the <code>forAllK</code> construct.
+	 * @return <code>true</code>, or <code>false</code> if not fulfilling the requirement that all un-assigned variables
+	 *         are re-assignable.
 	 */
-	protected void handleForAllK(ClaimForAllK construct)
+	protected boolean handleForAllK(ClaimForAllK construct)
 	{
 		ClaimStructure kStruct = construct.getStructure();
-		Vector<ClaimConstruct> statements = construct.getStatements();
 		
-		// map of pairs <Variable, value> used to bind fields in knowledge pattern that can be assigned (are
-		// reassignable).
-		HashMap<ClaimVariable, ClaimValue> map = new HashMap<ClaimVariable, ClaimValue>();
-		boolean matches = false;
+		// check condition that the arguments will be assignable multiple times
+		for(ClaimConstruct c : evaluateConstructs(kStruct.getFields(), 1, KeepVariables.KEEP_REASSIGNABLE))
+			if((c instanceof ClaimVariable) && !((ClaimVariable) c).isReAssignable())
+			{
+				log.error("The variable [] is not assigned, nor re-assignable", c);
+				return false;
+			}
 		
-		Vector<ClaimConstruct> klStructureFields = kStruct.getFields();
-		
+		// get all possible matches
 		// FIXME: support other types of knowledge, other than SimpleKnowledge.
 		Collection<KnowledgeDescription> knowledge = claimComponent.getKBase().getAll(structure2Knowledge(kStruct));
-		// fields
+		
+		int startStatement = currentStatement;
+		int nStatements = construct.getStatements().size();
 		for(KnowledgeDescription kd : knowledge)
 		{
-			SimpleKnowledge klToMatch = (SimpleKnowledge) kd; 
-			// if found knowledge that has the same type
-			if(knowledgeType.equals(klToMatch.getKnowledgeType())) // FIXME: this is currently superfluous
-			{
-				matches = true;
-				// map.clear(); // not needed, in order to be able to make the verification for previously bound
-				// variables in this forAllK, by verifying which variables were unbound at the beginning of the
-				// execution
-				for(int j = 2; j < klStructureFields.size(); j++)
+			currentStatement = startStatement;
+			
+			// attempt to match with construct
+			ClaimStructure kbMatch = knowledge2Structure((SimpleKnowledge) kd);
+			
+			if(readValues(kbMatch.getFields(), kStruct.getFields(), 1))
+			{ // we are able to read the source into the destination, bindings already done
+				// execute cycle
+				trace("executing for match [].", kbMatch);
+				for(ClaimConstruct statement : construct.getStatements())
 				{
-					ClaimVariable fieldVariable = ((ClaimVariable) klStructureFields.get(j));
-					ClaimValue value = getVariableValue(fieldVariable);
-					// check if fieldVariable is in the symbol table or not
-					// if variable is bound (value != null) and doesn't match with the knowledge, return false
-					if(value != null)
-					{
-						if(!map.containsKey(fieldVariable))
-						{
-							if(!((String) value.getValue()).equals(klToMatch.getSimpleKnowledge().get(j - 2)))
-							{
-								matches = false;
-								continue;
-							}
-						}
-						else
-						{
-							map.put(fieldVariable, new ClaimValue(klToMatch.getSimpleKnowledge().get(j - 2)));
-						}
-					}
-					// if not, bind with value in the knowledge base
-					else
-					{
-						map.put(fieldVariable, new ClaimValue(klToMatch.getSimpleKnowledge().get(j - 2)));
-					}
+					currentStatement++;
+					if(!handleStatement(statement))
+						// statement fails -> abort this cycle
+						break;
 				}
-				
-				// if the pattern matches, put into behavior's symbol table all pairs <variable, value> that has been
-				// found
-				if(matches)
-				{
-					Set<Entry<ClaimVariable, ClaimValue>> set = map.entrySet();
-					for(Iterator<Entry<ClaimVariable, ClaimValue>> it = set.iterator(); it.hasNext();)
-					{
-						Map.Entry<ClaimVariable, ClaimValue> entry = it.next();
-						st.put(entry.getKey(), entry.getValue());
-					}
-					for(ClaimConstruct statement : statements)
-						handleStatement(statement);
-					/*
-					 * // reset all variables bound in this procedure to null for(Iterator<Entry<ClaimVariable,
-					 * ClaimValue>> it = set.iterator(); it.hasNext();) { Map.Entry<ClaimVariable, ClaimValue> entry =
-					 * it.next(); st.put(entry.getKey(), null); }
-					 */}
 			}
+			else
+				trace("Unable to read match [] into arguments [].", kbMatch, kStruct);
 		}
+		currentStatement += nStatements - 1;
+		return true;
 	}
 	
 	/**
-	 * Create a {@link SimpleKnowledge} instance from a {@link ClaimStructure}.
-	 * // TODO: support other types of knowledge, other than SimpleKnowledge.
+	 * Create a {@link SimpleKnowledge} instance from a {@link ClaimStructure}. // TODO: support other types of
+	 * knowledge, other than SimpleKnowledge.
 	 * 
 	 * @param knowledge
 	 *            : a structure <code>(struct knowledge knowledge-type knowledge-field-1 knowledge-field-2 ...)</code>
@@ -1019,7 +993,7 @@ public class ClaimBehavior
 	 */
 	protected SimpleKnowledge structure2Knowledge(ClaimStructure knowledge)
 	{
-		Vector<String> fields = constructs2Strings(knowledge.getFields(), 1); // ignore 'knowledge'
+		Vector<String> fields = constructs2Strings(knowledge.getFields(), 1, false); // ignore 'knowledge'
 		
 		SimpleKnowledge newKl = new SimpleKnowledge();
 		newKl.setKnowledgeType(fields.remove(0));
@@ -1031,10 +1005,11 @@ public class ClaimBehavior
 	 * Create a {@link ClaimStructure} from a {@link SimpleKnowledge} instance.
 	 * 
 	 * @param knowledge
+	 *            - the knowledge record.
 	 * @return a structure with the form
 	 *         <code>(struct knowledge knowledge-type knowledge-field-1 knowledge-field-2 ...)</code>
 	 */
-	protected ClaimStructure knowledge2Structure(SimpleKnowledge knowledge)
+	protected static ClaimStructure knowledge2Structure(SimpleKnowledge knowledge)
 	{
 		ClaimStructure ret = new ClaimStructure();
 		Vector<ClaimConstruct> fields = new Vector<ClaimConstruct>();
@@ -1068,7 +1043,7 @@ public class ClaimBehavior
 		}
 		
 		boolean returnValue = false;
-		Vector<ClaimConstruct> arguments = new Vector<ClaimConstruct>(flattenConstructs(args, 0,
+		Vector<ClaimConstruct> arguments = new Vector<ClaimConstruct>(evaluateConstructs(args, 0,
 				KeepVariables.KEEP_NONE));
 		
 		trace("invoking code attachment function [] with arguments: []", functionName, arguments);
@@ -1129,7 +1104,7 @@ public class ClaimBehavior
 		ClaimValue sourceValue = (sourceType == ClaimConstructType.VALUE) ? (ClaimValue) sourceField
 				: getVariableValue((ClaimVariable) sourceField);
 		boolean assignable = (destType == ClaimConstructType.VARIABLE)
-				&& ((destValue == null) || ((ClaimVariable) destField).isAssignable());
+				&& ((destValue == null) || ((ClaimVariable) destField).isReAssignable());
 		
 		if(assignable)
 		{
@@ -1232,6 +1207,19 @@ public class ClaimBehavior
 	// ==================================== OBJECT - CLAIM VALUE conversion
 	
 	/**
+	 * Get value of variable from the symbol table. First, search the variable in behavior's symbol table. If not found,
+	 * search in agent's symbol table (this functionality is covered by the {@link SymbolTable} class.
+	 * 
+	 * @param variable
+	 *            : the variable
+	 * @return : Value of variable if found; <code>null</code> otherwise
+	 */
+	protected ClaimValue getVariableValue(ClaimVariable variable)
+	{
+		return st.get(variable);
+	}
+	
+	/**
 	 * The method creates a vector of {@link ClaimConstruct} instances (more precisely {@link ClaimValue} instances),
 	 * each of them containing an object from the argument vector.
 	 * <p>
@@ -1239,7 +1227,8 @@ public class ClaimBehavior
 	 * file (such as {@link #readValues}).
 	 * 
 	 * @param args
-	 * @return
+	 *            - the objects to convert to S-CLAIM values.
+	 * @return the values obtained.
 	 */
 	protected static Vector<ClaimConstruct> objects2values(Vector<Object> args)
 	{
@@ -1250,161 +1239,218 @@ public class ClaimBehavior
 	}
 	
 	/**
+	 * Evaluates a construct to a value (or sometimes a variable).
+	 * <p>
+	 * The method only works on S-CLAIM variables, values, or function calls (these are evaluated and transformed to
+	 * boolean values); structures are not accepted.
+	 * <p>
+	 * Variables are treated as follows, depending on the {@link KeepVariables} setting: they are transformed to values
+	 * (or <code>null</code>, if uninstantiated); only uninstantiated variables are kept (with the purpose of
+	 * instantiating them later) and convert the other to values; or all variables are kept (with the purpose of
+	 * changing their value).
+	 * <p>
+	 * In case unassigned variables are not kept, the return is a {@link ClaimValue} instance containing
+	 * <code>null</code>.
+	 * 
+	 * @param construct
+	 *            - the construct to evaluate.
+	 * @param keepVariables
+	 *            - indicates the desired behavior regarding variables.
+	 * @return a construct that is either a {@link ClaimValue} instance, or a {@link ClaimVariable} instance (if the
+	 *         {@link KeepVariables} allows it. In case of an incorrect call, <code>null</code> is returned.
+	 */
+	protected ClaimConstruct evaluateConstruct(ClaimConstruct construct, KeepVariables keepVariables)
+	{
+		ClaimConstructType constructType = construct.getType();
+		switch(constructType)
+		{
+		case VARIABLE:
+			// get the value from the symbol table (can be null)
+			ClaimValue value = getVariableValue((ClaimVariable) construct);
+			boolean assigned = (value == null);
+			if(value == null)
+				value = new ClaimValue(null);
+			boolean assignable = ((ClaimVariable) construct).isReAssignable();
+			switch(keepVariables)
+			{
+			case KEEP_NONE:
+				return value;
+			case KEEP_REASSIGNABLE:
+				if(assignable)
+					return construct;
+				return value;
+			case KEEP_ASSIGNABLE:
+				if(assignable || !assigned)
+					return construct;
+				return value;
+			case KEEP_ALL:
+				return construct;
+			}
+			break;
+		case VALUE:
+			return construct;
+		case FUNCTION_CALL: // FIXME: this should probably be limited
+			if(handleCall((ClaimFunctionCall) construct))
+				return new ClaimValue(new Boolean(true));
+			return new ClaimValue(new Boolean(false));
+		default:
+			break;
+		}
+		log.error("illegal construct type [] inside construct", constructType);
+		return null;
+	}
+	
+	/**
 	 * Converts a {@link List} of {@link ClaimConstruct} instances - presumably from a larger construct or a structure -
-	 * to a {@link Vector} of constructs with only values or some variables (see below).
+	 * to a {@link Vector} of constructs with only values or some variables (see
+	 * {@link #evaluateConstruct(ClaimConstruct, KeepVariables)}, which is used in the implementation).
+	 * <p>
+	 * The method only works on lists that contain as elements variables, values, or function calls (these are evaluated
+	 * and transformed to boolean values); structures are not accepted.
 	 * 
 	 * @param constructs
-	 *            : the constructs to transform to values
+	 *            : the constructs to evaluate.
 	 * @param ignore
-	 *            : number of leading constructs to ignore (e.g. 'knowledge', 'message', etc)
+	 *            : number of leading constructs to ignore (e.g. 'knowledge', 'message', etc).
 	 * @param keepVariables
-	 *            : what to do with variables: transform to values (or <code>null</code>, if uninstantiated); keep only
-	 *            uninstantiated variables (with the purpose of instantiating them); or keep all variables (with the
-	 *            purpose of changing their value).
+	 *            : what variables to keep (see {@link #evaluateConstruct(ClaimConstruct, KeepVariables)}.
 	 * 
-	 * @return the values of the constructs or uninstantiated variables
+	 * @return the values of the constructs or sometimes variables. <code>null</code> is returned if the evaluation of
+	 *         any of the constructs fails.
 	 */
-	protected Vector<ClaimConstruct> flattenConstructs(List<ClaimConstruct> constructs, int ignore,
+	protected Vector<ClaimConstruct> evaluateConstructs(List<ClaimConstruct> constructs, int ignore,
 			KeepVariables keepVariables)
 	{
-		Vector<ClaimConstruct> args = new Vector<ClaimConstruct>();
+		Vector<ClaimConstruct> ret = new Vector<ClaimConstruct>();
 		int toIgnore = ignore;
 		for(ClaimConstruct cons : constructs)
 		{
 			if(toIgnore-- > 0)
 				continue;
-			
-			ClaimConstructType constructType = cons.getType();
-			switch(constructType)
-			{
-			case VARIABLE:
-				// get the value from the symbol table (can be null)
-				ClaimValue value = getVariableValue((ClaimVariable) cons);
-				boolean assignable = ((ClaimVariable) cons).isAssignable();
-				switch(keepVariables)
-				{
-				case KEEP_NONE:
-					args.add(value);
-					break;
-				case KEEP_REASSIGNABLE:
-					if(assignable)
-						args.add(cons);
-					else
-						args.add(value);
-					break;
-				case KEEP_UNISTANTIATED:
-					if((value == null) || assignable)
-						args.add(cons);
-					else
-						args.add(value);
-					break;
-				}
-				break;
-			case VALUE:
-				args.add(cons);
-				break;
-			case FUNCTION_CALL: // FIXME: this should probably be limited
-				if(handleCall((ClaimFunctionCall) cons))
-					args.add(new ClaimValue(new Boolean(true)));
-				else
-					args.add(new ClaimValue(new Boolean(false)));
-				break;
-			default:
-				log.error("illegal construct type [] inside construct", constructType);
-				break;
-			}
+			ClaimConstruct result = evaluateConstruct(cons, keepVariables);
+			if(result == null)
+				return null;
+			ret.add(result);
 		}
-		return args;
+		return ret;
 	}
 	
+	/**
+	 * Convert a list of S-CLAIM constructs to S-CLAIM values. The list must fulfill the requirements of
+	 * {@link #evaluateConstructs(List, int, KeepVariables)}, which is used in the implementation. No variables will be
+	 * kept.
+	 * 
+	 * @param constructs
+	 *            - the constructs to evaluate.
+	 * @param ignore
+	 *            - number of leading constructs to ignore.
+	 * @return a list of {@link ClaimValue} instances to which the constructs have been evaluated. Some instances may
+	 *         contain the <code>null</code> reference.
+	 */
 	protected Vector<ClaimValue> constructs2Values(List<ClaimConstruct> constructs, int ignore)
 	{
 		Vector<ClaimValue> args = new Vector<ClaimValue>();
-		for(ClaimConstruct arg : flattenConstructs(constructs, ignore, KeepVariables.KEEP_NONE))
+		for(ClaimConstruct arg : evaluateConstructs(constructs, ignore, KeepVariables.KEEP_NONE))
 			args.add((ClaimValue) arg);
 		return args;
 		
 	}
 	
+	/**
+	 * Convert a list of S-CLAIM constructs to Objects. The list must fulfill the requirements of
+	 * {@link #evaluateConstructs(List, int, KeepVariables)}, which is used in the implementation. No variables will be
+	 * kept.
+	 * <p>
+	 * <code>null</code> values (e.g. from unassigned variables) are translated to <code>null</code> elements.
+	 * 
+	 * @param constructs
+	 *            - the constructs to evaluate.
+	 * @param ignore
+	 *            - number of leading constructs to ignore.
+	 * @return a list of {@link Object} instances to which the constructs have been evaluated.
+	 */
 	protected Vector<Object> constructs2Objects(List<ClaimConstruct> constructs, int ignore)
 	{
 		Vector<Object> args = new Vector<Object>();
-		for(ClaimConstruct arg : flattenConstructs(constructs, ignore, KeepVariables.KEEP_NONE))
-			if(arg != null)
-				if(arg instanceof ClaimValue)
-					args.add(((ClaimValue) arg).getValue());
-				else
-					args.add((ClaimVariable) arg);
-			else
-				args.add(null);
+		for(ClaimConstruct arg : evaluateConstructs(constructs, ignore, KeepVariables.KEEP_NONE))
+			args.add(((ClaimValue) arg).getValue());
 		return args;
-	}
-	
-	protected Vector<String> constructs2Strings(List<ClaimConstruct> constructs, int ignore)
-	{
-		Vector<String> args = new Vector<String>();
-		for(Object arg : constructs2Objects(constructs, ignore))
-			args.add((String) arg);
-		return args;
-	}
-	
-	protected String constructs2OneStrings(List<ClaimConstruct> constructs, int ignore)
-	{
-		String rez = new String();
-		
-		Vector<Object> objects = constructs2Objects(constructs, ignore);
-		
-		for(Object arg : objects)
-		{
-			if(arg instanceof ClaimVariable)
-				rez = rez.concat(((ClaimVariable) arg).toString() + " ");
-			else
-				rez = rez.concat((String) arg + " ");
-		}
-		return rez;
-	}
-	
-	protected String constructsAndMaps(List<ClaimConstruct> constructs, HashMap<Integer, ClaimVariable> intToVariable,
-			int ignore)
-	{
-		String rez = new String("[");
-		
-		int no = 1;
-		Vector<Object> objects = constructs2Objects(constructs, ignore);
-		objects.remove(0);
-		
-		for(Object arg : objects)
-		{
-			if(st.containsSymbol(new ClaimVariable(arg.toString().substring(1))))
-				rez = rez + st.get(new ClaimVariable(arg.toString().substring(1))).getValue().toString() + " ";
-			else if(arg instanceof ClaimVariable)
-			{
-				intToVariable.put(no, (ClaimVariable) arg);
-				rez = rez.concat("?#" + no + " ");
-				no++;
-			}
-			else
-				rez = rez.concat((String) arg + " ");
-		}
-		rez = rez + "]";
-		return rez;
 	}
 	
 	/**
-	 * Get value of variable from the symbol table. First, search the variable in behavior's symbol table. If not found,
-	 * search in agent's symbol table
+	 * Convert a list of S-CLAIM constructs to Strings. The list must fulfill the requirements of
+	 * {@link #evaluateConstructs(List, int, KeepVariables)}, which is used in the implementation. No variables will be
+	 * kept. The strings are obtained by evaluating the constructs to S-CLAIM values and then calling
+	 * {@link Object#toString()} on the results of {@link ClaimValue#getValue()}.
+	 * <p>
+	 * <code>null</code> values (e.g. from unassigned variables) are translated to <code>null</code> elements, if
+	 * <code>transcribeNulls</code> is <code>false</code>, or to {@link ClaimValue#NULL_VALUE_OUTPUT} otherwise.
 	 * 
-	 * @param variable
-	 *            : the variable
-	 * @return : Value of variable if found; null otherwise
+	 * @param constructs
+	 *            - the constructs to evaluate.
+	 * @param ignore
+	 *            - number of leading constructs to ignore.
+	 * @param transcribeNulls
+	 *            - specifies if S-CLAIM values containing the <code>null</code> reference (e.g. from unassigned
+	 *            variables) should be left as <code>null</code> references or transcribed into String instances.
+	 * @return a list of {@link String} instances to which the constructs have been evaluated.
 	 */
-	protected ClaimValue getVariableValue(ClaimVariable variable)
+	protected Vector<String> constructs2Strings(List<ClaimConstruct> constructs, int ignore, boolean transcribeNulls)
 	{
-		ClaimValue value = null;
-		value = st.get(variable);
-		/*
-		 * if(value == null) value = this.cbd.getMyAgent().getSymbolTable().get(variable);
-		 */// not needed. The implementation of the symbol table already permits this
-		return value;
+		Vector<String> args = new Vector<String>();
+		for(Object arg : constructs2Objects(constructs, ignore))
+			if(arg != null)
+				args.add(arg.toString());
+			else
+				args.add(transcribeNulls ? ClaimValue.NULL_VALUE_OUTPUT : null);
+		return args;
 	}
+	
+	/**
+	 * Calls {@link #constructs2Strings(List, int)} and concatenates the result, with spaces ion between.
+	 * 
+	 * @param constructs
+	 *            - the list of constructs.
+	 * @param ignore
+	 *            - number of constructs to ignore.
+	 * @return a single string.
+	 */
+	protected String constructs2SingleString(List<ClaimConstruct> constructs, int ignore)
+	{
+		String rez = new String();
+		for(String str : constructs2Strings(constructs, ignore, true))
+			rez = rez.concat(str + " ");
+		if(rez.length() > 0)
+			rez = rez.substring(0, rez.length() - 1);
+		return rez;
+	}
+	
+	// TODO this appears to be used in the graph representation. investigate.
+	// protected String constructsAndMaps(List<ClaimConstruct> constructs, HashMap<Integer, ClaimVariable>
+	// intToVariable,
+	// int ignore)
+	// {
+	// String rez = new String("[");
+	//
+	// int no = 1;
+	// Vector<Object> objects = constructs2Objects(constructs, ignore);
+	// objects.remove(0);
+	//
+	// for(Object arg : objects)
+	// {
+	// if(st.containsSymbol(new ClaimVariable(arg.toString().substring(1))))
+	// rez = rez + st.get(new ClaimVariable(arg.toString().substring(1))).getValue().toString() + " ";
+	// else if(arg instanceof ClaimVariable)
+	// {
+	// intToVariable.put(no, (ClaimVariable) arg);
+	// rez = rez.concat("?#" + no + " ");
+	// no++;
+	// }
+	// else
+	// rez = rez.concat((String) arg + " ");
+	// }
+	// rez = rez + "]";
+	// return rez;
+	// }
+	
 }

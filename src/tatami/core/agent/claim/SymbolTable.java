@@ -129,7 +129,7 @@ public class SymbolTable implements Serializable
 			table.put(variable, value);
 		else
 		{
-			if(variable.isAssignable() || st.table.get(variable) == null)
+			if(variable.isReAssignable() || st.table.get(variable) == null)
 				st.table.put(variable, value);
 			else if(log != null)
 				log.error("Trying to bind the already bound variable " + variable.getName() + ". The old value: "

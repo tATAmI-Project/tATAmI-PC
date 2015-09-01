@@ -34,7 +34,7 @@ public class ClaimVariable extends ClaimConstruct
 	@Override
 	public String toString()
 	{
-		if (isAssignable())
+		if (isReAssignable())
 			return new String("??" + getName());
 		else
 			return new String("?" + getName());
@@ -44,7 +44,7 @@ public class ClaimVariable extends ClaimConstruct
 	@Override
 	public boolean equals(Object obj)
 	{
-		return (obj instanceof ClaimVariable) && name.equals(((ClaimVariable)obj).getName()) && isAffectable==((ClaimVariable)obj).isAssignable();
+		return (obj instanceof ClaimVariable) && name.equals(((ClaimVariable)obj).getName()) && isAffectable==((ClaimVariable)obj).isReAssignable();
 	}
 	
 	@Override
@@ -92,7 +92,7 @@ public class ClaimVariable extends ClaimConstruct
 	
 	
 	
-	public boolean isAssignable() {
+	public boolean isReAssignable() {
 		return isAffectable;
 	}
 
@@ -105,7 +105,7 @@ public class ClaimVariable extends ClaimConstruct
 	 */
 	public ClaimVariable getComplement()
 	{
-		ClaimVariable complement = new ClaimVariable(getName(), !isAssignable());
+		ClaimVariable complement = new ClaimVariable(getName(), !isReAssignable());
 		return complement;
 	}
 }
