@@ -1,0 +1,29 @@
+(agent AmILabClient ?server
+	(behavior
+		
+		 // add a default proximity
+		(initial default
+			(addK (struct knowledge proximity 999999))
+		)
+		
+		// update the proximity
+		(reactive update
+			(input @amilab updateProximity ?newProximity)
+			(removeK (struct knowledge proximity ?proximity))
+			(addK (struct knowledge proximity ?newProximity))
+		)
+		
+		// receive a request from the server 
+		(reactive request
+			(receive (struct message request))
+			(readK (struct knowledge proximity ?proximity))
+			(send ?server (struct message this ?proximity))
+		)
+		
+		// receive a CONFRIM or a DECLINE response
+		(reactive response
+			(receive (struct message ?response))
+			(output @amilab updateState ?response)
+		)
+	)
+)

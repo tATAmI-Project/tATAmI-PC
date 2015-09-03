@@ -1,4 +1,4 @@
-package scenario.amilab.app_demo;
+package scenario.amilab.utils;
 
 /**
  * Runnable that can be stopped.

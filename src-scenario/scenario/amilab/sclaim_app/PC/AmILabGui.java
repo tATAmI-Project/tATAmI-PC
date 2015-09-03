@@ -1,4 +1,4 @@
-package scenario.amilab.app_demo.PC;
+package scenario.amilab.sclaim_app.PC;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;

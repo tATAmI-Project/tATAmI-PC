@@ -1,4 +1,4 @@
-package scenario.amilab.app_demo;
+package scenario.amilab.sclaim_app;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -6,6 +6,7 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Vector;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -14,15 +15,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
-import scenario.amilab.app_demo.PC.AmILabGui;
+import scenario.amilab.sclaim_app.PC.AmILabGui;
 import scenario.amilab.utils.StoppableRunnable;
 import tatami.amilab.AmILabComponent;
-import tatami.amilab.AmILabComponent.AmILabDataType;
 import tatami.amilab.Perception;
-import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
-import tatami.core.agent.AgentEvent.AgentEventHandler;
-import tatami.core.agent.messaging.MessagingComponent;
+import tatami.core.agent.io.AgentIO;
 import tatami.core.agent.visualization.AgentGui;
 import tatami.core.agent.visualization.VisualizableComponent;
 
@@ -31,43 +29,38 @@ import tatami.core.agent.visualization.VisualizableComponent;
  * @author Claudiu-Mihai Toma
  *
  */
-public class AmILabClient extends AgentComponent
+public class AmILabClient extends AmILabComponent implements AgentIO
 {
 
 	/**
-	 * Serial UID.
+	 * The serial UID.
 	 */
-	private static final long serialVersionUID = -6787025838586743067L;
+	private static final long serialVersionUID = -7636346419364318356L;
 
 	/**
 	 * Proximity request message.
 	 */
-	public static final String PROXIMITY_REQUEST = "PROXIMITY_REQUEST";
+	public static final String PROXIMITY_REQUEST = "request";
+
+	/**
+	 * Proximity request message.
+	 */
+	public static final String UPDATE_PROXIMITY = "updateProximity";
 
 	/**
 	 * Confirmation message. This agent is the closest one.
 	 */
-	public static final String CONFIRM = "CONFIRM";
+	public static final String CONFIRM = "confirm";
 
 	/**
 	 * Decline message. This is not the closest agent.
 	 */
-	public static final String DECLINE = "DECLINE";
+	public static final String DECLINE = "decline";
 
 	/**
-	 * AmILab path element.
+	 * Proximity request message.
 	 */
-	public static final String AMILAB_PATH_ELEMENT = "amilab";
-
-	/**
-	 * Client path element.
-	 */
-	public static final String CLIENT_PATH_ELEMENT = "client";
-
-	/**
-	 * Server path element.
-	 */
-	public static final String SERVER_PATH_ELEMENT = "server";
+	public static final String UPDATE_STATE = "updateState";
 
 	/**
 	 * A happy face XD
@@ -77,18 +70,7 @@ public class AmILabClient extends AgentComponent
 	/**
 	 * A sad face :(
 	 */
-	// public static final String SAD_FACE = "images/sad_face.ico";
-	// public static final String SAD_FACE = "images/sad_face.jpeg";
-	// public static final String SAD_FACE = "images/sad_face.png";
 	public static final String SAD_FACE = "images/sad_face.jpg";
-
-	/**
-	 * Default constructor.
-	 */
-	public AmILabClient()
-	{
-		super(AgentComponentName.TESTING_COMPONENT);
-	}
 
 	/**
 	 * State of the simulation.
@@ -136,11 +118,6 @@ public class AmILabClient extends AgentComponent
 	protected Thread proximityUpdaterThread;
 
 	/**
-	 * Reference to the {@link AmILabComponent}.
-	 */
-	protected AmILabComponent amilab;
-
-	/**
 	 * Runnable that does all the logic
 	 */
 	protected StoppableRunnable clientRunnable;
@@ -149,51 +126,6 @@ public class AmILabClient extends AgentComponent
 	 * Thread that runs the server runnable.
 	 */
 	protected Thread clientThread;
-
-	/**
-	 * Getter for the {@link AmILabComponent}.
-	 * 
-	 * @return reference to the {@link AmILabComponent}
-	 */
-	public AmILabComponent getAmILabComponent()
-	{
-		return amilab;
-	}
-
-	/**
-	 * Register a message handler for a client.
-	 */
-	protected void registerClientMessanger()
-	{
-		registerMessageReceiver(new AgentEventHandler()
-		{
-			@Override
-			public void handleEvent(AgentEvent event)
-			{
-				String content = (String) event.getParameter(MessagingComponent.CONTENT_PARAMETER);
-
-				getAgentLog().info("Client received []", content);
-
-				if (content.equals(PROXIMITY_REQUEST))
-				{
-					sendReply(Long.toString(proximity), event);
-					getAgentLog().info("Client sent []", Long.toString(proximity));
-					return;
-				}
-				if (content.equals(CONFIRM))
-				{
-					active = true;
-					return;
-				}
-				if (content.equals(DECLINE))
-				{
-					active = false;
-					return;
-				}
-
-			}
-		}, AMILAB_PATH_ELEMENT, CLIENT_PATH_ELEMENT);
-	}
 
 	/**
 	 * Gets the visualizable component of this agent.
@@ -285,7 +217,7 @@ public class AmILabClient extends AgentComponent
 
 				while (!stopFlag)
 				{
-					perception = getAmILabComponent().get(AmILabDataType.SKELETON);
+					perception = get(AmILabDataType.SKELETON);
 
 					try
 					{
@@ -385,11 +317,10 @@ public class AmILabClient extends AgentComponent
 	{
 		super.atSimulationStart(event);
 
-		amilab = (AmILabComponent) getAgentComponent(AgentComponentName.AMILAB_COMPONENT);
 		gui = getGui();
 		label = gui.getLabel();
 
-		registerClientMessanger();
+		startInternalBuffer();
 		proximityUpdaterThread.start();
 		clientThread.start();
 	}
@@ -404,32 +335,27 @@ public class AmILabClient extends AgentComponent
 	}
 
 	@Override
-	protected boolean sendReply(String content, AgentEvent replyTo)
+	public Vector<Object> getInput(String portName)
 	{
-		return super.sendReply(content, replyTo);
+		if (!portName.equals(UPDATE_PROXIMITY))
+			return null;
+		Vector<Object> ret = new Vector<Object>();
+		ret.addElement(new Long(proximity));
+		return ret;
 	}
 
 	@Override
-	protected boolean sendMessageToEndpoint(String content, String sourceEndpoint, String targetEndpoint)
+	public void doOutput(String portName, Vector<Object> arguments)
 	{
-		return super.sendMessageToEndpoint(content, sourceEndpoint, targetEndpoint);
+		if (!portName.equals(UPDATE_STATE))
+			return;
+
+		String state = (String) arguments.get(0);
+
+		if (state.equals(CONFIRM))
+			active = true;
+		if (state.equals(DECLINE))
+			active = false;
 	}
 
-	@Override
-	protected AgentComponent getAgentComponent(AgentComponentName name)
-	{
-		return super.getAgentComponent(name);
-	}
-
-	@Override
-	protected void postAgentEvent(AgentEvent event)
-	{
-		super.postAgentEvent(event);
-	}
-
-	@Override
-	protected Logger getAgentLog()
-	{
-		return super.getAgentLog();
-	}
 }

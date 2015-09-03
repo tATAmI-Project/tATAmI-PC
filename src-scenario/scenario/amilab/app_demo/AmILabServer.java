@@ -9,6 +9,7 @@ import java.util.Set;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
+import scenario.amilab.utils.StoppableRunnable;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.messaging.MessagingComponent;
