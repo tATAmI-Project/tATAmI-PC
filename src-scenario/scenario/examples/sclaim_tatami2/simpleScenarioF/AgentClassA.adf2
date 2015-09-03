@@ -3,7 +3,7 @@
 		(initial register
 			(input @testing theinput check ?value)
 			(print received ?value)
-			(output @testing theoutput "the value is" ?value "the end")
+			(output @testing theoutput the_value_is ?value the_end)
 		)
 	)
 )
