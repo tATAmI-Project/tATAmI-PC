@@ -26,12 +26,15 @@ import net.xqhs.util.logging.LoggerSimple;
 import net.xqhs.util.logging.Unit;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventType;
+import tatami.core.agent.io.AgentActiveIO;
+import tatami.core.agent.io.AgentIO;
 import tatami.core.agent.kb.KnowledgeBase;
 import tatami.core.agent.kb.KnowledgeBase.KnowledgeDescription;
 import tatami.core.agent.kb.simple.SimpleKnowledge;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
+import tatami.sclaim.constructs.basic.ClaimBehaviorType;
 import tatami.sclaim.constructs.basic.ClaimCondition;
 import tatami.sclaim.constructs.basic.ClaimConstruct;
 import tatami.sclaim.constructs.basic.ClaimConstructType;
@@ -91,7 +94,7 @@ import tatami.sclaim.constructs.basic.ClaimWhile;
  * @author Nguyen Thi Thuy Nga
  * @author Marius-Tudor Benea
  * @author Andrei Olaru
- * 
+ * 		
  */
 public class ClaimBehavior
 {
@@ -141,16 +144,21 @@ public class ClaimBehavior
 	 * The {@link Logger} instance to use. It will never be <code>null</code>, though it may fall back to a
 	 * {@link DumbLogger}.
 	 */
-	protected transient Logger			log					= null;
+	protected transient Logger			log							= null;
 	/**
 	 * Information about how the behavior was activated. For future use, more activation records may be present.
 	 * Currently, only one is used.
 	 */
-	protected AgentEvent				activationEvent		= null;
+	protected AgentEvent				activationEvent				= null;
 	/**
 	 * Is <code>true</code> while the execution of the behavior is in its activation part, before beginning the body.
 	 */
 	protected boolean					activating;
+	/**
+	 * The prefix added to the first argument in an input/output construct that indicates that input/output should be
+	 * taken from an agent component that implements {@link AgentIO} or {@link AgentActiveIO}.
+	 */
+	public static final String			IO_COMPONENT_NAME_PREFIX	= "@";
 	// ============= What follows are elements for tracing and debugging, especially the trace() method.
 	/**
 	 * The number (index) of the statement currently being processed. This should only be used for debugging.
@@ -160,34 +168,34 @@ public class ClaimBehavior
 	 * If <code>true</code>, the tracing messages in the behavior will be buffered and the entire buffer (
 	 * {@link #logBuffer} displayed at the end.
 	 */
-	protected boolean					bufferLog			= true;
+	protected boolean					bufferLog					= false;
 	/**
 	 * The buffer to hold the tracing messages.
 	 */
-	protected String					logBuffer			= null;
+	protected String					logBuffer					= null;
 	
 	/**
 	 * The list of agent names that should be debugged (output tracing messages), if {@link #debugAllAgents} is set to
 	 * <code>false</code>.
 	 */
-	static final protected String[]		debuggedAgents		= new String[] {};
+	static final protected String[]	debuggedAgents		= new String[] {};
 	/**
 	 * If true, all agents will be traced, regardless of the value of {@link #debuggedAgents}.
 	 */
-	static final protected boolean		debugAllAgents		= true;
+	static final protected boolean	debugAllAgents		= true;
 	/**
 	 * The list of behavior names that should be debugged (output tracing messages), if {@link #debugAllAgents} is set
 	 * to <code>false</code>.
 	 */
-	static final protected String[]		debuggedBehaviors	= new String[] {};
+	static final protected String[]	debuggedBehaviors	= new String[] {};
 	/**
 	 * If true, all behaviors will be traced, regardless of the value of {@link #debuggedBehaviors}.
 	 */
-	static final protected boolean		debugAllBehaviors	= true;
+	static final protected boolean	debugAllBehaviors	= true;
 	/**
 	 * The value is computed at the creation of the behavior to know if the behavior should be traced or not.
 	 */
-	protected boolean					isDebugging;
+	protected boolean				isDebugging;
 	
 	/**
 	 * Creates an instance that manages the execution of a claim behavior, as described by its definition.
@@ -290,7 +298,7 @@ public class ClaimBehavior
 		// deal with the rest of the objects
 		for(int i = parts.length - 1; i < objects.length; i++)
 			ret += LoggerSimple.ARGUMENT_BEGIN + objects[i] + LoggerSimple.ARGUMENT_END;
-		
+			
 		return ret;
 	}
 	
@@ -351,10 +359,13 @@ public class ClaimBehavior
 		
 		for(ClaimConstruct statement : cbd.getStatements())
 		{ // the behavior stops whenever a statement returns false (for statements that are not nested)
-			if(!((statement.getType() == ClaimConstructType.CONDITION) || ((statement.getType() == ClaimConstructType.FUNCTION_CALL) && ((((ClaimFunctionCall) statement)
-					.getFunctionType() == ClaimFunctionType.RECEIVE) || (((ClaimFunctionCall) statement)
-					.getFunctionType() == ClaimFunctionType.INPUT)))))
+			if(!((statement.getType() == ClaimConstructType.CONDITION) || ((statement
+					.getType() == ClaimConstructType.FUNCTION_CALL)
+					&& ((((ClaimFunctionCall) statement).getFunctionType() == ClaimFunctionType.RECEIVE)
+							|| (((ClaimFunctionCall) statement).getFunctionType() == ClaimFunctionType.INPUT)))))
 				activating = false; // move into behavior body
+			if(cbd.getBehaviorType() == ClaimBehaviorType.INITIAL)
+				activating = false;
 				
 			if(!handleStatement(statement))
 			{ // stop behavior and exit execution
@@ -373,8 +384,8 @@ public class ClaimBehavior
 				log.warn("\t\t\t SCLAIM:[] [] behavior terminated (statement failure) at statement [].", cbd.getName(),
 						logBuffer, new Integer(currentStatement));
 			else
-				log.warn("behavior [] terminated (statement failure) at statement [].", cbd.getName(), new Integer(
-						currentStatement));
+				log.warn("behavior [] terminated (statement failure) at statement [].", cbd.getName(),
+						new Integer(currentStatement));
 		else if(bufferLog)
 			putLog(activating);
 	}
@@ -695,12 +706,12 @@ public class ClaimBehavior
 		
 		if(received == null)
 			return false;
-		
+			
 		ClaimStructure toBind = (ClaimStructure) args.get(args.size() - 1); // the last part is the message
 		
 		if(!readValues(received.getFields(), toBind.getFields(), 0))
 		{ // the message does not match the pattern
-		
+			
 			trace("message [] not matching pattern []", content, toBind);
 			return false;
 		}
@@ -724,6 +735,10 @@ public class ClaimBehavior
 	 * <p>
 	 * The difference between active and passive inputs is done by looking if the behavior has been activated by an
 	 * input. If it has, and we are in the activation part of the behavior, then the input is active.
+	 * <p>
+	 * If the first argument of the construct begins with {@value #IO_COMPONENT_NAME_PREFIX}, it will be considered as a
+	 * component name to get input from (normally input is retrieved from the <code>VisualizableComponent</code>. The
+	 * component must implement {@link AgentIO}. The rest of the arguments will be considered normally.
 	 * 
 	 * @param args
 	 *            - elements in the <code>input</code> construct.
@@ -735,19 +750,29 @@ public class ClaimBehavior
 	{
 		Vector<Object> receivedInput;
 		
-		// get input component
+		String IOcomponent = null;
 		ClaimConstruct arg0 = args.get(0);
+		if((arg0.getType() == ClaimConstructType.VALUE)
+				&& ((ClaimValue) arg0).toString().startsWith(IO_COMPONENT_NAME_PREFIX))
+		{
+			IOcomponent = ((ClaimValue) arg0).toString().substring(1);
+			args.remove(0);
+		}
+		
+		// get input component
+		arg0 = args.get(0);
 		String inputComponent = ((arg0.getType() == ClaimConstructType.VARIABLE) ? st.get((ClaimVariable) arg0)
 				: (ClaimValue) arg0).toString();
-		
+				
 		// get the input
 		if(activating)
 		{
 			// input is active / the behavior is input-activated
 			if(activationEvent.getType() != AgentEventType.GUI_INPUT)
-				throw new IllegalStateException("input cannot be in activation area if behavior is not input-activated");
-			if(activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME).equals(
-					inputComponent))
+				throw new IllegalStateException(
+						"input cannot be in activation area if behavior is not input-activated");
+			if(activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME)
+					.equals(inputComponent))
 				receivedInput = (Vector<Object>) activationEvent
 						.getParameter(VisualizableComponent.GUI_ARGUMENTS_EVENT_PARAMETER_NAME);
 			else
@@ -759,20 +784,30 @@ public class ClaimBehavior
 		}
 		else
 			// input is passive
-			receivedInput = claimComponent.getVisualizable().inputFromGUI(inputComponent);
+			receivedInput = claimComponent.inputFromIO(IOcomponent, inputComponent);
+			
+		if(receivedInput == null)
+		{
+			log.error("Received input from []:[] was null.", IOcomponent == null ? "GUI" : IOcomponent, inputComponent);
+			return false;
+		}
 		
 		// must copy values from source (activated / read input) into destination (input construct elements)
-		
 		Vector<ClaimConstruct> sourceArgs = objects2values(receivedInput);
 		Vector<ClaimConstruct> destinationArgs = new Vector<ClaimConstruct>(args);
 		destinationArgs.remove(0); // this is the name of the component
 		
-		trace("reading input from [] to []", sourceArgs, destinationArgs);
+		trace("reading input from []:[] : [] to []", IOcomponent == null ? "GUI" : IOcomponent, inputComponent,
+				sourceArgs, destinationArgs);
 		return readValues(sourceArgs, destinationArgs);
 	}
 	
 	/**
-	 * The constructs outputs to the GUI.
+	 * The construct outputs to an output port.
+	 * <p>
+	 * If the first argument of the construct begins with {@value #IO_COMPONENT_NAME_PREFIX}, it will be considered as a
+	 * component name to put output to (normally output is sent to the <code>VisualizableComponent</code>. The
+	 * component must implement {@link AgentIO}. The rest of the arguments will be considered normally.
 	 * 
 	 * @param args
 	 *            - elements in the <code>input</code> construct.
@@ -780,10 +815,20 @@ public class ClaimBehavior
 	 */
 	protected boolean handleOutput(Vector<ClaimConstruct> args)
 	{
+		String IOcomponent = null;
+		ClaimConstruct arg0 = args.get(0);
+		if((arg0.getType() == ClaimConstructType.VALUE)
+				&& ((ClaimValue) arg0).toString().startsWith(IO_COMPONENT_NAME_PREFIX))
+		{
+			IOcomponent = ((ClaimValue) arg0).toString().substring(1);
+			args.remove(0);
+		}
+		
 		String outputComponent = (String) ((ClaimValue) args.get(0)).getValue();
 		Vector<Object> outputV = constructs2Objects(args, 1); // get all but the component name
-		claimComponent.getVisualizable().outputToGUI(outputComponent, outputV);
-		trace("output [] was written on []", outputV, outputComponent);
+		
+		claimComponent.outputToIO(IOcomponent, outputComponent, outputV);
+		trace("output [] was written on []:[]", outputV, IOcomponent == null ? "GUI" : IOcomponent, outputComponent);
 		return true;
 	}
 	
@@ -885,7 +930,7 @@ public class ClaimBehavior
 				trace("added new knowledge [].", k.getTextRepresentation());
 			else
 				trace("adding knowledge [] had no effect.", k.getTextRepresentation());
-			
+				
 			return true;
 		}
 		case READK:
@@ -950,7 +995,7 @@ public class ClaimBehavior
 				log.error("The variable [] is not assigned, nor re-assignable", c);
 				return false;
 			}
-		
+			
 		// get all possible matches
 		// FIXME: support other types of knowledge, other than SimpleKnowledge.
 		Collection<KnowledgeDescription> knowledge = claimComponent.getKBase().getAll(structure2Knowledge(kStruct));
@@ -1043,9 +1088,9 @@ public class ClaimBehavior
 		}
 		
 		boolean returnValue = false;
-		Vector<ClaimConstruct> arguments = new Vector<ClaimConstruct>(evaluateConstructs(args, 0,
-				KeepVariables.KEEP_NONE));
-		
+		Vector<ClaimConstruct> arguments = new Vector<ClaimConstruct>(
+				evaluateConstructs(args, 0, KeepVariables.KEEP_NONE));
+				
 		trace("invoking code attachment function [] with arguments: []", functionName, arguments);
 		try
 		{
@@ -1096,16 +1141,17 @@ public class ClaimBehavior
 			return false;
 		}
 		
-		if(!((destType == ClaimConstructType.VALUE || destType == ClaimConstructType.VARIABLE) && (sourceType == ClaimConstructType.VALUE || sourceType == ClaimConstructType.VARIABLE)))
+		if(!((destType == ClaimConstructType.VALUE || destType == ClaimConstructType.VARIABLE)
+				&& (sourceType == ClaimConstructType.VALUE || sourceType == ClaimConstructType.VARIABLE)))
 			return false;
-		
+			
 		ClaimValue destValue = (destType == ClaimConstructType.VALUE) ? (ClaimValue) destField
 				: getVariableValue((ClaimVariable) destField);
 		ClaimValue sourceValue = (sourceType == ClaimConstructType.VALUE) ? (ClaimValue) sourceField
 				: getVariableValue((ClaimVariable) sourceField);
 		boolean assignable = (destType == ClaimConstructType.VARIABLE)
 				&& ((destValue == null) || ((ClaimVariable) destField).isReAssignable());
-		
+				
 		if(assignable)
 		{
 			if((sourceValue != null) && ((destValue == null) || !destValue.getValue().equals(sourceValue.getValue())))
@@ -1314,7 +1360,7 @@ public class ClaimBehavior
 	 *            : number of leading constructs to ignore (e.g. 'knowledge', 'message', etc).
 	 * @param keepVariables
 	 *            : what variables to keep (see {@link #evaluateConstruct(ClaimConstruct, KeepVariables)}.
-	 * 
+	 * 			
 	 * @return the values of the constructs or sometimes variables. <code>null</code> is returned if the evaluation of
 	 *         any of the constructs fails.
 	 */

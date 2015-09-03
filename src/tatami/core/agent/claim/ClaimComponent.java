@@ -21,6 +21,7 @@ import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
+import tatami.core.agent.io.AgentIO;
 import tatami.core.agent.kb.CognitiveComponent;
 import tatami.core.agent.kb.KnowledgeBase;
 import tatami.core.agent.parametric.AgentParameterName;
@@ -246,17 +247,82 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	}
 	
 	/**
-	 * The method should only be used when GUI events have been received or it is otherwise sure there is one such
-	 * component.
+	 * Retrieves (passive) input from a component that is either the {@link VisualizableComponent} (if the first
+	 * argument is null) or a component implementing {@link AgentIO}, searching by the name given in the first argument.
 	 * 
-	 * @return the {@link VisualizableComponent} of this agent.
+	 * @param IOcomponent
+	 *            - the name of the component, or <code>null</code> for the {@link VisualizableComponent}.
+	 * @param portName
+	 *            - the name of the port.
+	 * @return the values read from the input.
 	 */
-	protected VisualizableComponent getVisualizable()
+	protected Vector<Object> inputFromIO(String IOcomponent, String portName)
 	{
-		AgentComponent ret = getAgentComponent(AgentComponentName.VISUALIZABLE_COMPONENT);
-		if(ret == null)
-			throw new IllegalStateException("No vis component");
-		return (VisualizableComponent) ret;
+		return performIO(IOcomponent, portName, false, null);
+	}
+	
+	/**
+	 * Sends output to a component that is either the {@link VisualizableComponent} (if the first argument is null) or a
+	 * component implementing {@link AgentIO}, searching by the name given in the first argument.
+	 * 
+	 * @param IOcomponent
+	 *            - the name of the component, or <code>null</code> for the {@link VisualizableComponent}.
+	 * @param portName
+	 *            - the name of the port.
+	 * @param outputArgs
+	 *            - the values to write to output.
+	 */
+	protected void outputToIO(String IOcomponent, String portName, Vector<Object> outputArgs)
+	{
+		performIO(IOcomponent, portName, true, outputArgs);
+	}
+	
+	/**
+	 * <b>This method should only be used by {@link ClaimComponent} or extending classes internally.</b>
+	 * 
+	 * @param IOcomponent
+	 *            - the name of the component, or <code>null</code> for the {@link VisualizableComponent}.
+	 * @param portName
+	 *            - the name of the port.
+	 * @param isOutput
+	 *            - if <code>true</code>, the method will perform output and use the last argument. Otherwise, it will
+	 *            perform passive input.
+	 * @param outputArgs
+	 *            - arguments to output (if the case).
+	 * 			
+	 * @return the values read from input. <code>null</code> is returned if output was performed, or if an error
+	 *         occurred during input.
+	 */
+	protected Vector<Object> performIO(String IOcomponent, String portName, boolean isOutput, Vector<Object> outputArgs)
+	{
+		AgentComponent comp = null;
+		if(IOcomponent == null)
+			comp = getAgentComponent(AgentComponentName.VISUALIZABLE_COMPONENT);
+		else
+			comp = getAgentComponent(AgentComponentName.toComponentName(IOcomponent));
+		if(comp == null)
+		{
+			getAgentLog().error("Component [] not found.", IOcomponent == null ? "visualizable" : IOcomponent);
+			return null;
+		}
+		if(IOcomponent == null)
+		{
+			if(!isOutput)
+				return ((VisualizableComponent) comp).inputFromGUI(portName);
+			((VisualizableComponent) comp).outputToGUI(portName, outputArgs);
+			return null;
+		}
+		
+		if(!(comp instanceof AgentIO))
+		{
+			getAgentLog().error("Component [] not AgentIO.", IOcomponent);
+			return null;
+		}
+		
+		if(!isOutput)
+			return ((AgentIO) comp).getInput(portName);
+		((AgentIO) comp).doOutput(portName, outputArgs);
+		return null;
 	}
 	
 	@Override

@@ -26,12 +26,12 @@ import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.CompositeAgent;
+import tatami.core.agent.io.AgentActiveIO.InputListener;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.movement.MovementComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.AgentGui.DefaultComponent;
-import tatami.core.agent.visualization.AgentGui.InputListener;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
