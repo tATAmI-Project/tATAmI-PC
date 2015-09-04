@@ -521,17 +521,22 @@ public class AmILabComponent extends AgentComponent
 	}
 
 	@Override
-	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
+	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, List<String> agentPackages,
+			Logger log)
 	{
-		if (!super.preload(parameters, scenarioNode, log))
+		if (!super.preload(parameters, scenarioNode, agentPackages, log))
 			return false;
 
 		try
 		{
 			kestrelQueueName = getComponentData().get(QUEUE_NAME);
+			String kestrelIp = getComponentData().get(IP);
+			int kestrelPort = Integer.parseInt(getComponentData().get(PORT));
+
+			log.trace("Kestrel params", kestrelQueueName, kestrelIp, new Integer(kestrelPort));
+
 			// Set up connection.
-			kestrelClient = new SimpleKestrelClient(getComponentData().get(IP),
-					Integer.parseInt(getComponentData().get(PORT)));
+			kestrelClient = new SimpleKestrelClient(kestrelIp, kestrelPort);
 			// Test connection.
 			kestrelClient.peek(kestrelQueueName);
 		} catch (Exception e)

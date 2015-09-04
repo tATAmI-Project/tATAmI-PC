@@ -38,6 +38,6 @@ public class SclaimFunctions implements ClaimFunctionLibrary
 			arguments.set(3, new ClaimValue(proximity));
 		}
 
-		return false;
+		return true;
 	}
 }

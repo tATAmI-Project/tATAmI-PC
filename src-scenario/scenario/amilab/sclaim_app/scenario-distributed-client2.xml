@@ -40,8 +40,6 @@
 			
 				<scen:component name="s_claim">
 					<scen:parameter name="class" value="AmILabClient" />
-					<scen:parameter name="java-code" value="SclaimFunctions" />
-					<scen:parameter name="server" value="Master_Server" />
 				</scen:component>
 			
 				<scen:parameter name="loader" value="composite" />

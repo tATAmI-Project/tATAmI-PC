@@ -43,9 +43,14 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	public static final String PROXIMITY_REQUEST = "request";
 
 	/**
-	 * Proximity request message.
+	 * Get proximity message.
 	 */
-	public static final String UPDATE_PROXIMITY = "updateProximity";
+	public static final String GET_PROXIMITY = "getProximity";
+
+	/**
+	 * Max value for proximity.
+	 */
+	public static final long MAX_PROXIMITY = 999999;
 
 	/**
 	 * Confirmation message. This agent is the closest one.
@@ -58,9 +63,9 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	public static final String DECLINE = "decline";
 
 	/**
-	 * Proximity request message.
+	 * Update status message.
 	 */
-	public static final String UPDATE_STATE = "updateState";
+	public static final String UPDATE_STATUS = "updateStatus";
 
 	/**
 	 * A happy face XD
@@ -78,7 +83,7 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	protected boolean simulationIsOn;
 
 	/**
-	 * State of this component. {@code true} if this component must do stuff.
+	 * Status of this component. {@code true} if this component has the smallest proximity.
 	 */
 	protected boolean active;
 
@@ -196,7 +201,7 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 			return false;
 
 		active = false;
-		proximity = Long.MAX_VALUE;
+		proximity = MAX_PROXIMITY;
 
 		proximityUpdater = new StoppableRunnable()
 		{
@@ -337,20 +342,25 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	@Override
 	public Vector<Object> getInput(String portName)
 	{
-		if (!portName.equals(UPDATE_PROXIMITY))
+		if (!portName.equals(GET_PROXIMITY))
 			return null;
 		Vector<Object> ret = new Vector<Object>();
 		ret.addElement(new Long(proximity));
+		
+		getAgentLog().trace("Get proximity ", new Long(proximity));
+		
 		return ret;
 	}
 
 	@Override
 	public void doOutput(String portName, Vector<Object> arguments)
 	{
-		if (!portName.equals(UPDATE_STATE))
+		if (!portName.equals(UPDATE_STATUS))
 			return;
 
 		String state = (String) arguments.get(0);
+		
+		getAgentLog().trace("Got response ", state);
 
 		if (state.equals(CONFIRM))
 			active = true;

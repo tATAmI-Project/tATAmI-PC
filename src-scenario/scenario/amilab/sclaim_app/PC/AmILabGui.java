@@ -1,5 +1,8 @@
 package scenario.amilab.sclaim_app.PC;
 
+import java.awt.Label;
+import java.util.Vector;
+
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
@@ -23,11 +26,16 @@ public class AmILabGui extends PCDefaultAgentGui
 	 * Name of the main label.
 	 */
 	public static final String MAIN_LABEL = "main_label";
-	
+
 	/**
 	 * The type of the window, to be given to WindowLayout.
 	 */
 	public static final String WINDOW_TYPE = "amilab-gui";
+
+	/**
+	 * Request message.
+	 */
+	public static final String REQUEST = "request";
 
 	/**
 	 * Creates and configures the GUI.
@@ -38,6 +46,7 @@ public class AmILabGui extends PCDefaultAgentGui
 	public AmILabGui(AgentGuiConfig configuration)
 	{
 		super(configuration);
+		addComponent(REQUEST, new Label());
 	}
 
 	@Override
@@ -57,8 +66,8 @@ public class AmILabGui extends PCDefaultAgentGui
 	{
 		// WindowParameters protected constructors. How to set my custom dimensions?
 
-		// Without the super call the windows does not have a name
-		 super.placeWindow();
+		// Without the super call the window does not have a name
+		super.placeWindow();
 	}
 
 	/**
@@ -69,5 +78,13 @@ public class AmILabGui extends PCDefaultAgentGui
 	public JLabel getLabel()
 	{
 		return label;
+	}
+
+	/**
+	 * Sends requests to all the clients.
+	 */
+	public void sendRequests()
+	{
+		inputConnections.get(REQUEST).receiveInput(REQUEST, new Vector<Object>());
 	}
 }

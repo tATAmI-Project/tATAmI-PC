@@ -33,17 +33,19 @@
 				<scen:component name="messaging" />
 			
 				<scen:component name="amilab" classpath="scenario.amilab.sclaim_app.AmILabClient">
-					<scen:parameter name="IP" value="ami-crunch-08.local" />
+					<scen:parameter name="IP" value="127.0.0.1" />
 					<scen:parameter name="port" value="22133" />
 					<scen:parameter name="queue-name" value="measurements" />
 				</scen:component>
 			
+				<scen:component name="cognitive" />
+				
 				<scen:component name="s_claim">
 					<scen:parameter name="class" value="AmILabClient" />
 				</scen:component>
 			
 				<scen:parameter name="loader" value="composite" />
-				<scen:parameter name="name" value="Client-1" />
+				<scen:parameter name="name" value="Local_Client" />
 			</scen:agent>
 		</scen:container>
 	</scen:initial>
