@@ -38,6 +38,8 @@
 					<scen:parameter name="queue-name" value="measurements" />
 				</scen:component>
 			
+				<scen:component name="cognitive" />
+				
 				<scen:component name="s_claim">
 					<scen:parameter name="class" value="AmILabClient" />
 				</scen:component>

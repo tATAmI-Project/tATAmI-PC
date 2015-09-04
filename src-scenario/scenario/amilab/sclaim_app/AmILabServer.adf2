@@ -1,13 +1,14 @@
-(agent AmILabServer ?client1 //?client2 ?client3
+(agent AmILabServer ?client1 ?default //?client2 ?client3
 	(behavior
 	
 		// add all the clients to kb
 		(initial register
 		
 			// add all clients with a default proximity
-			(addK (struct knowledge client ?client1 999999))
-			//(addK (struct knowledge client ?client2 999999))
-			//(addK (struct knowledge client ?client3 999999))
+			(addK (struct knowledge client ?client1 ?default))
+			//(addK (struct knowledge client ?client2 ?default))
+			//(addK (struct knowledge client ?client3 ?default))
+			(print this added_clients)
 		)
 		
 		// send requests for proximity to all clients
@@ -15,6 +16,9 @@
 		
 			// something tells the server to send requests
 			(input @visualizable request)
+			
+			(print this send_requests)
+			
 			(forAllK (struct knowledge client ?client ?proximity)
 				(send ?client (struct message request this))
 			)
@@ -37,7 +41,7 @@
 			(removeK (struct knowledge client ??closestClient ??smallestProximity))
 			
 			// tell the closest client the good news
-			(send ??closescClient (struct message response confirm))
+			(send ??closestClient (struct message response confirm))
 			
 			// tell all the other clients the bad news
 			(forAllK (struct knowledge client ?client ?proximity)

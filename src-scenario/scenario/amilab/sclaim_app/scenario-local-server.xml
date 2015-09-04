@@ -33,9 +33,9 @@
 				<scen:component name="messaging" />
 			
 				<scen:component name="amilab" classpath="scenario.amilab.sclaim_app.AmILabServer">
-					<scen:parameter name="IP" value="127.0.0.1" />
+					<scen:parameter name="IP" value="ami-crunch-08.local" />
 					<scen:parameter name="port" value="22133" />
-					<scen:parameter name="queue-name" value="measurements" />
+					<scen:parameter name="queue-name" value="tatami" />
 				</scen:component>
 			
 				<scen:component name="cognitive" />
@@ -44,6 +44,7 @@
 					<scen:parameter name="class" value="AmILabServer" />
 					<scen:parameter name="java-code" value="SclaimFunctions" />
 					<scen:parameter name="client1" value="Local_Client" />
+					<scen:parameter name="default" value="1000000" />
 				</scen:component>
 			
 				<scen:parameter name="loader" value="composite" />

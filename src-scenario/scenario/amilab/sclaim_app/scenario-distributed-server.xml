@@ -38,16 +38,18 @@
 					<scen:parameter name="queue-name" value="measurements" />
 				</scen:component>
 			
+				<scen:component name="cognitive" />
+				
 				<scen:component name="s_claim">
 					<scen:parameter name="class" value="AmILabServer" />
 					<scen:parameter name="java-code" value="SclaimFunctions" />
 					<scen:parameter name="client1" value="Client-1" />
 					<scen:parameter name="client2" value="Client-2" />
-					<scen:parameter name="client3" value="Master_Server" />
+					<scen:parameter name="default" value="1000000" />
 				</scen:component>
 			
 				<scen:parameter name="loader" value="composite" />
-				<scen:parameter name="name" value="Master_Server" />
+				<scen:parameter name="name" value="Master-Server" />
 			</scen:agent>
 		</scen:container>
 	</scen:initial>

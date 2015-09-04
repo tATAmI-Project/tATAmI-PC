@@ -24,18 +24,18 @@ public class SclaimFunctions implements ClaimFunctionLibrary
 	public static boolean bestClient(Vector<ClaimValue> arguments)
 	{
 		// Extract proximities.
-		Long proximity = (Long) arguments.get(1).getValue();
-		Long smallestProximity = (Long) arguments.get(3).getValue();
+		long proximity = Long.parseLong((String) arguments.get(1).getValue());
+		long smallestProximity = Long.parseLong((String) arguments.get(3).getValue());
 
 		// Check if the smallest proximity is still the smallest.
-		if (proximity.longValue() < smallestProximity.longValue())
+		if (proximity < smallestProximity)
 		{
 			// Extract the name of the new best client.
 			String client = (String) arguments.get(0).getValue();
 
 			// Update the values for the best client.
 			arguments.set(2, new ClaimValue(client));
-			arguments.set(3, new ClaimValue(proximity));
+			arguments.set(3, new ClaimValue(new Long(proximity)));
 		}
 
 		return true;

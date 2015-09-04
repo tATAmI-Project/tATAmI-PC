@@ -267,7 +267,7 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 				} catch (Exception e)
 				{
 					e.printStackTrace();
-					return -1;
+					return MAX_PROXIMITY;
 				}
 			}
 

@@ -6,9 +6,6 @@
 			// receive a request from the server 
 			(receive (struct message request ?server))
 			
-			// quick fix
-			(print getting something)
-			
 			// get the current proximity
 			(input @amilab getProximity ?proximity)
 			

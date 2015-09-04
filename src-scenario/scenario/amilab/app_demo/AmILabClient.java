@@ -319,6 +319,8 @@ public class AmILabClient extends AgentComponent
 				try
 				{
 					parsedJson = new ObjectMapper().readValue(perception.getData(), HashMap.class);
+					String daq = (String) parsedJson.get("sensor_id");
+					System.out.println("%%%%%%%%%%%%%%%%%%%%% " + daq);
 					HashMap<?, ?> skeleton = (HashMap<?, ?>) parsedJson.get("skeleton_3D");
 					HashMap<?, ?> torso = (HashMap<?, ?>) skeleton.get("torso");
 					double newProximity = ((Double) torso.get("Z")).doubleValue();

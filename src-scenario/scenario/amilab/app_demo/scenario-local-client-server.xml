@@ -18,16 +18,20 @@
 		<scen:parameter name="name" value="local" />
 	</scen:platform>
 
+	<scen:agentPackage>scenario.amilab.app_demo</scen:agentPackage>
+
 	<scen:initial>
 		<scen:container name="Container">
 			<scen:agent>
 				<scen:component name="parametric" />
-				<scen:component name="visualizable" />
+				<scen:component name="visualizable" >
+					<scen:parameter name="GUI" value="AmILabGui"/>
+				</scen:component>
 				<scen:component name="messaging" />
 				<scen:component name="amilab" >
 					<scen:parameter name="IP" value="ami-crunch-08.local" />
 					<scen:parameter name="port" value="22133" />
-					<scen:parameter name="queue-name" value="measurements" />
+					<scen:parameter name="queue-name" value="tatami" />
 				</scen:component>
 				<scen:component name="testing"
 					classpath="scenario.amilab.app_demo.AmILabServer" >
