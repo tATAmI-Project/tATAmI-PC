@@ -155,6 +155,11 @@ public class ClaimBehavior
 	 */
 	protected boolean					activating;
 	/**
+	 * Is <code>true</code> before the behavior finishes executing the first statement in a reactive behavior (i.e. a
+	 * receive or an input).
+	 */
+	protected boolean					firstStatement;
+	/**
 	 * The prefix added to the first argument in an input/output construct that indicates that input/output should be
 	 * taken from an agent component that implements {@link AgentIO} or {@link AgentActiveIO}.
 	 */
@@ -352,6 +357,7 @@ public class ClaimBehavior
 	{
 		activationEvent = activatingEvent;
 		activating = true;
+		firstStatement = true;
 		boolean executionFailure = false;
 		if(bufferLog)
 			logBuffer = "\n";
@@ -359,13 +365,15 @@ public class ClaimBehavior
 		
 		for(ClaimConstruct statement : cbd.getStatements())
 		{ // the behavior stops whenever a statement returns false (for statements that are not nested)
-			if(!((statement.getType() == ClaimConstructType.CONDITION) || ((statement
-					.getType() == ClaimConstructType.FUNCTION_CALL)
-					&& ((((ClaimFunctionCall) statement).getFunctionType() == ClaimFunctionType.RECEIVE)
-							|| (((ClaimFunctionCall) statement).getFunctionType() == ClaimFunctionType.INPUT)))))
-				activating = false; // move into behavior body
 			if(cbd.getBehaviorType() == ClaimBehaviorType.INITIAL)
 				activating = false;
+			if(activating && firstStatement
+					&& !((statement.getType() == ClaimConstructType.FUNCTION_CALL)
+							&& ((((ClaimFunctionCall) statement).getFunctionType() == ClaimFunctionType.RECEIVE)
+									|| (((ClaimFunctionCall) statement).getFunctionType() == ClaimFunctionType.INPUT))))
+				activating = false;
+			if(activating && !firstStatement && (statement.getType() != ClaimConstructType.CONDITION))
+				activating = false; // move into behavior body
 				
 			if(!handleStatement(statement))
 			{ // stop behavior and exit execution
@@ -373,6 +381,7 @@ public class ClaimBehavior
 				break;
 			}
 			currentStatement++;
+			firstStatement = false;
 		}
 		// end of behavior: stop behavior and exit execution
 		currentStatement = 0;
@@ -806,8 +815,8 @@ public class ClaimBehavior
 	 * The construct outputs to an output port.
 	 * <p>
 	 * If the first argument of the construct begins with {@value #IO_COMPONENT_NAME_PREFIX}, it will be considered as a
-	 * component name to put output to (normally output is sent to the <code>VisualizableComponent</code>. The
-	 * component must implement {@link AgentIO}. The rest of the arguments will be considered normally.
+	 * component name to put output to (normally output is sent to the <code>VisualizableComponent</code>. The component
+	 * must implement {@link AgentIO}. The rest of the arguments will be considered normally.
 	 * 
 	 * @param args
 	 *            - elements in the <code>input</code> construct.
