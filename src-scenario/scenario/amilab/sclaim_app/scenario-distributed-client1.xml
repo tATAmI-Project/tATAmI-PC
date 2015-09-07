@@ -32,10 +32,11 @@
 			
 				<scen:component name="messaging" />
 			
-				<scen:component name="amilab" classpath="scenario.amilab.sclaim_app.AmILabClient">
+				<scen:component name="amilab" classpath="scenario.amilab.sclaim_app.AmILabClient" >
 					<scen:parameter name="IP" value="ami-crunch-08.local" />
 					<scen:parameter name="port" value="22133" />
-					<scen:parameter name="queue-name" value="measurements" />
+					<scen:parameter name="queue-name" value="tatami" />
+					<scen:parameter name="sensor" value="daq-05" />
 				</scen:component>
 			
 				<scen:component name="cognitive" />

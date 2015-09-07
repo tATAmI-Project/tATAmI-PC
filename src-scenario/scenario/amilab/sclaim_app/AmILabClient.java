@@ -38,6 +38,11 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	private static final long serialVersionUID = -7636346419364318356L;
 
 	/**
+	 * Name of the parameter for the daq to observe.
+	 */
+	private static final String SENSOR = "sensor";
+
+	/**
 	 * Proximity request message.
 	 */
 	public static final String PROXIMITY_REQUEST = "request";
@@ -46,6 +51,11 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	 * Get proximity message.
 	 */
 	public static final String GET_PROXIMITY = "getProximity";
+
+	/**
+	 * Numerical value for any invalid proximity.
+	 */
+	public static final long INVALID_PROXIMITY = -1;
 
 	/**
 	 * Max value for proximity.
@@ -76,6 +86,11 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	 * A sad face :(
 	 */
 	public static final String SAD_FACE = "images/sad_face.jpg";
+
+	/**
+	 * Name of the data acquisition unit this client monitors.
+	 */
+	protected String daq;
 
 	/**
 	 * State of the simulation.
@@ -200,6 +215,8 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 		if (!super.preload(parameters, scenarioNode, agentPackages, log))
 			return false;
 
+		daq = getComponentData().get(SENSOR);
+
 		active = false;
 		proximity = MAX_PROXIMITY;
 
@@ -234,7 +251,7 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 
 					long newProximity = processPerception(perception);
 
-					if (newProximity < 0)
+					if (newProximity == INVALID_PROXIMITY)
 						continue;
 
 					proximity = newProximity;
@@ -256,6 +273,14 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 				try
 				{
 					parsedJson = new ObjectMapper().readValue(perception.getData(), HashMap.class);
+					String crtDaq = (String) parsedJson.get("sensor_id");
+
+					// If this entry is from another daq return the last known proximity.
+					if (!crtDaq.equals(daq))
+					{
+						return INVALID_PROXIMITY;
+					}
+
 					HashMap<?, ?> skeleton = (HashMap<?, ?>) parsedJson.get("skeleton_3D");
 					HashMap<?, ?> torso = (HashMap<?, ?>) skeleton.get("torso");
 					double newProximity = ((Double) torso.get("Z")).doubleValue();
@@ -267,7 +292,7 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 				} catch (Exception e)
 				{
 					e.printStackTrace();
-					return MAX_PROXIMITY;
+					return INVALID_PROXIMITY;
 				}
 			}
 
@@ -346,9 +371,9 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 			return null;
 		Vector<Object> ret = new Vector<Object>();
 		ret.addElement(new Long(proximity));
-		
+
 		getAgentLog().trace("Get proximity ", new Long(proximity));
-		
+
 		return ret;
 	}
 
@@ -359,7 +384,7 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 			return;
 
 		String state = (String) arguments.get(0);
-		
+
 		getAgentLog().trace("Got response ", state);
 
 		if (state.equals(CONFIRM))
