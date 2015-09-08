@@ -94,7 +94,7 @@ import tatami.sclaim.constructs.basic.ClaimWhile;
  * @author Nguyen Thi Thuy Nga
  * @author Marius-Tudor Benea
  * @author Andrei Olaru
- * 		
+ * 
  */
 public class ClaimBehavior
 {
@@ -104,30 +104,31 @@ public class ClaimBehavior
 	 * 
 	 * @author Andrei Olaru
 	 */
-	protected enum KeepVariables {
+	protected enum KeepVariables
+	{
 		/**
 		 * Transforms all variables to values; unassigned / uninstantiated variables will be transformed to
 		 * <code>null</code>.
 		 */
 		KEEP_NONE,
-		
+
 		/**
 		 * Just like <code>KEEP_NONE</code>, but keeps reassignable variables as {@link ClaimVariable} instances.
 		 */
 		KEEP_REASSIGNABLE,
-		
+
 		/**
 		 * Assigned variables are replaced by their values; Re-assignable and unassigned variables are kept as
 		 * {@link ClaimVariable} instances.
 		 */
 		KEEP_ASSIGNABLE,
-		
+
 		/**
 		 * All variables are kept as they are.
 		 */
 		KEEP_ALL,
 	}
-	
+
 	/**
 	 * The behavior definition.
 	 */
@@ -173,12 +174,12 @@ public class ClaimBehavior
 	 * If <code>true</code>, the tracing messages in the behavior will be buffered and the entire buffer (
 	 * {@link #logBuffer} displayed at the end.
 	 */
-	protected boolean					bufferLog					= false;
+	protected boolean					bufferLog					= true;
 	/**
 	 * The buffer to hold the tracing messages.
 	 */
 	protected String					logBuffer					= null;
-	
+
 	/**
 	 * The list of agent names that should be debugged (output tracing messages), if {@link #debugAllAgents} is set to
 	 * <code>false</code>.
@@ -201,7 +202,7 @@ public class ClaimBehavior
 	 * The value is computed at the creation of the behavior to know if the behavior should be traced or not.
 	 */
 	protected boolean				isDebugging;
-	
+
 	/**
 	 * Creates an instance that manages the execution of a claim behavior, as described by its definition.
 	 * 
@@ -222,13 +223,13 @@ public class ClaimBehavior
 		st = new SymbolTable(agentST);
 		currentStatement = 0;
 		log = logLink;
-		if(log == null)
+		if (log == null)
 			log = DumbLogger.get();
 		st.setLogLink(log);
-		
+
 		initDebugging();
 	}
-	
+
 	/**
 	 * Initializes the {@link #isDebugging} member to know if this particular behavior should be debugged or not.
 	 */
@@ -240,7 +241,7 @@ public class ClaimBehavior
 		isDebugging = (debugAllAgents || Arrays.binarySearch(debuggedAgents, claimComponent.getAgentName()) > 0)
 				&& (debugAllBehaviors || Arrays.binarySearch(debuggedBehaviors, cbd.getName()) > 0);
 	}
-	
+
 	/**
 	 * Traces the execution of an S-CLAIM statement, in case the behavior is being debugged. If so, the arguments are
 	 * passed verbatim to {@link Logger#trace(String, Object...)}, with the exception that the message is prepended with
@@ -253,17 +254,16 @@ public class ClaimBehavior
 	 */
 	protected void trace(String message, Object... arguments)
 	{
-		if(isDebugging)
+		if (isDebugging)
 		{
-			if(bufferLog)
+			if (bufferLog)
 			{
 				logBuffer += "\t\t\t\t\t\t\t[" + currentStatement + "] " + compose(message, arguments) + "\n";
-			}
-			else
+			} else
 				log.trace("\t\t\t [SCLAIM:" + cbd.getName() + ":" + currentStatement + "] " + message, arguments);
 		}
 	}
-	
+
 	/**
 	 * Creates a single logging message with the entire log of the behavior execution. See {@link #bufferLog}.
 	 * 
@@ -272,14 +272,14 @@ public class ClaimBehavior
 	 */
 	protected void putLog(boolean shorten)
 	{
-		if(isDebugging && (logBuffer != null))
+		if (isDebugging && (logBuffer != null))
 		{
-			if(shorten)
+			if (shorten)
 				logBuffer = logBuffer.replace('\n', '|').replace('\t', ' ');
 			log.trace("\t\t\t SCLAIM:" + cbd.getName() + " []", logBuffer);
 		}
 	}
-	
+
 	/**
 	 * Copy of the <code>compose</code> method in {@link Unit}.
 	 * 
@@ -295,33 +295,33 @@ public class ClaimBehavior
 		// there are enough objects for all parts
 		// there may be more objects than parts
 		String ret = parts[0];
-		for(int i = 0; i < parts.length - 1; i++)
+		for (int i = 0; i < parts.length - 1; i++)
 		{
 			ret += LoggerSimple.ARGUMENT_BEGIN + objects[i] + LoggerSimple.ARGUMENT_END;
 			ret += parts[i + 1];
 		}
 		// deal with the rest of the objects
-		for(int i = parts.length - 1; i < objects.length; i++)
+		for (int i = parts.length - 1; i < objects.length; i++)
 			ret += LoggerSimple.ARGUMENT_BEGIN + objects[i] + LoggerSimple.ARGUMENT_END;
-			
+
 		return ret;
 	}
-	
+
 	/**
 	 * @return the type of the behavior, as the type of the agent event that may trigger the behavior.
 	 */
 	public AgentEventType getActivationType()
 	{
-		switch(cbd.getBehaviorType())
+		switch (cbd.getBehaviorType())
 		{
 		case INITIAL:
 			return AgentEventType.SIMULATION_START;
 		case REACTIVE:
 		{
 			ClaimConstruct statement = cbd.getStatements().firstElement();
-			if(statement.getType() != ClaimConstructType.FUNCTION_CALL)
+			if (statement.getType() != ClaimConstructType.FUNCTION_CALL)
 				throw new IllegalStateException("illegal start of behavior.");
-			switch(((ClaimFunctionCall) statement).getFunctionType())
+			switch (((ClaimFunctionCall) statement).getFunctionType())
 			{
 			case RECEIVE:
 				return AgentEventType.AGENT_MESSAGE;
@@ -337,7 +337,7 @@ public class ClaimBehavior
 		}
 		throw new IllegalStateException("behavior type not handled.");
 	}
-	
+
 	/**
 	 * This method is called whenever the behavior may be executed. It tests for the activation conditions and executes
 	 * all the statements.
@@ -359,23 +359,30 @@ public class ClaimBehavior
 		activating = true;
 		firstStatement = true;
 		boolean executionFailure = false;
-		if(bufferLog)
+		if (bufferLog)
 			logBuffer = "\n";
 		trace("entering with event []", activatingEvent);
-		
-		for(ClaimConstruct statement : cbd.getStatements())
+
+		for (ClaimConstruct statement : cbd.getStatements())
 		{ // the behavior stops whenever a statement returns false (for statements that are not nested)
-			if(cbd.getBehaviorType() == ClaimBehaviorType.INITIAL)
+			if (cbd.getBehaviorType() == ClaimBehaviorType.INITIAL)
 				activating = false;
-			if(activating && firstStatement
+			if (activating && firstStatement
 					&& !((statement.getType() == ClaimConstructType.FUNCTION_CALL)
 							&& ((((ClaimFunctionCall) statement).getFunctionType() == ClaimFunctionType.RECEIVE)
 									|| (((ClaimFunctionCall) statement).getFunctionType() == ClaimFunctionType.INPUT))))
 				activating = false;
-			if(activating && !firstStatement && (statement.getType() != ClaimConstructType.CONDITION))
+			if (activating && !firstStatement && (statement.getType() != ClaimConstructType.CONDITION))
 				activating = false; // move into behavior body
-				
-			if(!handleStatement(statement))
+
+			if (statement.getType() == ClaimConstructType.FUNCTION_CALL)
+				trace("executing statement []:[] with args [].", statement.getType(),
+						((ClaimFunctionCall) statement).getFunctionType(),
+						((ClaimFunctionCall) statement).getArguments());
+			else
+				trace("executing statement [].", statement.getType());
+
+			if (!handleStatement(statement))
 			{ // stop behavior and exit execution
 				executionFailure = !activating;
 				break;
@@ -386,19 +393,19 @@ public class ClaimBehavior
 		// end of behavior: stop behavior and exit execution
 		currentStatement = 0;
 		st.clearSymbolTable(); // reinitialize symbol table
-		if(activating)
+		if (activating)
 			logBuffer = "activation failed.\n" + logBuffer;
-		if(executionFailure)
-			if(bufferLog)
+		if (executionFailure)
+			if (bufferLog)
 				log.warn("\t\t\t SCLAIM:[] [] behavior terminated (statement failure) at statement [].", cbd.getName(),
 						logBuffer, new Integer(currentStatement));
 			else
 				log.warn("behavior [] terminated (statement failure) at statement [].", cbd.getName(),
 						new Integer(currentStatement));
-		else if(bufferLog)
+		else if (bufferLog)
 			putLog(activating);
 	}
-	
+
 	/**
 	 * Handle one statement in the behavior. The code here handles complex statements and deferres to
 	 * {@link #handleCall(ClaimFunctionCall)} the handling of simple statements.
@@ -409,7 +416,7 @@ public class ClaimBehavior
 	 */
 	protected boolean handleStatement(ClaimConstruct statement)
 	{
-		switch(statement.getType())
+		switch (statement.getType())
 		{
 		case FUNCTION_CALL:
 			return handleCall((ClaimFunctionCall) statement);
@@ -417,23 +424,22 @@ public class ClaimBehavior
 			return handleCall(((ClaimCondition) statement).getCondition());
 		case IF:
 			boolean condition = handleCall(((ClaimIf) statement).getCondition());
-			if(condition)
+			if (condition)
 			{
 				trace("if condition satisfied.");
-				
+
 				Vector<ClaimConstruct> trueBranch = ((ClaimIf) statement).getTrueBranch();
-				for(ClaimConstruct trueBranchStatement : trueBranch)
-					if(!handleStatement(trueBranchStatement))
+				for (ClaimConstruct trueBranchStatement : trueBranch)
+					if (!handleStatement(trueBranchStatement))
 						return false;
-			}
-			else
+			} else
 			{
 				trace("if condition not satisfied.");
-				
+
 				Vector<ClaimConstruct> falseBranch = ((ClaimIf) statement).getFalseBranch();
-				if(falseBranch != null)
-					for(ClaimConstruct falseBranchStatement : falseBranch)
-						if(!handleStatement(falseBranchStatement))
+				if (falseBranch != null)
+					for (ClaimConstruct falseBranchStatement : falseBranch)
+						if (!handleStatement(falseBranchStatement))
 							return false;
 			}
 			break;
@@ -449,7 +455,7 @@ public class ClaimBehavior
 		}
 		return true; // normal exit from forAllK, while, if
 	}
-	
+
 	/**
 	 * Handle a simple statement. The return value indicates the success of the statement. The value of all statements
 	 * is returned directly, although it may not have sense for some statement types to return false.
@@ -463,8 +469,8 @@ public class ClaimBehavior
 	{
 		// arguments of the function
 		Vector<ClaimConstruct> args = function.getArguments();
-		
-		switch(function.getFunctionType())
+
+		switch (function.getFunctionType())
 		{
 		case SEND:
 			return handleSend(args);
@@ -498,13 +504,13 @@ public class ClaimBehavior
 		log.warn("Unreachable area reached");
 		return false;
 	}
-	
+
 	// ==================================== ^^ -- ACTIVATION AND GENERAL EXECUTION -- ^^ =============================
 	// ===============================================================================================================
 	// ==================================== vv --------- STATEMENT HANDLING --------- vv =============================
-	
+
 	// ==================================== AGENT MANAGEMENT
-	
+
 	/**
 	 * Creates a new agent, based on the given arguments
 	 * 
@@ -524,12 +530,12 @@ public class ClaimBehavior
 		 * agentName.getValue(), "core.claim.ClaimAgent", args.subList(1, args.size()).toArray()); }
 		 * catch(StaleProxyException e) { e.printStackTrace(); return false; }
 		 */
-		
+
 		// TODO
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * This deletes the agent from the inside. It is a basic implementation of the S-CLAIM acid primitive, that has to
 	 * be extended in the future
@@ -540,12 +546,12 @@ public class ClaimBehavior
 	{
 		log.trace("Acid command received. I will delete myself!");
 		// this.myAgent.getParametric().doDelete();
-		
+
 		// TODO
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * This deletes the agent with the name specified as the first element of the vector received as argument, from the
 	 * outside.
@@ -559,18 +565,18 @@ public class ClaimBehavior
 	protected boolean handleOpen(Vector<ClaimConstruct> args)
 	{
 		// ClaimValue agentName = (ClaimValue) args.get(0);
-		
+
 		/*
 		 * try { ((ParametricComponent) this.myAgent).getContainerController().getAgent((String)
 		 * agentName.getValue()).kill(); } catch(StaleProxyException e) { e.printStackTrace(); return false; }
 		 * catch(ControllerException e) { e.printStackTrace(); return false; }
 		 */
-		
+
 		// TODO
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * @param args
 	 * @return
@@ -602,13 +608,13 @@ public class ClaimBehavior
 		 * 
 		 * ((ClaimComponent) this.myAgent).addBehaviour(sb); }
 		 */
-		
+
 		// TODO
 		return true;
 	}
-	
+
 	// ==================================== AGENT COMMUNICATION
-	
+
 	/**
 	 * The send construct.
 	 * <p>
@@ -627,14 +633,14 @@ public class ClaimBehavior
 	{
 		String receiver = null; // receiver of the message to be sent
 		int parametersAdjust = 0; // offset argument number if there is no receiver field
-		
+
 		boolean replyMode = false; // if true, the reply will be sent to an agent
 		// TODO remove this and rebrand it as general communication?
 		boolean webServiceInvocation = false; // if true, the send is a web service invocation
 		boolean expectServiceReturn = false; // if true, wait for a reply (blocking call)
-		
+
 		// decide upon the receiver(s) of the message
-		switch(args.get(0).getType())
+		switch (args.get(0).getType())
 		{
 		case VARIABLE:
 			receiver = (String) getVariableValue(((ClaimVariable) args.get(0))).getValue();
@@ -644,7 +650,7 @@ public class ClaimBehavior
 			break;
 		case STRUCTURE:
 			// there is no receiver information; should reply to the original sender
-			switch(activationEvent.getType())
+			switch (activationEvent.getType())
 			{
 			case AGENT_MESSAGE:
 				// trace("replying to message ", lastMessage);
@@ -661,37 +667,36 @@ public class ClaimBehavior
 		default:
 			break;
 		}
-		
-		if(args.size() > 3)
+
+		if (args.size() > 3)
 		{
-			if(webServiceInvocation)
+			if (webServiceInvocation)
 				expectServiceReturn = true;
 			else
 				log.error("Too many arguments for send primitive when not in web service mode.");
 		}
-		
-		if(receiver == null)
+
+		if (receiver == null)
 		{
 			log.error("Unable to determine message receiver");
 			return false;
 		}
-		
+
 		// second argument is a structure that represents all the message's fields
 		ClaimStructure message = null;
 		message = st.bindStructure((ClaimStructure) args.get(1 - parametersAdjust));
-		
-		if(webServiceInvocation)
+
+		if (webServiceInvocation)
 		{
 			// TODO: Web service invocation
-		}
-		else
+		} else
 		{
 			claimComponent.sendMessage(message.toString(), receiver);
 			trace("sent to [] message [].", receiver, message.toString());
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Handle the <code>receive</code> construct.
 	 * <p>
@@ -712,28 +717,28 @@ public class ClaimBehavior
 		String content = (String) activationEvent.getParameter(MessagingComponent.CONTENT_PARAMETER);
 		String sender = (String) activationEvent.getParameter(MessagingComponent.SOURCE_PARAMETER);
 		ClaimStructure received = ClaimStructure.parseString(content);
-		
-		if(received == null)
+
+		if (received == null)
 			return false;
-			
+
 		ClaimStructure toBind = (ClaimStructure) args.get(args.size() - 1); // the last part is the message
-		
-		if(!readValues(received.getFields(), toBind.getFields(), 0))
+
+		if (!readValues(received.getFields(), toBind.getFields(), 0))
 		{ // the message does not match the pattern
-			
+
 			trace("message [] not matching pattern []", content, toBind);
 			return false;
 		}
-		
+
 		trace("message received from []: []", sender, content);
 		// capture sender, if necessary
-		if(args.size() >= 2)
+		if (args.size() >= 2)
 			st.put((ClaimVariable) args.get(0), new ClaimValue(sender));
 		return true;
 	}
-	
+
 	// ==================================== INPUT / OUTPUT
-	
+
 	/**
 	 * There are two mechanisms for handling input:
 	 * <p>
@@ -758,29 +763,30 @@ public class ClaimBehavior
 	protected boolean handleInput(Vector<ClaimConstruct> args)
 	{
 		Vector<Object> receivedInput;
-		
+		Vector<ClaimConstruct> workArgs = new Vector<ClaimConstruct>(args); // FIXME: workaround for error-prone behavior
+
 		String IOcomponent = null;
-		ClaimConstruct arg0 = args.get(0);
-		if((arg0.getType() == ClaimConstructType.VALUE)
+		ClaimConstruct arg0 = workArgs.get(0);
+		if ((arg0.getType() == ClaimConstructType.VALUE)
 				&& ((ClaimValue) arg0).toString().startsWith(IO_COMPONENT_NAME_PREFIX))
 		{
 			IOcomponent = ((ClaimValue) arg0).toString().substring(1);
-			args.remove(0);
+			workArgs.remove(0);
 		}
-		
+
 		// get input component
-		arg0 = args.get(0);
+		arg0 = workArgs.get(0);
 		String inputComponent = ((arg0.getType() == ClaimConstructType.VARIABLE) ? st.get((ClaimVariable) arg0)
 				: (ClaimValue) arg0).toString();
-				
+
 		// get the input
-		if(activating)
+		if (activating)
 		{
 			// input is active / the behavior is input-activated
-			if(activationEvent.getType() != AgentEventType.GUI_INPUT)
+			if (activationEvent.getType() != AgentEventType.GUI_INPUT)
 				throw new IllegalStateException(
 						"input cannot be in activation area if behavior is not input-activated");
-			if(activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME)
+			if (activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME)
 					.equals(inputComponent))
 				receivedInput = (Vector<Object>) activationEvent
 						.getParameter(VisualizableComponent.GUI_ARGUMENTS_EVENT_PARAMETER_NAME);
@@ -790,27 +796,30 @@ public class ClaimBehavior
 						activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME));
 				return false;
 			}
-		}
-		else
+			trace("The input is active.");
+		} else
+		{
 			// input is passive
+			trace("The input is passive.");
 			receivedInput = claimComponent.inputFromIO(IOcomponent, inputComponent);
-			
-		if(receivedInput == null)
+		}
+
+		if (receivedInput == null)
 		{
 			log.error("Received input from []:[] was null.", IOcomponent == null ? "GUI" : IOcomponent, inputComponent);
 			return false;
 		}
-		
+
 		// must copy values from source (activated / read input) into destination (input construct elements)
 		Vector<ClaimConstruct> sourceArgs = objects2values(receivedInput);
-		Vector<ClaimConstruct> destinationArgs = new Vector<ClaimConstruct>(args);
+		Vector<ClaimConstruct> destinationArgs = new Vector<ClaimConstruct>(workArgs);
 		destinationArgs.remove(0); // this is the name of the component
-		
+
 		trace("reading input from []:[] : [] to []", IOcomponent == null ? "GUI" : IOcomponent, inputComponent,
 				sourceArgs, destinationArgs);
 		return readValues(sourceArgs, destinationArgs);
 	}
-	
+
 	/**
 	 * The construct outputs to an output port.
 	 * <p>
@@ -825,24 +834,26 @@ public class ClaimBehavior
 	protected boolean handleOutput(Vector<ClaimConstruct> args)
 	{
 		String IOcomponent = null;
-		ClaimConstruct arg0 = args.get(0);
-		if((arg0.getType() == ClaimConstructType.VALUE)
+		Vector<ClaimConstruct> workArgs = new Vector<ClaimConstruct>(args); // FIXME: workaround for error-prone behavior
+		
+		ClaimConstruct arg0 = workArgs.get(0);
+		if ((arg0.getType() == ClaimConstructType.VALUE)
 				&& ((ClaimValue) arg0).toString().startsWith(IO_COMPONENT_NAME_PREFIX))
 		{
 			IOcomponent = ((ClaimValue) arg0).toString().substring(1);
-			args.remove(0);
+			workArgs.remove(0);
 		}
-		
-		String outputComponent = (String) ((ClaimValue) args.get(0)).getValue();
-		Vector<Object> outputV = constructs2Objects(args, 1); // get all but the component name
-		
+
+		String outputComponent = (String) ((ClaimValue) workArgs.get(0)).getValue();
+		Vector<Object> outputV = constructs2Objects(workArgs, 1); // get all but the component name
+
 		claimComponent.outputToIO(IOcomponent, outputComponent, outputV);
 		trace("output [] was written on []:[]", outputV, IOcomponent == null ? "GUI" : IOcomponent, outputComponent);
 		return true;
 	}
-	
+
 	// ==================================== EXECUTION MONITORING & CONTROL
-	
+
 	/**
 	 * The primitive prints out the given arguments to the console.
 	 * 
@@ -854,21 +865,21 @@ public class ClaimBehavior
 	{
 		Object[] outputV = constructs2Objects(args, 0).toArray();
 		String msg = compose("", outputV);
-		
+
 		System.out.println(msg);
-		
+
 		trace("The message [] was printed on console", msg);
 		return true;
 	}
-	
+
 	@SuppressWarnings("static-method")
 	protected boolean handleWait(Vector<ClaimConstruct> args)
 	{
 		// after wait there's always a constant
 		// ClaimValue waitTimeConstant = (ClaimValue) args.get(0);
-		
+
 		// TODO
-		
+
 		// long timeout = Integer.parseInt((String) waitTimeConstant.getValue());
 		// wakeUpAtTime = System.currentTimeMillis() + timeout;
 		//
@@ -879,10 +890,10 @@ public class ClaimBehavior
 		// {
 		// e.printStackTrace();
 		// }
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Initializes a while loop based on the condition contained in the variable {@code construct}
 	 * 
@@ -892,16 +903,16 @@ public class ClaimBehavior
 	protected void handleWhile(ClaimWhile construct)
 	{
 		Vector<ClaimConstruct> statements = construct.getStatements();
-		
-		while(handleCall(construct.getCondition()))
+
+		while (handleCall(construct.getCondition()))
 		{
-			for(ClaimConstruct statement : statements)
+			for (ClaimConstruct statement : statements)
 				handleStatement(statement);
 		}
 	}
-	
+
 	// ==================================== KNOWLEDGE MANAGEMENT
-	
+
 	/**
 	 * Method that handles all knowledge management primitives (except <code>forAllK</code>), namely <code>addK</code>,
 	 * <code>readK</code> and <code>removeK</code>.
@@ -924,22 +935,22 @@ public class ClaimBehavior
 	protected boolean handleKnowledgeManagement(ClaimFunctionType construct, Vector<ClaimConstruct> args)
 	{
 		KnowledgeBase kb = claimComponent.getKBase();
-		
+
 		// the primitive is always followed by the piece of knowledge (may be a pattern).
 		// TODO: support multiple types of knowledge, not just SimpleKnowledge.
 		ClaimStructure kStruct = (ClaimStructure) args.get(0);
 		SimpleKnowledge k = structure2Knowledge(kStruct);
-		
-		switch(construct)
+
+		switch (construct)
 		{
 		case ADDK:
 		// function "add knowledge"
 		{
-			if(kb.add(k))
+			if (kb.add(k))
 				trace("added new knowledge [].", k.getTextRepresentation());
 			else
 				trace("adding knowledge [] had no effect.", k.getTextRepresentation());
-				
+
 			return true;
 		}
 		case READK:
@@ -948,9 +959,9 @@ public class ClaimBehavior
 		{
 			// first find the result
 			KnowledgeDescription result = kb.getFirst(k);
-			if(result != null)
+			if (result != null)
 			{ // then [attempt to] bind the variables
-				if(readValues(knowledge2Structure((SimpleKnowledge) result).getFields(), kStruct.getFields(), 0))
+				if (readValues(knowledge2Structure((SimpleKnowledge) result).getFields(), kStruct.getFields(), 0))
 				{
 					trace("knowledge [] read into [].", k.getTextRepresentation(), kStruct);
 					return true;
@@ -964,7 +975,7 @@ public class ClaimBehavior
 		case REMOVEK:
 		// function "remove knowledge"
 		{
-			if(kb.remove(k))
+			if (kb.remove(k))
 				trace("removed knowledge [].", k.getTextRepresentation());
 			else
 				trace("removing knowledge [] had no effect.", k.getTextRepresentation());
@@ -975,7 +986,7 @@ public class ClaimBehavior
 			return true; // unreachable code
 		}
 	}
-	
+
 	/**
 	 * Read all records of knowledge in the knowledge base that match the pattern. For each possible match, execute the
 	 * subordinate statements (forming a cycle).
@@ -996,47 +1007,46 @@ public class ClaimBehavior
 	protected boolean handleForAllK(ClaimForAllK construct)
 	{
 		ClaimStructure kStruct = construct.getStructure();
-		
+
 		// check condition that the arguments will be assignable multiple times
-		for(ClaimConstruct c : evaluateConstructs(kStruct.getFields(), 1, KeepVariables.KEEP_REASSIGNABLE))
-			if((c instanceof ClaimVariable) && !((ClaimVariable) c).isReAssignable())
+		for (ClaimConstruct c : evaluateConstructs(kStruct.getFields(), 1, KeepVariables.KEEP_REASSIGNABLE))
+			if ((c instanceof ClaimVariable) && !((ClaimVariable) c).isReAssignable())
 			{
 				log.error("The variable [] is not assigned, nor re-assignable", c);
 				return false;
 			}
-			
+
 		// get all possible matches
 		// FIXME: support other types of knowledge, other than SimpleKnowledge.
 		Collection<KnowledgeDescription> knowledge = claimComponent.getKBase().getAll(structure2Knowledge(kStruct));
-		
+
 		int startStatement = currentStatement;
 		int nStatements = construct.getStatements().size();
-		for(KnowledgeDescription kd : knowledge)
+		for (KnowledgeDescription kd : knowledge)
 		{
 			currentStatement = startStatement;
-			
+
 			// attempt to match with construct
 			ClaimStructure kbMatch = knowledge2Structure((SimpleKnowledge) kd);
-			
-			if(readValues(kbMatch.getFields(), kStruct.getFields(), 1))
+
+			if (readValues(kbMatch.getFields(), kStruct.getFields(), 1))
 			{ // we are able to read the source into the destination, bindings already done
 				// execute cycle
 				trace("executing for match [].", kbMatch);
-				for(ClaimConstruct statement : construct.getStatements())
+				for (ClaimConstruct statement : construct.getStatements())
 				{
 					currentStatement++;
-					if(!handleStatement(statement))
+					if (!handleStatement(statement))
 						// statement fails -> abort this cycle
 						break;
 				}
-			}
-			else
+			} else
 				trace("Unable to read match [] into arguments [].", kbMatch, kStruct);
 		}
 		currentStatement += nStatements - 1;
 		return true;
 	}
-	
+
 	/**
 	 * Create a {@link SimpleKnowledge} instance from a {@link ClaimStructure}. // TODO: support other types of
 	 * knowledge, other than SimpleKnowledge.
@@ -1048,13 +1058,13 @@ public class ClaimBehavior
 	protected SimpleKnowledge structure2Knowledge(ClaimStructure knowledge)
 	{
 		Vector<String> fields = constructs2Strings(knowledge.getFields(), 1, false); // ignore 'knowledge'
-		
+
 		SimpleKnowledge newKl = new SimpleKnowledge();
 		newKl.setKnowledgeType(fields.remove(0));
 		newKl.setSimpleKnowledge(new LinkedList<String>(fields));
 		return newKl;
 	}
-	
+
 	/**
 	 * Create a {@link ClaimStructure} from a {@link SimpleKnowledge} instance.
 	 * 
@@ -1069,59 +1079,59 @@ public class ClaimBehavior
 		Vector<ClaimConstruct> fields = new Vector<ClaimConstruct>();
 		fields.add(new ClaimValue("knowledge"));
 		fields.add(new ClaimValue(knowledge.getKnowledgeType()));
-		for(Object fieldValue : knowledge.getSimpleKnowledge())
+		for (Object fieldValue : knowledge.getSimpleKnowledge())
 			fields.add(new ClaimValue(fieldValue));
 		ret.setFields(fields);
 		return ret;
 	}
-	
+
 	// ==================================== JAVA FUNCTIONS
-	
+
 	protected boolean handleJavaCall(String functionName, Vector<ClaimConstruct> args)
 	{
 		Method method = null;
-		for(Class<?> clazz : this.cbd.getMyAgent().getCodeAttachments())
+		for (Class<?> clazz : this.cbd.getMyAgent().getCodeAttachments())
 			try
 			{
 				method = clazz.getDeclaredMethod(functionName, Vector.class);
 				break;
-			} catch(SecurityException e)
+			} catch (SecurityException e)
 			{ // method not accessible here; carry on;
-			} catch(NoSuchMethodException e)
+			} catch (NoSuchMethodException e)
 			{ // method not found here; carry on;
 			}
-		if(method == null)
+		if (method == null)
 		{
 			log.error("function [] not found in code attachments", functionName);
 			return false;
 		}
-		
+
 		boolean returnValue = false;
 		Vector<ClaimConstruct> arguments = new Vector<ClaimConstruct>(
 				evaluateConstructs(args, 0, KeepVariables.KEEP_NONE));
-				
+
 		trace("invoking code attachment function [] with arguments: []", functionName, arguments);
 		try
 		{
 			returnValue = ((Boolean) method.invoke(null, arguments)).booleanValue();
 			readValues(arguments, args, 0);
-			
-		} catch(Exception e)
+
+		} catch (Exception e)
 		{
 			log.error("function [] invocation failed: ", functionName, e);
 			e.printStackTrace(); // FIXME: put this into the log
 		}
 		trace("code attachment function result [] with arguments [].", returnValue ? "OK" : "fail", arguments);
-		
+
 		return returnValue;
 	}
-	
+
 	// ==================================== ^^ --------- STATEMENT HANDLING --------- ^^ =============================
 	// ===============================================================================================================
 	// ==================================== vv --- AUXILIARY / CONVERSION METHODS --- vv =============================
-	
+
 	// ==================================== READ VALUES (from a set of S-CLAIM values / variables into another)
-	
+
 	/**
 	 * The method checks if two claim constructs match and indicates what bindings should be done to match the
 	 * destination to the source.
@@ -1141,40 +1151,40 @@ public class ClaimBehavior
 	{
 		ClaimConstructType destType = destField.getType();
 		ClaimConstructType sourceType = sourceField.getType();
-		
-		if(destType == ClaimConstructType.STRUCTURE || sourceType == ClaimConstructType.STRUCTURE)
+
+		if (destType == ClaimConstructType.STRUCTURE || sourceType == ClaimConstructType.STRUCTURE)
 		{
-			if(destType == sourceType)
+			if (destType == sourceType)
 				return readValues(((ClaimStructure) sourceField).getFields(), ((ClaimStructure) destField).getFields(),
 						0, bindingsOut);
 			return false;
 		}
-		
-		if(!((destType == ClaimConstructType.VALUE || destType == ClaimConstructType.VARIABLE)
+
+		if (!((destType == ClaimConstructType.VALUE || destType == ClaimConstructType.VARIABLE)
 				&& (sourceType == ClaimConstructType.VALUE || sourceType == ClaimConstructType.VARIABLE)))
 			return false;
-			
+
 		ClaimValue destValue = (destType == ClaimConstructType.VALUE) ? (ClaimValue) destField
 				: getVariableValue((ClaimVariable) destField);
 		ClaimValue sourceValue = (sourceType == ClaimConstructType.VALUE) ? (ClaimValue) sourceField
 				: getVariableValue((ClaimVariable) sourceField);
 		boolean assignable = (destType == ClaimConstructType.VARIABLE)
 				&& ((destValue == null) || ((ClaimVariable) destField).isReAssignable());
-				
-		if(assignable)
+
+		if (assignable)
 		{
-			if((sourceValue != null) && ((destValue == null) || !destValue.getValue().equals(sourceValue.getValue())))
+			if ((sourceValue != null) && ((destValue == null) || !destValue.getValue().equals(sourceValue.getValue())))
 				bindingsOut.put((ClaimVariable) destField, (ClaimValue) sourceField);
 			return true;
 		}
-		
-		if((destValue == null) && (sourceValue == null))
+
+		if ((destValue == null) && (sourceValue == null))
 			return true;
-		if((destValue == null) || (sourceValue == null))
+		if ((destValue == null) || (sourceValue == null))
 			return false;
 		return destValue.getValue().equals(sourceValue.getValue());
 	}
-	
+
 	/**
 	 * The method matches the source and destination lists of constructs, based on their structure and values; it
 	 * identifies potential bindings that can be done if the constructs match (instantiating variables in the
@@ -1208,17 +1218,17 @@ public class ClaimBehavior
 			int ignore, Map<ClaimVariable, ClaimValue> bindingsOut)
 	{
 		boolean match = true;
-		if(sourceConstructs.size() != destinationConstructs.size())
+		if (sourceConstructs.size() != destinationConstructs.size())
 			match = false;
-		for(int i = ignore; i < Math.min(sourceConstructs.size(), destinationConstructs.size()); i++)
+		for (int i = ignore; i < Math.min(sourceConstructs.size(), destinationConstructs.size()); i++)
 		{
 			boolean res = readValue(sourceConstructs.get(i), destinationConstructs.get(i), bindingsOut);
 			match = match && res;
 		}
-		
+
 		return match;
 	}
-	
+
 	/**
 	 * Same as {@link #readValues(Vector, Vector, int)}, but without ignoring any elements.
 	 * 
@@ -1234,7 +1244,7 @@ public class ClaimBehavior
 	{
 		return readValues(sourceConstructs, destinationConstructs, 0);
 	}
-	
+
 	/**
 	 * This method calls {@link #readValues(Vector, Vector, int, Map)} and performs the bindings returned.
 	 * 
@@ -1253,14 +1263,14 @@ public class ClaimBehavior
 	{
 		Map<ClaimVariable, ClaimValue> bindings = new HashMap<ClaimVariable, ClaimValue>(); // to bind at the end if OK
 		boolean match = readValues(sourceConstructs, destinationConstructs, ignore, bindings);
-		if(match)
-			for(Map.Entry<ClaimVariable, ClaimValue> entry : bindings.entrySet())
+		if (match)
+			for (Map.Entry<ClaimVariable, ClaimValue> entry : bindings.entrySet())
 				st.put(entry.getKey(), entry.getValue());
 		return match;
 	}
-	
+
 	// ==================================== OBJECT - CLAIM VALUE conversion
-	
+
 	/**
 	 * Get value of variable from the symbol table. First, search the variable in behavior's symbol table. If not found,
 	 * search in agent's symbol table (this functionality is covered by the {@link SymbolTable} class.
@@ -1273,7 +1283,7 @@ public class ClaimBehavior
 	{
 		return st.get(variable);
 	}
-	
+
 	/**
 	 * The method creates a vector of {@link ClaimConstruct} instances (more precisely {@link ClaimValue} instances),
 	 * each of them containing an object from the argument vector.
@@ -1288,11 +1298,11 @@ public class ClaimBehavior
 	protected static Vector<ClaimConstruct> objects2values(Vector<Object> args)
 	{
 		Vector<ClaimConstruct> ret = new Vector<ClaimConstruct>(args.size());
-		for(Object arg : args)
+		for (Object arg : args)
 			ret.add(new ClaimValue(arg));
 		return ret;
 	}
-	
+
 	/**
 	 * Evaluates a construct to a value (or sometimes a variable).
 	 * <p>
@@ -1317,25 +1327,25 @@ public class ClaimBehavior
 	protected ClaimConstruct evaluateConstruct(ClaimConstruct construct, KeepVariables keepVariables)
 	{
 		ClaimConstructType constructType = construct.getType();
-		switch(constructType)
+		switch (constructType)
 		{
 		case VARIABLE:
 			// get the value from the symbol table (can be null)
 			ClaimValue value = getVariableValue((ClaimVariable) construct);
 			boolean assigned = (value == null);
-			if(value == null)
+			if (value == null)
 				value = new ClaimValue(null);
 			boolean assignable = ((ClaimVariable) construct).isReAssignable();
-			switch(keepVariables)
+			switch (keepVariables)
 			{
 			case KEEP_NONE:
 				return value;
 			case KEEP_REASSIGNABLE:
-				if(assignable)
+				if (assignable)
 					return construct;
 				return value;
 			case KEEP_ASSIGNABLE:
-				if(assignable || !assigned)
+				if (assignable || !assigned)
 					return construct;
 				return value;
 			case KEEP_ALL:
@@ -1345,7 +1355,7 @@ public class ClaimBehavior
 		case VALUE:
 			return construct;
 		case FUNCTION_CALL: // FIXME: this should probably be limited
-			if(handleCall((ClaimFunctionCall) construct))
+			if (handleCall((ClaimFunctionCall) construct))
 				return new ClaimValue(new Boolean(true));
 			return new ClaimValue(new Boolean(false));
 		default:
@@ -1354,7 +1364,7 @@ public class ClaimBehavior
 		log.error("illegal construct type [] inside construct", constructType);
 		return null;
 	}
-	
+
 	/**
 	 * Converts a {@link List} of {@link ClaimConstruct} instances - presumably from a larger construct or a structure -
 	 * to a {@link Vector} of constructs with only values or some variables (see
@@ -1369,7 +1379,7 @@ public class ClaimBehavior
 	 *            : number of leading constructs to ignore (e.g. 'knowledge', 'message', etc).
 	 * @param keepVariables
 	 *            : what variables to keep (see {@link #evaluateConstruct(ClaimConstruct, KeepVariables)}.
-	 * 			
+	 * 
 	 * @return the values of the constructs or sometimes variables. <code>null</code> is returned if the evaluation of
 	 *         any of the constructs fails.
 	 */
@@ -1378,18 +1388,18 @@ public class ClaimBehavior
 	{
 		Vector<ClaimConstruct> ret = new Vector<ClaimConstruct>();
 		int toIgnore = ignore;
-		for(ClaimConstruct cons : constructs)
+		for (ClaimConstruct cons : constructs)
 		{
-			if(toIgnore-- > 0)
+			if (toIgnore-- > 0)
 				continue;
 			ClaimConstruct result = evaluateConstruct(cons, keepVariables);
-			if(result == null)
+			if (result == null)
 				return null;
 			ret.add(result);
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * Convert a list of S-CLAIM constructs to S-CLAIM values. The list must fulfill the requirements of
 	 * {@link #evaluateConstructs(List, int, KeepVariables)}, which is used in the implementation. No variables will be
@@ -1405,12 +1415,12 @@ public class ClaimBehavior
 	protected Vector<ClaimValue> constructs2Values(List<ClaimConstruct> constructs, int ignore)
 	{
 		Vector<ClaimValue> args = new Vector<ClaimValue>();
-		for(ClaimConstruct arg : evaluateConstructs(constructs, ignore, KeepVariables.KEEP_NONE))
+		for (ClaimConstruct arg : evaluateConstructs(constructs, ignore, KeepVariables.KEEP_NONE))
 			args.add((ClaimValue) arg);
 		return args;
-		
+
 	}
-	
+
 	/**
 	 * Convert a list of S-CLAIM constructs to Objects. The list must fulfill the requirements of
 	 * {@link #evaluateConstructs(List, int, KeepVariables)}, which is used in the implementation. No variables will be
@@ -1427,11 +1437,11 @@ public class ClaimBehavior
 	protected Vector<Object> constructs2Objects(List<ClaimConstruct> constructs, int ignore)
 	{
 		Vector<Object> args = new Vector<Object>();
-		for(ClaimConstruct arg : evaluateConstructs(constructs, ignore, KeepVariables.KEEP_NONE))
+		for (ClaimConstruct arg : evaluateConstructs(constructs, ignore, KeepVariables.KEEP_NONE))
 			args.add(((ClaimValue) arg).getValue());
 		return args;
 	}
-	
+
 	/**
 	 * Convert a list of S-CLAIM constructs to Strings. The list must fulfill the requirements of
 	 * {@link #evaluateConstructs(List, int, KeepVariables)}, which is used in the implementation. No variables will be
@@ -1453,14 +1463,14 @@ public class ClaimBehavior
 	protected Vector<String> constructs2Strings(List<ClaimConstruct> constructs, int ignore, boolean transcribeNulls)
 	{
 		Vector<String> args = new Vector<String>();
-		for(Object arg : constructs2Objects(constructs, ignore))
-			if(arg != null)
+		for (Object arg : constructs2Objects(constructs, ignore))
+			if (arg != null)
 				args.add(arg.toString());
 			else
 				args.add(transcribeNulls ? ClaimValue.NULL_VALUE_OUTPUT : null);
 		return args;
 	}
-	
+
 	/**
 	 * Calls {@link #constructs2Strings(List, int)} and concatenates the result, with spaces ion between.
 	 * 
@@ -1473,13 +1483,13 @@ public class ClaimBehavior
 	protected String constructs2SingleString(List<ClaimConstruct> constructs, int ignore)
 	{
 		String rez = new String();
-		for(String str : constructs2Strings(constructs, ignore, true))
+		for (String str : constructs2Strings(constructs, ignore, true))
 			rez = rez.concat(str + " ");
-		if(rez.length() > 0)
+		if (rez.length() > 0)
 			rez = rez.substring(0, rez.length() - 1);
 		return rez;
 	}
-	
+
 	// TODO this appears to be used in the graph representation. investigate.
 	// protected String constructsAndMaps(List<ClaimConstruct> constructs, HashMap<Integer, ClaimVariable>
 	// intToVariable,
@@ -1507,5 +1517,5 @@ public class ClaimBehavior
 	// rez = rez + "]";
 	// return rez;
 	// }
-	
+
 }
