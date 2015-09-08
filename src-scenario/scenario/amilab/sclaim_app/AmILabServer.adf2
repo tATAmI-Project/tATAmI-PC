@@ -5,7 +5,7 @@
 		(initial register
 		
 			// add all clients with a default proximity
-			(addK (struct knowledge client ?client1 ?default))
+			//(addK (struct knowledge client ?client1 ?default))
 			(addK (struct knowledge client ?client2 ?default))
 			(addK (struct knowledge client ?client3 ?default))
 			(print this added_clients)
@@ -15,7 +15,7 @@
 		(reactive send_request
 		
 			// something tells the server to send requests
-			(input @visualizable request)
+			(input request)
 			
 			(print this send_requests)
 			
@@ -31,6 +31,7 @@
 			(receive (struct message proximity ?senderClient ?newProximity))
 			
 			// update his proximity in the kb
+			(readK (struct knowledge client ?senderClient ?oldProximity))
 			(removeK (struct knowledge client ?senderClient ?oldProximity))
 			(addK (struct knowledge client ?senderClient ?newProximity))
 			

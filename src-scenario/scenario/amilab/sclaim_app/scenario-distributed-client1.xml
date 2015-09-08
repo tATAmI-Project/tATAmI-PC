@@ -28,6 +28,7 @@
 			
 				<scen:component name="visualizable" >
 					<scen:parameter name="GUI" value="AmILabGui"/>
+					<scen:parameter name="window-type" value="amilab-gui"/>
 				</scen:component>
 			
 				<scen:component name="messaging" />
@@ -36,7 +37,7 @@
 					<scen:parameter name="IP" value="ami-crunch-08.local" />
 					<scen:parameter name="port" value="22133" />
 					<scen:parameter name="queue-name" value="tatami" />
-					<scen:parameter name="sensor" value="daq-05" />
+					<scen:parameter name="sensor" value="daq-01" />
 				</scen:component>
 			
 				<scen:component name="cognitive" />

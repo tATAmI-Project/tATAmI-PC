@@ -28,6 +28,7 @@
 			
 				<scen:component name="visualizable" >
 					<scen:parameter name="GUI" value="AmILabGui"/>
+					<scen:parameter name="WindowType" value="amilab-gui"/>
 				</scen:component>
 			
 				<scen:component name="messaging" />

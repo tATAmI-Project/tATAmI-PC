@@ -367,12 +367,14 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	@Override
 	public Vector<Object> getInput(String portName)
 	{
+		getAgentLog().trace("Getting proximity...");
+
 		if (!portName.equals(GET_PROXIMITY))
 			return null;
 		Vector<Object> ret = new Vector<Object>();
 		ret.addElement(new Long(proximity));
 
-		getAgentLog().trace("Get proximity ", new Long(proximity));
+		getAgentLog().trace("Got proximity ", new Long(proximity));
 
 		return ret;
 	}
