@@ -4,8 +4,11 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
@@ -16,7 +19,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
 import scenario.amilab.sclaim_app.PC.AmILabGui;
-import scenario.amilab.utils.StoppableRunnable;
 import tatami.amilab.AmILabComponent;
 import tatami.amilab.Perception;
 import tatami.core.agent.AgentEvent;
@@ -53,11 +55,6 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	public static final String GET_PROXIMITY = "getProximity";
 
 	/**
-	 * Numerical value for any invalid proximity.
-	 */
-	public static final long INVALID_PROXIMITY = -1;
-
-	/**
 	 * Max value for proximity.
 	 */
 	public static final long MAX_PROXIMITY = 999999;
@@ -88,14 +85,14 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	public static final String SAD_FACE = "images/sad_face.jpg";
 
 	/**
+	 * New dimension of image.
+	 */
+	private final int resize = 300;
+
+	/**
 	 * Name of the data acquisition unit this client monitors.
 	 */
 	protected String daq;
-
-	/**
-	 * State of the simulation.
-	 */
-	protected boolean simulationIsOn;
 
 	/**
 	 * Status of this component. {@code true} if this component has the smallest proximity.
@@ -128,24 +125,24 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	protected ImageIcon offIcon;
 
 	/**
-	 * Updates the proximity.
+	 * Timer to run tasks periodically.
 	 */
-	protected StoppableRunnable proximityUpdater;
+	protected Timer timer;
 
 	/**
-	 * Support thread for the local {@link ProximityUpdater}.
+	 * No delay.
 	 */
-	protected Thread proximityUpdaterThread;
+	protected static final int NO_DELAY = 0;
 
 	/**
-	 * Runnable that does all the logic
+	 * How often to update the proximity.
 	 */
-	protected StoppableRunnable clientRunnable;
+	private static final int PROXIMITY_PERIOD = 50;
 
 	/**
-	 * Thread that runs the server runnable.
+	 * How often to refresh the GUI.
 	 */
-	protected Thread clientThread;
+	private static final int REFRESH_GUI_PERIOD = 50;
 
 	/**
 	 * Gets the visualizable component of this agent.
@@ -178,11 +175,13 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	 */
 	protected ImageIcon createImageIcon(String path, String description)
 	{
-		java.net.URL imgURL = getClass().getResource(path);
+		URL imgURL = getClass().getResource(path);
+
 		if (imgURL != null)
 		{
 			return new ImageIcon(imgURL, description);
 		}
+
 		System.err.println("Couldn't find file: " + path);
 		return null;
 	}
@@ -220,43 +219,68 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 		active = false;
 		proximity = MAX_PROXIMITY;
 
-		proximityUpdater = new StoppableRunnable()
-		{
-			/**
-			 * The time used to reduce thread's CPU consumption.
-			 */
-			private static final int TIME_TO_SLEEP = 50;
+		timer = new Timer();
 
+		onIcon = new ImageIcon(getScaledImage(createImageIcon(HAPPY_FACE, HAPPY_FACE).getImage(), resize, resize));
+		offIcon = new ImageIcon(getScaledImage(createImageIcon(SAD_FACE, SAD_FACE).getImage(), resize, resize));
+
+		return true;
+	}
+
+	@Override
+	protected void atSimulationStart(AgentEvent event)
+	{
+		super.atSimulationStart(event);
+
+		gui = getGui();
+		label = gui.getLabel();
+
+		startInternalBuffer();
+
+		// Update the proximity.
+		timer.schedule(new TimerTask()
+		{
 			/**
 			 * How many decimals to keep.
 			 */
 			private static final int DOUBLE_TO_LONG = 100;
 
+			/**
+			 * Numerical value for any invalid proximity.
+			 */
+			public static final long INVALID_PROXIMITY = -1;
+
+			/**
+			 * JSON sensor id.
+			 */
+			public static final String SENSOR_ID = "sensor_id";
+
+			/**
+			 * JSON 3d skeleton.
+			 */
+			public static final String SKELETON_3D = "skeleton_3D";
+
+			/**
+			 * JSON torso.
+			 */
+			public static final String TORSO = "torso";
+
+			/**
+			 * JSON z axis.
+			 */
+			public static final String Z_AXIS = "Z";
+
 			@Override
 			public void run()
 			{
-				Perception perception = null;
+				Perception perception = get(AmILabDataType.SKELETON, false);
 
-				while (!stopFlag)
-				{
-					perception = get(AmILabDataType.SKELETON);
+				long newProximity = processPerception(perception);
 
-					try
-					{
-						Thread.sleep(TIME_TO_SLEEP);
-					} catch (InterruptedException e)
-					{
-						e.printStackTrace();
-					}
+				if (newProximity == INVALID_PROXIMITY)
+					return;
 
-					long newProximity = processPerception(perception);
-
-					if (newProximity == INVALID_PROXIMITY)
-						continue;
-
-					proximity = newProximity;
-				}
-
+				proximity = newProximity;
 			}
 
 			/**
@@ -273,7 +297,7 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 				try
 				{
 					parsedJson = new ObjectMapper().readValue(perception.getData(), HashMap.class);
-					String crtDaq = (String) parsedJson.get("sensor_id");
+					String crtDaq = (String) parsedJson.get(SENSOR_ID);
 
 					// If this entry is from another daq return the last known proximity.
 					if (!crtDaq.equals(daq))
@@ -281,9 +305,9 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 						return INVALID_PROXIMITY;
 					}
 
-					HashMap<?, ?> skeleton = (HashMap<?, ?>) parsedJson.get("skeleton_3D");
-					HashMap<?, ?> torso = (HashMap<?, ?>) skeleton.get("torso");
-					double newProximity = ((Double) torso.get("Z")).doubleValue();
+					HashMap<?, ?> skeleton = (HashMap<?, ?>) parsedJson.get(SKELETON_3D);
+					HashMap<?, ?> torso = (HashMap<?, ?>) skeleton.get(TORSO);
+					double newProximity = ((Double) torso.get(Z_AXIS)).doubleValue();
 
 					newProximity *= DOUBLE_TO_LONG;
 
@@ -291,68 +315,24 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 
 				} catch (Exception e)
 				{
-					e.printStackTrace();
 					return INVALID_PROXIMITY;
 				}
 			}
+		}, NO_DELAY, PROXIMITY_PERIOD);
 
-		};
-
-		int resize = 300;
-		onIcon = new ImageIcon(getScaledImage(createImageIcon(HAPPY_FACE, HAPPY_FACE).getImage(), resize, resize));
-		offIcon = new ImageIcon(getScaledImage(createImageIcon(SAD_FACE, SAD_FACE).getImage(), resize, resize));
-
-		proximityUpdaterThread = new Thread(proximityUpdater);
-
-		clientRunnable = new StoppableRunnable()
+		// Update the GUI.
+		timer.schedule(new TimerTask()
 		{
-			/**
-			 * The time between feedbacks.
-			 */
-			private static final int TIME_TO_SLEEP = 50;
-
 			@Override
 			public void run()
 			{
-				while (!stopFlag)
-				{
-					if (active)
-					{
-						// getAgentLog().info("I'm active and I have proximity []", Long.toString(proximity));
-						label.setIcon(onIcon);
-					} else
-					{
-						// getAgentLog().info("I'm inactive and I have proximity []", Long.toString(proximity));
-						label.setIcon(offIcon);
-					}
+				if (active)
 
-					try
-					{
-						Thread.sleep(TIME_TO_SLEEP);
-					} catch (InterruptedException e)
-					{
-						e.printStackTrace();
-					}
-				}
+					label.setIcon(onIcon);
+				else
+					label.setIcon(offIcon);
 			}
-		};
-
-		clientThread = new Thread(clientRunnable);
-
-		return true;
-	}
-
-	@Override
-	protected void atSimulationStart(AgentEvent event)
-	{
-		super.atSimulationStart(event);
-
-		gui = getGui();
-		label = gui.getLabel();
-
-		startInternalBuffer();
-		proximityUpdaterThread.start();
-		clientThread.start();
+		}, NO_DELAY, REFRESH_GUI_PERIOD);
 	}
 
 	@Override
@@ -360,8 +340,7 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	{
 		super.atAgentStop(event);
 
-		proximityUpdater.stop();
-		clientRunnable.stop();
+		timer.cancel();
 	}
 
 	@Override

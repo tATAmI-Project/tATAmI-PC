@@ -54,20 +54,8 @@ public class AmILabGui extends PCDefaultAgentGui
 	{
 		label = new JLabel("", SwingConstants.CENTER);
 
-		int size = 350;
-		window.setSize(size, size);
-		// window.setLayout(new FlowLayout());
 		window.add(label);
 		addComponent(MAIN_LABEL, label);
-	}
-
-	@Override
-	protected void placeWindow()
-	{
-		// WindowParameters protected constructors. How to set my custom dimensions?
-
-		// Without the super call the window does not have a name
-		super.placeWindow();
 	}
 
 	/**

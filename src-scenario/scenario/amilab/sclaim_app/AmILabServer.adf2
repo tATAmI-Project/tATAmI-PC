@@ -8,7 +8,6 @@
 			(addK (struct knowledge client ?client1 ?default))
 			(addK (struct knowledge client ?client2 ?default))
 			(addK (struct knowledge client ?client3 ?default))
-			(print this added_clients)
 		)
 		
 		// send requests for proximity to all clients
@@ -16,8 +15,6 @@
 		
 			// something tells the server to send requests
 			(input request)
-			
-			(print this send_requests)
 			
 			(forAllK (struct knowledge client ??client ??proximity)
 				(send ??client (struct message request this))

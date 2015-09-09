@@ -1,10 +1,7 @@
 package scenario.amilab.sclaim_app;
 
-import java.util.List;
+import java.util.TimerTask;
 
-import net.xqhs.util.XML.XMLTree.XMLNode;
-import net.xqhs.util.logging.Logger;
-import scenario.amilab.utils.StoppableRunnable;
 import tatami.core.agent.AgentEvent;
 
 /**
@@ -21,14 +18,9 @@ public class AmILabServer extends AmILabClient
 	private static final long serialVersionUID = 1406553420405779596L;
 
 	/**
-	 * Runnable that does all the logic
+	 * How often to send pings.
 	 */
-	protected StoppableRunnable serverRunnable;
-
-	/**
-	 * Thread that runs the server runnable.
-	 */
-	protected Thread serverThread;
+	private static final int PING_PERIOD = 500;
 
 	/**
 	 * Send requests to all clients.
@@ -39,58 +31,20 @@ public class AmILabServer extends AmILabClient
 	}
 
 	@Override
-	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, List<String> agentPackages,
-			Logger log)
-	{
-		if (!super.preload(parameters, scenarioNode, agentPackages, log))
-			return false;
-
-		serverRunnable = new StoppableRunnable()
-		{
-			/**
-			 * The time between the "pings".
-			 */
-			private static final int TIME_TO_SLEEP = 500;
-
-			@Override
-			public void run()
-			{
-				while (!stopFlag)
-				{
-					try
-					{
-						Thread.sleep(TIME_TO_SLEEP);
-					} catch (InterruptedException e)
-					{
-						e.printStackTrace();
-					}
-
-					System.out.println("Sending ping...");
-					sendRequests();
-					System.out.println("Sent ping.");
-				}
-			}
-		};
-
-		serverThread = new Thread(serverRunnable);
-
-		return true;
-	}
-
-	@Override
 	protected void atSimulationStart(AgentEvent event)
 	{
 		super.atSimulationStart(event);
 
-		serverThread.start();
+		// Periodically send pings.
+		timer.schedule(new TimerTask()
+		{
+			@Override
+			public void run()
+			{
+				System.out.println("Sending ping...");
+				sendRequests();
+				System.out.println("Sent ping.");
+			}
+		}, NO_DELAY, PING_PERIOD);
 	}
-
-	@Override
-	protected void atAgentStop(AgentEvent event)
-	{
-		super.atAgentStop(event);
-
-		serverRunnable.stop();
-	}
-
 }
