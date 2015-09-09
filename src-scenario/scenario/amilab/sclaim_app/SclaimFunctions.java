@@ -35,7 +35,7 @@ public class SclaimFunctions implements ClaimFunctionLibrary
 
 			// Update the values for the best client.
 			arguments.set(2, new ClaimValue(client));
-			arguments.set(3, new ClaimValue(new Long(proximity)));
+			arguments.set(3, new ClaimValue(new Long(proximity).toString()));
 		}
 
 		return true;

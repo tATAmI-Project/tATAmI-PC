@@ -309,7 +309,7 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 			/**
 			 * The time between feedbacks.
 			 */
-			private static final int TIME_TO_SLEEP = 500;
+			private static final int TIME_TO_SLEEP = 50;
 
 			@Override
 			public void run()

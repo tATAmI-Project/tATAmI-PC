@@ -50,17 +50,13 @@ public class AmILabServer extends AmILabClient
 			/**
 			 * The time between the "pings".
 			 */
-			private static final int TIME_TO_SLEEP = 5000;
+			private static final int TIME_TO_SLEEP = 500;
 
 			@Override
 			public void run()
 			{
 				while (!stopFlag)
 				{
-					System.out.println("Sending ping...");
-					sendRequests();
-					System.out.println("Sent ping.");
-
 					try
 					{
 						Thread.sleep(TIME_TO_SLEEP);
@@ -68,6 +64,10 @@ public class AmILabServer extends AmILabClient
 					{
 						e.printStackTrace();
 					}
+
+					System.out.println("Sending ping...");
+					sendRequests();
+					System.out.println("Sent ping.");
 				}
 			}
 		};

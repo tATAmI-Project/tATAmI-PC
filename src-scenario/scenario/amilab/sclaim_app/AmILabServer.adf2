@@ -5,7 +5,7 @@
 		(initial register
 		
 			// add all clients with a default proximity
-			//(addK (struct knowledge client ?client1 ?default))
+			(addK (struct knowledge client ?client1 ?default))
 			(addK (struct knowledge client ?client2 ?default))
 			(addK (struct knowledge client ?client3 ?default))
 			(print this added_clients)
@@ -19,8 +19,8 @@
 			
 			(print this send_requests)
 			
-			(forAllK (struct knowledge client ?client ?proximity)
-				(send ?client (struct message request this))
+			(forAllK (struct knowledge client ??client ??proximity)
+				(send ??client (struct message request this))
 			)
 		)
 		
@@ -38,7 +38,8 @@
 			// determine the closest client and remove him from the kb
 			(readK (struct knowledge client ??closestClient ??smallestProximity))
 			(forAllK (struct knowledge client ??client ??proximity)
-				(bestClient ??client ??proximity ??closestClient ??smallestProximity))
+				(bestClient ??client ??proximity ??closestClient ??smallestProximity)
+			)
 			(removeK (struct knowledge client ??closestClient ??smallestProximity))
 			
 			// tell the closest client the good news
