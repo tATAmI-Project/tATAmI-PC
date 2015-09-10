@@ -13,12 +13,39 @@ package tatami.amilab;
 
 import tatami.amilab.AmILabComponent.AmILabDataType;
 
+/**
+ * Wrapper for the raw data obtained from the Kestrel queue.
+ * 
+ * @author Claudiu-Mihai Toma
+ *
+ */
 public class Perception
 {
-	private AmILabDataType	_type;
-	private long			_timestamp;
-	private String			_data;
+	/**
+	 * Type of this perception.
+	 */
+	private AmILabDataType _type;
 
+	/**
+	 * The timestamp of this perception.
+	 */
+	private long _timestamp;
+
+	/**
+	 * The actual data received from the Kestrel queue. It is in JSON format.
+	 */
+	private String _data;
+
+	/**
+	 * Basic constructor that needs all the information about the perception.
+	 * 
+	 * @param type
+	 *            - type of this perception
+	 * @param timestamp
+	 *            - the timestamp of this perception
+	 * @param data
+	 *            - JSON from a Kestrel queue
+	 */
 	public Perception(AmILabDataType type, long timestamp, String data)
 	{
 		_type = type;
@@ -26,31 +53,64 @@ public class Perception
 		_data = data;
 	}
 
+	/**
+	 * Type getter.
+	 * 
+	 * @return the type of this perception
+	 */
 	public AmILabDataType getType()
 	{
 		return _type;
 	}
 
+	/**
+	 * Type setter.
+	 * 
+	 * @param type
+	 *            - the type of this perception
+	 */
 	public void setType(AmILabDataType type)
 	{
 		_type = type;
 	}
 
+	/**
+	 * Timestamp getter.
+	 * 
+	 * @return the timestamp of this perception
+	 */
 	public long getTimestamp()
 	{
 		return _timestamp;
 	}
 
+	/**
+	 * Timestamp setter.
+	 * 
+	 * @param timestamp
+	 *            - the timestamp of this perception
+	 */
 	public void setTimestamp(long timestamp)
 	{
 		_timestamp = timestamp;
 	}
 
+	/**
+	 * Data getter.
+	 * 
+	 * @return JSON from a Kestrel queue
+	 */
 	public String getData()
 	{
 		return _data;
 	}
 
+	/**
+	 * Data setter.
+	 * 
+	 * @param data
+	 *            - JSON from a Kestrel queue
+	 */
 	public void setData(String data)
 	{
 		_data = data;

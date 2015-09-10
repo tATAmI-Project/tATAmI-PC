@@ -28,6 +28,10 @@ import tatami.core.agent.visualization.VisualizableComponent;
 
 /**
  * 
+ * This client is a special kind of {@link AmILabComponent} that constantly updates the subject's proximity. It also
+ * listens for proximity requests (which are responded to with the latest proximity) and updates the GUI according with
+ * the response of the server.
+ * 
  * @author Claudiu-Mihai Toma
  *
  */
@@ -95,11 +99,6 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	protected String daq;
 
 	/**
-	 * Status of this component. {@code true} if this component has the smallest proximity.
-	 */
-	protected boolean active;
-
-	/**
 	 * Current distance to the subject.
 	 */
 	protected long proximity;
@@ -138,11 +137,6 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 	 * How often to update the proximity.
 	 */
 	private static final int PROXIMITY_PERIOD = 50;
-
-	/**
-	 * How often to refresh the GUI.
-	 */
-	private static final int REFRESH_GUI_PERIOD = 50;
 
 	/**
 	 * Gets the visualizable component of this agent.
@@ -216,7 +210,6 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 
 		daq = getComponentData().get(SENSOR);
 
-		active = false;
 		proximity = MAX_PROXIMITY;
 
 		timer = new Timer();
@@ -234,6 +227,7 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 
 		gui = getGui();
 		label = gui.getLabel();
+		label.setIcon(offIcon);
 
 		startInternalBuffer();
 
@@ -319,20 +313,6 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 				}
 			}
 		}, NO_DELAY, PROXIMITY_PERIOD);
-
-		// Update the GUI.
-		timer.schedule(new TimerTask()
-		{
-			@Override
-			public void run()
-			{
-				if (active)
-
-					label.setIcon(onIcon);
-				else
-					label.setIcon(offIcon);
-			}
-		}, NO_DELAY, REFRESH_GUI_PERIOD);
 	}
 
 	@Override
@@ -369,9 +349,9 @@ public class AmILabClient extends AmILabComponent implements AgentIO
 		getAgentLog().trace("Got response ", state);
 
 		if (state.equals(CONFIRM))
-			active = true;
+			label.setIcon(onIcon);
 		if (state.equals(DECLINE))
-			active = false;
+			label.setIcon(offIcon);
 	}
 
 }

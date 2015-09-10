@@ -6,6 +6,8 @@ import tatami.core.agent.AgentEvent;
 
 /**
  * 
+ * The server is a special kind of client that is capable of sending periodic requests for proximity to all the clients.
+ * 
  * @author Claudiu-Mihai Toma
  *
  */
@@ -41,9 +43,7 @@ public class AmILabServer extends AmILabClient
 			@Override
 			public void run()
 			{
-				System.out.println("Sending ping...");
 				sendRequests();
-				System.out.println("Sent ping.");
 			}
 		}, NO_DELAY, PING_PERIOD);
 	}

@@ -13,6 +13,7 @@ package tatami.amilab;
 
 import java.util.HashMap;
 import java.util.Observable;
+import java.util.Observer;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -20,7 +21,15 @@ import tatami.amilab.AmILabComponent.AmILabDataType;
 import tatami.amilab.util.SimpleKestrelClient;
 
 /**
- * Runnable that populates buffers. Without buffers it dies.
+ * {@link Runnable} implementation that populates {@link AmILabBuffer}s. It implements the Observable pattern.
+ * Without buffers (observers), it dies. It is started by {@link AmILabComponent} when it is needed (there are buffers that observe
+ * it).
+ * <p>
+ * This runnable needs a working {@link SimpleKestrelClient} and a Kestrel queue name in order to function properly. It
+ * constantly gets data from the Kestrel queue and sends it to all the {@link Observer} buffers in the form of
+ * {@link Perception}s.
+ * <p>
+ * {@link AmILabRunnable} has static methods that can be used in order to manipulate data from the Kestrel queue.
  * 
  * @author Claudiu-Mihai Toma
  *
@@ -74,6 +83,9 @@ public class AmILabRunnable extends Observable implements Runnable
 
 	/**
 	 * Stops the thread.
+	 * <p>
+	 * WARNING: {@link AmILabRunnable#isAlive()} may return {@code true} shortly after
+	 * {@link AmILabRunnable#stopThread()} is called.
 	 */
 	public void stopThread()
 	{
@@ -82,9 +94,6 @@ public class AmILabRunnable extends Observable implements Runnable
 
 	/**
 	 * Checks if the thread is alive.
-	 * <p>
-	 * FIXME: This may need a Thread.sleep() because it may sometimes return {@code true} shortly after being stopped or
-	 * {@code false} shortly after started.
 	 * 
 	 * @return {@code true} if alive, {@code false} otherwise
 	 */
@@ -121,7 +130,6 @@ public class AmILabRunnable extends Observable implements Runnable
 			// Send perception to all buffers.
 			notifyObservers(perception);
 
-			// TODO: Sleep here?
 			try
 			{
 				Thread.sleep(TIME_TO_SLEEP);

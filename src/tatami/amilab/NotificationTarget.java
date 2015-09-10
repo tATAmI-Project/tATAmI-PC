@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import tatami.amilab.AmILabComponent.AmILabDataType;
 
 /**
+ * Target to be notified by an {@link AmILabBuffer} when it gets full.
  * 
  * @author Claudiu-Mihai Toma
  *

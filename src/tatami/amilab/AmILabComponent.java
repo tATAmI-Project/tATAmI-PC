@@ -26,9 +26,22 @@ import tatami.core.agent.AgentEvent;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
- * {@link AgentComponent} that gets data from AmILab.
+ * {@link AgentComponent} that gets data from AmILab. It interacts (directly or indirectly) with AmILab's Kestrel server
+ * in order to get useful data.
  * <p>
- * FIXME: Write a bit more...
+ * {@link AmILabComponent} has an internal buffer feature. Starting the internal buffer (via
+ * {@link AmILabComponent#startInternalBuffer()}) will greatly improve getters' times but it may require more
+ * computational power.
+ * <p>
+ * {@link AmILabComponent} offers custom {@link AmILabBuffer}s. Here's a list of predefined buffers:
+ * <ul>
+ * <li>buffer - {@link AmILabBuffer} that notifies a {@link NotificationTarget} when it gets full
+ * <li>mutable buffer - {@link AmILabMutableBuffer} that notifies a {@link NotificationTarget} when it gets full
+ * <li>cyclic buffer - {@link AmILabBuffer} that, when it gets full, removes the oldest entry in order to create space
+ * for a new one<
+ * <li>cyclic mutable buffer - {@link AmILabMutableBuffer} that, when it gets full, removes the oldest entry in order to
+ * create space for a new one
+ * </ul>
  * 
  * @author Claudiu-Mihai Toma
  */
@@ -39,31 +52,6 @@ public class AmILabComponent extends AgentComponent
 	 * The serial UID.
 	 */
 	private static final long serialVersionUID = 7762026334280094146L;
-
-	/**
-	 * Server IP.
-	 */
-	public static final String KESTREL_MASTER_SERVER_IP = "172.16.7.143";
-
-	/**
-	 * Loopback IP.
-	 */
-	public static final String KESTREL_LOCAL_SERVER_IP = "127.0.0.1";
-
-	/**
-	 * Default Kestrel port.
-	 */
-	public static final int KESTREL_SERVER_PORT = 22133;
-
-	/**
-	 * Default Kestrel queue name.
-	 */
-	public static final String KESTREL_AMILAB_COMPONENT_QUEUE = "AMILAB_COMPONENT_QUEUE";
-
-	/**
-	 * Measurements queue.
-	 */
-	public static final String KESTREL_MEASUREMENTS_QUEUE = "measurements";
 
 	/**
 	 * The name of the parameter in the component parameter set that corresponds to the IP.
@@ -272,33 +260,6 @@ public class AmILabComponent extends AgentComponent
 	}
 
 	/**
-	 * Pushes a message to the Kestrel queue.
-	 * <p>
-	 * TODO: Relevant only for testing.
-	 * 
-	 * @param message
-	 *            - message to be pushed
-	 */
-	public void set(String message)
-	{
-		kestrelClient.set(kestrelQueueName, message);
-	}
-
-	/**
-	 * Clears Kestrel queue.
-	 * <p>
-	 * TODO: Relevant only for testing.
-	 */
-	public void clearQueue()
-	{
-		String data = null;
-		do
-		{
-			data = get();
-		} while (data != null);
-	}
-
-	/**
 	 * Starts the internal thread.
 	 */
 	protected void startInternalThread()
@@ -317,18 +278,16 @@ public class AmILabComponent extends AgentComponent
 
 	/**
 	 * Checks if the internal thread is alive.
-	 * <p>
-	 * TODO: Public is relevant only for testing. Make it protected!
 	 * 
 	 * @return state of internal thread
 	 */
-	public boolean isInternalThreadAlive()
+	protected boolean isInternalThreadAlive()
 	{
 		return kestrelGatherer.isAlive();
 	}
 
 	/**
-	 * Starts the internal buffer.
+	 * Starts the internal buffer in order to get data quicker at the cost of more computational power.
 	 */
 	public void startInternalBuffer()
 	{

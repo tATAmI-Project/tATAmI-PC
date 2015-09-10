@@ -9,6 +9,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import tatami.amilab.AmILabComponent.AmILabDataType;
 
 /**
+ * {@link AmILabBuffer} that allows more access to it's elements (like adding new ones or direct access to it's
+ * underlying queues).
  * 
  * @author Claudiu-Mihai Toma
  *
@@ -25,11 +27,10 @@ public class AmILabMutableBuffer extends AmILabBuffer
 	 * @param desiredLimitType
 	 *            - type of buffer
 	 * @param desiredLimit
-	 *            - numerical value of limit; the value for {@code UNLIMITED}
-	 *            must be {@code NO_LIMIT} ({@code -1})
+	 *            - numerical value of limit; the value for {@code UNLIMITED} must be {@code NO_LIMIT} ({@code -1})
 	 * @param overwriteData
-	 *            - {@code true} if data is continuously overwritten;
-	 *            {@code false} if the updating stops once the limit is reached
+	 *            - {@code true} if data is continuously overwritten; {@code false} if the updating stops once the limit
+	 *            is reached
 	 *            <p>
 	 *            This parameter has no effect on unlimited buffers.
 	 * @param notificationTarget
@@ -60,8 +61,7 @@ public class AmILabMutableBuffer extends AmILabBuffer
 	 * 
 	 * @param perception
 	 *            - perception to be added at the end of it's queue.
-	 * @return {@code true} if the operation is successful; {@code false}
-	 *         otherwise
+	 * @return {@code true} if the operation is successful; {@code false} otherwise
 	 */
 	public boolean addElement(Perception perception)
 	{

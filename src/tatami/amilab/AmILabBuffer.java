@@ -25,6 +25,13 @@ import tatami.amilab.AmILabComponent.AmILabDataType;
 
 /**
  * Buffer that gets populated by an {@link AmILabRunnable}.
+ * <p>
+ * It can contain various types (see {@link AmILabDataType}) and have various limit types (see {@link LimitType}).
+ * <p>
+ * Elements cannot be added to this buffer from the exterior of this class. For a mutable buffer use <code>AmILabMutableBuffer</code>
+ * <p>
+ * Depending on the data given as constructor parameters it may or may not notify a {@link NotificationTarget} when it
+ * gets full.
  * 
  * @author Claudiu-Mihai Toma
  *
