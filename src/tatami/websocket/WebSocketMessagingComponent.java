@@ -11,17 +11,19 @@
  ******************************************************************************/
 package tatami.websocket;
 
+import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
+import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.messaging.NameBasedMessagingComponent;
 
 /**
- * 
+ * Agent component that allows communication via WebSockets, using the services provided by
+ * {@link WebSocketMessagingPlatform}.
  */
 public class WebSocketMessagingComponent extends NameBasedMessagingComponent
 {
-	
 	/**
-	 * 
+	 * the serial UID.
 	 */
 	private static final long serialVersionUID = 1L;
 	
@@ -30,9 +32,6 @@ public class WebSocketMessagingComponent extends NameBasedMessagingComponent
 	 */
 	WebSocketMessagingPlatform platform;
 	
-	/**
-	 * Method called when an agent starts
-	 */
 	@Override
 	protected void atAgentStart(AgentEvent event)
 	{
@@ -55,14 +54,14 @@ public class WebSocketMessagingComponent extends NameBasedMessagingComponent
 	}
 	
 	/**
-	 * Pass the message to the agent implementation
+	 * Pass the message to the implementation in {@link MessagingComponent}, via {@link AgentComponent}.
 	 * 
 	 * @param source
-	 *            -Source
+	 *            - source endpoint
 	 * @param target
-	 *            - Target
+	 *            - target endpoint
 	 * @param message
-	 *            - Content
+	 *            - message content
 	 */
 	public void onMessage(String source, String target, String message)
 	{
@@ -70,7 +69,7 @@ public class WebSocketMessagingComponent extends NameBasedMessagingComponent
 	}
 	
 	/**
-	 * Method called from the agent when it needs to send a message
+	 * Method called from the agent when it needs to send a message.
 	 */
 	@Override
 	public boolean sendMessage(String target, String source, String content)
