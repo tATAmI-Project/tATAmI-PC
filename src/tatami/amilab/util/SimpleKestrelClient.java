@@ -1,3 +1,6 @@
+/*******************************************************************************
+ * From https://github.com/hogelog/simple-kestrel-client.
+ ******************************************************************************/
 package tatami.amilab.util;
 
 import java.io.Closeable;
