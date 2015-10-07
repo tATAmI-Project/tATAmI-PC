@@ -27,7 +27,7 @@ import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.hierarchical.HierarchicalComponent;
 import tatami.core.agent.kb.CognitiveComponent;
 import tatami.core.agent.messaging.MessagingComponent;
-import tatami.core.agent.movement.MovementComponent;
+import tatami.core.agent.mobility.MobilityComponent;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.webServices.WebserviceComponent;
@@ -139,7 +139,7 @@ public abstract class AgentComponent implements Serializable
 		/**
 		 * The name of a component extending {@link MovementComponent}.
 		 */
-		MOVEMENT_COMPONENT,
+		MOBILITY_COMPONENT,
 		
 		/**
 		 * The name of a component extending {@link BehaviorComponent}.
