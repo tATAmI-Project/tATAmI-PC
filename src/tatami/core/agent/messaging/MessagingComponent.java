@@ -75,7 +75,7 @@ public abstract class MessagingComponent extends AgentComponent
 		/**
 		 * General messaging debugging switch.
 		 */
-		DEBUG_MESSAGING(false),
+		DEBUG_MESSAGING(true),
 		
 		;
 		
@@ -174,14 +174,8 @@ public abstract class MessagingComponent extends AgentComponent
 			// should never happen.
 			throw new IllegalStateException("Config locked:" + PlatformUtils.printException(e));
 		}
-		try
-		{
-			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
-					"Received message from [" + source + "] to [" + destination + "] with content [" + content + "].");
-		} catch(NullPointerException e)
-		{
-			// it's ok, there was no vis component / no log
-		}
+		getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING, "Received message from [] to [] with content [].", source,
+				destination, content);
 		
 		postAgentEvent(event);
 	}
@@ -211,18 +205,15 @@ public abstract class MessagingComponent extends AgentComponent
 			destinationInternal = "/";
 		for(Map.Entry<String, Set<AgentEventHandler>> entry : messageHandlers.entrySet())
 		{
-			try
-			{
-				getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
-						"Comparing: [" + destinationInternal + "] to declared [" + entry.getKey() + "]");
-			} catch(NullPointerException e)
-			{
-				// it's ok, there was no vis component / no log
-			}
+			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING, "Comparing: [] to declared []", destinationInternal,
+					entry.getKey());
 			if(destinationInternal.startsWith(entry.getKey()))
 				// prefix matches
 				for(AgentEventHandler receiver : entry.getValue())
+				{
+					getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING, "Dispatching to []", receiver);
 					receiver.handleEvent(event);
+				}
 		}
 	}
 	

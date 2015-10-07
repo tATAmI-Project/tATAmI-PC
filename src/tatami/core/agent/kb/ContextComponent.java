@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (C) 2015 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+ * 
+ * This file is part of tATAmI-PC.
+ * 
+ * tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+ * 
+ * tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package tatami.core.agent.kb;
 
 import java.util.ArrayList;
@@ -18,22 +29,17 @@ import net.xqhs.graphs.context.Instant.TimeKeeper;
 import net.xqhs.graphs.graph.Edge;
 import net.xqhs.graphs.graph.Graph;
 import net.xqhs.graphs.graph.GraphComponent;
-import net.xqhs.graphs.graph.Node;
 import net.xqhs.graphs.graph.SimpleGraph;
 import net.xqhs.graphs.matcher.GraphMatcherQuick;
 import net.xqhs.graphs.matcher.GraphMatchingProcess;
 import net.xqhs.graphs.matcher.Match;
 import net.xqhs.graphs.matcher.MonitorPack;
-import net.xqhs.graphs.pattern.EdgeP;
 import net.xqhs.graphs.pattern.GraphPattern;
-import net.xqhs.graphs.pattern.NodeP;
 import net.xqhs.graphs.representation.text.TextGraphRepresentation;
 import net.xqhs.graphs.util.ContentHolder;
-import tatami.core.agent.AgentComponent;
-import tatami.sclaim.constructs.basic.ClaimValue;
 
 @SuppressWarnings("javadoc")
-public class ContextComponent extends AgentComponent { // TODO extend Cognitive Component
+public class ContextComponent extends CognitiveComponent { // TODO extend Cognitive Component
 
 	/**
 	 * The serial UID.
@@ -48,7 +54,7 @@ public class ContextComponent extends AgentComponent { // TODO extend Cognitive 
 	 */
 	public ContextComponent() 
 	{
-		super(AgentComponentName.COGNITIVE_COMPONENT);
+		super();
 	
 		// make ticker
 		TimeKeeper ticker = new IntTimeKeeper();

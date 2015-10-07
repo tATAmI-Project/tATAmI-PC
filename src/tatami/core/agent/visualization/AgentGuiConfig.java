@@ -1,9 +1,21 @@
+/*******************************************************************************
+ * Copyright (C) 2015 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+ * 
+ * This file is part of tATAmI-PC.
+ * 
+ * tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+ * 
+ * tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package tatami.core.agent.visualization;
 
 import java.io.Serializable;
 import java.util.Collection;
 
 import net.xqhs.util.config.Config;
+import net.xqhs.util.logging.Logger;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
@@ -68,7 +80,7 @@ public class AgentGuiConfig extends Config implements Serializable
 		setClassNameOverride(null);
 		setWindowName(null);
 		setWindowType(DEFAULT_WINDOW_TYPE);
-		setGuiClass(null, null);
+		setGuiClass(null, null, null);
 		return this;
 	}
 	
@@ -130,9 +142,11 @@ public class AgentGuiConfig extends Config implements Serializable
 	 *            - the class for the GUI.
 	 * @param packages
 	 *            - a {@link Collection} of packages into which to look for the class.
+	 * @param log
+	 *            - log to use for logging messages.
 	 * @return the instance itself, for chained calls.
 	 */
-	public AgentGuiConfig setGuiClass(String className, Collection<String> packages)
+	public AgentGuiConfig setGuiClass(String className, Collection<String> packages, Logger log)
 	{
 		PlatformUtils.Platform platform = PlatformUtils.getPlatform();
 		// the default path for GUI classes is in ROOT.lowercase_platform.DEFAULT_GUI_PATH
@@ -142,10 +156,17 @@ public class AgentGuiConfig extends Config implements Serializable
 		// if overridden, start from the value of the override; otherwise, from the method argument.
 		String cName = (overrideClassName != null) ? overrideClassName : className;
 		if(cName == null) // no class name given -> load default. e.g. PCDefaultAgentGui.
+		{
 			guiClassName = defaultGuiPath + "." + platform + DEFAULT_AGENT_GUI;
+			if(log != null)
+				log.trace("GUI: using default class ", guiClassName);
+		}
 		else if(cName.indexOf(defaultGuiPath) >= 0)
-			// if the class contains package information and is inside the default package, it is left unchanged.
+		{ // if the class contains package information and is inside the default package, it is left unchanged.
 			guiClassName = cName;
+			if(log != null)
+				log.trace("GUI: using as is class ", guiClassName);
+		}
 		else
 		{
 			for(String pack : packages)
@@ -154,19 +175,25 @@ public class AgentGuiConfig extends Config implements Serializable
 				try
 				{
 					path = pack + "." + platform + "." + cName;
-					System.out.println("trying: [" + path + "]");
+					if(log != null)
+						log.trace("GUI: trying: []", path);
 					Class.forName(path);
 					guiClassName = path;
 					break;
 				} catch(ClassNotFoundException e)
 				{
-					System.out.println("not found: [" + path + "]");
 					// do nothing; go forth
 				}
 			}
 			// if an appropriate class has not been found, revert to the default GUI class.
 			if(guiClassName == null)
+			{
 				guiClassName = defaultGuiPath + "." + platform + DEFAULT_AGENT_GUI;
+				if(log != null)
+					log.trace("GUI not found; reverted to default: [] ", guiClassName);
+			}
+			else if(log != null)
+				log.trace("GUI found: []", guiClassName);
 		}
 		return this;
 	}
@@ -185,5 +212,13 @@ public class AgentGuiConfig extends Config implements Serializable
 	public String getWindowType()
 	{
 		return windowType;
+	}
+	
+	/**
+	 * @return the computed class name for the GUI.
+	 */
+	public String getGuiClass()
+	{
+		return guiClassName;
 	}
 }

@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (C) 2015 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+ * 
+ * This file is part of tATAmI-PC.
+ * 
+ * tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+ * 
+ * tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 //### This file created by BYACC 1.8(/Java extension  1.15)
 //### Java capabilities added 7 Jan 97, Bob Jamison
 //### Updated : 27 Nov 97  -- Bob Jamison, Joe Nieten
@@ -29,9 +40,8 @@ import net.xqhs.util.logging.Logger;
 import net.xqhs.util.logging.UnitComponentExt;
 import net.xqhs.util.logging.logging.Logging;
 import tatami.core.util.platformUtils.PlatformUtils;
-//import tatami.core.util.logging.Log;
 import tatami.sclaim.constructs.basic.*;
-//#line 29 "ParserSClaim.java"
+//#line 30 "ParserSClaim.java"
 
 
 
@@ -187,92 +197,97 @@ public final static short THEN=280;
 public final static short ELSE=281;
 public final static short INPUT=282;
 public final static short OUTPUT=283;
-public final static short IN=284;
-public final static short OUT=285;
-public final static short OPEN=286;
-public final static short ACID=287;
-public final static short NEW=288;
-public final static short WAIT=289;
-public final static short AGOAL=290;
-public final static short MGOAL=291;
-public final static short PGOAL=292;
-public final static short ACHIEVE=293;
-public final static short ACTION=294;
-public final static short MAINTAIN=295;
-public final static short TARGET=296;
+public final static short PRINT=284;
+public final static short IN=285;
+public final static short OUT=286;
+public final static short OPEN=287;
+public final static short ACID=288;
+public final static short NEW=289;
+public final static short WAIT=290;
+public final static short AGOAL=291;
+public final static short MGOAL=292;
+public final static short PGOAL=293;
+public final static short ACHIEVE=294;
+public final static short ACTION=295;
+public final static short MAINTAIN=296;
+public final static short TARGET=297;
 public final static short YYERRCODE=256;
 final static short yylhs[] = {                           -1,
     1,    1,    2,    2,    2,    3,    3,    4,    4,    4,
     6,    6,    5,    7,    7,    7,    7,    7,   10,   10,
    11,   12,   13,   13,   14,   14,   14,   14,   15,   15,
    16,   16,   16,   17,   17,   18,   19,   20,   21,   22,
-   23,   24,   25,   26,   27,    9,   28,   29,   30,   30,
-   30,   30,   30,   30,   30,   30,   30,   30,   30,    8,
-    8,   31,   31,   31,   31,   32,   32,   34,   33,   35,
-   35,   36,   37,   37,   39,   39,   40,   40,   41,   41,
-   41,   42,   42,   43,   43,   43,   43,   43,   43,   38,
-   38,   44,   44,   44,   45,   45,   46,    0,    0,
+   23,   24,   25,   26,   27,   28,    9,   29,   30,   31,
+   31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+   31,    8,    8,   32,   32,   32,   32,   33,   33,   35,
+   34,   36,   36,   37,   38,   38,   40,   40,   41,   41,
+   42,   42,   42,   43,   43,   44,   44,   44,   44,   44,
+   44,   39,   39,   45,   45,   45,   46,   46,   47,    0,
+    0,
 };
 final static short yylen[] = {                            2,
     1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
     1,    2,    4,    1,    1,    1,    1,    1,    1,    2,
     1,    1,    1,    2,    1,    1,    1,    1,    5,    4,
     1,    1,    1,    1,    2,    4,    4,    4,    4,    4,
-    4,    4,    3,    4,    4,    4,    4,    4,    1,    1,
-    1,    1,    1,    1,    1,    1,    1,    1,    1,    3,
-    4,    7,    9,    7,    7,    1,    2,    1,    1,    1,
-    1,    4,    6,    8,    4,    5,    4,    5,    1,    1,
-    1,    1,    2,    1,    1,    1,    1,    1,    1,    1,
-    2,    5,    5,    6,    1,    2,    4,    6,    5,
+    4,    4,    4,    3,    4,    4,    4,    4,    4,    1,
+    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+    1,    3,    4,    7,    9,    7,    7,    1,    2,    1,
+    1,    1,    1,    4,    6,    8,    4,    5,    4,    5,
+    1,    1,    1,    1,    2,    1,    1,    1,    1,    1,
+    1,    1,    2,    5,    5,    6,    1,    2,    4,    6,
+    5,
 };
 final static short yydefred[] = {                         0,
     0,    0,    0,   21,    0,    1,    2,    0,   22,   23,
-    0,    0,    0,   24,    0,   99,    0,   95,    0,   98,
-   25,   26,   27,   28,    0,   97,   96,    0,    0,   85,
-   57,   49,   79,   80,   50,   51,   52,   53,   54,   55,
-   56,   58,   59,   84,   89,   81,   86,    0,   87,   88,
-   82,    0,   90,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,   24,    0,  101,    0,   97,    0,  100,
+   25,   26,   27,   28,    0,   99,   98,    0,    0,   87,
+   59,   50,   81,   82,   51,   52,   53,   54,   55,   56,
+   57,   58,   60,   61,   86,   91,   83,   88,    0,   89,
+   90,   84,    0,   92,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,   92,   91,   93,    0,   83,
-    7,    6,    4,    5,    0,    3,   31,   32,   33,   34,
-    0,    0,    0,   71,   70,    0,    0,    0,    0,    0,
-    0,   14,   15,   16,   19,   17,   18,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,   43,    0,    0,    0,
-    0,    0,   60,    0,   94,    0,    0,   37,   35,   36,
-   72,    0,   75,    0,   77,    0,   45,   20,   46,   47,
-    0,   38,   39,   40,   41,   42,   44,   48,    0,   69,
-    0,    0,   61,    0,    8,    9,   11,   10,    0,    0,
-   76,   78,    0,    0,    0,    0,    0,   30,   12,   13,
-    0,   73,   68,    0,   66,    0,    0,   29,    0,   62,
-   67,    0,   64,   65,   74,    0,   63,
+    0,    0,    0,    0,    0,    0,    0,   94,   93,   95,
+    0,   85,    7,    6,    4,    5,    0,    3,   31,   32,
+   33,   34,    0,    0,    0,   73,   72,    0,    0,    0,
+    0,    0,    0,   14,   15,   16,   19,   17,   18,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,   44,
+    0,    0,    0,    0,    0,   62,    0,   96,    0,    0,
+   37,   35,   36,   74,    0,   77,    0,   79,    0,   46,
+   20,   47,   48,    0,   38,   39,   40,   41,   42,   43,
+   45,   49,    0,   71,    0,    0,   63,    0,    8,    9,
+   11,   10,    0,    0,   78,   80,    0,    0,    0,    0,
+    0,   30,   12,   13,    0,   75,   70,    0,   68,    0,
+    0,   29,    0,   64,   69,    0,   66,   67,   76,    0,
+   65,
 };
 final static short yydgoto[] = {                          2,
-   86,  102,  103,  157,  104,  159,  105,  106,  107,  108,
-   74,   10,   11,   25,   89,   90,   91,   32,   33,   34,
+   88,  104,  105,  161,  106,  163,  107,  108,  109,  110,
+   76,   10,   11,   25,   91,   92,   93,   32,   33,   34,
    35,   36,   37,   38,   39,   40,   41,   42,   43,   44,
-   45,  174,  151,  175,   96,   46,   47,   48,   49,   50,
-   51,   52,   53,   18,   19,   12,
+   45,   46,  178,  155,  179,   98,   47,   48,   49,   50,
+   51,   52,   53,   54,   18,   19,   12,
 };
-final static short yysindex[] = {                         1,
- -221,    0, -203,    0,   89,    0,    0, -206,    0,    0,
-   89,   39,   52,    0,   54,    0, -219,    0,  -27,    0,
-    0,    0,    0,    0, -203,    0,    0,   61,  -76,    0,
+final static short yysindex[] = {                       -33,
+ -252,    0, -222,    0,   97,    0,    0, -216,    0,    0,
+   97,   15,   18,    0,   46,    0, -187,    0,  -23,    0,
+    0,    0,    0,    0, -222,    0,    0,   54,  -77,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,   -4,    0,    0,
-    0,   21,    0,   71,   71,   64,   67,   72,   77,   77,
-   77,   64,   77,   77,   77,   77,   77,   73,   77,   77,
- -203, -203, -203,  -37,  158,    0,    0,    0,   25,    0,
-    0,    0,    0,    0, -234,    0,    0,    0,    0,    0,
-  -31,  -25, -254,    0,    0,   74, -150,   31, -203,   33,
- -242,    0,    0,    0,    0,    0,    0,  -14,   -8,   -1,
- -164,    5,   11,   17,   23,   29,    0,   35,   41,   77,
- -182, -182,    0,   47,    0, -154,   83,    0,    0,    0,
-    0,   83,    0,   43,    0,   45,    0,    0,    0,    0,
-   79,    0,    0,    0,    0,    0,    0,    0, -173,    0,
- -174, -172,    0,   83,    0,    0,    0,    0,   53,   59,
-    0,    0,  -39, -182, -182, -182,   65,    0,    0,    0,
-   79,    0,    0,  -21,    0,  -41,   84,    0,   49,    0,
-    0, -182,    0,    0,    0,  -19,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    5,    0,
+    0,    0,   23,    0,   79,   79,   60,   63,   69,   85,
+   85,   85,   60,   85,   85,   85,   85,   85,   85,   71,
+   85,   85, -222, -222, -222,  -37,  129,    0,    0,    0,
+   27,    0,    0,    0,    0,    0, -233,    0,    0,    0,
+    0,    0,  -31,  -25, -253,    0,    0,   86, -131,   35,
+ -222,   45, -234,    0,    0,    0,    0,    0,    0,  -14,
+   -8,    1, -147,    7,   13,   19,   25,   31,   37,    0,
+   43,   49,   85, -168, -168,    0,   55,    0, -127,   91,
+    0,    0,    0,    0,   91,    0,   57,    0,   77,    0,
+    0,    0,    0,  101,    0,    0,    0,    0,    0,    0,
+    0,    0, -148,    0, -144, -142,    0,   91,    0,    0,
+    0,    0,   61,   67,    0,    0,  -39, -168, -168, -168,
+   73,    0,    0,    0,  101,    0,    0,  -21,    0,  -41,
+  113,    0,   83,    0,    0, -168,    0,    0,    0,  -19,
+    0,
 };
 final static short yyrindex[] = {                         0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -293,103 +308,105 @@ final static short yyrindex[] = {                         0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,
 };
 final static short yygindex[] = {                         0,
-   13,  299,  -24, -148,   22, -126,  247,  320,  321,  341,
-   99,  116,    0,    0,    0,   18,   76,    0,    0,    0,
+   39,  -42,  -20, -102,  -24, -130,  248,  328,  329,  112,
+  117,  144,    0,    0,    0,   42,  103,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0, -157,    6, -132,   70,    0,    0,  -45,    0,    0,
-   81,    0,   12,  115,    0,  126,
+    0,    0, -146,   32, -159,   98,    0,    0,  -45,    0,
+    0,  109,    0,  -11,  145,    0,  152,
 };
-final static int YYTABLESIZE=500;
+final static int YYTABLESIZE=512;
 static short yytable[];
 static { yytable();}
 static void yytable(){
-yytable = new short[]{                        183,
-   75,  172,  101,  123,    4,  160,   79,  176,   85,  128,
-  169,  169,   17,   26,   85,  130,    4,    9,  169,  180,
-  132,  187,   60,    9,  186,  101,  137,  167,  126,   88,
-   88,  101,  139,  177,   60,   75,   76,  127,  101,  140,
-    1,  181,    3,  181,  101,  142,   21,   22,   23,   24,
-  101,  143,  134,  181,  136,    4,  101,  144,   13,   77,
-   29,   78,  101,  145,   75,  125,   88,   88,  101,  146,
-   75,  133,   75,  135,  101,  147,   81,   82,   98,   16,
-  101,  148,   75,  161,   75,  162,  101,  153,   75,  185,
-   77,   17,   97,  168,   20,  163,  150,  150,   97,  170,
-   29,    5,  156,   93,   97,  178,   97,  156,  129,  129,
-   85,   99,  132,  117,  131,  141,  101,  154,   75,  164,
-  165,  166,   97,   28,  184,  179,   14,  152,    8,  156,
-   92,  111,   80,   27,  156,  156,   15,    0,    0,  173,
-  173,  173,  156,    0,    0,   77,    0,   77,  158,  173,
-    0,  173,    0,  158,    0,    0,    0,  173,    0,    0,
-    0,  173,    0,    0,    0,    0,    0,    0,    0,  120,
-  121,  122,    0,    0,   77,  158,    0,    0,    0,    0,
-  158,  158,    4,    0,    0,    0,    0,    0,  158,    0,
-   77,    0,    0,   54,   55,    0,   56,   57,   58,   59,
-   60,   61,   62,    0,    0,   63,   64,   65,   66,   67,
-   68,   69,   70,   71,   72,   73,    0,   81,   82,    6,
-    7,   81,   82,   83,   84,    6,    7,   81,   82,   83,
-   84,    6,    7,   81,   82,   83,   84,   81,   82,   81,
-   82,  171,    6,    7,   81,   82,   83,   84,    6,    7,
-   81,   82,   83,   84,  182,    6,    7,   81,   82,   83,
-   84,    6,    7,   81,   82,   83,   84,    6,    7,   81,
-   82,   83,   84,    6,    7,   81,   82,   83,   84,    6,
-    7,   81,   82,   83,   84,    6,    7,   81,   82,   83,
-   84,    6,    7,   81,   82,   83,   84,    6,    7,   81,
-   82,   83,   84,    6,    7,   81,   82,   83,   84,    6,
-    7,   81,   82,   83,   84,    6,    7,   81,   82,   83,
-   84,    6,    7,   81,   82,   83,   84,    6,    7,   81,
-   82,   83,   84,    6,    7,   81,   82,   83,   84,    6,
-    7,   81,   82,   83,   84,    6,    7,   30,   31,    0,
-    0,    0,   87,   87,  138,  138,  138,    0,  138,  138,
-  138,  138,  138,    0,  138,  138,  149,   30,   31,    0,
-  138,   30,   31,    0,    0,   94,   95,  100,    0,    0,
-    0,   94,   95,    0,    0,    0,    0,    0,    0,   87,
-   87,    0,    0,    0,    0,    0,    0,    0,   30,   31,
-  109,  110,    0,  112,  113,  114,  115,  116,    0,  118,
-  119,    0,    0,    0,  124,    0,    4,   30,   31,   30,
-   31,    0,    0,    0,    0,  155,    0,    0,   55,    0,
-  155,   57,   58,   59,   60,   61,   62,    0,    0,    0,
-   64,   65,   66,   67,   68,   69,   70,   71,   72,   73,
-    0,    0,  155,   30,   31,   30,   31,  155,  155,    0,
-   30,   31,    0,    0,    0,  155,    0,    0,    0,    0,
+yytable = new short[]{                        187,
+   77,  176,  103,  126,  164,    4,    1,   81,   87,  131,
+  181,    3,   89,   89,   87,  133,   17,   26,  185,  184,
+  185,  191,  180,   61,    4,  103,  140,  171,  135,  129,
+  185,  103,  142,  100,   90,   90,    4,   79,  130,  190,
+  103,  143,   61,    9,   77,   78,  103,  145,   13,    9,
+   89,   89,  103,  146,  137,   16,  139,   17,  103,  147,
+  173,  173,   29,   80,  103,  148,   77,  128,  173,   79,
+  103,  149,   90,   90,   77,  136,  103,  150,   21,   22,
+   23,   24,  103,  151,   77,  138,   20,  159,  103,  152,
+   83,   84,  159,   29,  103,  157,   77,  165,  167,   95,
+   99,  172,   99,  154,  154,  162,   99,  174,  101,  160,
+  162,  120,   99,  182,  160,  159,   77,  166,   87,    5,
+  159,  159,   77,  189,  103,   79,  134,   79,  159,  183,
+   99,  135,  144,  162,  132,  132,    8,  160,  162,  162,
+   77,   28,  160,  160,  158,  168,  162,  177,  177,  177,
+  160,  169,  170,  188,   14,   79,  156,  177,   94,  177,
+  113,   82,   15,   27,    0,  177,    0,    0,    0,  177,
+    0,   79,  111,  112,    0,  114,  115,  116,  117,  118,
+  119,    4,  121,  122,    0,    0,    0,  127,    0,  123,
+  124,  125,   55,   56,    0,   57,   58,   59,   60,   61,
+   62,   63,    0,    0,   64,   65,   66,   67,   68,   69,
+   70,   71,   72,   73,   74,   75,    0,   83,   84,    6,
+    7,   83,   84,   85,   86,    6,    7,   83,   84,   85,
+   86,    6,    7,   83,   84,   85,   86,   83,   84,   83,
+   84,  175,    6,    7,   83,   84,   85,   86,    6,    7,
+   83,   84,   85,   86,    0,  186,    0,    6,    7,   83,
+   84,   85,   86,    6,    7,   83,   84,   85,   86,    6,
+    7,   83,   84,   85,   86,    6,    7,   83,   84,   85,
+   86,    6,    7,   83,   84,   85,   86,    6,    7,   83,
+   84,   85,   86,    6,    7,   83,   84,   85,   86,    6,
+    7,   83,   84,   85,   86,    6,    7,   83,   84,   85,
+   86,    6,    7,   83,   84,   85,   86,    6,    7,   83,
+   84,   85,   86,    6,    7,   83,   84,   85,   86,    6,
+    7,   83,   84,   85,   86,    6,    7,   83,   84,   85,
+   86,    6,    7,   83,   84,   85,   86,    6,    7,   83,
+   84,   85,   86,    6,    7,   30,   31,  141,  141,  141,
+    0,  141,  141,  141,  141,  141,  141,    0,  141,  141,
+  153,    0,    0,    0,  141,    0,   30,   31,    0,    0,
+   30,   31,    0,    0,   96,   97,  102,    4,    0,    0,
+   96,   97,    0,    0,    0,    0,    0,    0,    0,   56,
+    0,    0,   58,   59,   60,   61,   62,   63,   30,   31,
+    0,   65,   66,   67,   68,   69,   70,   71,   72,   73,
+   74,   75,    0,    0,    0,    0,    0,   30,   31,   30,
+   31,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,   30,   31,   30,   31,    0,    0,
+    0,   30,   31,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,   30,   31,    0,    0,    0,    0,
     0,    0,   30,   31,    0,    0,    0,    0,    0,    0,
-   30,   31,    0,    0,    0,    0,    0,    0,   30,   31,
+   30,   31,
 };
 }
 static short yycheck[];
 static { yycheck(); }
 static void yycheck() {
 yycheck = new short[] {                         41,
-   40,   41,   40,   41,  259,  132,   52,  165,   40,   41,
-  159,  160,   40,   41,   40,   41,  259,    5,  167,   41,
-  263,   41,  277,   11,  182,   40,   41,  154,  263,   54,
-   55,   40,   41,  166,  277,   40,   41,  272,   40,   41,
-   40,  174,  264,  176,   40,   41,  266,  267,  268,  269,
-   40,   41,   98,  186,  100,  259,   40,   41,  265,   48,
-   40,   41,   40,   41,   40,   41,   91,   92,   40,   41,
-   40,   41,   40,   41,   40,   41,  259,  260,   57,   41,
-   40,   41,   40,   41,   40,   41,   40,   41,   40,   41,
-   79,   40,   40,   41,   41,  141,  121,  122,   40,   41,
-   40,    3,  127,   40,   40,   41,   40,  132,   91,   92,
-   40,   40,  263,   41,   41,  280,   40,  272,   40,  293,
-  295,  294,   40,   25,   41,  171,   11,  122,   40,  154,
-   55,   62,   52,   19,  159,  160,   11,   -1,   -1,  164,
-  165,  166,  167,   -1,   -1,  134,   -1,  136,  127,  174,
-   -1,  176,   -1,  132,   -1,   -1,   -1,  182,   -1,   -1,
-   -1,  186,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   71,
-   72,   73,   -1,   -1,  163,  154,   -1,   -1,   -1,   -1,
-  159,  160,  259,   -1,   -1,   -1,   -1,   -1,  167,   -1,
-  179,   -1,   -1,  270,  271,   -1,  273,  274,  275,  276,
-  277,  278,  279,   -1,   -1,  282,  283,  284,  285,  286,
-  287,  288,  289,  290,  291,  292,   -1,  259,  260,  257,
+   40,   41,   40,   41,  135,  259,   40,   53,   40,   41,
+  170,  264,   55,   56,   40,   41,   40,   41,  178,   41,
+  180,   41,  169,  277,  259,   40,   41,  158,  263,  263,
+  190,   40,   41,   58,   55,   56,  259,   49,  272,  186,
+   40,   41,  277,    5,   40,   41,   40,   41,  265,   11,
+   93,   94,   40,   41,  100,   41,  102,   40,   40,   41,
+  163,  164,   40,   41,   40,   41,   40,   41,  171,   81,
+   40,   41,   93,   94,   40,   41,   40,   41,  266,  267,
+  268,  269,   40,   41,   40,   41,   41,  130,   40,   41,
+  259,  260,  135,   40,   40,   41,   40,   41,  144,   40,
+   40,   41,   40,  124,  125,  130,   40,   41,   40,  130,
+  135,   41,   40,   41,  135,  158,   40,   41,   40,    3,
+  163,  164,   40,   41,   40,  137,   41,  139,  171,  175,
+   40,  263,  280,  158,   93,   94,   40,  158,  163,  164,
+   40,   25,  163,  164,  272,  294,  171,  168,  169,  170,
+  171,  296,  295,   41,   11,  167,  125,  178,   56,  180,
+   63,   53,   11,   19,   -1,  186,   -1,   -1,   -1,  190,
+   -1,  183,   61,   62,   -1,   64,   65,   66,   67,   68,
+   69,  259,   71,   72,   -1,   -1,   -1,   76,   -1,   73,
+   74,   75,  270,  271,   -1,  273,  274,  275,  276,  277,
+  278,  279,   -1,   -1,  282,  283,  284,  285,  286,  287,
+  288,  289,  290,  291,  292,  293,   -1,  259,  260,  257,
   258,  259,  260,  261,  262,  257,  258,  259,  260,  261,
   262,  257,  258,  259,  260,  261,  262,  259,  260,  259,
   260,  281,  257,  258,  259,  260,  261,  262,  257,  258,
-  259,  260,  261,  262,  296,  257,  258,  259,  260,  261,
-  262,  257,  258,  259,  260,  261,  262,  257,  258,  259,
+  259,  260,  261,  262,   -1,  297,   -1,  257,  258,  259,
   260,  261,  262,  257,  258,  259,  260,  261,  262,  257,
   258,  259,  260,  261,  262,  257,  258,  259,  260,  261,
   262,  257,  258,  259,  260,  261,  262,  257,  258,  259,
@@ -397,26 +414,29 @@ yycheck = new short[] {                         41,
   258,  259,  260,  261,  262,  257,  258,  259,  260,  261,
   262,  257,  258,  259,  260,  261,  262,  257,  258,  259,
   260,  261,  262,  257,  258,  259,  260,  261,  262,  257,
-  258,  259,  260,  261,  262,  257,  258,   28,   28,   -1,
-   -1,   -1,   54,   55,  108,  109,  110,   -1,  112,  113,
-  114,  115,  116,   -1,  118,  119,  120,   48,   48,   -1,
-  124,   52,   52,   -1,   -1,   56,   56,   58,   -1,   -1,
-   -1,   62,   62,   -1,   -1,   -1,   -1,   -1,   -1,   91,
-   92,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   79,   79,
-   60,   61,   -1,   63,   64,   65,   66,   67,   -1,   69,
-   70,   -1,   -1,   -1,   74,   -1,  259,   98,   98,  100,
-  100,   -1,   -1,   -1,   -1,  127,   -1,   -1,  271,   -1,
-  132,  274,  275,  276,  277,  278,  279,   -1,   -1,   -1,
-  283,  284,  285,  286,  287,  288,  289,  290,  291,  292,
-   -1,   -1,  154,  134,  134,  136,  136,  159,  160,   -1,
-  141,  141,   -1,   -1,   -1,  167,   -1,   -1,   -1,   -1,
+  258,  259,  260,  261,  262,  257,  258,  259,  260,  261,
+  262,  257,  258,  259,  260,  261,  262,  257,  258,  259,
+  260,  261,  262,  257,  258,   28,   28,  110,  111,  112,
+   -1,  114,  115,  116,  117,  118,  119,   -1,  121,  122,
+  123,   -1,   -1,   -1,  127,   -1,   49,   49,   -1,   -1,
+   53,   53,   -1,   -1,   57,   57,   59,  259,   -1,   -1,
+   63,   63,   -1,   -1,   -1,   -1,   -1,   -1,   -1,  271,
+   -1,   -1,  274,  275,  276,  277,  278,  279,   81,   81,
+   -1,  283,  284,  285,  286,  287,  288,  289,  290,  291,
+  292,  293,   -1,   -1,   -1,   -1,   -1,  100,  100,  102,
+  102,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
    -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
-   -1,   -1,  163,  163,   -1,   -1,   -1,   -1,   -1,   -1,
-  171,  171,   -1,   -1,   -1,   -1,   -1,   -1,  179,  179,
+   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,  137,  137,  139,  139,   -1,   -1,
+   -1,  144,  144,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,   -1,
+   -1,   -1,   -1,   -1,  167,  167,   -1,   -1,   -1,   -1,
+   -1,   -1,  175,  175,   -1,   -1,   -1,   -1,   -1,   -1,
+  183,  183,
 };
 }
 final static short YYFINAL=2;
-final static short YYMAXTOKEN=296;
+final static short YYMAXTOKEN=297;
 final static String yyname[] = {
 "end-of-file",null,null,null,null,null,null,null,null,null,null,null,null,null,
 null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
@@ -438,7 +458,7 @@ null,null,null,null,"VARIABLE","AFFECTABLE_VARIABLE","CONSTANT",
 "STRING_LITERAL","THIS","PARENT","STRUCT","AGENT","BEHAVIOR","INITIAL",
 "REACTIVE","CYCLIC","PROACTIVE","RECEIVE","SEND","MESSAGE","CONDITION",
 "FORALLK","WHILE","ADDK","READK","REMOVEK","IF","THEN","ELSE","INPUT","OUTPUT",
-"IN","OUT","OPEN","ACID","NEW","WAIT","AGOAL","MGOAL","PGOAL","ACHIEVE",
+"PRINT","IN","OUT","OPEN","ACID","NEW","WAIT","AGOAL","MGOAL","PGOAL","ACHIEVE",
 "ACTION","MAINTAIN","TARGET",
 };
 final static String yyrule[] = {
@@ -482,6 +502,7 @@ final static String yyrule[] = {
 "receive_function : '(' RECEIVE message_argument_list ')'",
 "input_function : '(' INPUT argument_list ')'",
 "output_function : '(' OUTPUT argument_list ')'",
+"print_function : '(' PRINT argument_list ')'",
 "in_function : '(' IN argument_list ')'",
 "out_function : '(' OUT argument_list ')'",
 "open_function : '(' OPEN argument_list ')'",
@@ -493,6 +514,7 @@ final static String yyrule[] = {
 "wait_function : '(' WAIT argument_list ')'",
 "language_function : send_function",
 "language_function : output_function",
+"language_function : print_function",
 "language_function : in_function",
 "language_function : out_function",
 "language_function : open_function",
@@ -544,11 +566,10 @@ final static String yyrule[] = {
 "agent_specification : '(' AGENT name behaviors_declaration ')'",
 };
 
-//#line 760 "parser.y"
+//#line 776 "parser.y"
 private static String unitName = "parser";
 
 /** the logger */
-//public Logger log = Log.getLogger(unitName);
 public Logger log = (UnitComponentExt) new UnitComponentExt().setUnitName(unitName).setLoggerType(
 						PlatformUtils.platformLogType());
 
@@ -656,7 +677,7 @@ public ClaimAgentDefinition parse() {
     return null;
   }
 }
-//#line 592 "ParserSClaim.java"
+//#line 606 "ParserSClaim.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -811,42 +832,42 @@ boolean doaction;
       {
 //########## USER-SUPPLIED ACTIONS ##########
 case 1:
-//#line 36 "parser.y"
+//#line 37 "parser.y"
 {
 			/*log.info("variable -> VARIABLE:"+lexer.yytext().substring(1));*/
 			yyval = new ParserSClaimVal(new ClaimVariable(lexer.yytext().substring(1)));
 		}
 break;
 case 2:
-//#line 41 "parser.y"
+//#line 42 "parser.y"
 {
 			/*log.info("variable -> AFFECTABLE_VARIABLE:"+lexer.yytext().substring(2));*/
 			yyval = new ParserSClaimVal(new ClaimVariable(lexer.yytext().substring(2),true));
 		}
 break;
 case 3:
-//#line 48 "parser.y"
+//#line 49 "parser.y"
 {
 			/*log.info("claim_variable -> variable");*/
 			yyval = val_peek(0);
 		}
 break;
 case 4:
-//#line 53 "parser.y"
+//#line 54 "parser.y"
 {
 			/*log.info("claim_variable -> THIS");*/
 			yyval = new ParserSClaimVal(new ClaimVariable("this"));
 		}
 break;
 case 5:
-//#line 58 "parser.y"
+//#line 59 "parser.y"
 {
 			/*log.info("claim_variable -> PARENT");*/
 			yyval = new ParserSClaimVal(new ClaimVariable("parent",true));
 		}
 break;
 case 6:
-//#line 66 "parser.y"
+//#line 67 "parser.y"
 {
 			/*//log.info("constant -> STRING_LITERAL:"+lexer.yytext());*/
 			String content = lexer.yytext();
@@ -854,35 +875,35 @@ case 6:
 		}
 break;
 case 7:
-//#line 72 "parser.y"
+//#line 73 "parser.y"
 {
 			/*log.info("constant -> CONSTANT: "+lexer.yytext());*/
 			yyval = new ParserSClaimVal(new ClaimValue(lexer.yytext()));
 		}
 break;
 case 8:
-//#line 81 "parser.y"
+//#line 82 "parser.y"
 {
 			/*log.info("structure_field -> claim_variable");*/
 			yyval = val_peek(0);
 		}
 break;
 case 9:
-//#line 86 "parser.y"
+//#line 87 "parser.y"
 {
 			/*log.info("structure_field -> constant: "+lexer.yytext());*/
 			yyval = val_peek(0);
 		}
 break;
 case 10:
-//#line 91 "parser.y"
+//#line 92 "parser.y"
 {
 			/*log.info("structure_field -> structure");*/
 			yyval = val_peek(0);
 		}
 break;
 case 11:
-//#line 99 "parser.y"
+//#line 100 "parser.y"
 {
 			/*log.info("structure_field_list -> structure_field");*/
 			yyval = new ParserSClaimVal(new Vector<ClaimConstruct>());
@@ -890,7 +911,7 @@ case 11:
 		}
 break;
 case 12:
-//#line 105 "parser.y"
+//#line 106 "parser.y"
 {
 			/*log.info("structure_field_list -> structure_field_list structure_field");*/
 			yyval = val_peek(1);
@@ -898,49 +919,49 @@ case 12:
 		}
 break;
 case 13:
-//#line 119 "parser.y"
+//#line 120 "parser.y"
 {
 			/*log.info("structure -> '(' STRUCT structure_field_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimStructure(val_peek(1).claimConstructVector));
 		}
 break;
 case 14:
-//#line 127 "parser.y"
+//#line 128 "parser.y"
 {
 			/*log.info("argument -> claim_variable");*/
 			yyval = val_peek(0);
 		}
 break;
 case 15:
-//#line 132 "parser.y"
+//#line 133 "parser.y"
 {
 			/*log.info("argument -> constant: "+lexer.yytext());*/
 			yyval = val_peek(0);
 		}
 break;
 case 16:
-//#line 137 "parser.y"
+//#line 138 "parser.y"
 {
 			/*log.info("argument -> structure");*/
 			yyval = val_peek(0);
 		}
 break;
 case 17:
-//#line 142 "parser.y"
+//#line 143 "parser.y"
 {
 			/*log.info("argument -> functions");*/
 			yyval = val_peek(0);
 		}
 break;
 case 18:
-//#line 147 "parser.y"
+//#line 148 "parser.y"
 {
 			/*log.info("argument -> readK_function");*/
 			yyval = val_peek(0);
 		}
 break;
 case 19:
-//#line 155 "parser.y"
+//#line 156 "parser.y"
 {
 			/*log.info("argument_list -> argument");*/
 			yyval = new ParserSClaimVal(new Vector<ClaimConstruct>());
@@ -948,7 +969,7 @@ case 19:
 		}
 break;
 case 20:
-//#line 161 "parser.y"
+//#line 162 "parser.y"
 {
 			/*log.info("argument_list -> argument_list argument");*/
 			yyval = val_peek(1);
@@ -956,21 +977,21 @@ case 20:
 		}
 break;
 case 21:
-//#line 170 "parser.y"
+//#line 171 "parser.y"
 {
 			/*log.info("name -> CONSTANT: "+lexer.yytext());*/
 			yyval = new ParserSClaimVal(lexer.yytext());
 		}
 break;
 case 22:
-//#line 178 "parser.y"
+//#line 179 "parser.y"
 {
 			/*log.info("agent_argument -> variable");*/
 			yyval = val_peek(0);
 		}
 break;
 case 23:
-//#line 186 "parser.y"
+//#line 187 "parser.y"
 {
 			/*log.info("agent_argument_list -> agent_argument");*/
 			
@@ -984,7 +1005,7 @@ case 23:
 		}
 break;
 case 24:
-//#line 198 "parser.y"
+//#line 199 "parser.y"
 {
 			/*log.info("agent_argument_list -> agent_argument_list agent_argument");*/
 			yyval = val_peek(1);
@@ -1009,35 +1030,35 @@ case 24:
 		}
 break;
 case 25:
-//#line 224 "parser.y"
+//#line 225 "parser.y"
 {
 			/*log.info("behavior_type -> INITIAL");*/
 			yyval = new ParserSClaimVal(ClaimBehaviorType.INITIAL);
 		}
 break;
 case 26:
-//#line 229 "parser.y"
+//#line 230 "parser.y"
 {
 			/*log.info("behavior_type -> REACTIVE");*/
 			yyval = new ParserSClaimVal(ClaimBehaviorType.REACTIVE);
 		}
 break;
 case 27:
-//#line 234 "parser.y"
+//#line 235 "parser.y"
 {
 			/*log.info("behavior_type -> CYCLIC");*/
 			yyval = new ParserSClaimVal(ClaimBehaviorType.CYCLIC);
 		}
 break;
 case 28:
-//#line 239 "parser.y"
+//#line 240 "parser.y"
 {
 			/*log.info("behavior_type -> PROACTIVE");*/
 			yyval = new ParserSClaimVal(ClaimBehaviorType.PROACTIVE);
 		}
 break;
 case 29:
-//#line 252 "parser.y"
+//#line 253 "parser.y"
 {
 			/*log.info("message_structure -> '(' STRUCT MESSAGE structure_field_list ')'");*/
 			Vector<ClaimConstruct> structFields = new Vector<ClaimConstruct>();
@@ -1047,7 +1068,7 @@ case 29:
 		}
 break;
 case 30:
-//#line 260 "parser.y"
+//#line 261 "parser.y"
 {
 			/*log.info("message_structure -> '(' MESSAGE structure_field_list ')'");*/
 			Vector<ClaimConstruct> structFields = new Vector<ClaimConstruct>();
@@ -1057,28 +1078,28 @@ case 30:
 		}
 break;
 case 31:
-//#line 271 "parser.y"
+//#line 272 "parser.y"
 {
 			/*log.info("message_argument -> variable");*/
 			yyval = val_peek(0);
 		}
 break;
 case 32:
-//#line 276 "parser.y"
+//#line 277 "parser.y"
 {
 			/*log.info("message_argument -> constant: "+lexer.yytext());*/
 			yyval = val_peek(0);
 		}
 break;
 case 33:
-//#line 281 "parser.y"
+//#line 282 "parser.y"
 {
 			/*log.info("message_argument -> message_structure");*/
 			yyval = val_peek(0);
 		}
 break;
 case 34:
-//#line 289 "parser.y"
+//#line 290 "parser.y"
 {
 			/*log.info("argument_list -> message_argument");*/
 			yyval = new ParserSClaimVal(new Vector<ClaimConstruct>());
@@ -1086,7 +1107,7 @@ case 34:
 		}
 break;
 case 35:
-//#line 295 "parser.y"
+//#line 296 "parser.y"
 {
 			/*log.info("argument_list -> message_argument_list message_argument");*/
 			yyval = val_peek(1);
@@ -1094,280 +1115,293 @@ case 35:
 		}
 break;
 case 36:
-//#line 304 "parser.y"
+//#line 305 "parser.y"
 {
 			/*log.info("send_function -> '(' SEND message_argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.SEND ,new String("send"),val_peek(1).claimConstructVector));
 		}
 break;
 case 37:
-//#line 312 "parser.y"
+//#line 313 "parser.y"
 {
 			/*log.info("receive_function -> '(' RECEIVE message_argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.RECEIVE ,new String("receive"),val_peek(1).claimConstructVector));
 		}
 break;
 case 38:
-//#line 320 "parser.y"
+//#line 321 "parser.y"
 {
 			/*log.info("in_function -> '(' INPUT argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.INPUT ,new String("input"),val_peek(1).claimConstructVector));
 		}
 break;
 case 39:
-//#line 327 "parser.y"
+//#line 329 "parser.y"
 {
-			/*log.info("in_function -> '(' OUTPUT argument_list ')'");*/
+			/*log.info("output_function -> '(' OUTPUT argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.OUTPUT ,new String("output"),val_peek(1).claimConstructVector));
 		}
 break;
 case 40:
-//#line 334 "parser.y"
+//#line 337 "parser.y"
+{
+			/*log.info("print_function -> '(' PRINT argument_list ')'");*/
+			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.PRINT ,new String("print"),val_peek(1).claimConstructVector));
+		}
+break;
+case 41:
+//#line 345 "parser.y"
 {
 			/*log.info("in_function -> '(' IN argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.IN ,new String("in"),val_peek(1).claimConstructVector));
 		}
 break;
-case 41:
-//#line 342 "parser.y"
+case 42:
+//#line 353 "parser.y"
 {
 			/*log.info("out_function -> '(' OUT argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.OUT ,new String("out"),val_peek(1).claimConstructVector));
 		}
 break;
-case 42:
-//#line 350 "parser.y"
+case 43:
+//#line 361 "parser.y"
 {
 			/*log.info("open_function -> '(' OPEN argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.OPEN ,new String("open"),val_peek(1).claimConstructVector));
 		}
 break;
-case 43:
-//#line 358 "parser.y"
+case 44:
+//#line 369 "parser.y"
 {
 			/*log.info("acid_function -> '(' ACID argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.ACID ,new String("acid"),null));
 		}
 break;
-case 44:
-//#line 366 "parser.y"
+case 45:
+//#line 377 "parser.y"
 {
 			/*log.info("new_function -> '(' NEW argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.NEW ,new String("new"),val_peek(1).claimConstructVector));
 		}
 break;
-case 45:
-//#line 374 "parser.y"
+case 46:
+//#line 385 "parser.y"
 {
 			/*log.info("addK_function -> '(' ADDK argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.ADDK ,new String("addK"),val_peek(1).claimConstructVector));
 		}
 break;
-case 46:
-//#line 382 "parser.y"
+case 47:
+//#line 393 "parser.y"
 {
 			/*log.info("readK_function -> '(' READK argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.READK ,new String("readK"),val_peek(1).claimConstructVector));
 		}
 break;
-case 47:
-//#line 390 "parser.y"
+case 48:
+//#line 401 "parser.y"
 {
 			/*log.info("removeK_function -> '(' REMOVEK argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.REMOVEK ,new String("removeK"),val_peek(1).claimConstructVector));
 		}
 break;
-case 48:
-//#line 398 "parser.y"
+case 49:
+//#line 409 "parser.y"
 {
 			/*log.info("wait_function -> '(' WAIT argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall( ClaimFunctionType.WAIT ,new String("wait"),val_peek(1).claimConstructVector));
 		}
 break;
-case 49:
-//#line 406 "parser.y"
+case 50:
+//#line 417 "parser.y"
 {
 			/*log.info("language_function -> send_function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 50:
-//#line 416 "parser.y"
+case 51:
+//#line 427 "parser.y"
 {
 			/*log.info("language_function -> output_function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 51:
-//#line 421 "parser.y"
+case 52:
+//#line 432 "parser.y"
+{
+			/*log.info("language_function -> print_function");*/
+			yyval = val_peek(0);
+		}
+break;
+case 53:
+//#line 437 "parser.y"
 {
 			/*log.info("language_function -> in_function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 52:
-//#line 426 "parser.y"
+case 54:
+//#line 442 "parser.y"
 {
 			/*log.info("language_function -> out_function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 53:
-//#line 431 "parser.y"
+case 55:
+//#line 447 "parser.y"
 {
 			/*log.info("language_function -> open_function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 54:
-//#line 436 "parser.y"
+case 56:
+//#line 452 "parser.y"
 {
 			/*log.info("language_function -> acid_function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 55:
-//#line 441 "parser.y"
+case 57:
+//#line 457 "parser.y"
 {
 			/*log.info("language_function -> new_function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 56:
-//#line 446 "parser.y"
+case 58:
+//#line 462 "parser.y"
 {
 			/*log.info("language_function -> addk_function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 57:
-//#line 451 "parser.y"
+case 59:
+//#line 467 "parser.y"
 {
 			/*log.info("language_function -> readk_function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 58:
-//#line 456 "parser.y"
+case 60:
+//#line 472 "parser.y"
 {
 			/*log.info("language_function -> removek_function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 59:
-//#line 461 "parser.y"
+case 61:
+//#line 477 "parser.y"
 {
 			/*log.info("language_function -> wait_function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 60:
-//#line 469 "parser.y"
+case 62:
+//#line 485 "parser.y"
 {
 			/*log.info("function -> '(' name ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall(ClaimFunctionType.JAVA,val_peek(1).sval,null));
 		}
 break;
-case 61:
-//#line 474 "parser.y"
+case 63:
+//#line 490 "parser.y"
 {
 			/*log.info("function -> '(' name argument_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimFunctionCall(ClaimFunctionType.JAVA,val_peek(2).sval,val_peek(1).claimConstructVector));
 		}
 break;
-/*case 62:
-//#line 482 "parser.y"
-{
-			log.info("goal -> '(' AGOAL name proposition_list ')'");
-			yyval = new ParserSClaimVal(new ClaimaGoal(ClaimConstructType.AGOAL, val_peek(4).sval, val_peek(1).claimConstructVector, val_peek(3).ival));
-		}
-break;
-case 63:
-//#line 487 "parser.y"
-{
-			yyval = new ParserSClaimVal(new ClaimmGoal(ClaimConstructType.MGOAL, val_peek(6).sval, val_peek(3).claimConstructVector, val_peek(1).claimConstructVector, Integer.parseInt(((ClaimValue) val_peek(5).obj).toString())));	
-		}
-break;
 case 64:
-//#line 491 "parser.y"
+//#line 498 "parser.y"
 {
-			yyval = yyval = new ParserSClaimVal(new ClaimmGoal(ClaimConstructType.MGOAL, val_peek(4).sval, val_peek(1).claimConstructVector, null, Integer.parseInt(((ClaimValue) val_peek(3).obj).toString())));
+			/*log.info("goal -> '(' AGOAL name proposition_list ')'");*/
+			/*$$ = new ParserSClaimVal(new ClaimaGoal(ClaimConstructType.AGOAL, $3.sval, $6.claimConstructVector, $4.ival));*/
 		}
 break;
 case 65:
-//#line 495 "parser.y"
+//#line 503 "parser.y"
 {
-			yyval = new ParserSClaimVal(new ClaimpGoal(ClaimConstructType.PGOAL, val_peek(4).sval, val_peek(1).claimConstruct, Integer.parseInt(((ClaimValue) val_peek(3).obj).toString())));
+			/*$$ = new ParserSClaimVal(new ClaimmGoal(ClaimConstructType.MGOAL, $3.sval, $6.claimConstructVector, $8.claimConstructVector, Integer.parseInt(((ClaimValue) $4.obj).toString())));	*/
 		}
 break;
-*/
 case 66:
-//#line 502 "parser.y"
+//#line 507 "parser.y"
+{
+			/*$$ = $$ = new ParserSClaimVal(new ClaimmGoal(ClaimConstructType.MGOAL, $3.sval, $6.claimConstructVector, null, Integer.parseInt(((ClaimValue) $4.obj).toString())));*/
+		}
+break;
+case 67:
+//#line 511 "parser.y"
+{
+			/*$$ = new ParserSClaimVal(new ClaimpGoal(ClaimConstructType.PGOAL, $3.sval, $6.claimConstruct, Integer.parseInt(((ClaimValue) $4.obj).toString())));*/
+		}
+break;
+case 68:
+//#line 518 "parser.y"
 {
 			/*log.info("proposition_list -> proposition");*/
 			yyval = new ParserSClaimVal(new Vector<ClaimConstruct>());
 			yyval.claimConstructVector.add(val_peek(0).claimConstruct);
 		}
 break;
-case 67:
-//#line 508 "parser.y"
+case 69:
+//#line 524 "parser.y"
 {
 			/*log.info("proposition_list -> proposition_list proposition");*/
 			yyval = val_peek(1);
 			yyval.claimConstructVector.add(val_peek(0).claimConstruct);
 		}
 break;
-case 68:
-//#line 517 "parser.y"
+case 70:
+//#line 533 "parser.y"
 {
 			/*log.info("proposition -> constant ");*/
 			yyval = val_peek(0);
 		}
 break;
-case 69:
-//#line 525 "parser.y"
+case 71:
+//#line 541 "parser.y"
 {
 			/*log.info("priority -> constant");*/
 			yyval = val_peek(0);
 		}
 break;
-case 70:
-//#line 534 "parser.y"
+case 72:
+//#line 550 "parser.y"
 {
 			/*log.info("valid_condition -> readK_function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 71:
-//#line 539 "parser.y"
+case 73:
+//#line 555 "parser.y"
 {
 			/*log.info("valid_condition -> function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 72:
-//#line 547 "parser.y"
+case 74:
+//#line 563 "parser.y"
 {
 			/*log.info("condition -> '(' CONDITION valid_condition ')'");*/
 			yyval = new ParserSClaimVal(new ClaimCondition((ClaimFunctionCall) val_peek(1).claimConstruct));
 		}
 break;
-case 73:
-//#line 555 "parser.y"
+case 75:
+//#line 571 "parser.y"
 {
 			/*log.info("if_stmt -> '(' IF if_valid_condition THEN behavior_content_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimIf((ClaimFunctionCall) val_peek(3).claimConstruct,val_peek(1).claimConstructVector, null));
 		}
 break;
-case 74:
-//#line 560 "parser.y"
+case 76:
+//#line 576 "parser.y"
 {
 			/*log.info("if_stmt -> '(' IF if_valid_condition THEN behavior_content_list ELSE behavior_content_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimIf((ClaimFunctionCall) val_peek(5).claimConstruct,val_peek(3).claimConstructVector,val_peek(1).claimConstructVector));
 		}
 break;
-case 75:
-//#line 568 "parser.y"
+case 77:
+//#line 584 "parser.y"
 {
 			/*log.info("forAllK -> '(' FORALLK structure ')'");*/
 			if (!verifyVariablesInStructure((ClaimStructure) val_peek(1).claimConstruct))
@@ -1375,8 +1409,8 @@ case 75:
 			yyval = new ParserSClaimVal(new ClaimForAllK((ClaimStructure) val_peek(1).claimConstruct, null));
 		}
 break;
-case 76:
-//#line 575 "parser.y"
+case 78:
+//#line 591 "parser.y"
 {
 			/*log.info("forAllK -> '(' FORALLK structure behavior_content_list ')'");*/
 			if (!verifyVariablesInStructure((ClaimStructure) val_peek(2).claimConstruct))
@@ -1384,130 +1418,130 @@ case 76:
 			yyval = new ParserSClaimVal(new ClaimForAllK((ClaimStructure) val_peek(2).claimConstruct, val_peek(1).claimConstructVector));
 		}
 break;
-case 77:
-//#line 585 "parser.y"
+case 79:
+//#line 601 "parser.y"
 {
 			/*log.info("while -> '(' WHILE function ')'");*/
 			yyval = new ParserSClaimVal(new ClaimWhile((ClaimFunctionCall) val_peek(1).claimConstruct, null));
 		}
 break;
-case 78:
-//#line 590 "parser.y"
+case 80:
+//#line 606 "parser.y"
 {
 			/*log.info("while -> '(' WHILE function behavior_content_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimWhile((ClaimFunctionCall) val_peek(2).claimConstruct, val_peek(1).claimConstructVector));
 		}
 break;
-case 79:
-//#line 598 "parser.y"
-{
-			/*log.info("behavior_content_header -> receive_function");*/
-			yyval = val_peek(0);
-		}
-break;
-case 80:
-//#line 603 "parser.y"
-{
-			/*log.info("behavior_content_header -> receive_function");*/
-			yyval = val_peek(0);
-		}
-break;
 case 81:
-//#line 608 "parser.y"
+//#line 614 "parser.y"
+{
+			/*log.info("behavior_content_header -> receive_function");*/
+			yyval = val_peek(0);
+		}
+break;
+case 82:
+//#line 619 "parser.y"
+{
+			/*log.info("behavior_content_header -> receive_function");*/
+			yyval = val_peek(0);
+		}
+break;
+case 83:
+//#line 624 "parser.y"
 {
 			/*log.info("behavior_content_header -> condition");*/
 			yyval = val_peek(0);
 		}
 break;
-case 82:
-//#line 616 "parser.y"
+case 84:
+//#line 632 "parser.y"
 {
 			/*log.info("behavior_content_header_list -> behavior_content_header");*/
 			yyval = new ParserSClaimVal(new Vector<ClaimConstruct>());
 			yyval.claimConstructVector.add(val_peek(0).claimConstruct);
 		}
 break;
-case 83:
-//#line 622 "parser.y"
+case 85:
+//#line 638 "parser.y"
 {
 			/*log.info("behavior_content_header_list -> behavior_content_header_list behavior_content_header");*/
 			yyval = val_peek(1);
 			yyval.claimConstructVector.add(val_peek(0).claimConstruct);
 		}
 break;
-case 84:
-//#line 632 "parser.y"
+case 86:
+//#line 648 "parser.y"
 {
 			/*log.info("behavior_content -> language_function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 85:
-//#line 637 "parser.y"
+case 87:
+//#line 653 "parser.y"
 {
 			/*log.info("behavior_content -> function");*/
 			yyval = val_peek(0);
 		}
 break;
-case 86:
-//#line 642 "parser.y"
+case 88:
+//#line 658 "parser.y"
 {
 			/*log.info("behavior_content -> if_stmt");*/
 			yyval = val_peek(0);
 		}
 break;
-case 87:
-//#line 647 "parser.y"
+case 89:
+//#line 663 "parser.y"
 {
 			/*log.info("behavior_content -> forAllK");*/
 			yyval = val_peek(0);
 		}
 break;
-case 88:
-//#line 652 "parser.y"
+case 90:
+//#line 668 "parser.y"
 {
 			/*log.info("behavior_content -> while");*/
 			yyval = val_peek(0);
 		}
 break;
-case 89:
-//#line 657 "parser.y"
+case 91:
+//#line 673 "parser.y"
 {
 			yyval = val_peek(0);
 		}
 break;
-case 90:
-//#line 664 "parser.y"
+case 92:
+//#line 680 "parser.y"
 {
 			/*log.info("behavior_content_list -> behavior_content");*/
 			yyval = new ParserSClaimVal(new Vector<ClaimConstruct>());
 			yyval.claimConstructVector.add(val_peek(0).claimConstruct);
 		}
 break;
-case 91:
-//#line 670 "parser.y"
+case 93:
+//#line 686 "parser.y"
 {
 			/*log.info("behavior_content_list -> behavior_content_list behavior_content");*/
 			yyval = val_peek(1);
 			yyval.claimConstructVector.add(val_peek(0).claimConstruct);
 		}
 break;
-case 92:
-//#line 684 "parser.y"
+case 94:
+//#line 700 "parser.y"
 {
 			/*log.info("behavior -> '(' behavior_type name behavior_content_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimBehaviorDefinition(val_peek(2).sval, val_peek(3).claimBehaviorType, val_peek(1).claimConstructVector));
 		}
 break;
-case 93:
-//#line 689 "parser.y"
+case 95:
+//#line 705 "parser.y"
 {
 			/*log.info("behavior -> '(' behavior_type name behavior_content_header_list ')'");*/
 			yyval = new ParserSClaimVal(new ClaimBehaviorDefinition(val_peek(2).sval, val_peek(3).claimBehaviorType, val_peek(1).claimConstructVector));
 		}
 break;
-case 94:
-//#line 694 "parser.y"
+case 96:
+//#line 710 "parser.y"
 {
 			/*log.info("behavior -> '(' behavior_type name behavior_content_header behavior_content_list ')'");*/
 			Boolean concatenateSucceeded = val_peek(2).claimConstructVector.addAll(val_peek(1).claimConstructVector);
@@ -1517,31 +1551,31 @@ case 94:
 				log.error("error while concatenating the vectors of statements, while creating the behavior");
 		}
 break;
-case 95:
-//#line 706 "parser.y"
+case 97:
+//#line 722 "parser.y"
 {
 			/*log.info("behavior_list -> behavior");*/
 			yyval = new ParserSClaimVal(new Vector<ClaimConstruct>());
 			yyval.claimConstructVector.add(val_peek(0).claimConstruct);
 		}
 break;
-case 96:
-//#line 712 "parser.y"
+case 98:
+//#line 728 "parser.y"
 {
 			/*log.info("behavior_list -> behavior_list behavior");*/
 			yyval = val_peek(1);
 			yyval.claimConstructVector.add(val_peek(0).claimConstruct);
 		}
 break;
-case 97:
-//#line 721 "parser.y"
+case 99:
+//#line 737 "parser.y"
 {
 			/*log.info("behavior_declaration -> '(' BEHAVIOR behavior_list ')'");*/
 			yyval = val_peek(1);
 		}
 break;
-case 98:
-//#line 729 "parser.y"
+case 100:
+//#line 745 "parser.y"
 {
 			/*log.info("agent_specification -> '(' AGENT name agent_argument_list behaviors_declaration ')'");*/
 			parsedAgent = new ClaimAgentDefinition(val_peek(3).sval, 
@@ -1554,8 +1588,8 @@ case 98:
 				currentBehavior.setMyAgent(parsedAgent);
 		}
 break;
-case 99:
-//#line 741 "parser.y"
+case 101:
+//#line 757 "parser.y"
 {
 			/*log.info("agent_specification -> '(' AGENT name behaviors_declaration ')'");*/
 			
@@ -1573,7 +1607,7 @@ case 99:
 				currentBehavior.setMyAgent(parsedAgent);
 		}
 break;
-//#line 1503 "ParserSClaim.java"
+//#line 1531 "ParserSClaim.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

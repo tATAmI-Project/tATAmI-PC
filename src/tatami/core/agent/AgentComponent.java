@@ -1,13 +1,28 @@
+/*******************************************************************************
+ * Copyright (C) 2015 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+ * 
+ * This file is part of tATAmI-PC.
+ * 
+ * tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+ * 
+ * tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package tatami.core.agent;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
+import net.xqhs.util.logging.DumbLogger;
 import net.xqhs.util.logging.Logger;
+import tatami.amilab.AmILabComponent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
+import tatami.core.agent.behavior.BehaviorComponent;
 import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.hierarchical.HierarchicalComponent;
 import tatami.core.agent.kb.CognitiveComponent;
@@ -127,6 +142,11 @@ public abstract class AgentComponent implements Serializable
 		MOVEMENT_COMPONENT,
 		
 		/**
+		 * The name of a component extending {@link BehaviorComponent}.
+		 */
+		BEHAVIOR_COMPONENT,
+		
+		/**
 		 * The name of a component extending {@link WebserviceComponent}.
 		 */
 		WEBSERVICE_COMPONENT,
@@ -140,6 +160,11 @@ public abstract class AgentComponent implements Serializable
 		 * The name of a component extending {@link ClaimComponent}.
 		 */
 		S_CLAIM_COMPONENT(AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".claim.ClaimComponent"),
+
+		/**
+		 * The name of a component extending {@link AmILabComponent}.
+		 */
+		AMILAB_COMPONENT("tatami.amilab.AmILabComponent"),
 		
 		/**
 		 * TEMPORARY type for testing. TODO: remove this type.
@@ -366,11 +391,14 @@ public abstract class AgentComponent implements Serializable
 	 * @param scenarioNode
 	 *            - the {@link XMLNode} that contains the complete data for creating the component, as stated in the
 	 *            scenario file.
+	 * @param agentPackages
+	 *            - the packages where the agent may look for files.
 	 * @param log
 	 *            - the {@link Logger} in which to output any potential problems (as warnings or errors).
 	 * @return <code>true</code> if no fatal issues were found; <code>false</code> otherwise.
 	 */
-	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
+	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, List<String> agentPackages,
+			Logger log)
 	{
 		if(parameters != null)
 		{
@@ -620,13 +648,7 @@ public abstract class AgentComponent implements Serializable
 		if(eventHandlers.containsKey(event))
 		{
 			oldHandler = eventHandlers.get(event);
-			try
-			{
-				getAgentLog().warn("Handler for event [] overwritten with []; was []", event, handler, oldHandler);
-			} catch(NullPointerException e)
-			{
-				// no log, it's ok.
-			}
+			getAgentLog().warn("Handler for event [] overwritten with []; was []", event, handler, oldHandler);
 		}
 		eventHandlers.put(event, handler);
 		return oldHandler;
@@ -645,7 +667,8 @@ public abstract class AgentComponent implements Serializable
 	}
 	
 	/**
-	 * @return the log of the agent, or <code>null</code> if one is not present or cannot be obtained.
+	 * @return the log of the agent, or an instance of {@link DumbLogger}, if one is not present or cannot be obtained.
+	 *         <code>null</code> should never be returned.
 	 */
 	protected Logger getAgentLog()
 	{
@@ -654,7 +677,7 @@ public abstract class AgentComponent implements Serializable
 			return ((VisualizableComponent) getAgentComponent(AgentComponentName.VISUALIZABLE_COMPONENT)).getLog();
 		} catch(NullPointerException e)
 		{
-			return null;
+			return DumbLogger.get();
 		}
 	}
 	

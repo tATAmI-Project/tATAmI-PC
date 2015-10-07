@@ -34,7 +34,7 @@ public class ClaimVariable extends ClaimConstruct
 	@Override
 	public String toString()
 	{
-		if (isAffectable())
+		if (isReAssignable())
 			return new String("??" + getName());
 		else
 			return new String("?" + getName());
@@ -44,7 +44,7 @@ public class ClaimVariable extends ClaimConstruct
 	@Override
 	public boolean equals(Object obj)
 	{
-		return (obj instanceof ClaimVariable) && name.equals(((ClaimVariable)obj).getName()) && isAffectable==((ClaimVariable)obj).isAffectable();
+		return (obj instanceof ClaimVariable) && name.equals(((ClaimVariable)obj).getName()) && isAffectable==((ClaimVariable)obj).isReAssignable();
 	}
 	
 	@Override
@@ -83,29 +83,29 @@ public class ClaimVariable extends ClaimConstruct
 		this(variableName,false);
 	}
 	
-	public ClaimVariable(String variableName, boolean affectable)
+	public ClaimVariable(String variableName, boolean assignable)
 	{
 		super(ClaimConstructType.VARIABLE);
 		setName(variableName);
-		setAffectable(affectable);
+		setAffectable(assignable);
 	}
 	
 	
 	
-	public boolean isAffectable() {
+	public boolean isReAssignable() {
 		return isAffectable;
 	}
 
-	public void setAffectable(boolean isAffectable) {
-		this.isAffectable = isAffectable;
+	public void setAffectable(boolean isAssignable) {
+		this.isAffectable = isAssignable;
 	}
 
 	/**
-	 * Gets the complement of the current variable, according to the affectability
+	 * Gets the complement of the current variable, according to the re-assignability.
 	 */
 	public ClaimVariable getComplement()
 	{
-		ClaimVariable complement = new ClaimVariable(getName(), !isAffectable());
+		ClaimVariable complement = new ClaimVariable(getName(), !isReAssignable());
 		return complement;
 	}
 }

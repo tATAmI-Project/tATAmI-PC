@@ -1,5 +1,6 @@
 package scenario.examples;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -81,9 +82,10 @@ public class PingTestComponent extends AgentComponent
 	}
 	
 	@Override
-	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, Logger log)
+	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, List<String> agentPackages,
+			Logger log)
 	{
-		if(!super.preload(parameters, scenarioNode, log))
+		if(!super.preload(parameters, scenarioNode, agentPackages, log))
 			return false;
 		otherAgent = getComponentData().get(OTHER_AGENT_PARAMETER_NAME);
 		return true;

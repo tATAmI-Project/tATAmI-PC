@@ -1,0 +1,75 @@
+(agent AmILabServer ?client1 ?client2 ?client3 ?default
+	(behavior
+	
+		// add all the clients to kb
+		(initial register
+		
+			// add all clients with a default proximity
+			(addK (struct knowledge client ?client1 ?default))
+			(addK (struct knowledge client ?client2 ?default))
+			(addK (struct knowledge client ?client3 ?default))
+		)
+		
+		// send requests for proximity to all clients
+		(reactive send_request
+		
+			// something tells the server to send requests
+			(input request)
+			
+			(forAllK (struct knowledge client ??client ??proximity)
+				(send ??client (struct message request this))
+			)
+		)
+		
+		// update the proximity of a client in the kb and update all the clients about their new status
+		(reactive send_response
+			
+			// a client sent his proximiy
+			(receive (struct message proximity ?senderClient ?newProximity))
+			
+			// update his proximity in the kb
+			(readK (struct knowledge client ?senderClient ?oldProximity))
+			(removeK (struct knowledge client ?senderClient ?oldProximity))
+			(addK (struct knowledge client ?senderClient ?newProximity))
+			
+			// determine the closest client and remove him from the kb
+			(readK (struct knowledge client ??closestClient ??smallestProximity))
+			(forAllK (struct knowledge client ??client ??proximity)
+				(bestClient ??client ??proximity ??closestClient ??smallestProximity)
+			)
+			(removeK (struct knowledge client ??closestClient ??smallestProximity))
+			
+			// tell the closest client the good news
+			(send ??closestClient (struct message response confirm))
+			
+			// tell all the other clients the bad news
+			(forAllK (struct knowledge client ??client ??proximity)
+				(send ??client (struct message response decline))
+			)
+			
+			// add back the closest client to the kb
+			(addK (struct knowledge client ??closestClient ??smallestProximity))
+		)
+		
+		
+		// The below lines are copied from the Client in order to enable a server to act as a client.
+		
+		(reactive receive_request
+			
+			// receive a request from the server 
+			(receive (struct message request ?server))
+			
+			// get the current proximity
+			(input @amilab getProximity ?proximity)
+			
+			// send the current proximity
+			(send ?server (struct message proximity this ?proximity))
+		)
+		
+		// receive a CONFIRM or a DECLINE response
+		(reactive receive_response
+			(receive (struct message response ?response))
+			(output @amilab updateStatus ?response)
+		)
+	)
+)

@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (C) 2015 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+ * 
+ * This file is part of tATAmI-PC.
+ * 
+ * tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+ * 
+ * tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package tatami.core.agent;
 
 import java.io.Serializable;
@@ -12,7 +23,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.AgentEvent.AgentSequenceType;
-import tatami.core.agent.claim.ClaimComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.simulation.AgentManager;
@@ -130,10 +140,6 @@ public class CompositeAgent implements Serializable, AgentManager
 						synchronized(eventQueue)
 						{
 							state = AgentState.RUNNING;
-							// FIXME this should be done by intercepting AGENT_START
-							if(getComponent(AgentComponentName.S_CLAIM_COMPONENT) != null)
-								((ClaimComponent) getComponent(AgentComponentName.S_CLAIM_COMPONENT))
-										.registerBehaviors();
 						}
 						break;
 					case AGENT_STOP:
@@ -328,6 +334,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 */
 	protected boolean postAgentEvent(AgentEvent event)
 	{
+		event.lock();
 		if(!(((state == AgentState.STARTING) && (event.getType() == AgentEventType.AGENT_START)) || (state == AgentState.RUNNING)))
 			return false;
 		boolean exiting = (event.getType() == AgentEventType.AGENT_STOP);
@@ -424,5 +431,12 @@ public class CompositeAgent implements Serializable, AgentManager
 	public boolean canAddComponents()
 	{
 		return (state == AgentState.INITIALIZING) || (state == AgentState.STOPPED) || (state == AgentState.RUNNING);
+	}
+	
+	@Override
+	public String toString()
+	{
+		// TODO improve; currently just for debugging.
+		return getAgentName();
 	}
 }

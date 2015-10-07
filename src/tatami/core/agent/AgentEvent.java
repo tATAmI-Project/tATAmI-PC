@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (C) 2015 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+ * 
+ * This file is part of tATAmI-PC.
+ * 
+ * tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+ * 
+ * tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package tatami.core.agent;
 
 import java.util.HashMap;
@@ -45,6 +56,11 @@ public class AgentEvent extends Config
 		 * messaging component exists; otherwise, message routing will be handled by the messaging component.
 		 */
 		AGENT_MESSAGE(AgentSequenceType.UNORDERED),
+		
+		/**
+		 * Event occurs when an active input (see AgentGui) is activated by the user and the agent must react to it.
+		 */
+		GUI_INPUT(AgentSequenceType.UNORDERED),
 		
 		/**
 		 * Event occurs when the start of the simulation is requested by the user.

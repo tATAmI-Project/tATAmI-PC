@@ -12,6 +12,7 @@
 package tatami.core.agent.parametric;
 
 import java.util.Collection;
+import java.util.List;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
@@ -64,9 +65,10 @@ public class ParametricComponent extends AgentComponent
 	 * indicating agent parameters.
 	 */
 	@Override
-	protected boolean preload(ComponentCreationData componentParameters, XMLNode scenarioNode, Logger log)
+	protected boolean preload(ComponentCreationData componentParameters, XMLNode scenarioNode,
+			List<String> agentPackages, Logger log)
 	{
-		if(!super.preload(componentParameters, scenarioNode, log))
+		if(!super.preload(componentParameters, scenarioNode, agentPackages, log))
 			return false;
 		parameters = (AgentParameters) getComponentData().getObject(COMPONENT_PARAMETER_NAME);
 		if(parameters == null)

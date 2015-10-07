@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (C) 2015 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+ * 
+ * This file is part of tATAmI-PC.
+ * 
+ * tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+ * 
+ * tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package tatami.jade;
 
 import jade.core.AID;
@@ -81,14 +92,8 @@ public class JadeMessagingComponent extends NameBasedMessagingComponent
 		if(nElements > 3)
 			message.setConversationId(targetElements[3]);
 		message.setContent(content);
-		try
-		{
-			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
-					"Sending message to [" + target + "] with content [" + content + "].");
-		} catch(NullPointerException e1)
-		{
-			// it's ok
-		}
+		getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
+				"Sending message to [" + target + "] with content [" + content + "].");
 		getWrapper().send(message);
 		return true;
 	}
@@ -106,25 +111,13 @@ public class JadeMessagingComponent extends NameBasedMessagingComponent
 			wrapper = (JadeAgentWrapper) getPlatformLink();
 		} catch(ClassCastException e)
 		{
-			try
-			{
-				getAgentLog().error("Platform link is not a jade agent wrapper:" + PlatformUtils.printException(e));
-			} catch(NullPointerException e1)
-			{
-				// it's ok
-			}
+			getAgentLog().error("Platform link is not a jade agent wrapper:" + PlatformUtils.printException(e));
 			throw new IllegalStateException("Platform link is not a jade agent wrapper:"
 					+ PlatformUtils.printException(e));
 		}
 		if(wrapper == null)
 		{
-			try
-			{
-				getAgentLog().error("Platform link is null.");
-			} catch(NullPointerException e1)
-			{
-				// it's ok
-			}
+			getAgentLog().error("Platform link is null.");
 			throw new IllegalStateException("Platform link is null.");
 		}
 		return wrapper;

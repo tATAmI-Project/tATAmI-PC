@@ -3,4 +3,4 @@
 # the program byacc/j is used for the generation of the parser. 
 # Run this script in Linux or run the following command after BYACC/J was successfully installed, in any supported OS.
 
-yacc -J -Jclass=ParserSClaim -Jpackage=sclaim.parser.generation -Jsemantic=ParserSClaimVal parser.y
+yacc -J -Jclass=ParserSClaim -Jpackage=tatami.sclaim.parser.generation -Jsemantic=ParserSClaimVal parser.y

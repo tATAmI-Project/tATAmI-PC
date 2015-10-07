@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (C) 2015 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+ * 
+ * This file is part of tATAmI-PC.
+ * 
+ * tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+ * 
+ * tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package testing.system_testing.default_components;
 
 import java.util.Vector;
@@ -11,11 +22,11 @@ import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.CompositeAgent;
+import tatami.core.agent.io.AgentActiveIO.InputListener;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.AgentGui.AgentGuiBackgroundTask;
-import tatami.core.agent.visualization.AgentGui.InputListener;
 import tatami.core.agent.visualization.AgentGui.ResultNotificationListener;
 import tatami.core.agent.visualization.VisualizableComponent;
 import testing.system_testing.default_components.PC.TestGui;
@@ -59,7 +70,7 @@ public class VisualizableComponentTest extends Unit
 			protected void componentInitializer()
 			{
 				preload((ComponentCreationData) new ComponentCreationData().addObject(COMPONENT_PARAMETER_NAME,
-						agentParameters), null, null);
+						agentParameters), null, null, null);
 			}
 		});
 		
@@ -72,7 +83,7 @@ public class VisualizableComponentTest extends Unit
 				super.componentInitializer();
 				
 				preload((ComponentCreationData) new ComponentCreationData().add(VisualizableComponent.GUI_PARAMETER_NAME,
-						TestGui.class.getSimpleName()), null, null);
+						TestGui.class.getSimpleName()), null, null, null);
 			}
 		});
 		

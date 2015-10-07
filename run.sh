@@ -13,7 +13,7 @@ fi
 
 echo ===============================================================
 
-java -Djava.ext.dirs=libs -cp bin tatami.simulation.Boot "$@"
+java -Djava.ext.dirs=libs:libs-kestrel:libs-json -cp bin tatami.simulation.Boot "$@"
 
 echo ===============================================================
 echo Press any key

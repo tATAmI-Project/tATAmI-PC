@@ -1,0 +1,22 @@
+(agent AmILabClient
+	(behavior
+		
+		(reactive receive_request
+			
+			// receive a request from the server 
+			(receive (struct message request ?server))
+			
+			// get the current proximity
+			(input @amilab getProximity ?proximity)
+			
+			// send the current proximity
+			(send ?server (struct message proximity this ?proximity))
+		)
+		
+		// receive a CONFIRM or a DECLINE response
+		(reactive receive_response
+			(receive (struct message response ?response))
+			(output @amilab updateStatus ?response)
+		)
+	)
+)

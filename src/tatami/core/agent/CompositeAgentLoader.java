@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (C) 2015 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
+ * 
+ * This file is part of tATAmI-PC.
+ * 
+ * tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+ * 
+ * tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package tatami.core.agent;
 
 import java.util.Iterator;
@@ -126,7 +137,7 @@ public class CompositeAgentLoader implements AgentLoader
 			try
 			{
 				component = (AgentComponent) PlatformUtils.loadClassInstance(this, componentClass, new Object[0]);
-				log.trace("component [] loaded for agent [].", componentClass, agentCreationData.getAgentName());
+				log.trace("component [] created for agent []. pre-loading...", componentClass, agentCreationData.getAgentName());
 			} catch(Exception e)
 			{
 				log.error("Component [] failed to load; it will not be available for agent []:", componentClass,
@@ -146,8 +157,11 @@ public class CompositeAgentLoader implements AgentLoader
 				componentData
 						.addObject(ParametricComponent.COMPONENT_PARAMETER_NAME, agentCreationData.getParameters());
 			
-			if(component.preload(componentData, componentNode, log))
+			if(component.preload(componentData, componentNode, agentCreationData.getPackages(), log))
+			{
 				agentCreationData.getParameters().addObject(COMPONENT_PARAMETER_NAME, component);
+				log.trace("component [] pre-loaded for agent []", componentClass, agentCreationData.getAgentName());
+			}
 			else
 				log.error("Component [] failed pre-loading step; it will not be available for agent [].",
 						componentClass, agentCreationData.getAgentName());

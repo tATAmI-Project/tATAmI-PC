@@ -13,30 +13,34 @@ package tatami.core.agent.visualization;
 
 import java.util.Vector;
 
+import tatami.core.agent.io.AgentActiveIO;
+
 /**
- * This class models the GUI of an agent (and a GUI in general) so as to make it platform-independent.
+ * This class models the GUI of an agent (and a GUI in general) so as to make it platform-independent, based on
+ * {@link AgentActiveIO}.
  * <p>
- * It models the GUI as a set of components that can perform input and/or output. Components are logical units that can
- * contain one or more controls and that can correspond to non-disjoint sets of controls.
+ * It models the GUI as a set of GUI components (I/O ports) that can perform input and/or output. These components are
+ * different from agent components. GUI components are logical units that can contain one or more controls and that can
+ * correspond to non-disjoint sets of controls.
  * <p>
- * There are three types of functionalities that can be associated to a component:
+ * There are three types of functionalities that can be associated to a GUI component:
  * <ul>
  * <li>output -- the component is able to change appearance according to set of {@link Object} instances;
  * <li>'passive' input -- the component is able to store information entered by the user (or collected from the user),
  * that can be retrieved as a set of {@link Object} instances.
- * <li>'active' input -- the component is able to notify an {@link InputListener} instance about the user's activity,
- * also transmitting a set of {@link Object} instances along with the notification.
+ * <li>'active' input -- the component is able to notify a {@link tatami.core.agent.io.AgentActiveIO.InputListener}
+ * instance about the user's activity, also transmitting a set of {@link Object} instances along with the notification.
  * </ul>
  * Basic examples of the functionalities are as follows: output in a text field; get passive input from a text field;
  * receive active input / notifications when a button is pressed.
  * <p>
- * Components in the GUI are identified by {@link String} names. It is strongly recommended that the names are stored as
- * constants in enumerations. For instance, default components exists in a GUI, which get their names from the
- * {@link DefaultComponent} enumeration.
+ * GUI components are identified by {@link String} names. It is strongly recommended that the names are stored as
+ * constants in enumerations and are treated as lower case. For instance, default components exists in a GUI, which get
+ * their names from the {@link DefaultComponent} enumeration.
  * 
  * @author Andrei Olaru
  */
-public interface AgentGui
+public interface AgentGui extends AgentActiveIO
 {
 	/**
 	 * Default components of a GUI.
@@ -56,33 +60,13 @@ public interface AgentGui
 	}
 	
 	/**
-	 * This interface should be implemented by classes that are able to receive notifications from 'active' inputs. Such
-	 * notifications will be accompanied by some arguments describing the notification, beside the name of the component
-	 * generating the notification.
-	 * 
-	 * @author Andrei Olaru
-	 */
-	public interface InputListener
-	{
-		/**
-		 * The method is invoked whenever an 'active input' component is activated.
-		 * 
-		 * @param componentName
-		 *            - the name of the component invoking the method.
-		 * @param arguments
-		 *            - arguments accompanying the notification.
-		 */
-		public void receiveInput(String componentName, Vector<Object> arguments);
-	}
-	
-	/**
 	 * The interface enables the GUI to perform long / background tasks.
 	 * <p>
 	 * This also must be used by Java Swing implementations to take control off from the EDT.
 	 * 
 	 * @see <a href="http://docs.oracle.com/javase/tutorial/uiswing/concurrency/dispatch.html">Swing Concurrency
 	 *      Tutorial</a>
-	 * 
+	 * 		
 	 * @author Andrei Olaru
 	 */
 	public interface AgentGuiBackgroundTask
@@ -124,6 +108,7 @@ public interface AgentGui
 	 * @param arguments
 	 *            - the information to transmit.
 	 */
+	@Override
 	public void doOutput(String componentName, Vector<Object> arguments);
 	
 	/**
@@ -133,18 +118,8 @@ public interface AgentGui
 	 *            - the name of the component.
 	 * @return the received information.
 	 */
-	public Vector<Object> getinput(String componentName);
-	
-	/**
-	 * Connects a component, as active input, to an implementation of {@link InputListener}. The input will invoke the
-	 * <code>receiveInput()</code> method of the implementation whenever it is the case.
-	 * 
-	 * @param componentName
-	 *            - the name of the component
-	 * @param listener
-	 *            - the {@link InputListener} implementation to be invoked on activation.
-	 */
-	public void connectInput(String componentName, InputListener listener);
+	@Override
+	public Vector<Object> getInput(String componentName);
 	
 	/**
 	 * Instructs the GUI to unload, effectively closing the GUI.
@@ -154,12 +129,12 @@ public interface AgentGui
 	/**
 	 * The method executes a task in the background of the GUI, as specified by the implementation. This is useful, for
 	 * instance, for taking tasks off the Swing EDT.(DemointeractivGUI.setTitle(getAgentName());
-			
+	 * 
 	 * <p>
 	 * Implementations are expected to start another thread for executing the work.
 	 * 
 	 * @see AgentGuiBackgroundTask
-	 * 
+	 * 		
 	 * @param agentGuiBackgroundTask
 	 *            - the task to perform.
 	 * @param argument
@@ -169,5 +144,5 @@ public interface AgentGui
 	 */
 	public void background(AgentGuiBackgroundTask agentGuiBackgroundTask, Object argument,
 			ResultNotificationListener resultListener);
-	
+			
 }

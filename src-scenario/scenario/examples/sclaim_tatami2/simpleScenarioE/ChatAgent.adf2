@@ -7,7 +7,7 @@
 	)
 		
 	(reactive snd
-		(input messageinput text ?sendMessage)						// the agent is notified that there is a message to send
+		(input messageinput ?sendMessage)						// the agent is notified that there is a message to send
 		(readK (struct knowledge sequence ?sequence))				// read the sequence number from the knowledge base
 		(removeK (struct knowledge sequence ?sequence))				// remove the stored sequence
 		(addK (struct knoweldge msg sent ?sequence ?sendMessage))	// store the message in the knowledge base, together with the type (received/sent) and the sequence
@@ -37,7 +37,7 @@
 		(forAllK (struct knowledge msg ??direction ??sequence ??message)	// go through all messages
 			(assembleOutput ??direction ??sequence ??message ??output)		// put them in the ?output variable; ARTIFICIAL: ?output will be overwritten
 		)
-		(output chatlog ??output)										// display
+		(output chatlog ??output 1)										// display
 	)
 		
 )

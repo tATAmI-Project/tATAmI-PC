@@ -35,6 +35,7 @@ public enum ClaimFunctionType
 	// input-output
 	INPUT,
 	OUTPUT,
+	PRINT,
 	
 	// Inspired from the ambient calculus:
 	IN,

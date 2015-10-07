@@ -1,38 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="testing/tudor/|simulation/oldBoot.java|agent_packages/phase1/|testing/planning/|testing/nga/|testing/gerard/|testing/andrei/VisualizationInfrastructureTest.java" kind="src" path="src"/>
-	<classpathentry excluding="2011/|2011/|scenario/s2011/nii2011/" kind="src" path="src-scenario"/>
-	<classpathentry kind="src" path="src-schema"/>
-	<classpathentry kind="lib" path="libs/log4j-1.2.16.jar"/>
-	<classpathentry kind="lib" path="libs/Config.jar" sourcepath="libs/Config.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/Config.jar!/doc-Config/"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src-scenario"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="libs/commons-codec-1.3.jar"/>
-	<classpathentry kind="lib" path="libs/jade.jar" sourcepath="libs/JADE-src-4.1.zip">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/JADE-doc-4.1.zip!/jade/doc/api"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="libs/net.xqhs.XML.jar" sourcepath="libs/net.xqhs.XML.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/net.xqhs.XML.jar!/doc-net.xqhs.XML"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="libs/Graphs.jar" sourcepath="libs/Graphs.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/Graphs.jar!/doc-Graphs/"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="libs/Config.jar"/>
 	<classpathentry kind="lib" path="libs/Gel.jar"/>
-	<classpathentry kind="lib" path="libs/net.xqhs.WindowLayout.jar"/>
+	<classpathentry kind="lib" path="libs/Graphs.jar"/>
+	<classpathentry kind="lib" path="libs/JADE-doc-4.1.zip"/>
+	<classpathentry kind="lib" path="libs/JADE-src-4.1.zip"/>
+	<classpathentry kind="lib" path="libs/jade.jar"/>
 	<classpathentry kind="lib" path="libs/java_websocket.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="libs/Logging.jar" sourcepath="libs/Logging.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/Logging.jar!/doc-Logging/"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="libs/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="libs/Logging.jar"/>
+	<classpathentry kind="lib" path="libs/net.xqhs.WindowLayout.jar"/>
+	<classpathentry kind="lib" path="libs/net.xqhs.XML.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/finagle-core-3.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/finagle-kestrel-3.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/finagle-memcached-3.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/guava-11.0.2.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/hamcrest-core-1.1.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/jsr305-1.3.9.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/junit-4.10.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/logback-classic-1.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/logback-core-1.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/netty-3.4.0.Alpha1.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/scala-library-2.8.1.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/slf4j-api-1.6.4.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/util-collection-3.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/util-core-3.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-kestrel/util-hashing-3.0.0.jar"/>
+	<classpathentry kind="lib" path="libs-json/jackson-all-1.9.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -46,14 +46,14 @@ public class ChatAgentGui extends PCDefaultAgentGui
 		TextField tf = new TextField();
 		window.add(tf, c);
 		tf.setMinimumSize(new Dimension(150, 30));
-		components.put(ChatComponents.CHATTEXT.toString(), tf);
+		addComponent(ChatComponents.CHATTEXT.toString(), tf);
 		
 		c.gridx = 1;
 		TextArea ta = new TextArea();
 		ta.setEnabled(false);
 		window.add(ta, c);
 		ta.setMinimumSize(new Dimension(150, 100));
-		components.put(ChatComponents.CHATLOG.toString(), ta);
+		addComponent(ChatComponents.CHATLOG.toString(), ta);
 		
 		c.fill = GridBagConstraints.BOTH;
 		c.gridx = 2;
@@ -66,9 +66,9 @@ public class ChatAgentGui extends PCDefaultAgentGui
 				if(inputListener != null)
 				{
 					Vector<Object> args = new Vector<Object>(1);
-					args.add(((TextField)components.get(ChatComponents.CHATTEXT.toString())).getText());
+					args.add(((TextField)getComponent(ChatComponents.CHATTEXT.toString())).getText());
 					inputListener.receiveInput(ChatComponents.MESSAGEINPUT.toString().toLowerCase(), args);
-					((TextField)components.get(ChatComponents.CHATTEXT.toString())).setText("");
+					((TextField)getComponent(ChatComponents.CHATTEXT.toString())).setText("");
 				}
 				else
 					System.out.println("nobody to receive the input");
@@ -76,7 +76,7 @@ public class ChatAgentGui extends PCDefaultAgentGui
 			}
 		});
 		window.add(sendButton, c);
-		components.put(DefaultComponent.AGENT_NAME.toString(), sendButton);
+		addComponent(DefaultComponent.AGENT_NAME.toString(), sendButton);
 	}
 	
 	@Override

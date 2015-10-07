@@ -11,6 +11,9 @@
  ******************************************************************************/
 package tatami.simulation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import tatami.core.agent.parametric.AgentParameters;
 
@@ -37,6 +40,10 @@ public class AgentCreationData
 	 * The parameters to pass to the agent. The reference cannot be <code>null</code>.
 	 */
 	AgentParameters	parameters;
+	/**
+	 * The set of packages where the loader and the components may look for data.
+	 */
+	List<String>		packages;
 	/**
 	 * <code>true</code> if the agent should be created on the local machine, <code>false</code> if it should be created
 	 * on a different machine.
@@ -68,6 +75,8 @@ public class AgentCreationData
 	 *            - the name of the agent.
 	 * @param agentParameters
 	 *            - the {@link AgentParameters} instance to pass to the agent.
+	 * @param agentPackages
+	 *            - the set of packages where the loader and the components may look for data.
 	 * @param destination
 	 *            - the container on which the agent should be created.
 	 * @param remote
@@ -80,15 +89,13 @@ public class AgentCreationData
 	 * @param scenarioNode
 	 *            - the {@link XMLNode} instance corresponding to the agent, as resulted from parsing the scenario file.
 	 */
-	public AgentCreationData(String name, AgentParameters agentParameters, String destination, boolean remote,
-			String agentPlatform, AgentLoader agentLoader, XMLNode scenarioNode)
+	public AgentCreationData(String name, AgentParameters agentParameters, List<String> agentPackages,
+			String destination, boolean remote, String agentPlatform, AgentLoader agentLoader, XMLNode scenarioNode)
 	{
 		if(name == null)
 			throw new NullPointerException("Agent name cannot be null");
 		if(agentParameters == null)
 			throw new NullPointerException("Agent parameters cannot be null");
-		if(destination == null)
-			throw new NullPointerException("Container cannot be null");
 		if(agentPlatform == null)
 			throw new NullPointerException("Agent platform cannot be null");
 		if(agentLoader == null)
@@ -98,6 +105,7 @@ public class AgentCreationData
 		
 		agentName = name;
 		parameters = agentParameters;
+		packages = (agentPackages != null) ? agentPackages : new ArrayList<String>();
 		destinationContainer = destination;
 		isRemote = remote;
 		platform = agentPlatform;
@@ -119,6 +127,14 @@ public class AgentCreationData
 	public AgentParameters getParameters()
 	{
 		return parameters;
+	}
+	
+	/**
+	 * @return the list packages where the agent may look for files.
+	 */
+	public List<String> getPackages()
+	{
+		return packages;
 	}
 	
 	/**
