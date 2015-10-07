@@ -1,4 +1,4 @@
-package scenario.amilab.sclaim_app;
+package scenario.application.amilab_follow_me_v1;
 
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -18,7 +18,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
-import scenario.amilab.sclaim_app.PC.AmILabGui;
+import scenario.application.amilab_follow_me_v1.PC.AmILabGui;
 import tatami.amilab.AmILabComponent;
 import tatami.amilab.Perception;
 import tatami.core.agent.AgentEvent;

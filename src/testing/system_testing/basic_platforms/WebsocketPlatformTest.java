@@ -22,7 +22,7 @@ public class WebsocketPlatformTest
 	/**
 	 * The scenario.
 	 */
-	private static final String SCENARIO = "../../websocket/scenario-ping";
+	private static final String SCENARIO = "../../../dev/websocket/scenario-ping";
 	
 	/**
 	 * The main method.

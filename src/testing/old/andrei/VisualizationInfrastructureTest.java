@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package testing.andrei;
+package testing.old.andrei;
 
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.visualization.VisualizableComponent;

@@ -1,4 +1,4 @@
-package scenario.amilab.sclaim_app.PC;
+package scenario.application.amilab_follow_me_v1.PC;
 
 import java.awt.Label;
 import java.util.Vector;

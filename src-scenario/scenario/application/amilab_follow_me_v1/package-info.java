@@ -47,4 +47,4 @@
  * 
  * @author Claudiu-Mihai Toma
  */
-package scenario.amilab.sclaim_app;
+package scenario.application.amilab_follow_me_v1;

@@ -9,7 +9,16 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package testing.alex;
+package testing.tudor;
 
-public class emptyTestFile {
+import simulation.Boot;
+import testing.old.andrei.httpServer.TestServer;
+
+public class NII2011Test
+{
+	public static void main(String[] args)
+	{
+		TestServer.main(null);
+		Boot.main(new String[]{"scenario/nii2011/scenario.xml"});
+	}
 }

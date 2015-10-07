@@ -13,7 +13,7 @@ package tatami.simulation;
 
 import net.xqhs.windowLayout.LayoutIndications.BarPosition;
 import net.xqhs.windowLayout.grid.GridLayoutIndications;
-import scenario.amilab.sclaim_app.PC.AmILabGui;
+import scenario.application.amilab_follow_me_v1.PC.AmILabGui;
 import tatami.core.agent.visualization.AgentGuiConfig;
 
 /**

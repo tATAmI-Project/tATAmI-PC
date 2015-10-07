@@ -9,16 +9,16 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package testing.tudor;
+package testing.old.andrei;
 
-import simulation.Boot;
-import testing.andrei.httpServer.TestServer;
+import tatami.simulation.Boot;
+import testing.old.andrei.httpServer.TestServer;
 
-public class NII2011Test
+public class SmartRoomTest
 {
 	public static void main(String[] args)
 	{
 		TestServer.main(null);
-		Boot.main(new String[]{"scenario/nii2011/scenario.xml"});
+		Boot.main(new String[]{"scenario/SmartRoomStep2/Step2scenario.xml"});
 	}
 }

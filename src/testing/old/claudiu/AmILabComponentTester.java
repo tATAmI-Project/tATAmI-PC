@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package testing.claudiu;
+package testing.old.claudiu;
 
 import tatami.amilab.AmILabComponent;
 import tatami.amilab.AmILabComponent.AmILabDataType;

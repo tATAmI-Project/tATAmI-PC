@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package testing.andrei;
+package testing.old.andrei;
 
 import java.awt.TextArea;
 import java.awt.event.WindowAdapter;
