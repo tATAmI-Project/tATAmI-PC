@@ -13,7 +13,6 @@ package tatami.simulation;
 
 import net.xqhs.windowLayout.LayoutIndications.BarPosition;
 import net.xqhs.windowLayout.grid.GridLayoutIndications;
-import scenario.application.amilab_follow_me_v1.PC.AmILabGui;
 import tatami.core.agent.visualization.AgentGuiConfig;
 
 /**
@@ -29,7 +28,7 @@ public class BootDefaultArguments
 	/**
 	 * The scenario file.
 	 */
-	static final String scenarioFileName = "src-scenario/scenario/amilab/app_demo/scenario-local-client-server.xml";
+	static final String				scenarioFileName		= "src-scenario/scenario/examples/migration/scenario-migration.xml";
 	// static final String scenarioFileName = "src-scenario/scenario/amilab/app_demo/scenario-distributed-client.xml";
 	// static final String scenarioFileName = "src-scenario/scenario/amilab/app_demo/scenario-distributed-server.xml";
 	// static final String scenarioFileName = "src-scenario/scenario/amilab/scenario-consumer-A.xml";
