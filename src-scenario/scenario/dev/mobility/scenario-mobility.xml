@@ -28,7 +28,7 @@
 				<scen:component name="visualizable" />
 				<scen:component name="messaging" />
 				<scen:component name="testing"
-					classpath="scenario.examples.StateAgentTestComponent">
+					classpath="scenario.dev.mobility.StateAgentTestComponent">
 					<scen:parameter name="other agent" value="AgentB" />
 				</scen:component>
 				<scen:parameter name="loader" value="composite" />

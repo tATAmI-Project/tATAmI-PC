@@ -1,4 +1,4 @@
-package scenario.examples;
+package scenario.dev.mobility;
 
 import java.util.Random;
 import java.util.Timer;
