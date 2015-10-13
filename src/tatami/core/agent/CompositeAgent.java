@@ -156,6 +156,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	/**
 	 * Time (in milliseconds) to wait for the agent thread to exit.
 	 */
+	@Deprecated
 	protected static final long							EXIT_TIMEOUT				= 500;
 																					
 	/**
@@ -241,17 +242,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 */
 	public boolean exit()
 	{
-		if(!postAgentEvent(new AgentEvent(AgentEventType.AGENT_STOP)))
-			return false;
-		try
-		{
-			agentThread.join(0);// EXIT_TIMEOUT);
-		} catch(InterruptedException e)
-		{
-			e.printStackTrace();
-			return false;
-		}
-		return true;
+		return postAgentEvent(new AgentEvent(AgentEventType.AGENT_STOP));
 	}
 	
 	/**
@@ -261,6 +252,24 @@ public class CompositeAgent implements Serializable, AgentManager
 	public boolean stop()
 	{
 		return exit();
+	}
+	
+	/**
+	 * This method contains some legacy code for forcing the agent thread to stop. Testing currently shows that posting
+	 * a stop event should be sufficient, so this method should only be used in case of malfunction that cannot be
+	 * solved otherwise at the time.
+	 */
+	@Deprecated
+	public void killAgent()
+	{
+		exit();
+		try
+		{
+			agentThread.join(EXIT_TIMEOUT);
+		} catch(InterruptedException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -586,6 +595,16 @@ public class CompositeAgent implements Serializable, AgentManager
 	}
 	
 	/**
+	 * Checks if the agent is currently in <code>STOPPED</code> state.
+	 * 
+	 * @return <code>true</code> if the agent is currently <code>STOPPED</code>; <code>false</code> otherwise.
+	 */
+	public boolean isStopped()
+	{
+		return agentState == AgentState.STOPPED;
+	}
+	
+	/**
 	 * Checks whether the agent is in the <code>TRANSIENT</code> state.
 	 * 
 	 * @return <code>true</code> if the agent is currently <code>TRANSIENT</code>; <code>false</code> otherwise.
@@ -633,7 +652,7 @@ public class CompositeAgent implements Serializable, AgentManager
 				if(getAgentName() != null)
 					localLog.setUnitName(getAgentName() + "#");
 				else
-					localLog.setUnitName(super.toString().replace(getClass().getName(), "CompAg"));
+					localLog.setUnitName(super.toString().replace(getClass().getName(), "CompAg") + "#");
 			}
 			localLog.li(message, arguments);
 		}

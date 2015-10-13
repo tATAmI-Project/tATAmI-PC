@@ -83,18 +83,18 @@ public class BareCompositeAgentTest extends Unit
 		
 		// trying to stop already stopped
 		if(agent.stop())
-			li("erroneous stop successful");
+			le("erroneous stop successful");
 		else
-			le("erroneous stop failed");
+			li("erroneous stop failed");
 			
 		// test transient state
 		agent.toggleTransient();
 		
 		// erroneous start in transient
 		if(agent.start())
-			li("erroneous start successful");
+			le("erroneous start successful");
 		else
-			le("erroneous start failed");
+			li("erroneous start failed");
 			
 		// attempt to add component in transient state
 		try
@@ -117,9 +117,9 @@ public class BareCompositeAgentTest extends Unit
 			
 		// trying to start already started
 		if(agent.start())
-			li("re-start successful");
+			le("re-start successful");
 		else
-			le("re-start failed");
+			li("re-start failed");
 		try
 		{
 			Thread.sleep(2000);
@@ -129,23 +129,52 @@ public class BareCompositeAgentTest extends Unit
 		}
 		// trying to start already started
 		if(agent.start())
-			li("re-re-start successful");
+			le("re-re-start successful");
 		else
-			le("re-re-start failed");
+			li("re-re-start failed");
 			
-		
+		// attempting to stop then re-start the agent
+		if(agent.stop())
+			li("stop successful");
+		else
+			le("stop failed");
+			
+		int tries = 10;
+		while(!agent.isStopped() && tries > 0)
+			try
+			{
+				tries--;
+				Thread.sleep(10);
+			} catch(InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		li("agent stopped after [] tries.", new Integer(tries));
+			
+		if(agent.start())
+			li("start 2 successful");
+		else
+			le("start 2 failed");
+			
 		boolean done = false;
 		while(!done)
 		{
 			done = agent.exit();
 			if(!done)
 				le("exit failed");
+			try
+			{
+				Thread.sleep(50);
+			} catch(InterruptedException e)
+			{
+				e.printStackTrace();
+			}
 		}
+		li("exit successful");
 		if(!agent.exit())
 			li("re-exit failed");
 		else
 			li("re-exit successful");
-		li("exit successful");
 		li("done.");
 		doExit();
 	}
