@@ -49,7 +49,7 @@ public class BareCompositeAgentTest extends Unit
 	 */
 	public BareCompositeAgentTest()
 	{
-		setUnitName("parametric component tester").setLogLevel(generalLevel);
+		setUnitName("composite agent tester").setLogLevel(generalLevel);
 		li("starting...");
 		
 		CompositeAgent agent = new CompositeAgent();
@@ -85,6 +85,11 @@ public class BareCompositeAgentTest extends Unit
 			li("start successful");
 		else
 			le("start failed");
+		
+		if(agent.start())
+			li("re-start successful");
+		else
+			le("re-start failed");
 		try
 		{
 			Thread.sleep(2000);
@@ -92,6 +97,19 @@ public class BareCompositeAgentTest extends Unit
 		{
 			e.printStackTrace();
 		}
+		if(agent.start())
+			li("re-re-start successful");
+		else
+			le("re-re-start failed");
+		
+		
+		
+		// test transient state
+		
+		
+		
+		
+		
 		boolean done = false;
 		while(!done)
 		{
@@ -99,6 +117,10 @@ public class BareCompositeAgentTest extends Unit
 			if(!done)
 				le("exit failed");
 		}
+		if(!agent.exit())
+			li("re-exit failed");
+		else
+			li("re-exit successful");
 		li("exit successful");
 		li("done.");
 		doExit();

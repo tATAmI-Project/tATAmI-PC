@@ -20,6 +20,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import net.xqhs.util.logging.UnitComponent;
+import net.xqhs.util.logging.LoggerSimple.Level;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.AgentEvent.AgentSequenceType;
@@ -43,7 +45,7 @@ import tatami.simulation.PlatformLoader.PlatformLink;
  * A composite agent instance is its own {@link AgentManager}.
  * 
  * @author Andrei Olaru
- * 
+ * 		
  */
 public class CompositeAgent implements Serializable, AgentManager
 {
@@ -52,11 +54,15 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * <p>
 	 * The normal transition between states is the following: <br/>
 	 * <ul>
-	 * <li> {@link #INITIALIZING} [here components are normally added] &rarr; {@link #STARTING} [starting thread;
-	 * starting components] &rarr; {@link #RUNNING}.
+	 * <li>{@link #STOPPED} [here components are normally added] + {@link AgentEventType#AGENT_START} &rarr;
+	 * {@link #STARTING} [starting thread; starting components] &rarr; {@link #RUNNING}.
 	 * <li>while in {@link #RUNNING}, components can be added or removed.
-	 * <li> {@link #RUNNING} + {@link AgentEventType#AGENT_STOP} &rarr; {@link #STOPPING} [no more events accepted; stop
-	 * components; stop thread] &rarr; {@link #STOPPED} (equivalent with {@link #INITIALIZING}).
+	 * <li>{@link #RUNNING} + {@link AgentEventType#AGENT_STOP} &rarr; {@link #STOPPING} [no more events accepted; stop
+	 * components; stop thread] &rarr; {@link #STOPPED}.
+	 * <li>when the {@link #TRANSIENT} state is involved, the transitions are as follows: {@link #RUNNING} +
+	 * {@link AgentEventType#AGENT_STOP} w/ parameter {@link CompositeAgent#TRANSIENT_EVENT_PARAMETER} &rarr;
+	 * {@link #STOPPING} &rarr {@link #TRANSIENT} [unable to modify agent] + {@link AgentEventType#AGENT_START} w/
+	 * parameter {@link CompositeAgent#TRANSIENT_EVENT_PARAMETER} &rarr; {@link #RUNNING}.
 	 * </ul>
 	 * 
 	 * @author Andrei Olaru
@@ -69,10 +75,17 @@ public class CompositeAgent implements Serializable, AgentManager
 		RUNNING,
 		
 		/**
-		 * State indicating that the agent has been created and that it is waiting to start. The agent's thread has not
-		 * yet started.
+		 * State indicating that the agent is stopped and is unable to process events. The agent's thread is stopped.
+		 * All components are stopped.
 		 */
-		INITIALIZING,
+		STOPPED,
+		
+		/**
+		 * This state is a version of the {@link #STOPPED} state, with the exception that it does not allow any changes
+		 * the general state of the agent (e.g. component list). The state should be used to "freeze" the agent, such as
+		 * for it to be serialized.. Normally, in this state components should not allow any changes either.
+		 */
+		TRANSIENT,
 		
 		/**
 		 * State indicating that the agent is in the process of starting, but is not currently accepting events. The
@@ -82,19 +95,13 @@ public class CompositeAgent implements Serializable, AgentManager
 		
 		/**
 		 * State indicating that the agent is currently stopping. It is not accepting events any more. The thread may or
-		 * may not have been started. The components are in the process of stopping.
+		 * may not be running. The components are in the process of stopping.
 		 */
 		STOPPING,
-		
-		/**
-		 * State indicating that the agent has been stopped and is unable to process events. The agent's thread has been
-		 * stopped. All components are stopped.
-		 */
-		STOPPED,
 	}
 	
 	/**
-	 * THis is the event-processing thread of the agent.
+	 * This is the event-processing thread of the agent.
 	 * 
 	 * @author Andrei Olaru
 	 */
@@ -103,8 +110,8 @@ public class CompositeAgent implements Serializable, AgentManager
 		@Override
 		public void run()
 		{
-			boolean doexit = false;
-			while(!doexit)
+			boolean threadExit = false;
+			while(!threadExit)
 			{
 				// System.out.println("oops");
 				if((eventQueue != null) && eventQueue.isEmpty())
@@ -134,29 +141,8 @@ public class CompositeAgent implements Serializable, AgentManager
 							it.previous().signalAgentEvent(event);
 						break;
 					}
-					switch(event.getType())
-					{
-					case AGENT_START: // the agent has completed starting and all components are up.
-						synchronized(eventQueue)
-						{
-							state = AgentState.RUNNING;
-						}
-						break;
-					case AGENT_STOP:
-						synchronized(eventQueue)
-						{
-							if(!eventQueue.isEmpty())
-							{
-								// TODO: do something
-							}
-						}
-						eventQueue = null;
-						state = AgentState.STOPPED;
-						doexit = true;
-						break;
-					default:
-						// do nothing
-					}
+					
+					threadExit = FSMEventOut(event.getType(), event.getParameter(TRANSIENT_EVENT_PARAMETER) != null);
 				}
 			}
 		}
@@ -165,31 +151,38 @@ public class CompositeAgent implements Serializable, AgentManager
 	/**
 	 * The class UID
 	 */
-	private static final long							serialVersionUID	= -2693230015986527097L;
-	
+	private static final long							serialVersionUID			= -2693230015986527097L;
+																					
 	/**
 	 * Time (in milliseconds) to wait for the agent thread to exit.
 	 */
-	protected static final long							EXIT_TIMEOUT		= 500;
-	
+	protected static final long							EXIT_TIMEOUT				= 500;
+																					
+	/**
+	 * The name of the parameter that should be added to {@link AgentEventType#AGENT_START} /
+	 * {@link AgentEventType#AGENT_STOP} events in order to take the agent out of / into the
+	 * {@link AgentState#TRANSIENT} state.
+	 */
+	protected static final String						TRANSIENT_EVENT_PARAMETER	= "TO_FROM_TRANSIENT";
+																					
 	/**
 	 * This can be used by platform-specific components to contact the platform.
 	 */
-	protected Object									platformLink		= null;
-	
+	protected Object									platformLink				= null;
+																					
 	/**
 	 * The {@link Map} that links component names (functionalities) to standard component instances.
 	 */
-	protected Map<AgentComponentName, AgentComponent>	components			= new HashMap<AgentComponentName, AgentComponent>();
-	
+	protected Map<AgentComponentName, AgentComponent>	components					= new HashMap<AgentComponentName, AgentComponent>();
+																					
 	/**
 	 * A {@link List} that holds the order in which components were added, so as to signal agent events to components in
 	 * the correct order (as specified by {@link AgentSequenceType}).
 	 * <p>
 	 * It is important that this list is managed together with <code>components</code>.
 	 */
-	protected ArrayList<AgentComponent>					componentOrder		= new ArrayList<AgentComponent>();
-	
+	protected ArrayList<AgentComponent>					componentOrder				= new ArrayList<AgentComponent>();
+																					
 	// TODO: add support for non-standard components.
 	// /**
 	// * The {@link Map} that holds the non-standard components (names are {@link String}).
@@ -200,87 +193,47 @@ public class CompositeAgent implements Serializable, AgentManager
 	/**
 	 * A synchronized queue of agent events, as posted by the components.
 	 */
-	protected LinkedBlockingQueue<AgentEvent>			eventQueue			= null;
-	
+	protected LinkedBlockingQueue<AgentEvent>			eventQueue					= null;
+																					
 	/**
 	 * The thread managing the agent's lifecycle (managing events).
 	 */
-	protected Thread									agentThread			= null;
-	
+	protected Thread									agentThread					= null;
+																					
 	/**
 	 * The agent state. See {@link AgentState}. Access to this member should be synchronized with the lock of
 	 * <code>eventQueue</code>.
 	 */
-	protected AgentState								state				= AgentState.INITIALIZING;
-	
+	protected AgentState								agentState					= AgentState.STOPPED;
+																					
 	/**
-	 * Adds a component to the agent that has been configured beforehand. The agent will register with the component, as
-	 * parent.
-	 * <p>
-	 * The component will be identified by the agent by means of its <code>getComponentName</code> method. Only one
-	 * instance per name (functionality) will be allowed.
-	 * 
-	 * @param component
-	 *            - the {@link AgentComponent} instance to add.
-	 * @return the agent instance itself. This can be used to continue adding other components.
+	 * <b>*EXPERIMENTAL*</b>. This log is used only for important logging messages related to the agnt's state. While
+	 * the agent will attempt to use the name set in the parametric component, this may not succeed if such a component
+	 * does not exist, or if the name has not been set. This log should only be used by means of the
+	 * {@link #log(String, Object...)} method.
 	 */
-	public CompositeAgent addComponent(AgentComponent component)
-	{
-		if(!canAddComponents())
-			throw new IllegalStateException("Cannot add components in state [" + state + "].");
-		if(component == null)
-			throw new InvalidParameterException("Component is null");
-		if(hasComponent(component.getComponentName()))
-			throw new InvalidParameterException("Cannot add multiple components for name ["
-					+ component.getComponentName() + "]");
-		components.put(component.getComponentName(), component);
-		componentOrder.add(component);
-		component.setParent(this);
-		return this;
-	}
-	
+	protected UnitComponent								localLog					= (UnitComponent) new UnitComponent()
+			.setLogLevel(Level.INFO);
+			
 	/**
-	 * Removes an existing component of the agent.
-	 * <p>
-	 * The method will call the method <code>getComponentName()</code> of the component with a <code>null</code>
-	 * parameter.
-	 * 
-	 * @param name
-	 *            - the name of the component to remove (as instance of {@link AgentComponentName}.
-	 * @return a reference to the just-removed component instance.
+	 * This switch activates the use of the {@link #localLog}.
 	 */
-	public AgentComponent removeComponent(AgentComponentName name)
-	{
-		if(!hasComponent(name))
-			throw new InvalidParameterException("Component [" + name + "] does not exist");
-		AgentComponent component = getComponent(name);
-		componentOrder.remove(component);
-		components.remove(component);
-		return component;
-	}
-	
+	protected boolean									USE_LOCAL_LOG				= true;
+																					
 	/**
-	 * Starts the lifecycle of the agent. All components will receive an <code>AGENT_START</code> event.
+	 * Starts the lifecycle of the agent. All components will receive an {@link AgentEventType#AGENT_START} event.
 	 * 
 	 * @return true if the event has been successfully posted. See <code>postAgentEvent()</code>.
 	 */
 	@Override
 	public boolean start()
 	{
-		if(eventQueue != null)
-			return false;
-		if(!((state == AgentState.INITIALIZING) || (state == AgentState.STOPPED)))
-			return false;
-		state = AgentState.STARTING;
-		eventQueue = new LinkedBlockingQueue<AgentEvent>();
-		agentThread = new Thread(new AgentThread());
-		agentThread.start();
 		return postAgentEvent(new AgentEvent(AgentEventType.AGENT_START));
 	}
 	
 	/**
-	 * Instructs the agent to unload all components and exit. All components will receive an <code>AGENT_EXIT</code>
-	 * event.
+	 * Instructs the agent to unload all components and exit. All components will receive an
+	 * {@link AgentEventType#AGENT_STOP} event.
 	 * <p>
 	 * No events will be successfully received after this event has been posted.
 	 * 
@@ -310,6 +263,19 @@ public class CompositeAgent implements Serializable, AgentManager
 		return exit();
 	}
 	
+	/**
+	 * Instructs the agent to switch state between <code>STOPPED</code> and <code>TRANSIENT</code>.
+	 * 
+	 * @return <code>true</code> if the agent is now in the <code>TRANSIENT</code> state, <code>false</code> otherwise.
+	 * 		
+	 * @throws RuntimeException
+	 *             if the agent was in any other state than the two.
+	 */
+	public boolean toggleTransient() throws RuntimeException
+	{
+		return FSMToggleTransient();
+	}
+	
 	@Override
 	public boolean setPlatformLink(PlatformLink link)
 	{
@@ -335,16 +301,19 @@ public class CompositeAgent implements Serializable, AgentManager
 	protected boolean postAgentEvent(AgentEvent event)
 	{
 		event.lock();
-		if(!(((state == AgentState.STARTING) && (event.getType() == AgentEventType.AGENT_START)) || (state == AgentState.RUNNING)))
+		
+		if(!canPostEvent(event))
 			return false;
-		boolean exiting = (event.getType() == AgentEventType.AGENT_STOP);
+			
+		AgentState futureState = FSMEventIn(event.getType(), event.getParameter(TRANSIENT_EVENT_PARAMETER) != null);
+		
 		try
 		{
 			if(eventQueue != null)
 				synchronized(eventQueue)
 				{
-					if(exiting)
-						state = AgentState.STOPPING;
+					if(futureState != null)
+						agentState = futureState;
 					eventQueue.put(event);
 					eventQueue.notify();
 				}
@@ -356,6 +325,203 @@ public class CompositeAgent implements Serializable, AgentManager
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * Checks whether the specified event can be posted in the current agent state.
+	 * <p>
+	 * Basically, there are two checks:
+	 * <ul>
+	 * <li>Any event except {@link AgentEventType#AGENT_START} can be posted only in the {@link AgentState#RUNNING}
+	 * state.
+	 * <li>If the {@link AgentEventType#AGENT_START} is posted while the agent is in the {@link AgentState#TRANSIENT}
+	 * state, it needs to feature a parameter called {@value #TRANSIENT_EVENT_PARAMETER} (with any value).
+	 * <li>The {@link AgentEventType#AGENT_START} event can be posted while the agent is {@link AgentState#STOPPED}.
+	 * 
+	 * @param event
+	 * @return
+	 */
+	protected boolean canPostEvent(AgentEvent event)
+	{
+		switch(event.getType())
+		{
+		case AGENT_START:
+			if(agentState == AgentState.TRANSIENT)
+				return event.getParameter(TRANSIENT_EVENT_PARAMETER) != null;
+			return agentState == AgentState.STOPPED;
+		default:
+			return agentState == AgentState.RUNNING;
+		}
+	}
+	
+	/**
+	 * Change the state of the agent (if it is the case) and perform other actions, <i>before</i> an event is added to
+	 * the event queue. It is presumed that the event has already been checked with {@link #canPostEvent(AgentEvent)}
+	 * and that the event can indeed be posted to the queue in the current state.
+	 * <p>
+	 * If the event was {@link AgentEventType#AGENT_START}, the agent will enter {@link AgentState#STARTING}, the event
+	 * queue is created and the agent thread is started.
+	 * <p>
+	 * If the event was {@link AgentEventType#AGENT_STOP}, the agent will enter {@link AgentState#STOPPING}.
+	 * 
+	 * @param eventType
+	 *            - the type of the event.
+	 * @param fromToTransient
+	 *            - <code>true</code> if the agent should enter / exit from the {@link AgentState#TRANSIENT} state.
+	 * @return the state the agent should enter next (the actual state change will happen in
+	 *         {@link #postAgentEvent(AgentEvent)}, together with posting the event to the queue.
+	 */
+	protected AgentState FSMEventIn(AgentEventType eventType, boolean fromToTransient)
+	{
+		AgentState futureState = null;
+		switch(eventType)
+		{
+		case AGENT_START:
+			if(getAgentName() != null)
+				localLog.setUnitName(getAgentName() + "#");
+			else
+				localLog.setUnitName(super.toString().replace(getClass().getName(), "CompAg"));
+				
+			futureState = AgentState.STARTING;
+			
+			if(eventQueue != null)
+				log("event queue already present");
+			eventQueue = new LinkedBlockingQueue<AgentEvent>();
+			agentThread = new Thread(new AgentThread());
+			agentThread.start();
+			break;
+		case AGENT_STOP:
+			futureState = AgentState.STOPPING;
+			break;
+		default:
+			// nothing to do
+		}
+		if(futureState != null)
+			log("Agent state is soon [][]", futureState, fromToTransient ? "transient" : "");
+		return futureState;
+	}
+	
+	/**
+	 * Change the state of the agent (if it is the case) and perform other actions, <i>after</i> an event has been
+	 * processed by all components.
+	 * <p>
+	 * If the event was {@link AgentEventType#AGENT_START}, the state will be {@link AgentState#RUNNING}.
+	 * <p>
+	 * If the event was {@link AgentEventType#AGENT_STOP}, the event queue will be consumed, the state will be
+	 * {@link AgentState#STOPPED} or {@link AgentState#TRANSIENT} (depending on the event parameters), and the log and
+	 * thread will exit.
+	 * 
+	 * @param eventType
+	 *            - the type of the event.
+	 * @param toFromTransient
+	 *            - <code>true</code> if the agent should enter / exit from the {@link AgentState#TRANSIENT} state.
+	 * @return <code>true</code> if the agent thread should exit.
+	 */
+	protected boolean FSMEventOut(AgentEventType eventType, boolean toFromTransient)
+	{
+		switch(eventType)
+		{
+		case AGENT_START: // the agent has completed starting and all components are up.
+			synchronized(eventQueue)
+			{
+				agentState = AgentState.RUNNING;
+				log("state is now", agentState);
+			}
+			break;
+		case AGENT_STOP:
+			synchronized(eventQueue)
+			{
+				if(!eventQueue.isEmpty())
+				{
+					while(!eventQueue.isEmpty())
+						log("ignoring event", eventQueue.poll());
+				}
+				if(toFromTransient)
+					agentState = AgentState.TRANSIENT;
+				else
+					agentState = AgentState.STOPPED;
+				log("state is now", agentState);
+			}
+			eventQueue = null;
+			localLog.doExit();
+			return true;
+		default:
+			// do nothing
+		}
+		return false;
+	}
+	
+	/**
+	 * Changes the agent state between {@link AgentState#STOPPED} and {@link AgentState#TRANSIENT}. If the agent is in
+	 * any other state, an exception is thrown.
+	 * 
+	 * @return <code>true</code> if the agent is now (after the change) in the {@link AgentState#TRANSIENT} state.
+	 *         <code>false</code> if it is now in {@link AgentState#STOPPED}.
+	 * 		
+	 * @throws RuntimeException
+	 *             if the agent is in any other state than the two above.
+	 */
+	protected boolean FSMToggleTransient() throws RuntimeException
+	{
+		switch(agentState)
+		{
+		case STOPPED:
+			agentState = AgentState.TRANSIENT;
+			break;
+		case TRANSIENT:
+			agentState = AgentState.STOPPED;
+			break;
+		default:
+			throw new IllegalStateException("Unable to toggle TRANSIENT state while in " + agentState);
+		}
+		log("state switched to", agentState);
+		return isTransient();
+	}
+	
+	/**
+	 * Adds a component to the agent that has been configured beforehand. The agent will register with the component, as
+	 * parent.
+	 * <p>
+	 * The component will be identified by the agent by means of its <code>getComponentName</code> method. Only one
+	 * instance per name (functionality) will be allowed.
+	 * 
+	 * @param component
+	 *            - the {@link AgentComponent} instance to add.
+	 * @return the agent instance itself. This can be used to continue adding other components.
+	 */
+	public CompositeAgent addComponent(AgentComponent component)
+	{
+		if(!canAddComponents())
+			throw new IllegalStateException("Cannot add components in state [" + agentState + "].");
+		if(component == null)
+			throw new InvalidParameterException("Component is null");
+		if(hasComponent(component.getComponentName()))
+			throw new InvalidParameterException(
+					"Cannot add multiple components for name [" + component.getComponentName() + "]");
+		components.put(component.getComponentName(), component);
+		componentOrder.add(component);
+		component.setParent(this);
+		return this;
+	}
+	
+	/**
+	 * Removes an existing component of the agent.
+	 * <p>
+	 * The method will call the method <code>getComponentName()</code> of the component with a <code>null</code>
+	 * parameter.
+	 * 
+	 * @param name
+	 *            - the name of the component to remove (as instance of {@link AgentComponentName}.
+	 * @return a reference to the just-removed component instance.
+	 */
+	public AgentComponent removeComponent(AgentComponentName name)
+	{
+		if(!hasComponent(name))
+			throw new InvalidParameterException("Component [" + name + "] does not exist");
+		AgentComponent component = getComponent(name);
+		componentOrder.remove(component);
+		components.remove(component);
+		return component;
 	}
 	
 	/**
@@ -410,16 +576,26 @@ public class CompositeAgent implements Serializable, AgentManager
 	}
 	
 	/**
-	 * Checks if the agent is currently in RUNNING state. In case components are added during this state, they must
-	 * consider that the agent is already running and no additional {@link AgentEventType#AGENT_START} events will be
-	 * issued.
+	 * Checks if the agent is currently in <code>RUNNING</code> state. In case components are added during this state,
+	 * they must consider that the agent is already running and no additional {@link AgentEventType#AGENT_START} events
+	 * will be issued.
 	 * 
-	 * @return <code>true</code> if the agent is currently RUNNING; <code>false</code> otherwise.
+	 * @return <code>true</code> if the agent is currently <code>RUNNING</code>; <code>false</code> otherwise.
 	 */
 	@Override
 	public boolean isRunning()
 	{
-		return state == AgentState.RUNNING;
+		return agentState == AgentState.RUNNING;
+	}
+	
+	/**
+	 * Checks whether the agent is in the <code>TRANSIENT</code> state.
+	 * 
+	 * @return <code>true</code> if the agent is currently <code>TRANSIENT</code>; <code>false</code> otherwise.
+	 */
+	public boolean isTransient()
+	{
+		return agentState == AgentState.TRANSIENT;
 	}
 	
 	/**
@@ -430,13 +606,30 @@ public class CompositeAgent implements Serializable, AgentManager
 	 */
 	public boolean canAddComponents()
 	{
-		return (state == AgentState.INITIALIZING) || (state == AgentState.STOPPED) || (state == AgentState.RUNNING);
+		return (agentState == AgentState.STOPPED) || (agentState == AgentState.RUNNING);
 	}
 	
+	/**
+	 * Returns the name of the agent.
+	 */
 	@Override
 	public String toString()
 	{
-		// TODO improve; currently just for debugging.
 		return getAgentName();
+	}
+	
+	/**
+	 * Use this method to output to the local log. Do not abuse. The call is relayed to a
+	 * {@link UnitComponent#li(String, Object...)} call.
+	 * 
+	 * @param message
+	 *            - the message.
+	 * @param arguments
+	 *            - objects to include in the message.
+	 */
+	protected void log(String message, Object... arguments)
+	{
+		if(USE_LOCAL_LOG && (localLog != null))
+			localLog.li(message, arguments);
 	}
 }
