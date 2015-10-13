@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Extends {@link ParameterSet} to have to types of keys for parameters. One type is designated by instances of the type
+ * Extends {@link ParameterSet} to have two types of keys for parameters. One type is designated by instances of the type
  * <b>T</b> -- 'registered' parameters. The other type is designated by normal {@link String} keys -- 'unregistered'
  * parameters.
  * <p>
