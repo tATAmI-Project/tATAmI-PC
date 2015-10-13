@@ -11,7 +11,6 @@
  ******************************************************************************/
 package tatami.core.agent;
 
-import net.xqhs.util.config.Config;
 import tatami.core.util.ParameterSet;
 
 /**
@@ -186,41 +185,4 @@ public class AgentEvent extends ParameterSet
 		locked();
 		addObject(EVENT_TYPE_PARAMETER_NAME, eventType);
 	}
-	
-	/**
-	 * Adds a parameter to the event.
-	 * 
-	 * @param name
-	 *            - the name associated with the parameter.
-	 * @param value
-	 *            - the value of the parameter.
-	 * @return the previous value associated with the name, if any; <code>null</code> otherwise.
-	 * @throws ConfigLockedException
-	 *             if the method is called after the event has been posted (underlying {@link Config} instance is
-	 *             locked).
-	 */
-	public AgentEvent addParameter(String name, Object value) throws ConfigLockedException
-	{
-		locked();
-		return (AgentEvent) addObject(name, value);
-	}
-	
-	/**
-	 * Retrieves a parameter of the event.
-	 * 
-	 * @param name
-	 *            - the name associated with the parameter.
-	 * @return the value associated with the name.
-	 */
-	public Object getParameter(String name)
-	{
-		return getObject(name);
-	}
-	
-	@Override
-	public String toString()
-	{
-		return getType() + " : " + super.toString();
-	}
-	
 }

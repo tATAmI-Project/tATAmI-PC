@@ -33,7 +33,9 @@ import net.xqhs.util.config.Config;
  * Historically, this functionality was achieved as a set of String-Object entries, but that was not as efficient.
  * Functionality is the same, except that the order of values for the same key is maintained.
  * <p>
- * The class extends {@link Config} and can be locked so that no changes are made thereon.
+ * The class extends {@link Config} and can be locked so that no changes are made thereon. However, the
+ * {@link net.xqhs.util.config.Config.ConfigLockedException} thrown by locked methods is converted to a
+ * {@link RuntimeException} instance.
  * 
  * @author Andrei Olaru
  */
@@ -43,12 +45,12 @@ public class ParameterSet extends Config implements Serializable
 	 * The class UID.
 	 */
 	private static final long					serialVersionUID	= -8204648145896154271L;
-	
+																	
 	/**
 	 * A map simulating a set of entries String &rarr; Object.
 	 */
 	protected final Map<String, List<Object>>	parameterSet		= new HashMap<String, List<Object>>();
-	
+																	
 	/**
 	 * Adds a new parameter entry.
 	 * 
@@ -178,8 +180,15 @@ public class ParameterSet extends Config implements Serializable
 		return parameterSet.toString();
 	}
 	
+	/**
+	 * Wrapper of {@link Config#locked()} that converts the {@link net.xqhs.util.config.Config.ConfigLockedException}
+	 * into an {@link IllegalStateException}.
+	 * 
+	 * @throws RuntimeException
+	 *             if the set has been {@link #lock()}-ed.
+	 */
 	@Override
-	public void locked()
+	public void locked() throws RuntimeException
 	{
 		try
 		{

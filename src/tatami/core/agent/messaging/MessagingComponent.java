@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.Debug.DebugItem;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
@@ -177,10 +176,10 @@ public abstract class MessagingComponent extends AgentComponent
 		AgentEvent event = new AgentEvent(AgentEventType.AGENT_MESSAGE);
 		try
 		{
-			event.addParameter(MessagingComponent.SOURCE_PARAMETER, source);
-			event.addParameter(MessagingComponent.DESTINATION_PARAMETER, destination);
-			event.addParameter(MessagingComponent.CONTENT_PARAMETER, content);
-		} catch(ConfigLockedException e)
+			event.add(MessagingComponent.SOURCE_PARAMETER, source);
+			event.add(MessagingComponent.DESTINATION_PARAMETER, destination);
+			event.add(MessagingComponent.CONTENT_PARAMETER, content);
+		} catch(RuntimeException e)
 		{
 			// should never happen.
 			throw new IllegalStateException("Config locked:" + PlatformUtils.printException(e));
@@ -403,7 +402,7 @@ public abstract class MessagingComponent extends AgentComponent
 				getAgentLog().error("Event is null.");
 			return null;
 		}
-		String address = (String) event.getParameter(DESTINATION_PARAMETER);
+		String address = event.get(DESTINATION_PARAMETER);
 		if(!address.startsWith(getAgentAddress()))
 		{
 			try
@@ -445,7 +444,7 @@ public abstract class MessagingComponent extends AgentComponent
 				getAgentLog().error("Event is null.");
 			return null;
 		}
-		String content = (String) event.getParameter(CONTENT_PARAMETER);
+		String content = event.get(CONTENT_PARAMETER);
 		return content;
 	}
 	

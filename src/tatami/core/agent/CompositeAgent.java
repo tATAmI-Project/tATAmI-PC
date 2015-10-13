@@ -142,7 +142,7 @@ public class CompositeAgent implements Serializable, AgentManager
 						break;
 					}
 					
-					threadExit = FSMEventOut(event.getType(), event.getParameter(TRANSIENT_EVENT_PARAMETER) != null);
+					threadExit = FSMEventOut(event.getType(), event.isSet(TRANSIENT_EVENT_PARAMETER));
 				}
 			}
 		}
@@ -305,7 +305,7 @@ public class CompositeAgent implements Serializable, AgentManager
 		if(!canPostEvent(event))
 			return false;
 			
-		AgentState futureState = FSMEventIn(event.getType(), event.getParameter(TRANSIENT_EVENT_PARAMETER) != null);
+		AgentState futureState = FSMEventIn(event.getType(), event.isSet(TRANSIENT_EVENT_PARAMETER));
 		
 		try
 		{
@@ -347,7 +347,7 @@ public class CompositeAgent implements Serializable, AgentManager
 		{
 		case AGENT_START:
 			if(agentState == AgentState.TRANSIENT)
-				return event.getParameter(TRANSIENT_EVENT_PARAMETER) != null;
+				return event.isSet(TRANSIENT_EVENT_PARAMETER);
 			return agentState == AgentState.STOPPED;
 		default:
 			return agentState == AgentState.RUNNING;
