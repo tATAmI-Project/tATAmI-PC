@@ -15,15 +15,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.xqhs.util.config.Config;
+import tatami.core.util.ParameterSet;
 
 /**
  * The class stores an agent event, characterized by its type and, optionally, a set of parameters that have names.
+ * <p>
+ * The class is baked by a {@link ParameterSet}.
  * 
  * @author andreiolaru
  */
-public class AgentEvent extends Config
+public class AgentEvent extends ParameterSet
 {
-	
+	/**
+	 * The serial UID.
+	 */
+	private static final long serialVersionUID = 379942317804425591L;
+
 	/**
 	 * The enumeration specified the full set of agent-internal events that can occur.
 	 * 
@@ -146,14 +153,9 @@ public class AgentEvent extends Config
 	}
 	
 	/**
-	 * The type of the event. Is one of {@link AgentEventType}.
+	 * The name of the parameter in the parameter set, storing the type of the event.
 	 */
-	AgentEventType		type;
-	
-	/**
-	 * The parameters of the event, associated with their name.
-	 */
-	Map<String, Object>	parameters	= new HashMap<String, Object>();
+	protected static final String EVENT_TYPE_PARAMETER_NAME = "EVENT_TYPE";
 	
 	/**
 	 * Creates a new agent event.
@@ -173,7 +175,7 @@ public class AgentEvent extends Config
 	 */
 	public AgentEventType getType()
 	{
-		return type;
+		return (AgentEventType) getObject(EVENT_TYPE_PARAMETER_NAME);
 	}
 	
 	/**
@@ -184,7 +186,8 @@ public class AgentEvent extends Config
 	 */
 	private void setType(AgentEventType eventType)
 	{
-		type = eventType;
+		locked();
+		addObject(EVENT_TYPE_PARAMETER_NAME, eventType);
 	}
 	
 	/**
@@ -202,7 +205,7 @@ public class AgentEvent extends Config
 	public Object addParameter(String name, Object value) throws ConfigLockedException
 	{
 		locked();
-		return parameters.put(name, value);
+		return addObject(name, value);
 	}
 	
 	/**
@@ -214,13 +217,13 @@ public class AgentEvent extends Config
 	 */
 	public Object getParameter(String name)
 	{
-		return parameters.get(name);
+		return getObject(name);
 	}
 	
 	@Override
 	public String toString()
 	{
-		return type + ":" + parameters.toString();
+		return getType() + " : " + super.toString();
 	}
 	
 }
