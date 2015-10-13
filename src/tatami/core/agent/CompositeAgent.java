@@ -160,10 +160,10 @@ public class CompositeAgent implements Serializable, AgentManager
 																					
 	/**
 	 * The name of the parameter that should be added to {@link AgentEventType#AGENT_START} /
-	 * {@link AgentEventType#AGENT_STOP} events in order to take the agent out of / into the
-	 * {@link AgentState#TRANSIENT} state.
+	 * {@link AgentEventType#AGENT_STOP} events in order to take the agent out of / into the <code>TRANSIENT</code>
+	 * state.
 	 */
-	protected static final String						TRANSIENT_EVENT_PARAMETER	= "TO_FROM_TRANSIENT";
+	public static final String							TRANSIENT_EVENT_PARAMETER	= "TO_FROM_TRANSIENT";
 																					
 	/**
 	 * This can be used by platform-specific components to contact the platform.
@@ -377,11 +377,6 @@ public class CompositeAgent implements Serializable, AgentManager
 		switch(eventType)
 		{
 		case AGENT_START:
-			if(getAgentName() != null)
-				localLog.setUnitName(getAgentName() + "#");
-			else
-				localLog.setUnitName(super.toString().replace(getClass().getName(), "CompAg"));
-				
 			futureState = AgentState.STARTING;
 			
 			if(eventQueue != null)
@@ -425,7 +420,7 @@ public class CompositeAgent implements Serializable, AgentManager
 			synchronized(eventQueue)
 			{
 				agentState = AgentState.RUNNING;
-				log("state is now", agentState);
+				log("state is now ", agentState);
 			}
 			break;
 		case AGENT_STOP:
@@ -434,13 +429,13 @@ public class CompositeAgent implements Serializable, AgentManager
 				if(!eventQueue.isEmpty())
 				{
 					while(!eventQueue.isEmpty())
-						log("ignoring event", eventQueue.poll());
+						log("ignoring event ", eventQueue.poll());
 				}
 				if(toFromTransient)
 					agentState = AgentState.TRANSIENT;
 				else
 					agentState = AgentState.STOPPED;
-				log("state is now", agentState);
+				log("state is now ", agentState);
 			}
 			eventQueue = null;
 			localLog.doExit();
@@ -474,7 +469,9 @@ public class CompositeAgent implements Serializable, AgentManager
 		default:
 			throw new IllegalStateException("Unable to toggle TRANSIENT state while in " + agentState);
 		}
-		log("state switched to", agentState);
+		if(localLog.getUnitName() != null)
+			// protect against locking the log
+			log("state switched to ", agentState);
 		return isTransient();
 	}
 	
@@ -630,6 +627,15 @@ public class CompositeAgent implements Serializable, AgentManager
 	protected void log(String message, Object... arguments)
 	{
 		if(USE_LOCAL_LOG && (localLog != null))
+		{
+			if(localLog.getUnitName() == null)
+			{
+				if(getAgentName() != null)
+					localLog.setUnitName(getAgentName() + "#");
+				else
+					localLog.setUnitName(super.toString().replace(getClass().getName(), "CompAg"));
+			}
 			localLog.li(message, arguments);
+		}
 	}
 }

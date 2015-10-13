@@ -11,9 +11,6 @@
  ******************************************************************************/
 package tatami.core.agent;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.xqhs.util.config.Config;
 import tatami.core.util.ParameterSet;
 
@@ -202,10 +199,10 @@ public class AgentEvent extends ParameterSet
 	 *             if the method is called after the event has been posted (underlying {@link Config} instance is
 	 *             locked).
 	 */
-	public Object addParameter(String name, Object value) throws ConfigLockedException
+	public AgentEvent addParameter(String name, Object value) throws ConfigLockedException
 	{
 		locked();
-		return addObject(name, value);
+		return (AgentEvent) addObject(name, value);
 	}
 	
 	/**

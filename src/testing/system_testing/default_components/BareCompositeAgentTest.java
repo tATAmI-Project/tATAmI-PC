@@ -23,16 +23,16 @@ import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.CompositeAgent;
 
 /**
- * Creates a bare composite agent (without a platform), and adds a test component to it. The test component intercepts agent events and prints them.
- * The agent is asked to exit soon after creation.
+ * Creates a bare composite agent (without a platform), and adds a test component to it. The test component intercepts
+ * agent events and prints them. The agent is asked to exit soon after creation.
  * <p>
  * Expected output:
  * <ul>
- * <li> start successful
- * <li> interception of AGENT_START
- * <li> delay
- * <li> interception of AGENT_EXIT
- * <li> system exit
+ * <li>start successful
+ * <li>interception of AGENT_START
+ * <li>delay
+ * <li>interception of AGENT_EXIT
+ * <li>system exit
  * </ul>
  * 
  * @author Andrei Olaru
@@ -42,7 +42,7 @@ public class BareCompositeAgentTest extends Unit
 	/**
 	 * General level for logs.
 	 */
-	static final Level	generalLevel	= Level.ALL;
+	static final Level generalLevel = Level.ALL;
 	
 	/**
 	 * Main testing method.
@@ -55,8 +55,8 @@ public class BareCompositeAgentTest extends Unit
 		CompositeAgent agent = new CompositeAgent();
 		agent.addComponent(new AgentComponent(AgentComponentName.TESTING_COMPONENT) {
 			private static final long	serialVersionUID	= 1L;
-			UnitComponent	locallog;
-			
+			UnitComponent				locallog;
+										
 			@Override
 			protected void componentInitializer()
 			{
@@ -81,11 +81,41 @@ public class BareCompositeAgentTest extends Unit
 			}
 		});
 		
+		// trying to stop already stopped
+		if(agent.stop())
+			li("erroneous stop successful");
+		else
+			le("erroneous stop failed");
+			
+		// test transient state
+		agent.toggleTransient();
+		
+		// erroneous start in transient
+		if(agent.start())
+			li("erroneous start successful");
+		else
+			le("erroneous start failed");
+			
+		// attempt to add component in transient state
+		try
+		{
+			agent.addComponent(new AgentComponent(AgentComponentName.TESTING_COMPONENT) {
+				private static final long serialVersionUID = 1L;
+			});
+		} catch(RuntimeException e1)
+		{
+			le("Failed adding component: ", e1);
+		}
+		
+		agent.toggleTransient();
+		
+		// normal start
 		if(agent.start())
 			li("start successful");
 		else
 			le("start failed");
-		
+			
+		// trying to start already started
 		if(agent.start())
 			li("re-start successful");
 		else
@@ -97,18 +127,12 @@ public class BareCompositeAgentTest extends Unit
 		{
 			e.printStackTrace();
 		}
+		// trying to start already started
 		if(agent.start())
 			li("re-re-start successful");
 		else
 			le("re-re-start failed");
-		
-		
-		
-		// test transient state
-		
-		
-		
-		
+			
 		
 		boolean done = false;
 		while(!done)
@@ -129,7 +153,8 @@ public class BareCompositeAgentTest extends Unit
 	/**
 	 * main
 	 * 
-	 * @param args - not used
+	 * @param args
+	 *            - not used
 	 */
 	@SuppressWarnings("unused")
 	public static void main(String args[])
