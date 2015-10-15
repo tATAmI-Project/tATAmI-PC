@@ -29,18 +29,7 @@ public class BootDefaultArguments
 	/**
 	 * The scenario file.
 	 */
-	static final String scenarioFileName = "src-scenario/scenario/amilab/app_demo/scenario-local-client-server.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/amilab/app_demo/scenario-distributed-client.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/amilab/app_demo/scenario-distributed-server.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/amilab/scenario-consumer-A.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/amilab/scenario-feeder-consumer-B.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/examples/jade/simpleA/scenario.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/s2014/SmartConference/smart_room_conference.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/s2013/SmartRoom_EMAS/smart_room_emas.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/s2014/SmartConference/timeline.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/s2014/demo/smart_conference.xml";
-	// static final String scenarioFileName = "src-scenario/scenario/s2014/SmartConference/even_odd_scenario.xml";
-
+	static final String scenarioFileName = BootSettingsManager.SCENARIO_DIRECTORY + "scenario/examples/sclaim_tatami2/simpleScenarioE/scenarioE-tATAmI2.xml";
 	/**
 	 * Main (Jade) host.
 	 */

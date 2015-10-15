@@ -14,8 +14,11 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.example.org/scenarioSchema3 ../../../../../src-schema/scenarioSchema3.xsd ">
 
- 	<scen:platform>
-		<scen:parameter name="name" value="local" />
+	<scen:config mainHost="server client" mainPort="9002"
+		localHost="127.0.0.1" localPort="9002" />
+	
+    <scen:platform>
+		<scen:parameter name="name" value="websocket" />
 	</scen:platform>
 	
 	<scen:agentPackage>scenario.examples.sclaim_tatami2.simpleScenarioE</scen:agentPackage>
