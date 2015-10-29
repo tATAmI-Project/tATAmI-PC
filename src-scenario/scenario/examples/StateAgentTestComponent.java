@@ -10,6 +10,7 @@ import net.xqhs.util.logging.UnitComponent;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.CompositeAgent;
+import tatami.core.agent.AgentEvent.AgentEventType;
 
 public class StateAgentTestComponent extends AgentComponent {
 
@@ -30,12 +31,12 @@ public class StateAgentTestComponent extends AgentComponent {
 	/**
 	 * Timer for pinging.
 	 */
-	Timer pingTimer = null;
+	transient Timer pingTimer = null;
 
 	/**
 	 * The log.
 	 */
-	UnitComponent locallog = null;
+	transient UnitComponent locallog = null;
 
 	/**
 	 * Cache for the name of this agent.
@@ -109,7 +110,6 @@ public class StateAgentTestComponent extends AgentComponent {
 	@Override
 	protected void atSimulationStart(AgentEvent event) {
 		super.atSimulationStart(event);
-		System.out.println("here");
 		pingTimer.schedule(new MakeStep(), PING_INITIAL_DELAY, PING_PERIOD);
 	}
 
@@ -117,5 +117,18 @@ public class StateAgentTestComponent extends AgentComponent {
 	protected void atAgentStop(AgentEvent event) {
 		super.atAgentStop(event);
 		pingTimer.cancel();
+	}
+	
+	@Override
+	protected void atBeforeAgentMove(AgentEvent event)
+	{
+		pingTimer.cancel();
+	}
+	
+	@Override
+	protected void atAfterAgentMove(AgentEvent event)
+	{
+		pingTimer = new Timer();
+		pingTimer.schedule(new MakeStep(), PING_INITIAL_DELAY, PING_PERIOD);
 	}
 }
