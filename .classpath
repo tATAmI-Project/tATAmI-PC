@@ -1,38 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="testing/tudor/|simulation/oldBoot.java|agent_packages/phase1/|testing/planning/|testing/nga/|testing/gerard/|testing/andrei/VisualizationInfrastructureTest.java" kind="src" path="src"/>
-	<classpathentry excluding="2011/|2011/|scenario/s2011/nii2011/" kind="src" path="src-scenario"/>
-	<classpathentry kind="src" path="src-schema"/>
+	<classpathentry excluding="testing/tudor/|simulation/oldBoot.java|agent_packages/phase1/" kind="src" path="src"/>
 	<classpathentry kind="lib" path="libs/log4j-1.2.16.jar"/>
-	<classpathentry kind="lib" path="libs/Config.jar" sourcepath="libs/Config.jar">
+	<classpathentry kind="lib" path="libs/wsdc.jar"/>
+	<classpathentry kind="lib" path="libs/wsdl4j-1.5.1.jar"/>
+	<classpathentry kind="lib" path="libs/wsig.jar"/>
+	<classpathentry kind="lib" path="libs/jade.jar" sourcepath="libs/JADE-src-4.2.0.zip">
 		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/Config.jar!/doc-Config/"/>
+			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/JADE-doc-4.2.0.zip!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="libs/commons-codec-1.3.jar"/>
-	<classpathentry kind="lib" path="libs/jade.jar" sourcepath="libs/JADE-src-4.1.zip">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/JADE-doc-4.1.zip!/jade/doc/api"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="libs/net.xqhs.XML.jar" sourcepath="libs/net.xqhs.XML.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/net.xqhs.XML.jar!/doc-net.xqhs.XML"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="libs/Graphs.jar" sourcepath="libs/Graphs.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/Graphs.jar!/doc-Graphs/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="libs/Gel.jar"/>
-	<classpathentry kind="lib" path="libs/net.xqhs.WindowLayout.jar"/>
-	<classpathentry kind="lib" path="libs/java_websocket.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="libs/Logging.jar" sourcepath="libs/Logging.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/Logging.jar!/doc-Logging/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,0 +1,10 @@
+(agent ChatAgent ?followerAgent
+
+(behavior
+	
+	(reactive call
+		(input call button ?unused)									// the agent is notified that it must call the follower
+		(send ?followerAgent (struct message call this))			// make the call
+	)
+)
+)
