@@ -23,16 +23,16 @@ import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.CompositeAgent;
 
 /**
- * Creates a bare composite agent (without a platform), and adds a test component to it. The test component intercepts agent events and prints them.
- * The agent is asked to exit soon after creation.
+ * Creates a bare composite agent (without a platform), and adds a test component to it. The test component intercepts
+ * agent events and prints them. The agent is asked to exit soon after creation.
  * <p>
  * Expected output:
  * <ul>
- * <li> start successful
- * <li> interception of AGENT_START
- * <li> delay
- * <li> interception of AGENT_EXIT
- * <li> system exit
+ * <li>start successful
+ * <li>interception of AGENT_START
+ * <li>delay
+ * <li>interception of AGENT_EXIT
+ * <li>system exit
  * </ul>
  * 
  * @author Andrei Olaru
@@ -42,21 +42,21 @@ public class BareCompositeAgentTest extends Unit
 	/**
 	 * General level for logs.
 	 */
-	static final Level	generalLevel	= Level.ALL;
+	static final Level generalLevel = Level.ALL;
 	
 	/**
 	 * Main testing method.
 	 */
 	public BareCompositeAgentTest()
 	{
-		setUnitName("parametric component tester").setLogLevel(generalLevel);
+		setUnitName("composite agent tester").setLogLevel(generalLevel);
 		li("starting...");
 		
 		CompositeAgent agent = new CompositeAgent();
 		agent.addComponent(new AgentComponent(AgentComponentName.TESTING_COMPONENT) {
 			private static final long	serialVersionUID	= 1L;
-			UnitComponent	locallog;
-			
+			UnitComponent				locallog;
+										
 			@Override
 			protected void componentInitializer()
 			{
@@ -71,7 +71,7 @@ public class BareCompositeAgentTest extends Unit
 						if(locallog == null)
 							System.out.println("local log is null");
 						else
-							locallog.li("event: [" + event.getType().toString() + "]");
+							locallog.li("event: [" + event.toString() + "]");
 						if(event.getType() == AgentEventType.AGENT_STOP)
 							locallog.doExit();
 					}
@@ -81,10 +81,45 @@ public class BareCompositeAgentTest extends Unit
 			}
 		});
 		
+		// trying to stop already stopped
+		if(agent.stop())
+			le("erroneous stop successful");
+		else
+			li("erroneous stop failed");
+			
+		// test transient state
+		agent.toggleTransient();
+		
+		// erroneous start in transient
+		if(agent.start())
+			le("erroneous start successful");
+		else
+			li("erroneous start failed");
+			
+		// attempt to add component in transient state
+		try
+		{
+			agent.addComponent(new AgentComponent(AgentComponentName.TESTING_COMPONENT) {
+				private static final long serialVersionUID = 1L;
+			});
+		} catch(RuntimeException e1)
+		{
+			le("Failed adding component: ", e1);
+		}
+		
+		agent.toggleTransient();
+		
+		// normal start
 		if(agent.start())
 			li("start successful");
 		else
 			le("start failed");
+			
+		// trying to start already started
+		if(agent.start())
+			le("re-start successful");
+		else
+			li("re-start failed");
 		try
 		{
 			Thread.sleep(2000);
@@ -92,14 +127,54 @@ public class BareCompositeAgentTest extends Unit
 		{
 			e.printStackTrace();
 		}
+		// trying to start already started
+		if(agent.start())
+			le("re-re-start successful");
+		else
+			li("re-re-start failed");
+			
+		// attempting to stop then re-start the agent
+		if(agent.stop())
+			li("stop successful");
+		else
+			le("stop failed");
+			
+		int tries = 10;
+		while(!agent.isStopped() && tries > 0)
+			try
+			{
+				tries--;
+				Thread.sleep(10);
+			} catch(InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		li("agent stopped after [] tries.", new Integer(tries));
+			
+		if(agent.start())
+			li("start 2 successful");
+		else
+			le("start 2 failed");
+			
 		boolean done = false;
 		while(!done)
 		{
 			done = agent.exit();
 			if(!done)
 				le("exit failed");
+			try
+			{
+				Thread.sleep(50);
+			} catch(InterruptedException e)
+			{
+				e.printStackTrace();
+			}
 		}
 		li("exit successful");
+		if(!agent.exit())
+			li("re-exit failed");
+		else
+			li("re-exit successful");
 		li("done.");
 		doExit();
 	}
@@ -107,7 +182,8 @@ public class BareCompositeAgentTest extends Unit
 	/**
 	 * main
 	 * 
-	 * @param args - not used
+	 * @param args
+	 *            - not used
 	 */
 	@SuppressWarnings("unused")
 	public static void main(String args[])

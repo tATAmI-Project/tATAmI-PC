@@ -714,8 +714,8 @@ public class ClaimBehavior
 	 */
 	protected boolean handleReceive(Vector<ClaimConstruct> args)
 	{
-		String content = (String) activationEvent.getParameter(MessagingComponent.CONTENT_PARAMETER);
-		String sender = (String) activationEvent.getParameter(MessagingComponent.SOURCE_PARAMETER);
+		String content = activationEvent.get(MessagingComponent.CONTENT_PARAMETER);
+		String sender = activationEvent.get(MessagingComponent.SOURCE_PARAMETER);
 		ClaimStructure received = ClaimStructure.parseString(content);
 
 		if (received == null)
@@ -786,14 +786,14 @@ public class ClaimBehavior
 			if (activationEvent.getType() != AgentEventType.GUI_INPUT)
 				throw new IllegalStateException(
 						"input cannot be in activation area if behavior is not input-activated");
-			if (activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME)
+			if (activationEvent.get(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME)
 					.equals(inputComponent))
 				receivedInput = (Vector<Object>) activationEvent
-						.getParameter(VisualizableComponent.GUI_ARGUMENTS_EVENT_PARAMETER_NAME);
+						.getObject(VisualizableComponent.GUI_ARGUMENTS_EVENT_PARAMETER_NAME);
 			else
 			{
 				log.error("incorrect input activated: expected [] vs activated [].", inputComponent,
-						activationEvent.getParameter(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME));
+						activationEvent.get(VisualizableComponent.GUI_COMPONENT_EVENT_PARAMETER_NAME));
 				return false;
 			}
 			trace("The input is active.");

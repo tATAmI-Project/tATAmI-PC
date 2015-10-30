@@ -69,7 +69,7 @@ public class MessagingCompositeAgent
 						public void handleEvent(AgentEvent event)
 						{
 							getAgentLog().info("final message received from []",
-									event.getParameter(MessagingComponent.SOURCE_PARAMETER));
+									event.get(MessagingComponent.SOURCE_PARAMETER));
 							postAgentEvent(new AgentEvent(AgentEventType.AGENT_STOP));
 						}
 					}, "testing", "final");
@@ -78,7 +78,7 @@ public class MessagingCompositeAgent
 						public void handleEvent(AgentEvent event)
 						{
 							getAgentLog().info("message received []",
-									event.getParameter(MessagingComponent.CONTENT_PARAMETER));
+									event.get(MessagingComponent.CONTENT_PARAMETER));
 						}
 					}, "testing");
 				}
@@ -135,7 +135,7 @@ public class MessagingCompositeAgent
 						public void handleEvent(AgentEvent event)
 						{
 							getAgentLog().info("message with content [] received",
-									event.getParameter(MessagingComponent.CONTENT_PARAMETER));
+									event.get(MessagingComponent.CONTENT_PARAMETER));
 							sendReply("hello back", event);
 							try
 							{
@@ -149,15 +149,15 @@ public class MessagingCompositeAgent
 							MessagingComponent msg = (MessagingComponent) getAgentComponent(
 									AgentComponentName.MESSAGING_COMPONENT);
 							String targetAgent = msg.extractAgentAddress(
-									(String) event.getParameter(MessagingComponent.SOURCE_PARAMETER));
+									event.get(MessagingComponent.SOURCE_PARAMETER));
 							String[] targetElements = msg.extractInternalAddressElements(
-									(String) event.getParameter(MessagingComponent.SOURCE_PARAMETER));
+									event.get(MessagingComponent.SOURCE_PARAMETER));
 							String[] targetElementsNew = Arrays.copyOf(targetElements, targetElements.length + 1);
 							targetElementsNew[targetElements.length] = "final";
 							String target = msg.makePath(targetAgent, targetElementsNew);
 							
 							sendMessageToEndpoint("ending",
-									(String) event.getParameter(MessagingComponent.DESTINATION_PARAMETER), target);
+									event.get(MessagingComponent.DESTINATION_PARAMETER), target);
 							postAgentEvent(new AgentEvent(AgentEventType.AGENT_STOP));
 						}
 					}, "testing");

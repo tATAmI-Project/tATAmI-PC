@@ -85,7 +85,7 @@ public class ContextComponentTest extends Unit
 					@Override
 					public void handleEvent(AgentEvent event)
 					{
-						locallog.li("event: [" + event.getType().toString() + "]");
+						locallog.li("event: [" + event.toString() + "]");
 						ContextComponent context = (ContextComponent) getAgentComponent(AgentComponentName.COGNITIVE_COMPONENT);
 						
 						if(context == null)

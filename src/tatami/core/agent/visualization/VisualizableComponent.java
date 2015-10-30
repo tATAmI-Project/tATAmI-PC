@@ -14,7 +14,6 @@ package tatami.core.agent.visualization;
 import java.util.Vector;
 
 import net.xqhs.util.config.Config;
-import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.DumbLogger;
 import net.xqhs.util.logging.Logger;
 import net.xqhs.util.logging.LoggerSimple.Level;
@@ -50,7 +49,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	/**
 	 * Class UID.
 	 */
-	private static final long	serialVersionUID	= -5680276720645213673L;
+	private static final long serialVersionUID = -5680276720645213673L;
 	
 	/**
 	 * The vocabulary of message types related to visualization.
@@ -97,12 +96,12 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	/**
 	 * The name of the parameter in the component parameter set that corresponds to the name of the GUI.
 	 */
-	public static final String				GUI_PARAMETER_NAME			= "GUI";
+	public static final String				GUI_PARAMETER_NAME					= "GUI";
 	/**
 	 * The name of the parameter in the component parameter set that corresponds to the type of the window.
 	 */
-	public static final String				WINDOW_TYPE_PARAMETER_NAME	= "window-type";
-	
+	public static final String				WINDOW_TYPE_PARAMETER_NAME			= "window-type";
+																				
 	/**
 	 * The name of the parameter in the event corresponding to GUI input, designating the name of the activated GUI
 	 * component.
@@ -113,35 +112,35 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	 * GUI event).
 	 */
 	public static final String				GUI_ARGUMENTS_EVENT_PARAMETER_NAME	= "arguments";
-	
+																				
 	/**
 	 * Debug constant to disable reporting (lowers quantity of messages). Normally should be set to <code>false</code>.
 	 */
 	private static final boolean			DEBUG_DISABLE_REPORTING				= true;
-	
+																				
 	/**
 	 * The logging {@link Unit}.
 	 */
-	protected transient UnitComponentExt	loggingUnit					= null;
+	protected transient UnitComponentExt	loggingUnit							= null;
 	/**
 	 * The {@link Config} for the GUI. Should remain the same object throughout the agent's lifecycle, although it may
 	 * be changed, and the agent's GUI will be recreated.
 	 */
-	protected AgentGuiConfig				guiConfig					= new AgentGuiConfig();
+	protected AgentGuiConfig				guiConfig							= new AgentGuiConfig();
 	/**
 	 * The GUI implementation. Depends on platform, but implements {@link AgentGui}.
 	 */
-	protected transient AgentGui			gui							= null;
-	
+	protected transient AgentGui			gui									= null;
+																				
 	/**
 	 * The name of the entity to which the agent has to report.
 	 */
-	private String							visualizationParent			= null;
+	private String							visualizationParent					= null;
 	/**
 	 * The name of the entity which serves as the current container for the agent.
 	 */
-	private String							currentContainer			= null;
-	
+	private String							currentContainer					= null;
+																				
 	/**
 	 * Create a new {@link VisualizableComponent} instance:
 	 */
@@ -227,7 +226,8 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
-				String parent = ((MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT)).extractContent(event);
+				String parent = ((MessagingComponent) getAgentComponent(AgentComponentName.MESSAGING_COMPONENT))
+						.extractContent(event);
 				setVisualizationParent(parent);
 				getLog().info("visualization root received: []", parent);
 			}
@@ -237,7 +237,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
-				String content = (String) event.getParameter(MessagingComponent.CONTENT_PARAMETER);
+				String content = event.get(MessagingComponent.CONTENT_PARAMETER);
 				getLog().info("received control event [].", content);
 				postAgentEvent(new AgentEvent(AgentEventType.valueOf(content)));
 			}
@@ -260,14 +260,15 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 				.setLoggerType(PlatformUtils.platformLogType()).setLogLevel(Level.ALL);
 		if(!DEBUG_DISABLE_REPORTING)
 			loggingUnit.setLogReporter(this);
-		
+			
 		// load GUI
 		try
 		{
 			if(getComponentData().isSet(GUI_PARAMETER_NAME))
 				guiConfig.setGuiClass(getComponentData().get(GUI_PARAMETER_NAME),
 						((ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT))
-								.parVals(AgentParameterName.AGENT_PACKAGE), getLog());
+								.parVals(AgentParameterName.AGENT_PACKAGE),
+						getLog());
 		} catch(NullPointerException e)
 		{
 			// it's ok, no parametric component
@@ -385,7 +386,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	public Logger getLog()
 	{
 		if(loggingUnit != null)
-		return loggingUnit;
+			return loggingUnit;
 		return DumbLogger.get();
 	}
 	
@@ -441,12 +442,12 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		AgentEvent event = new AgentEvent(AgentEventType.GUI_INPUT);
 		try
 		{
-			event.addParameter(GUI_COMPONENT_EVENT_PARAMETER_NAME, componentName);
-			event.addParameter(GUI_ARGUMENTS_EVENT_PARAMETER_NAME, arguments);
-		} catch(ConfigLockedException e)
-	{
+			event.add(GUI_COMPONENT_EVENT_PARAMETER_NAME, componentName);
+			event.addObject(GUI_ARGUMENTS_EVENT_PARAMETER_NAME, arguments);
+		} catch(IllegalStateException e)
+		{
 			// can't get here
-			throw new IllegalStateException("should not be here");
+			throw new IllegalStateException("should not be here " + e);
 		}
 		postAgentEvent(event);
 	}

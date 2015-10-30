@@ -67,7 +67,7 @@ public class MonitoringTestComponent extends AgentComponent
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
-				String eventMessage = "agent [" + getAgentName() + "] event: [" + event.getType().toString() + "]";
+				String eventMessage = "agent [" + getAgentName() + "] event: [" + event.toString() + "]";
 				locallog.li(eventMessage);
 				ParametricComponent parametric = (ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT);
 				if(parametric != null)

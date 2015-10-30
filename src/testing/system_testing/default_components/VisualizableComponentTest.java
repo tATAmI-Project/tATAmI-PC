@@ -63,7 +63,7 @@ public class VisualizableComponentTest extends Unit
 		agentParameters.add(AgentParameterName.AGENT_PACKAGE, packageName);
 		
 		agent.addComponent(new ParametricComponent() {
-			private static final long	serialVersionUID	= 1L;
+			private static final long serialVersionUID = 1L;
 			
 			// pre-loading is only possible from the inside of the component or from the core package
 			@Override
@@ -75,22 +75,23 @@ public class VisualizableComponentTest extends Unit
 		});
 		
 		agent.addComponent(new VisualizableComponent() {
-			private static final long	serialVersionUID	= 1L;
+			private static final long serialVersionUID = 1L;
 			
 			@Override
 			protected void componentInitializer()
 			{
 				super.componentInitializer();
 				
-				preload((ComponentCreationData) new ComponentCreationData().add(VisualizableComponent.GUI_PARAMETER_NAME,
-						TestGui.class.getSimpleName()), null, null, null);
+				preload((ComponentCreationData) new ComponentCreationData()
+						.add(VisualizableComponent.GUI_PARAMETER_NAME, TestGui.class.getSimpleName()), null, null,
+						null);
 			}
 		});
 		
 		agent.addComponent(new AgentComponent(AgentComponentName.TESTING_COMPONENT) {
 			private static final long	serialVersionUID	= 1L;
 			UnitComponent				locallog;
-			
+										
 			@Override
 			protected String getAgentName()
 			{
@@ -118,8 +119,7 @@ public class VisualizableComponentTest extends Unit
 					@Override
 					public void handleEvent(AgentEvent event)
 					{
-						String eventMessage = "agent [" + getAgentName() + "] event: [" + event.getType().toString()
-								+ "]";
+						String eventMessage = "agent [" + getAgentName() + "] event: [" + event.toString() + "]";
 						locallog.li(eventMessage);
 						VisualizableComponent vis = getVisualizable();
 						if(event.getType() == AgentEventType.AGENT_START)

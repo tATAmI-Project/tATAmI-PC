@@ -83,7 +83,7 @@ public class ParametricComponentTest extends Unit
 					@Override
 					public void handleEvent(AgentEvent event)
 					{
-						locallog.li("event: [" + event.getType().toString() + "]");
+						locallog.li("event: [" + event.toString() + "]");
 						ParametricComponent parametric = (ParametricComponent) getAgentComponent(AgentComponentName.PARAMETRIC_COMPONENT);
 						if(parametric == null)
 							locallog.li("\t parametric component is currently null");

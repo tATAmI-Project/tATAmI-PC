@@ -90,7 +90,7 @@ public abstract class AgentComponent implements Serializable
 	/**
 	 * The class UID.
 	 */
-	private static final long	serialVersionUID	= -8282262747231347473L;
+	private static final long serialVersionUID = -8282262747231347473L;
 	
 	/**
 	 * Alias of {@link ParameterSet}.
@@ -102,7 +102,7 @@ public abstract class AgentComponent implements Serializable
 		/**
 		 * The serial UID.
 		 */
-		private static final long	serialVersionUID	= 5069937206709568881L;
+		private static final long serialVersionUID = 5069937206709568881L;
 	}
 	
 	/**
@@ -124,8 +124,9 @@ public abstract class AgentComponent implements Serializable
 		/**
 		 * The name of a component extending {@link VisualizableComponent}.
 		 */
-		VISUALIZABLE_COMPONENT(AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".visualization.VisualizableComponent"),
-		
+		VISUALIZABLE_COMPONENT(
+				AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".visualization.VisualizableComponent"),
+				
 		/**
 		 * The name of a component extending {@link CognitiveComponent}.
 		 */
@@ -160,7 +161,7 @@ public abstract class AgentComponent implements Serializable
 		 * The name of a component extending {@link ClaimComponent}.
 		 */
 		S_CLAIM_COMPONENT(AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".claim.ClaimComponent"),
-
+		
 		/**
 		 * The name of a component extending {@link AmILabComponent}.
 		 */
@@ -181,17 +182,17 @@ public abstract class AgentComponent implements Serializable
 		 * Default parent package packages containing default component implementations.
 		 */
 		private static final String	AGENT_COMPONENT_PACKAGE_ROOT	= "tatami.core.agent";
-		
+																	
 		/**
 		 * The fully qualified class name of the default component implementation.
 		 */
 		String						componentClass;
-		
+									
 		/**
 		 * The name of the component, as appearing in the scenario file.
 		 */
 		String						componentName;
-		
+									
 		/**
 		 * Specifies the fully qualified class name of the component implementation.
 		 * 
@@ -252,8 +253,8 @@ public abstract class AgentComponent implements Serializable
 		{
 			try
 			{
-				return AgentComponentName.valueOf(componentName.toUpperCase() + "_"
-						+ AGENT_COMPONENT_CLASS_SUFFIX.toUpperCase());
+				return AgentComponentName
+						.valueOf(componentName.toUpperCase() + "_" + AGENT_COMPONENT_CLASS_SUFFIX.toUpperCase());
 			} catch(Exception e)
 			{
 				return null;
@@ -279,7 +280,7 @@ public abstract class AgentComponent implements Serializable
 	 * The {@link AgentEventHandler} instances that respond to various events in the agent.
 	 */
 	private Map<AgentEventType, AgentEventHandler>	eventHandlers;
-	
+													
 	/**
 	 * The constructor assigns the name to the component.
 	 * <p>
@@ -797,7 +798,7 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected boolean sendReply(String content, AgentEvent replyTo)
 	{
-		return sendMessageToEndpoint(content, (String) replyTo.getParameter(MessagingComponent.DESTINATION_PARAMETER),
-				(String) replyTo.getParameter(MessagingComponent.SOURCE_PARAMETER));
+		return sendMessageToEndpoint(content, replyTo.get(MessagingComponent.DESTINATION_PARAMETER),
+				replyTo.get(MessagingComponent.SOURCE_PARAMETER));
 	}
 }
