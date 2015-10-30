@@ -11,7 +11,12 @@
  ******************************************************************************/
 package tatami.core.agent;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,8 +25,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import net.xqhs.util.logging.UnitComponent;
 import net.xqhs.util.logging.LoggerSimple.Level;
+import net.xqhs.util.logging.UnitComponent;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.AgentEvent.AgentSequenceType;
@@ -656,5 +661,81 @@ public class CompositeAgent implements Serializable, AgentManager
 			}
 			localLog.li(message, arguments);
 		}
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public byte[] getRawAgentState(){
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutput objectOutput = null;
+		ObjectOutput nameOutput = null;
+		
+		ArrayList<byte[]> sComponents = new ArrayList<byte[]>();
+		ArrayList<byte[]> sComponentsName = new ArrayList<byte[]>();
+		
+		int size = 0;
+		
+		//For every componenet of the agent
+		for (AgentComponent component : componentOrder) {
+			try {
+				objectOutput = new ObjectOutputStream(bos);
+				objectOutput.writeObject(component);
+				byte[] rawObject = bos.toByteArray();
+				sComponents.add(rawObject);
+				
+		
+				nameOutput = new ObjectOutputStream(bos);
+				nameOutput.writeObject(component.getClass().getName());
+				byte[] rawName = bos.toByteArray();
+				sComponentsName.add(rawName);
+				
+				size += rawObject.length + rawName.length;
+			} 
+			catch(Exception e){
+				//Log exception
+			}
+			finally {
+				try {
+					if (objectOutput != null) {
+						objectOutput.close();
+					}
+				} catch (IOException ex) {
+					// ignore close exception
+				}
+				try {
+					bos.close();
+				} catch (IOException ex) {
+					// ignore close exception
+				}
+			}
+		}
+		
+		byte[] rawAgent = new byte[size + sComponents.size() * 8];
+		int index = 0;
+		
+		for(int i = 0; i < sComponents.size(); ++i){
+			byte[] nameSizeBytes = ByteBuffer.allocate(4).putInt(sComponentsName.get(i).length).array();
+			byte[] objectSizeBytes = ByteBuffer.allocate(4).putInt(sComponents.get(i).length).array();
+			
+			//Add component name size
+			System.arraycopy(nameSizeBytes, 0, rawAgent, index, 4);
+			index += 4;
+			
+			//Add component name
+			System.arraycopy(sComponentsName.get(i), 0, rawAgent, index, sComponentsName.get(i).length);
+			index += sComponentsName.get(i).length;
+			
+			//Add object size
+			System.arraycopy(objectSizeBytes, 0, rawAgent, index, 4);
+			index += 4;
+			
+			//Add object
+			System.arraycopy(sComponents.get(i), 0, rawAgent, index, sComponents.get(i).length);
+			index += sComponents.get(i).length;
+			
+		}
+		return rawAgent;
 	}
 }
