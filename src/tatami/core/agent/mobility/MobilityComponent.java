@@ -13,14 +13,22 @@ package tatami.core.agent.mobility;
 
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
+import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.CompositeAgent;
 
 public class MobilityComponent extends AgentComponent
 {
-	protected MobilityComponent()
+	public MobilityComponent()
 	{
 		super(AgentComponentName.MOBILITY_COMPONENT);
+		registerHandler(AgentEventType.AGENT_MESSAGE, new AgentEventHandler() {
+			@Override
+			public void handleEvent(AgentEvent event)
+			{
+				
+			}
+		});
 	}
 	
 	public String extractDestination(Object eventData)
@@ -32,10 +40,10 @@ public class MobilityComponent extends AgentComponent
 	
 	public boolean move(String nodeName)
 	{
-		postAgentEvent(new AgentEvent(AgentEventType.AGENT_STOP));
-		
-		// ...
-		
+		getAgentLog().lf("===============================" + getAgentName());
+		AgentEvent event = new AgentEvent(AgentEventType.BEFORE_MOVE);
+		event.setCustomMessage(nodeName);
+		postAgentEvent(event);
 		return true; // if it is most likely that the agent will move
 	}
 	

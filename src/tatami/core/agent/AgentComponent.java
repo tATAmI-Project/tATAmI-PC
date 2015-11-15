@@ -140,7 +140,8 @@ public abstract class AgentComponent implements Serializable
 		/**
 		 * The name of a component extending {@link MovementComponent}.
 		 */
-		MOBILITY_COMPONENT,
+		MOBILITY_COMPONENT(
+				AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".mobility.MobilityComponent"),
 		
 		/**
 		 * The name of a component extending {@link BehaviorComponent}.
@@ -760,6 +761,17 @@ public abstract class AgentComponent implements Serializable
 		if(msgr != null)
 			return msgr.sendMessage(msgr.makePath(targetAgent, targetPathElements), sourceEndpoint, content);
 		return false;
+	}
+	
+	
+	/**
+	 * 
+	 * @param nodeName
+	 * @return
+	 */
+	protected boolean move(String nodeName){
+		MobilityComponent mobilityComponent = (MobilityComponent) parentAgent.getComponent(AgentComponentName.MOBILITY_COMPONENT);
+		return mobilityComponent.move(nodeName);
 	}
 	
 	/**
