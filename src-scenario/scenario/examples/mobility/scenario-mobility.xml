@@ -26,8 +26,7 @@
 			<scen:agent>
 				<scen:component name="parametric" />
 				<scen:component name="visualizable" />
-				<scen:component name="testing"
-					classpath="tatami.core.agent.mobility.MobilityComponent" />
+				<scen:component name="mobility" />
 				<scen:component name="messaging" />
 				<scen:component name="testing"
 					classpath="scenario.examples.StateAgentTestComponent">

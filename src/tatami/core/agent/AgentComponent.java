@@ -138,10 +138,9 @@ public abstract class AgentComponent implements Serializable
 		MESSAGING_COMPONENT,
 		
 		/**
-		 * The name of a component extending {@link MovementComponent}.
+		 * The name of a component extending {@link MobilityComponent}.
 		 */
-		MOBILITY_COMPONENT(
-				AgentComponentName.AGENT_COMPONENT_PACKAGE_ROOT + ".mobility.MobilityComponent"),
+		MOBILITY_COMPONENT,
 		
 		/**
 		 * The name of a component extending {@link BehaviorComponent}.
@@ -763,12 +762,6 @@ public abstract class AgentComponent implements Serializable
 		return false;
 	}
 	
-	
-	/**
-	 * 
-	 * @param nodeName
-	 * @return
-	 */
 	protected boolean move(String nodeName){
 		MobilityComponent mobilityComponent = (MobilityComponent) parentAgent.getComponent(AgentComponentName.MOBILITY_COMPONENT);
 		return mobilityComponent.move(nodeName);
