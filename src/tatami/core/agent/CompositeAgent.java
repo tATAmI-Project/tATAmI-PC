@@ -156,11 +156,11 @@ public class CompositeAgent implements Serializable, AgentManager
 								count++;
 							}
 						}
-						if(agentState == AgentState.TRANSIENT && count == componentOrder.size()){
-							log("All componenets are paused!");
+						if(agentState == AgentState.STOPPING && count == componentOrder.size()){
+							log("All components are paused!");
 						}
 						else{
-							log(count + " Componenets paused of " + componentOrder.size());
+							log(count + " components paused of " + componentOrder.size() + agentState);
 						}
 						
 					}

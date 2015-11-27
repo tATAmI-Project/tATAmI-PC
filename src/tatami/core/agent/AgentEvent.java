@@ -45,16 +45,6 @@ public class AgentEvent extends ParameterSet
 		AGENT_STOP(AgentSequenceType.DESTRUCTIVE),
 		
 		/**
-		 * Event occurs when the agent must move to a different machine.
-		 */
-		BEFORE_MOVE(AgentSequenceType.DESTRUCTIVE),
-		
-		/**
-		 * Event occurs when the agent has just moved to a different machine.
-		 */
-		AFTER_MOVE(AgentSequenceType.CONSTRUCTIVE),
-		
-		/**
 		 * Event occurs when the agent has received a message. Events of this type will only get posted when no
 		 * messaging component exists; otherwise, message routing will be handled by the messaging component.
 		 */

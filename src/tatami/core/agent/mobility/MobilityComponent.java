@@ -26,21 +26,20 @@ public class MobilityComponent extends AgentComponent
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
-				
+			
 			}
 		});
 	}
 	
 	public String extractDestination(Object eventData)
 	{
-		return ((AgentEvent)eventData).getCustomMessage();
+		return ((AgentEvent) eventData).getCustomMessage();
 	}
-	
 	
 	public boolean move(String nodeName)
 	{
 		getAgentLog().lf("===============================" + getAgentName());
-		AgentEvent event = new AgentEvent(AgentEventType.BEFORE_MOVE);
+		AgentEvent event = (AgentEvent) new AgentEvent(AgentEventType.AGENT_STOP).add(CompositeAgent.TRANSIENT_EVENT_PARAMETER, null);
 		event.setCustomMessage(nodeName);
 		postAgentEvent(event);
 		return true; // if it is most likely that the agent will move

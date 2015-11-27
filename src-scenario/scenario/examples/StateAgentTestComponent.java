@@ -158,18 +158,18 @@ public class StateAgentTestComponent extends AgentComponent {
 		pingTimer.cancel();
 		getAgentLog().lf("atAgentStop ");
 	}
-	
-	@Override
-	protected void atBeforeAgentMove(AgentEvent event)
-	{
-		pingTimer.cancel();
-		mActive = false;
-	}
-	
-	@Override
-	protected void atAfterAgentMove(AgentEvent event)
-	{
-		pingTimer = new Timer();
-		pingTimer.schedule(new MakeStep(this), PING_INITIAL_DELAY, PING_PERIOD);
-	}
+//	
+//	@Override
+//	protected void atBeforeAgentMove(AgentEvent event)
+//	{
+//		pingTimer.cancel();
+//		mActive = false;
+//	}
+//	
+//	@Override
+//	protected void atAfterAgentMove(AgentEvent event)
+//	{
+//		pingTimer = new Timer();
+//		pingTimer.schedule(new MakeStep(this), PING_INITIAL_DELAY, PING_PERIOD);
+//	}
 }

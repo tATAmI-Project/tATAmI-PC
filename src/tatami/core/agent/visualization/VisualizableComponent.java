@@ -189,33 +189,33 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		removeVisualization();
 	}
 	
-	@Override
 	protected void atBeforeAgentMove(AgentEvent event)
 	{
-		super.atBeforeAgentMove(event);
-		
-		MobilityComponent mvmt = (MobilityComponent) getAgentComponent(AgentComponentName.MOBILITY_COMPONENT);
-		if(mvmt != null)
-		{
-			String destination = mvmt.extractDestination(event);
-			if(!destination.equals(getCurrentContainer()))
-			{
-				getLog().info("moving to []", destination.toString());
-				setCurrentContainer(destination.toString());
-				removeVisualization();
-			}
-		}
-		
-		mActive = false;
+		// FIX
+//		super.atBeforeAgentMove(event);
+//		
+//		MobilityComponent mvmt = (MobilityComponent) getAgentComponent(AgentComponentName.MOBILITY_COMPONENT);
+//		if(mvmt != null)
+//		{
+//			String destination = mvmt.extractDestination(event);
+//			if(!destination.equals(getCurrentContainer()))
+//			{
+//				getLog().info("moving to []", destination.toString());
+//				setCurrentContainer(destination.toString());
+//				removeVisualization();
+//			}
+//		}
+//		
+//		mActive = false;
 	}
 	
-	@Override
 	protected void atAfterAgentMove(AgentEvent event)
 	{
-		super.atAfterAgentMove(event);
-		
-		resetVisualization();
-		getLog().info("arrived after move");
+		// FIX
+//		super.atAfterAgentMove(event);
+//		
+//		resetVisualization();
+//		getLog().info("arrived after move");
 	}
 	
 	/**

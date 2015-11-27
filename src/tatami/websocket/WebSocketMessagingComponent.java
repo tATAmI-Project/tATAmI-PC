@@ -97,19 +97,4 @@ public class WebSocketMessagingComponent extends NameBasedMessagingComponent
 		super.atAgentStop(event);
 
 	}
-	
-	@Override
-	protected void atBeforeAgentMove(AgentEvent event)
-	{
-		mActive = false;
-	}
-	
-	@Override
-	protected void atAfterAgentMove(AgentEvent event)
-	{
-	}
-	
-	
-	
-	
 }

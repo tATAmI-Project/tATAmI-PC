@@ -333,21 +333,7 @@ public abstract class AgentComponent implements Serializable
 				atAgentStop(event);
 			}
 		});
-		registerHandler(AgentEventType.BEFORE_MOVE, new AgentEventHandler() {
-			@Override
-			public void handleEvent(AgentEvent event)
-			{
-				atBeforeAgentMove(event);
-			}
-		});
-		registerHandler(AgentEventType.AFTER_MOVE, new AgentEventHandler() {
-			@Override
-			public void handleEvent(AgentEvent event)
-			{
-				atAfterAgentMove(event);
-			}
-		});
-		
+	
 		componentInitializer();
 	}
 	
@@ -488,38 +474,6 @@ public abstract class AgentComponent implements Serializable
 	 *            - the event that occurred.
 	 */
 	protected void atAgentStop(AgentEvent event)
-	{
-		// this class does not do anything here.
-	}
-	
-	/**
-	 * Method that is called by the default handler for {@link AgentEventType#BEFORE_MOVE}.
-	 * <p>
-	 * Extending classes should override this method and should consider calling the overridden method first.
-	 * <p>
-	 * Since extending classes may register other handlers for the event, it is not guaranteed that this method will be
-	 * called when the event occurs.
-	 * 
-	 * @param event
-	 *            - the event that occurred.
-	 */
-	protected void atBeforeAgentMove(AgentEvent event)
-	{
-		// this class does not do anything here.
-	}
-	
-	/**
-	 * Method that is called by the default handler for {@link AgentEventType#AFTER_MOVE}.
-	 * <p>
-	 * Extending classes should override this method and should consider calling the overridden method first.
-	 * <p>
-	 * Since extending classes may register other handlers for the event, it is not guaranteed that this method will be
-	 * called when the event occurs.
-	 * 
-	 * @param event
-	 *            - the event that occurred.
-	 */
-	protected void atAfterAgentMove(AgentEvent event)
 	{
 		// this class does not do anything here.
 	}
