@@ -142,9 +142,27 @@ public class CompositeAgent implements Serializable, AgentManager
 						break;
 					case DESTRUCTIVE:{
 						for(ListIterator<AgentComponent> it = componentOrder.listIterator(componentOrder.size()); it
-								.hasPrevious();)
+								.hasPrevious();){
 							it.previous().signalAgentEvent(event);
-							log("Pause event sent");
+						}
+						
+						//count stopped components;
+						
+						log("Pause event sent");
+						
+						int count = 0;
+						for(AgentComponent component : componentOrder){
+							if(!component.isActive()){
+								count++;
+							}
+						}
+						if(agentState == AgentState.TRANSIENT && count == componentOrder.size()){
+							log("All componenets are paused!");
+						}
+						else{
+							log(count + " Componenets paused of " + componentOrder.size());
+						}
+						
 					}
 						break;
 					}

@@ -10,6 +10,7 @@ import net.xqhs.util.logging.UnitComponent;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.CompositeAgent;
+import tatami.core.agent.AgentEvent.AgentEventType;
 
 
 /**
@@ -140,6 +141,8 @@ public class StateAgentTestComponent extends AgentComponent {
 		Random r = new Random();
 
 		mSubject = r.nextInt() % 10;
+		
+		mActive = true;
 	}
 
 	@Override
@@ -150,14 +153,17 @@ public class StateAgentTestComponent extends AgentComponent {
 
 	@Override
 	protected void atAgentStop(AgentEvent event) {
+		//AgentEvent event = new AgentEvent(AgentEventType.BEFORE_MOVE);
 		super.atAgentStop(event);
 		pingTimer.cancel();
+		getAgentLog().lf("atAgentStop ");
 	}
 	
 	@Override
 	protected void atBeforeAgentMove(AgentEvent event)
 	{
 		pingTimer.cancel();
+		mActive = false;
 	}
 	
 	@Override

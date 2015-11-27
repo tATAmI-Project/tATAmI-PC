@@ -33,8 +33,7 @@ public class MobilityComponent extends AgentComponent
 	
 	public String extractDestination(Object eventData)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return ((AgentEvent)eventData).getCustomMessage();
 	}
 	
 	

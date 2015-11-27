@@ -11,6 +11,8 @@
  ******************************************************************************/
 package tatami.websocket;
 
+import java.util.Timer;
+
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.messaging.MessagingComponent;
@@ -41,7 +43,7 @@ public class WebSocketMessagingComponent extends NameBasedMessagingComponent
 			throw new IllegalStateException("Platform Link is not of expected type");
 		platform = (WebSocketMessagingPlatform) getPlatformLink();
 		platform.register(getAgentName(), this);
-		
+		mActive = true;
 	}
 	
 	/**
@@ -87,5 +89,27 @@ public class WebSocketMessagingComponent extends NameBasedMessagingComponent
 		
 		return false;
 	}
+	
+	
+	@Override
+	protected void atAgentStop(AgentEvent event) {
+		//AgentEvent event = new AgentEvent(AgentEventType.BEFORE_MOVE);
+		super.atAgentStop(event);
+
+	}
+	
+	@Override
+	protected void atBeforeAgentMove(AgentEvent event)
+	{
+		mActive = false;
+	}
+	
+	@Override
+	protected void atAfterAgentMove(AgentEvent event)
+	{
+	}
+	
+	
+	
 	
 }

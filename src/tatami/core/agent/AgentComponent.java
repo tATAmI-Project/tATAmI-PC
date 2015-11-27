@@ -767,6 +767,12 @@ public abstract class AgentComponent implements Serializable
 		return mobilityComponent.move(nodeName);
 	}
 	
+	protected boolean mActive;
+	
+	protected boolean isActive(){
+		return mActive;
+	}
+	
 	/**
 	 * Method that relays the sending of a message, without the need to interact with the messaging component directly.
 	 * This version of the method takes the complete target endpoint.

@@ -179,6 +179,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		
 		resetVisualization();
 		registerMessageHandlers();
+		mActive = true;
 	}
 	
 	@Override
@@ -204,6 +205,8 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 				removeVisualization();
 			}
 		}
+		
+		mActive = false;
 	}
 	
 	@Override
