@@ -104,7 +104,7 @@ public class AutobahnServer extends WebSocketServer
 		if(message.indexOf("::mobility") == 0)
 		{
 			String agentName = message.substring(message.lastIndexOf("::") + 2, message.length());
-			registry.put(agentName, conn);
+			
 			return;
 		}
 		

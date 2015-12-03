@@ -284,28 +284,53 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	public SimulationManager getParent(){
 		return mParent;
 	}
+	
+	public static final int BATCH_SIZE = 90;
+	
+	private String getByteAsString(byte x){
+		String out = String.valueOf(String.valueOf(x).length()) + String.valueOf(x);
+		return out;
+	}
+	
+	private String getByteArrayAsString(byte[] raw){
+		String out = "";
+		for(int i = 0; i < raw.length; ++i){
+			out += getByteAsString(raw[i]);
+		}
+		return out;
+	}
+	
 
 	@Override
 	public void onAgentStateChenged(CompositeAgent agent) {
-		if(agent.getAgentState() == AgentState.TRANSIENT){
-			
+		if (agent.getAgentState() == AgentState.TRANSIENT) {
+
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutput out = null;
 			try {
-			  out = new ObjectOutputStream(bos);   
-			  out.writeObject(agent);
-			  byte[] yourBytes = bos.toByteArray();
-			  
-			  System.out.println("!!!!!!!!!!!!Length: " + yourBytes.length);
-			  
-			}
-			catch(Exception e){
+				out = new ObjectOutputStream(bos);
+				out.writeObject(agent);
+				byte[] yourBytes = bos.toByteArray();
+				
+				String rawString  = getByteArrayAsString(yourBytes);
+				
+				
+				while(rawString.length() > 0){
+					//A - source, B - target
+					mClient.send("A" + "::" + "B" + "::" + rawString.substring(0, Math.min(BATCH_SIZE, rawString.length())));
+					rawString = rawString.substring(BATCH_SIZE+1);
+				}
+				
+
+				System.out.println("!!!!!!!!!!!!Length: " + yourBytes.length);
+
+			} catch (Exception e) {
 				System.out.println(e.getMessage());
 				e.printStackTrace();
 				System.out.println("Exception occured");
 			}
 		}
-		
+
 	}
 	
 }
