@@ -97,7 +97,7 @@ public abstract class AgentComponent implements Serializable
 	 * 
 	 * @author Andrei Olaru
 	 */
-	public static class ComponentCreationData extends ParameterSet
+	public static class ComponentCreationData extends ParameterSet implements Serializable
 	{
 		/**
 		 * The serial UID.

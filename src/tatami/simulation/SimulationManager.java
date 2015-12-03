@@ -62,6 +62,8 @@ import tatami.simulation.PlatformLoader.PlatformLink;
  */
 public class SimulationManager implements AgentManager
 {
+	
+
 	/**
 	 * Components of the simulation manager GUI.
 	 * 
@@ -204,6 +206,12 @@ public class SimulationManager implements AgentManager
 		else
 			events = Collections.emptyList();
 		// TODO: add agent graph and corresponding representation
+		
+		
+		
+		for(Entry<String, PlatformLoader> platformLoader : platforms.entrySet()){
+			platformLoader.getValue().setParent(this);
+		}
 	}
 	
 	@Override
@@ -615,4 +623,16 @@ public class SimulationManager implements AgentManager
 	{
 		return null;
 	}
+
+	@Override
+	public void addStateChangeListener(IStateChangeListener listener) {
+		
+		
+	}
+	
+	public void reconstructAgent(byte[] rawAgent){
+		
+	}
+	
+	
 }

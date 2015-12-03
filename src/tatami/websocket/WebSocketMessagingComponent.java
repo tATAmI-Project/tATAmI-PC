@@ -11,6 +11,7 @@
  ******************************************************************************/
 package tatami.websocket;
 
+import java.io.Serializable;
 import java.util.Timer;
 
 import tatami.core.agent.AgentComponent;
@@ -32,7 +33,7 @@ public class WebSocketMessagingComponent extends NameBasedMessagingComponent
 	/**
 	 * Reference to the platform
 	 */
-	WebSocketMessagingPlatform platform;
+	transient WebSocketMessagingPlatform platform;
 	
 	@Override
 	protected void atAgentStart(AgentEvent event)

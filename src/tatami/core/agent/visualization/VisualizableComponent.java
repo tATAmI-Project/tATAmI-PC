@@ -126,7 +126,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	 * The {@link Config} for the GUI. Should remain the same object throughout the agent's lifecycle, although it may
 	 * be changed, and the agent's GUI will be recreated.
 	 */
-	protected AgentGuiConfig				guiConfig							= new AgentGuiConfig();
+	transient protected AgentGuiConfig				guiConfig							= new AgentGuiConfig();
 	/**
 	 * The GUI implementation. Depends on platform, but implements {@link AgentGui}.
 	 */

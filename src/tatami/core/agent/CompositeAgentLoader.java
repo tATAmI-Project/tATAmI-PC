@@ -11,18 +11,21 @@
  ******************************************************************************/
 package tatami.core.agent;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentComponent.ComponentCreationData;
+import tatami.core.agent.CompositeAgent.AgentState;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.AgentCreationData;
 import tatami.simulation.AgentLoader;
 import tatami.simulation.AgentManager;
+import tatami.simulation.IStateChangeListener;
 import tatami.simulation.PlatformLoader;
 
 /**
@@ -30,7 +33,7 @@ import tatami.simulation.PlatformLoader;
  * 
  * @author Andrei Olaru
  */
-public class CompositeAgentLoader implements AgentLoader
+public class CompositeAgentLoader implements AgentLoader, IStateChangeListener, Serializable
 {
 	/**
 	 * Name of XML nodes in the scenario representing components.
@@ -173,9 +176,16 @@ public class CompositeAgentLoader implements AgentLoader
 	@Override
 	public AgentManager load(AgentCreationData agentCreationData)
 	{
+		System.out.println("=================================+++Load");
 		CompositeAgent agent = new CompositeAgent();
+		agent.addStateChangeListener(this);
 		for(Object componentObj : agentCreationData.getParameters().getObjects(COMPONENT_PARAMETER_NAME))
 			agent.addComponent((AgentComponent) componentObj);
 		return agent;
+	}
+
+	@Override
+	public void stateChanged(CompositeAgent agent) {
+		
 	}
 }

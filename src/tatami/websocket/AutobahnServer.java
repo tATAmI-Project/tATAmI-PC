@@ -92,18 +92,27 @@ public class AutobahnServer extends WebSocketServer
 	@Override
 	public void onMessage(WebSocket conn, String message)
 	{
+		
 		// Now the message needs to be routed
-		if(message.indexOf("::internal") > -1)
+		if(message.indexOf("::internal") == 0)
 		{
 			String agentName = message.substring(message.lastIndexOf("::") + 2, message.length());
 			registry.put(agentName, conn);
+			return;
 		}
-		else
+		
+		if(message.indexOf("::mobility") == 0)
 		{
-			String target = message.split("::")[1];
-			String currentTarget = (target.indexOf("/") > 0) ? target.substring(0, target.indexOf("/")) : target;
-			registry.get(currentTarget).send(message);
+			String agentName = message.substring(message.lastIndexOf("::") + 2, message.length());
+			registry.put(agentName, conn);
+			return;
 		}
+		
+		
+		
+		String target = message.split("::")[1];
+		String currentTarget = (target.indexOf("/") > 0) ? target.substring(0, target.indexOf("/")) : target;
+		registry.get(currentTarget).send(message);
 	}
 	
 	@Override

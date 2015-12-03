@@ -11,6 +11,8 @@
  ******************************************************************************/
 package tatami.core.agent.parametric;
 
+import java.io.Serializable;
+
 import tatami.core.util.RegisteredParameterSet;
 
 /**
@@ -23,7 +25,7 @@ import tatami.core.util.RegisteredParameterSet;
  * 
  * @author Andrei Olaru
  */
-public class AgentParameters extends RegisteredParameterSet<AgentParameterName>
+public class AgentParameters extends RegisteredParameterSet<AgentParameterName> implements Serializable
 {
 	/**
 	 * The class UID.

@@ -12,6 +12,7 @@
 package tatami.simulation;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
+import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 
 /**
@@ -226,4 +227,9 @@ public interface PlatformLoader
 	 * @return the name of the class of the recommended implementation.
 	 */
 	public String getRecommendedComponentClass(AgentComponentName componentName);
+	
+	public void setParent(AgentManager agent);
+	public AgentManager getParent();
+	
+	public void onAgentStateChenged(CompositeAgent agent);
 }

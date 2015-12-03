@@ -65,4 +65,9 @@ public interface AgentManager
 	 * @return the name of the agent.
 	 */
 	public String getAgentName();
+	
+	public void addStateChangeListener(IStateChangeListener listener);
+	
+	public void reconstructAgent(byte[] rawAgent);
+	
 }

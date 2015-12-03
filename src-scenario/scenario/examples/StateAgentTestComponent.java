@@ -1,5 +1,6 @@
 package scenario.examples;
 
+import java.io.Serializable;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -10,7 +11,6 @@ import net.xqhs.util.logging.UnitComponent;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.CompositeAgent;
-import tatami.core.agent.AgentEvent.AgentEventType;
 
 
 /**
@@ -59,7 +59,7 @@ public class StateAgentTestComponent extends AgentComponent {
 	 * @author Yonutix
 	 *
 	 */
-	class MakeStep extends TimerTask {
+	class MakeStep extends TimerTask implements Serializable{
 		
 		
 		/**
@@ -80,7 +80,7 @@ public class StateAgentTestComponent extends AgentComponent {
 			mSubject++;
 			getAgentLog().lf("Incremented ", mSubject);
 			//Time to move
-			if( mSubject == 20){
+			if( mSubject == 10){
 				mParent.move("There");
 			}
 			
@@ -140,7 +140,7 @@ public class StateAgentTestComponent extends AgentComponent {
 
 		Random r = new Random();
 
-		mSubject = r.nextInt() % 10;
+		mSubject = 8; //r.nextInt() % 10;
 		
 		mActive = true;
 	}

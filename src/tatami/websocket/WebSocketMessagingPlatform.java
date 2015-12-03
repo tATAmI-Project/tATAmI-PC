@@ -11,6 +11,10 @@
  ******************************************************************************/
 package tatami.websocket;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -22,10 +26,13 @@ import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent.AgentComponentName;
+import tatami.core.agent.CompositeAgent;
+import tatami.core.agent.CompositeAgent.AgentState;
 import tatami.simulation.AgentManager;
 import tatami.simulation.BootSettingsManager;
 import tatami.simulation.PlatformLoader;
 import tatami.simulation.PlatformLoader.PlatformLink;
+import tatami.simulation.SimulationManager;
 
 /**
  * Implements a {@link PlatformLoader} instance that allows centralized communication via WebSockets.
@@ -86,6 +93,8 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	/** the logger */
 	UnitComponentExt log;
 	
+	SimulationManager mParent;
+	
 	/**
 	 * Name of the unit for logging purposes
 	 */
@@ -131,6 +140,10 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 		
 		mPort = Integer.parseInt(tmpPort);
 		return this;
+	}
+	
+	public void setParent(AgentManager parent){
+		mParent = (SimulationManager)parent;
 	}
 	
 	@Override
@@ -266,6 +279,33 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 			break;
 		}
 		return null;
+	}
+	
+	public SimulationManager getParent(){
+		return mParent;
+	}
+
+	@Override
+	public void onAgentStateChenged(CompositeAgent agent) {
+		if(agent.getAgentState() == AgentState.TRANSIENT){
+			
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutput out = null;
+			try {
+			  out = new ObjectOutputStream(bos);   
+			  out.writeObject(agent);
+			  byte[] yourBytes = bos.toByteArray();
+			  
+			  System.out.println("!!!!!!!!!!!!Length: " + yourBytes.length);
+			  
+			}
+			catch(Exception e){
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+				System.out.println("Exception occured");
+			}
+		}
+		
 	}
 	
 }

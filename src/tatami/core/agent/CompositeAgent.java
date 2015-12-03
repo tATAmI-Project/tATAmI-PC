@@ -11,12 +11,7 @@
  ******************************************************************************/
 package tatami.core.agent;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +28,8 @@ import tatami.core.agent.AgentEvent.AgentSequenceType;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.simulation.AgentManager;
+import tatami.simulation.IStateChangeListener;
+import tatami.simulation.PlatformLoader;
 import tatami.simulation.PlatformLoader.PlatformLink;
 
 /**
@@ -72,7 +69,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * 
 	 * @author Andrei Olaru
 	 */
-	enum AgentState {
+	public enum AgentState {
 		/**
 		 * State indicating that the agent is currently behaving normally and agent events are processed in good order.
 		 * All components are running.
@@ -110,7 +107,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * 
 	 * @author Andrei Olaru
 	 */
-	class AgentThread implements Runnable
+	class AgentThread implements Runnable, Serializable
 	{
 		@Override
 		public void run()
@@ -133,41 +130,24 @@ public class CompositeAgent implements Serializable, AgentManager
 				else
 				{
 					AgentEvent event = eventQueue.poll();
-					switch(event.getType().getSequenceType())
-					{
+					switch (event.getType().getSequenceType()) {
 					case CONSTRUCTIVE:
 					case UNORDERED:
-						for(AgentComponent component : componentOrder)
+						for (AgentComponent component : componentOrder)
 							component.signalAgentEvent(event);
 						break;
-					case DESTRUCTIVE:{
-						for(ListIterator<AgentComponent> it = componentOrder.listIterator(componentOrder.size()); it
-								.hasPrevious();){
+					case DESTRUCTIVE: {
+						for (ListIterator<AgentComponent> it = componentOrder.listIterator(componentOrder.size()); it
+								.hasPrevious();) {
 							it.previous().signalAgentEvent(event);
 						}
-						
-						//count stopped components;
-						
-						log("Pause event sent");
-						
-						int count = 0;
-						for(AgentComponent component : componentOrder){
-							if(!component.isActive()){
-								count++;
-							}
-						}
-						if(agentState == AgentState.STOPPING && count == componentOrder.size()){
-							log("All components are paused!");
-						}
-						else{
-							log(count + " components paused of " + componentOrder.size() + agentState);
-						}
-						
+						log("All events paused");
+
 					}
-						break;
 					}
 					
 					threadExit = FSMEventOut(event.getType(), event.isSet(TRANSIENT_EVENT_PARAMETER));
+					//onAgentStops();
 				}
 			}
 		}
@@ -194,7 +174,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	/**
 	 * This can be used by platform-specific components to contact the platform.
 	 */
-	protected Object									platformLink				= null;
+	transient protected Object									platformLink				= null;
 																					
 	/**
 	 * The {@link Map} that links component names (functionalities) to standard component instances.
@@ -224,7 +204,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	/**
 	 * The thread managing the agent's lifecycle (managing events).
 	 */
-	protected Thread									agentThread					= null;
+	transient protected Thread									agentThread					= null;
 																					
 	/**
 	 * The agent state. See {@link AgentState}. Access to this member should be synchronized with the lock of
@@ -238,13 +218,17 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * does not exist, or if the name has not been set. This log should only be used by means of the
 	 * {@link #log(String, Object...)} method.
 	 */
-	protected UnitComponent								localLog					= (UnitComponent) new UnitComponent()
+	transient protected UnitComponent								localLog					= (UnitComponent) new UnitComponent()
 			.setLogLevel(Level.INFO);
 			
 	/**
 	 * This switch activates the use of the {@link #localLog}.
 	 */
 	protected boolean									USE_LOCAL_LOG				= true;
+	
+	
+	
+	IStateChangeListener mStateChangeListener;
 																					
 	/**
 	 * Starts the lifecycle of the agent. All components will receive an {@link AgentEventType#AGENT_START} event.
@@ -473,6 +457,8 @@ public class CompositeAgent implements Serializable, AgentManager
 			}
 			eventQueue = null;
 			localLog.doExit();
+			mStateChangeListener.stateChanged(this);
+			((PlatformLoader)getPlatformLink()).onAgentStateChenged(this);
 			return true;
 		default:
 			// do nothing
@@ -681,5 +667,21 @@ public class CompositeAgent implements Serializable, AgentManager
 			}
 			localLog.li(message, arguments);
 		}
+	}
+	
+	public AgentState getAgentState(){
+		return agentState;
+	}
+
+	@Override
+	public void addStateChangeListener(IStateChangeListener listener) {
+		mStateChangeListener = listener;
+		System.out.println("Listener added");
+	}
+
+	@Override
+	public void reconstructAgent(byte[] rawAgent) {
+		// TODO Auto-generated method stub
+		
 	}
 }
