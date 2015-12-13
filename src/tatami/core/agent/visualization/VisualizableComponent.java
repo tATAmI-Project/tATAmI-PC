@@ -226,6 +226,8 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		// registers message receivers: receive the visualization root; receive exit message.
 		getLog().trace("Registering message handlers");
 		if(!registerMessageReceiver(new AgentEventHandler() {
+			private static final long serialVersionUID = -8296661707046703144L;
+
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
@@ -237,6 +239,8 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		}, Vocabulary.VISUALIZATION.toString(), Vocabulary.VISUALIZATION_MONITOR.toString()))
 			getLog().warn("No messaging component present");
 		registerMessageReceiver(new AgentEventHandler() {
+			private static final long serialVersionUID = -6379292023931191463L;
+
 			@Override
 			public void handleEvent(AgentEvent event)
 			{

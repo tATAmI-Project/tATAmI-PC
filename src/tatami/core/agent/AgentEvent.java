@@ -11,6 +11,8 @@
  ******************************************************************************/
 package tatami.core.agent;
 
+import java.io.Serializable;
+
 import tatami.core.util.ParameterSet;
 
 /**
@@ -126,7 +128,7 @@ public class AgentEvent extends ParameterSet
 	 * 
 	 * @author Andrei Olaru
 	 */
-	public interface AgentEventHandler
+	public interface AgentEventHandler extends Serializable
 	{
 		/**
 		 * The method is invoked whenever the event is posted to the {@link CompositeAgent} the component is part of.

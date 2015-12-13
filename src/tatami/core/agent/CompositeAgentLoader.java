@@ -11,14 +11,12 @@
  ******************************************************************************/
 package tatami.core.agent;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentComponent.ComponentCreationData;
-import tatami.core.agent.CompositeAgent.AgentState;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
@@ -33,7 +31,7 @@ import tatami.simulation.PlatformLoader;
  * 
  * @author Andrei Olaru
  */
-public class CompositeAgentLoader implements AgentLoader, IStateChangeListener, Serializable
+public class CompositeAgentLoader implements AgentLoader, IStateChangeListener
 {
 	/**
 	 * Name of XML nodes in the scenario representing components.

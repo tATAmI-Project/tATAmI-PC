@@ -107,7 +107,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * 
 	 * @author Andrei Olaru
 	 */
-	class AgentThread implements Runnable, Serializable
+	class AgentThread implements Runnable
 	{
 		@Override
 		public void run()
@@ -228,7 +228,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	
 	
 	
-	IStateChangeListener mStateChangeListener;
+	transient IStateChangeListener mStateChangeListener;
 																					
 	/**
 	 * Starts the lifecycle of the agent. All components will receive an {@link AgentEventType#AGENT_START} event.

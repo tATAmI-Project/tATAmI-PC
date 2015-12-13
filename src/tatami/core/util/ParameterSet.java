@@ -11,13 +11,13 @@
  ******************************************************************************/
 package tatami.core.util;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import net.xqhs.util.config.Config;
+import net.xqhs.util.config.SerializableConfig;
 
 /**
  * The class acts as a collection of key-value pairs that allows multiple values for the same key. Only addition and
@@ -39,7 +39,7 @@ import net.xqhs.util.config.Config;
  * 
  * @author Andrei Olaru
  */
-public class ParameterSet extends Config implements Serializable
+public class ParameterSet extends SerializableConfig
 {
 	/**
 	 * The class UID.
