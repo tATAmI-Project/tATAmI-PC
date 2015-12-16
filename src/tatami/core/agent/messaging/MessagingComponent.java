@@ -152,6 +152,8 @@ public abstract class MessagingComponent extends AgentComponent
 		super(AgentComponentName.MESSAGING_COMPONENT);
 		
 		registerHandler(AgentEventType.AGENT_MESSAGE, new AgentEventHandler() {
+			private static final long serialVersionUID = 2976579545234807775L;
+
 			@Override
 			public void handleEvent(AgentEvent event)
 			{

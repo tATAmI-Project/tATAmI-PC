@@ -97,7 +97,7 @@ public abstract class AgentComponent implements Serializable
 	 * 
 	 * @author Andrei Olaru
 	 */
-	public static class ComponentCreationData extends ParameterSet implements Serializable
+	public static class ComponentCreationData extends ParameterSet
 	{
 		/**
 		 * The serial UID.
@@ -306,6 +306,8 @@ public abstract class AgentComponent implements Serializable
 		// register
 		eventHandlers = new HashMap<AgentEventType, AgentEventHandler>();
 		registerHandler(AgentEventType.AGENT_START, new AgentEventHandler() {
+			private static final long serialVersionUID = 5345718461066227095L;
+
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
@@ -313,6 +315,8 @@ public abstract class AgentComponent implements Serializable
 			}
 		});
 		registerHandler(AgentEventType.SIMULATION_START, new AgentEventHandler() {
+			private static final long serialVersionUID = -4450027126349149405L;
+
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
@@ -320,6 +324,8 @@ public abstract class AgentComponent implements Serializable
 			}
 		});
 		registerHandler(AgentEventType.SIMULATION_PAUSE, new AgentEventHandler() {
+			private static final long serialVersionUID = -8713717117684905017L;
+
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
@@ -327,6 +333,8 @@ public abstract class AgentComponent implements Serializable
 			}
 		});
 		registerHandler(AgentEventType.AGENT_STOP, new AgentEventHandler() {
+			private static final long serialVersionUID = 3248743458751617352L;
+
 			@Override
 			public void handleEvent(AgentEvent event)
 			{
