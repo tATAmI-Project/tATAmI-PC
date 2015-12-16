@@ -6,20 +6,20 @@
  * Instructions on how to start the sclaim_app (it is mandatory to complete steps in this exact order):
  * <ol>
  * 
- * <li>Run the command <./run.sh src-scenario/scenario/amilab/sclaim_app/scenario-distributed-server.xml "server client"
- * 9002 [SERVER_IP] 9002> on the server.
+ * <li>Run the command <tt>./run.sh src-scenario/scenario/amilab/sclaim_app/scenario-distributed-server.xml "server client"
+ * 9002 [SERVER_IP] 9002</tt> on the server.
  * 
  * <li>Press "Create agents" on the server.
  * 
- * <li>Run the command <./run.sh src-scenario/scenario/amilab/sclaim_app/scenario-distributed-client1.xml "client" 9002
- * [SERVER_IP] 9002> on the first client.
+ * <li>Run the command <tt>./run.sh src-scenario/scenario/amilab/sclaim_app/scenario-distributed-client1.xml "client" 9002
+ * [SERVER_IP] 9002</tt> on the first client.
  * 
  * <li>Press "Create agents" on the first client.
  * 
  * <li>Press "and Start" on the first client.
  * 
- * <li>Run the command <./run.sh src-scenario/scenario/amilab/sclaim_app/scenario-distributed-client2.xml "client" 9002
- * [SERVER_IP] 9002> on the second client.
+ * <li>Run the command <tt>./run.sh src-scenario/scenario/amilab/sclaim_app/scenario-distributed-client2.xml "client" 9002
+ * [SERVER_IP] 9002</tt> on the second client.
  * 
  * <li>Press "Create agents" on the second client.
  * 
