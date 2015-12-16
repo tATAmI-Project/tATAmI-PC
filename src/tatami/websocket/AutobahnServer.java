@@ -13,6 +13,7 @@ package tatami.websocket;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -36,6 +37,8 @@ public class AutobahnServer extends WebSocketServer
 	 */
 	private HashMap<String, WebSocket> registry;
 	
+	private HashMap<String, WebSocket> ipRegistry;
+	
 	/**
 	 * 
 	 * @param port
@@ -50,6 +53,7 @@ public class AutobahnServer extends WebSocketServer
 	{
 		super(new InetSocketAddress(port), Collections.singletonList(d));
 		registry = new HashMap<String, WebSocket>();
+		ipRegistry = new HashMap<String, WebSocket>();
 	}
 	
 	/**
@@ -66,6 +70,7 @@ public class AutobahnServer extends WebSocketServer
 	{
 		super(address, Collections.singletonList(d));
 		registry = new HashMap<String, WebSocket>();
+		ipRegistry = new HashMap<String, WebSocket>();
 	}
 	
 	/**
@@ -98,17 +103,32 @@ public class AutobahnServer extends WebSocketServer
 		{
 			String agentName = message.substring(message.lastIndexOf("::") + 2, message.length());
 			registry.put(agentName, conn);
+			
+			String ipAddr = conn.getRemoteSocketAddress().getAddress().toString().substring(1);
+			
+			if(!ipRegistry.containsKey(ipAddr)){
+				ipRegistry.put(ipAddr, conn);
+				System.out.println(ipAddr + " Registered!!!");
+			}
 			return;
 		}
 		
 		if(message.indexOf("::mobility") == 0)
 		{
-			String agentName = message.substring(message.lastIndexOf("::") + 2, message.length());
+			String destination = message.substring(12, message.lastIndexOf("::"));
 			
+			if(ipRegistry.containsKey(destination)){
+				ipRegistry.get(destination).send(message);
+			}
+			else{
+				//System.out.println("No " + destination + " !!!!!!!!!!!!!!!!!!!");
+				
+				System.out.println("No |" + destination + "| !!!!!!!!!!!!!!!!!!!");
+			}
 			return;
 		}
 		
-		
+		System.out.println(message);
 		
 		String target = message.split("::")[1];
 		String currentTarget = (target.indexOf("/") > 0) ? target.substring(0, target.indexOf("/")) : target;

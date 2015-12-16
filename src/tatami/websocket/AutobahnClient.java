@@ -12,6 +12,7 @@
 package tatami.websocket;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import main.java.org.java_websocket.client.WebSocketClient;
@@ -28,6 +29,7 @@ public class AutobahnClient extends WebSocketClient
 	 * The map between the agent names and their corresponding server references
 	 */
 	HashMap<String, WebSocketMessagingPlatform> pltformRouting;
+	
 	
 	/**
 	 * This will not connect automatically the client to the server, connect method must be used
@@ -78,12 +80,25 @@ public class AutobahnClient extends WebSocketClient
 		send(message);
 	}
 	
+	public void mobilityPackage(String pack){
+		String message = "::" + "mobility" + "::" + "127.0.0.1" + "::" + pack;
+		send(message);
+	}
+	
 	/**
 	 * Method called when a message is received
 	 */
 	@Override
 	public void onMessage(String message)
 	{
+		
+		if(message.indexOf("::mobility") > -1){
+
+			String destination = message.substring(12, message.lastIndexOf("::"));
+			
+			System.out.println("Mobility message received, detination: " + destination);
+			return;
+		}
 		/* Forward the message to the platform */
 		String[] messageComponents = message.split("::");
 		String currentTarget = (messageComponents[1].indexOf("/") > 0)

@@ -179,7 +179,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	/**
 	 * The {@link Map} that links component names (functionalities) to standard component instances.
 	 */
-	transient protected Map<AgentComponentName, AgentComponent>	components					= new HashMap<AgentComponentName, AgentComponent>();
+	protected Map<AgentComponentName, AgentComponent>	components					= new HashMap<AgentComponentName, AgentComponent>();
 																					
 	/**
 	 * A {@link List} that holds the order in which components were added, so as to signal agent events to components in
@@ -187,7 +187,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * <p>
 	 * It is important that this list is managed together with <code>components</code>.
 	 */
-	transient protected ArrayList<AgentComponent>					componentOrder				= new ArrayList<AgentComponent>();
+	protected ArrayList<AgentComponent>					componentOrder				= new ArrayList<AgentComponent>();
 																					
 	// TODO: add support for non-standard components.
 	// /**
@@ -228,7 +228,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	
 	
 	
-	transient IStateChangeListener mStateChangeListener;
+	IStateChangeListener mStateChangeListener;
 																					
 	/**
 	 * Starts the lifecycle of the agent. All components will receive an {@link AgentEventType#AGENT_START} event.
