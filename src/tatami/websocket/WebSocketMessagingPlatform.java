@@ -39,61 +39,61 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	/**
 	 * When the componentType is NONE, this class is neither server or client
 	 */
-	public static final int NONE = 0x0;
-	
+	public static final int							NONE				= 0x0;
+																		
 	/**
 	 * When the SERVER bit is configured, this class is initialized as a server
 	 */
-	public static final int SERVER = 0x1;
-	
+	public static final int							SERVER				= 0x1;
+																		
 	/**
 	 * When the CLIENT bit is configured, this class is initialized as a client
 	 */
-	public static final int CLIENT = 0x2;
-	
+	public static final int							CLIENT				= 0x2;
+																		
 	/**
 	 * In this parameter will be stored the info about the class profile: client, server or both
 	 */
-	public int componentType = NONE;
-	
+	public int										componentType		= NONE;
+																		
 	/**
 	 * The port on which the server will be started or on which the client will connect to the server
 	 */
-	public int mPort = 9002;
-	
+	public int										mPort				= 9002;
+																		
 	/**
 	 * The object representing the server if this platform will have the server role
 	 */
-	public AutobahnServer mServer;
-	
+	public AutobahnServer							mServer;
+													
 	/**
 	 * The object representing the client if this platform will have the client role
 	 */
-	AutobahnClient mClient;
-	
+	AutobahnClient									mClient;
+													
 	/**
 	 * The thread on which the client will run
 	 */
-	Thread mClientThread;
-	
+	Thread											mClientThread;
+													
 	/**
 	 * The host name on which the websocket will be launched
 	 */
-	String mClientHost;
-	
+	String											mClientHost;
+													
 	/**
 	 * The register where all agents and their connections are registered
 	 */
-	HashMap<String, WebSocketMessagingComponent> mAgents;
-	
+	HashMap<String, WebSocketMessagingComponent>	mAgents;
+													
 	/** the logger */
-	UnitComponentExt log;
-	
+	UnitComponentExt								log;
+													
 	/**
 	 * Name of the unit for logging purposes
 	 */
-	protected final static String COMMUNICATION_UNIT = "websock";
-	
+	protected final static String					COMMUNICATION_UNIT	= "websock";
+																		
 	@Override
 	public String getName()
 	{
@@ -224,7 +224,8 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	 */
 	public void onMessage(String source, String target, String message)
 	{
-		if(message.indexOf("::mobility") > -1){
+		if(message.indexOf("::mobility") > -1)
+		{
 			System.out.println("Mobility message is on the platform");
 		}
 		
@@ -276,32 +277,36 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	}
 	
 	@Override
-	public void onAgentStateChanged(AgentManager agent) {
-		if (agent.isStopped()) {
-
+	public void onAgentStateChanged(AgentManager agent)
+	{
+		if(agent.isStopped())
+		{ // TODO and an indication of future movement exists from mobility component (with destination container name)
+			
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutput out = null;
-			try {
+			try
+			{
 				out = new ObjectOutputStream(bos);
 				out.writeObject(agent);
 				byte[] yourBytes = bos.toByteArray();
 				
 				InputComplexMessageTokenizer tok = new InputComplexMessageTokenizer(yourBytes);
 				
-				while(tok.hasMorePackages()){
+				while(tok.hasMorePackages())
+				{
 					mClient.mobilityPackage(tok.getNextPackage());
 				}
 				
-
 				System.out.println("!!!!!!!!!!!!Length: " + yourBytes.length);
-
-			} catch (Exception e) {
+				
+			} catch(Exception e)
+			{
 				System.out.println(e.getMessage());
 				e.printStackTrace();
 				System.out.println("Exception occured");
 			}
 		}
-
+		
 	}
 	
 }
