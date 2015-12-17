@@ -19,6 +19,8 @@ import tatami.core.agent.CompositeAgent;
 
 public class MobilityComponent extends AgentComponent
 {
+	public final String DESTINATION_PARAMETER = "mobility_destination";
+	
 	public MobilityComponent()
 	{
 		super(AgentComponentName.MOBILITY_COMPONENT);
@@ -33,26 +35,14 @@ public class MobilityComponent extends AgentComponent
 	
 	public String extractDestination(Object eventData)
 	{
-		return ((AgentEvent) eventData).getCustomMessage();
+		return ((AgentEvent) eventData).get(DESTINATION_PARAMETER);
 	}
 	
 	public boolean move(String nodeName)
 	{
 		getAgentLog().lf("===============================" + getAgentName());
-		AgentEvent event = (AgentEvent) new AgentEvent(AgentEventType.AGENT_STOP).add(CompositeAgent.TRANSIENT_EVENT_PARAMETER, null);
-		event.setCustomMessage(nodeName);
-		postAgentEvent(event);
+		postAgentEvent((AgentEvent) new AgentEvent(AgentEventType.AGENT_STOP)
+				.add(CompositeAgent.TRANSIENT_EVENT_PARAMETER, null).add(DESTINATION_PARAMETER, nodeName));
 		return true; // if it is most likely that the agent will move
 	}
-	
-	@Override
-	protected void atAgentStop(AgentEvent event)
-	{
-		super.atAgentStop(event);
-		
-		CompositeAgent agent = getParent(); // the agent to pack
-		
-		// ...
-	}
-	
 }

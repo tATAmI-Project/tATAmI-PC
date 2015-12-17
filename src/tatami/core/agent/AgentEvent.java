@@ -94,8 +94,6 @@ public class AgentEvent extends ParameterSet
 		}
 	}
 	
-	String mCustomMessage;
-	
 	/**
 	 * The sequence type of an agent event specifies the order in which components should be notified of the event.
 	 * 
@@ -178,13 +176,5 @@ public class AgentEvent extends ParameterSet
 	{
 		locked();
 		addObject(EVENT_TYPE_PARAMETER_NAME, eventType);
-	}
-	
-	public String getCustomMessage(){
-		return mCustomMessage;
-	}
-	
-	public void setCustomMessage(String customMessage){
-		mCustomMessage = customMessage;
 	}
 }

@@ -23,7 +23,6 @@ import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.AgentCreationData;
 import tatami.simulation.AgentLoader;
 import tatami.simulation.AgentManager;
-import tatami.simulation.IStateChangeListener;
 import tatami.simulation.PlatformLoader;
 
 /**
@@ -31,7 +30,7 @@ import tatami.simulation.PlatformLoader;
  * 
  * @author Andrei Olaru
  */
-public class CompositeAgentLoader implements AgentLoader, IStateChangeListener
+public class CompositeAgentLoader implements AgentLoader
 {
 	/**
 	 * Name of XML nodes in the scenario representing components.
@@ -176,14 +175,8 @@ public class CompositeAgentLoader implements AgentLoader, IStateChangeListener
 	{
 		System.out.println("=================================+++Load");
 		CompositeAgent agent = new CompositeAgent();
-		agent.addStateChangeListener(this);
 		for(Object componentObj : agentCreationData.getParameters().getObjects(COMPONENT_PARAMETER_NAME))
 			agent.addComponent((AgentComponent) componentObj);
 		return agent;
-	}
-
-	@Override
-	public void stateChanged(CompositeAgent agent) {
-		
 	}
 }

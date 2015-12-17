@@ -47,6 +47,14 @@ public interface AgentManager
 	public boolean isRunning();
 	
 	/**
+	 * Queries the agent to check if the agent is in a state of complete stop. From this state the agent can be started
+	 * again.
+	 * 
+	 * @return <code>true</code> if the agent is currently fully stopped.
+	 */
+	public boolean isStopped();
+	
+	/**
 	 * Creates a link from the agent to the platform, which will facilitate the invocation of specific platform
 	 * functionality. The passed instance may be the platform itself, or some agent-specific instance, depending on the
 	 * platform.
@@ -65,9 +73,4 @@ public interface AgentManager
 	 * @return the name of the agent.
 	 */
 	public String getAgentName();
-	
-	public void addStateChangeListener(IStateChangeListener listener);
-	
-	public void reconstructAgent(byte[] rawAgent);
-	
 }

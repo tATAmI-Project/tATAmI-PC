@@ -11,9 +11,6 @@
  ******************************************************************************/
 package tatami.websocket;
 
-import java.io.Serializable;
-import java.util.Timer;
-
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.messaging.MessagingComponent;

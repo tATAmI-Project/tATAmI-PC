@@ -12,7 +12,6 @@
 package tatami.simulation;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
-import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 
 /**
@@ -65,7 +64,7 @@ public interface PlatformLoader
 		 * The fully qualified name of the class to instantiate when starting the platform.
 		 */
 		private String	classN	= null;
-		
+								
 		/**
 		 * Creates a new platform type, giving it a name that is the lower case version of the enumeration value, and
 		 * setting a default class name, considering the platform name as the package name and also as a prefix to the
@@ -137,14 +136,20 @@ public interface PlatformLoader
 	 */
 	public static interface PlatformLink
 	{
-		// TODO
+		/**
+		 * The method should be called by an agent when a relevant change in the agent's state occurs, with respect to
+		 * the platform. This is especially meant to signal changes in the agent's running/stopped status.
+		 * 
+		 * @param agent - the calling {@link AgentManager} instance.
+		 */
+		public void onAgentStateChanged(AgentManager agent);
 	}
 	
 	/**
 	 * The default platform to use, if no other is specified.
 	 */
 	static final StandardPlatformType	DEFAULT_PLATFORM	= StandardPlatformType.DEFAULT;
-	
+															
 	/**
 	 * The name of the attribute containing the platform name in the XML file.
 	 */
@@ -153,7 +158,7 @@ public interface PlatformLoader
 	 * The name of the attribute containing the class path of the {@link PlatformLoader} class, in the XML file.
 	 */
 	static final String					CLASSPATH_ATTRIBUTE	= "classpath";
-	
+															
 	/**
 	 * @return the name of the platform loader, as used in the scenario file.
 	 */
@@ -227,9 +232,4 @@ public interface PlatformLoader
 	 * @return the name of the class of the recommended implementation.
 	 */
 	public String getRecommendedComponentClass(AgentComponentName componentName);
-	
-	public void setParent(AgentManager agent);
-	public AgentManager getParent();
-	
-	public void onAgentStateChenged(CompositeAgent agent);
 }

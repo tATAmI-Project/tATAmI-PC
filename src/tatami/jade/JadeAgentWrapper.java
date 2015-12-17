@@ -91,4 +91,10 @@ public class JadeAgentWrapper extends Agent implements PlatformLink
 			log.doExit();
 		doDelete();
 	}
+
+	@Override
+	public void onAgentStateChanged(AgentManager managedAgent)
+	{
+		// nothing to do
+	}
 }

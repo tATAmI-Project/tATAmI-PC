@@ -28,8 +28,6 @@ import tatami.core.agent.AgentEvent.AgentSequenceType;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.simulation.AgentManager;
-import tatami.simulation.IStateChangeListener;
-import tatami.simulation.PlatformLoader;
 import tatami.simulation.PlatformLoader.PlatformLink;
 
 /**
@@ -69,7 +67,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * 
 	 * @author Andrei Olaru
 	 */
-	public enum AgentState {
+	enum AgentState {
 		/**
 		 * State indicating that the agent is currently behaving normally and agent events are processed in good order.
 		 * All components are running.
@@ -115,7 +113,6 @@ public class CompositeAgent implements Serializable, AgentManager
 			boolean threadExit = false;
 			while(!threadExit)
 			{
-				// System.out.println("oops");
 				if((eventQueue != null) && eventQueue.isEmpty())
 					try
 					{
@@ -130,24 +127,25 @@ public class CompositeAgent implements Serializable, AgentManager
 				else
 				{
 					AgentEvent event = eventQueue.poll();
-					switch (event.getType().getSequenceType()) {
+//					log(event.toString());
+					switch(event.getType().getSequenceType())
+					{
 					case CONSTRUCTIVE:
 					case UNORDERED:
-						for (AgentComponent component : componentOrder)
+						for(AgentComponent component : componentOrder)
 							component.signalAgentEvent(event);
 						break;
-					case DESTRUCTIVE: {
-						for (ListIterator<AgentComponent> it = componentOrder.listIterator(componentOrder.size()); it
-								.hasPrevious();) {
+					case DESTRUCTIVE:
+					{
+						for(ListIterator<AgentComponent> it = componentOrder.listIterator(componentOrder.size()); it
+								.hasPrevious();)
+						{
 							it.previous().signalAgentEvent(event);
 						}
-						log("All events paused");
-
 					}
 					}
 					
 					threadExit = FSMEventOut(event.getType(), event.isSet(TRANSIENT_EVENT_PARAMETER));
-					//onAgentStops();
 				}
 			}
 		}
@@ -174,7 +172,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	/**
 	 * This can be used by platform-specific components to contact the platform.
 	 */
-	transient protected Object									platformLink				= null;
+	transient protected PlatformLink					platformLink				= null;
 																					
 	/**
 	 * The {@link Map} that links component names (functionalities) to standard component instances.
@@ -204,7 +202,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	/**
 	 * The thread managing the agent's lifecycle (managing events).
 	 */
-	transient protected Thread									agentThread					= null;
+	transient protected Thread							agentThread					= null;
 																					
 	/**
 	 * The agent state. See {@link AgentState}. Access to this member should be synchronized with the lock of
@@ -218,17 +216,13 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * does not exist, or if the name has not been set. This log should only be used by means of the
 	 * {@link #log(String, Object...)} method.
 	 */
-	transient protected UnitComponent								localLog					= (UnitComponent) new UnitComponent()
+	transient protected UnitComponent					localLog					= (UnitComponent) new UnitComponent()
 			.setLogLevel(Level.INFO);
 			
 	/**
 	 * This switch activates the use of the {@link #localLog}.
 	 */
 	protected boolean									USE_LOCAL_LOG				= true;
-	
-	
-	
-	IStateChangeListener mStateChangeListener;
 																					
 	/**
 	 * Starts the lifecycle of the agent. All components will receive an {@link AgentEventType#AGENT_START} event.
@@ -432,14 +426,16 @@ public class CompositeAgent implements Serializable, AgentManager
 	 */
 	protected boolean FSMEventOut(AgentEventType eventType, boolean toFromTransient)
 	{
+		boolean stateChanged = false;
 		switch(eventType)
 		{
 		case AGENT_START: // the agent has completed starting and all components are up.
 			synchronized(eventQueue)
 			{
 				agentState = AgentState.RUNNING;
-				log("state is now ", agentState);
+				stateChanged = true;
 			}
+			log("state is now ", agentState);
 			break;
 		case AGENT_STOP:
 			synchronized(eventQueue)
@@ -453,17 +449,19 @@ public class CompositeAgent implements Serializable, AgentManager
 					agentState = AgentState.TRANSIENT;
 				else
 					agentState = AgentState.STOPPED;
-				log("state is now ", agentState);
+				stateChanged = true;
 			}
+			log("state is now ", agentState);
 			eventQueue = null;
 			localLog.doExit();
-			mStateChangeListener.stateChanged(this);
-			((PlatformLoader)getPlatformLink()).onAgentStateChenged(this);
-			return true;
+			break;
 		default:
 			// do nothing
 		}
-		return false;
+		if(stateChanged)
+			getPlatformLink().onAgentStateChanged(this);
+		// if the agent is now stopped (or transient) the agent thread can exit.
+		return isStopped();
 	}
 	
 	/**
@@ -572,7 +570,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * 
 	 * @return the platform link.
 	 */
-	protected Object getPlatformLink()
+	protected PlatformLink getPlatformLink()
 	{
 		return platformLink;
 	}
@@ -610,9 +608,10 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * 
 	 * @return <code>true</code> if the agent is currently <code>STOPPED</code>; <code>false</code> otherwise.
 	 */
+	@Override
 	public boolean isStopped()
 	{
-		return agentState == AgentState.STOPPED;
+		return agentState == AgentState.STOPPED || agentState == AgentState.TRANSIENT;
 	}
 	
 	/**
@@ -667,21 +666,5 @@ public class CompositeAgent implements Serializable, AgentManager
 			}
 			localLog.li(message, arguments);
 		}
-	}
-	
-	public AgentState getAgentState(){
-		return agentState;
-	}
-
-	@Override
-	public void addStateChangeListener(IStateChangeListener listener) {
-		mStateChangeListener = listener;
-		System.out.println("Listener added");
-	}
-
-	@Override
-	public void reconstructAgent(byte[] rawAgent) {
-		// TODO Auto-generated method stub
-		
 	}
 }

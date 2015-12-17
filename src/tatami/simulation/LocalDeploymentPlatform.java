@@ -231,4 +231,10 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 	{
 		return StandardPlatformType.LOCAL.toString();
 	}
+
+	@Override
+	public void onAgentStateChanged(AgentManager agent)
+	{
+		// nothing to do
+	}
 }

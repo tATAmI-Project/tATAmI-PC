@@ -11,10 +11,8 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import tatami.core.agent.CompositeAgent;
-import tatami.core.agent.AgentComponent.AgentComponentName;
-import tatami.core.agent.CompositeAgent.AgentState;
 import net.xqhs.util.XML.XMLTree.XMLNode;
+import tatami.core.agent.AgentComponent.AgentComponentName;
 
 /**
  * THe default platform for running agents. It is a minimal platform, offering no facilities.
@@ -78,22 +76,5 @@ public class DefaultPlatform implements PlatformLoader
 	public String getRecommendedComponentClass(AgentComponentName componentName)
 	{
 		return null;
-	}
-
-	@Override
-	public void setParent(AgentManager agent) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public AgentManager getParent() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void onAgentStateChenged(CompositeAgent agent) {
-		
-		
 	}
 }

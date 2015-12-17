@@ -14,7 +14,6 @@ package tatami.jade;
 import java.lang.reflect.InvocationTargetException;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
-import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.jade.JadeInterface.JadeConfig;
@@ -152,23 +151,5 @@ public class JadePlatformLoader implements PlatformLoader
 			break;
 		}
 		return null;
-	}
-
-	@Override
-	public void setParent(AgentManager agent) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public AgentManager getParent() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void onAgentStateChenged(CompositeAgent agent) {
-		// TODO Auto-generated method stub
-		
 	}
 }

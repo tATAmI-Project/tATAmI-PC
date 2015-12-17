@@ -206,12 +206,6 @@ public class SimulationManager implements AgentManager
 		else
 			events = Collections.emptyList();
 		// TODO: add agent graph and corresponding representation
-		
-		
-		
-		for(Entry<String, PlatformLoader> platformLoader : platforms.entrySet()){
-			platformLoader.getValue().setParent(this);
-		}
 	}
 	
 	@Override
@@ -612,7 +606,15 @@ public class SimulationManager implements AgentManager
 	@Override
 	public boolean isRunning()
 	{
+		// TODO check if this makes sense
 		return true;
+	}
+	
+	@Override
+	public boolean isStopped()
+	{
+		// TODO check if this makes sense
+		return false;
 	}
 	
 	/**
@@ -623,16 +625,4 @@ public class SimulationManager implements AgentManager
 	{
 		return null;
 	}
-
-	@Override
-	public void addStateChangeListener(IStateChangeListener listener) {
-		
-		
-	}
-	
-	public void reconstructAgent(byte[] rawAgent){
-		
-	}
-	
-	
 }
