@@ -1,16 +1,23 @@
 package scenario.dev.mobility;
 
+import java.io.Serializable;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.Logger;
+import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponent;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.CompositeAgent;
 
+
+/**
+ * 
+ * @author Yonutix
+ *
+ */
 public class StateAgentTestComponent extends AgentComponent {
 
 	/**
@@ -30,29 +37,59 @@ public class StateAgentTestComponent extends AgentComponent {
 	/**
 	 * Timer for pinging.
 	 */
-	Timer pingTimer = null;
+	transient Timer pingTimer = null;
 
 	/**
 	 * The log.
 	 */
-	UnitComponent locallog = null;
+	transient UnitComponent locallog = null;
 
 	/**
 	 * Cache for the name of this agent.
 	 */
 	String thisAgent = null;
 
+	/**
+	 * 
+	 */
 	int mSubject;
 
-	class MakeStep extends TimerTask {
+	/**
+	 * 
+	 * @author Yonutix
+	 *
+	 */
+	class MakeStep extends TimerTask implements Serializable{
+		
+		
+		/**
+		 * 
+		 */
+		StateAgentTestComponent mParent;
+		
+		/**
+		 * 
+		 * @param parent The parent of this object
+		 */
+		public MakeStep(StateAgentTestComponent parent){
+			mParent = parent;
+		}
 
 		@Override
 		public void run() {
 			mSubject++;
 			getAgentLog().lf("Incremented ", mSubject);
+			//Time to move
+			if( mSubject == 10){
+				mParent.move("There");
+			}
+			
 		}
 	}
 
+	/**
+	 * 
+	 */
 	public StateAgentTestComponent() {
 		super(AgentComponentName.TESTING_COMPONENT);
 	}
@@ -103,19 +140,36 @@ public class StateAgentTestComponent extends AgentComponent {
 
 		Random r = new Random();
 
-		mSubject = r.nextInt() % 10;
+		mSubject = 8; //r.nextInt() % 10;
+		
+		mActive = true;
 	}
 
 	@Override
 	protected void atSimulationStart(AgentEvent event) {
 		super.atSimulationStart(event);
-		System.out.println("here");
-		pingTimer.schedule(new MakeStep(), PING_INITIAL_DELAY, PING_PERIOD);
+		pingTimer.schedule(new MakeStep(this), PING_INITIAL_DELAY, PING_PERIOD);
 	}
 
 	@Override
 	protected void atAgentStop(AgentEvent event) {
+		//AgentEvent event = new AgentEvent(AgentEventType.BEFORE_MOVE);
 		super.atAgentStop(event);
 		pingTimer.cancel();
+		getAgentLog().lf("atAgentStop ");
 	}
+//	
+//	@Override
+//	protected void atBeforeAgentMove(AgentEvent event)
+//	{
+//		pingTimer.cancel();
+//		mActive = false;
+//	}
+//	
+//	@Override
+//	protected void atAfterAgentMove(AgentEvent event)
+//	{
+//		pingTimer = new Timer();
+//		pingTimer.schedule(new MakeStep(this), PING_INITIAL_DELAY, PING_PERIOD);
+//	}
 }
