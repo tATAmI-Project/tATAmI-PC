@@ -55,9 +55,29 @@ public class OutputComplexMessageTokenizer {
 			finalBuffer += buffer.get(i);
 		}
 		
+		System.out.println(finalBuffer);
+		System.out.println(finalBuffer.length());
+		
+		ArrayList<Byte> bytes = new ArrayList<Byte>();
+		
+		while(finalBuffer.length() > 0){
+			int byteSize = Integer.valueOf(finalBuffer.substring(0, 1));
+			
+			byte b = Byte.valueOf(finalBuffer.substring(1, 1 + byteSize));
+			
+			bytes.add(b);
+		}
+		
+
+		
+		byte[] result = new byte[bytes.size()];
+		
+		for(int i = 0; i < bytes.size(); ++i){
+			result[i] = bytes.get(i);
+		}
 		
 		
-		return null;
+		return result;
 		
 	}
 }

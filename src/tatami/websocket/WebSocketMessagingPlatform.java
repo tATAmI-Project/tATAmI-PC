@@ -14,8 +14,10 @@ package tatami.websocket;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import main.java.org.java_websocket.WebSocketImpl;
@@ -88,6 +90,9 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 													
 	/** the logger */
 	UnitComponentExt								log;
+	
+	
+	ArrayList<OutputComplexMessageTokenizer> mAgentsbuffer;
 													
 	/**
 	 * Name of the unit for logging purposes
@@ -111,6 +116,8 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	@Override
 	public WebSocketMessagingPlatform setConfig(XMLNode configuration, BootSettingsManager settings)
 	{
+		mAgentsbuffer = new ArrayList<OutputComplexMessageTokenizer>();
+		mAgentsbuffer.add(new OutputComplexMessageTokenizer());
 		
 		log = (UnitComponentExt) new UnitComponentExt().setUnitName(COMMUNICATION_UNIT).setLogLevel(Level.ALL);
 		
@@ -207,6 +214,17 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 		}
 	}
 	
+	public String getIP() {
+		String ip = "";
+
+		try {
+			ip = InetAddress.getLocalHost().getHostAddress();
+		} catch (Exception e) {
+
+		}
+		return ip;
+	}
+	
 	@Override
 	public boolean addContainer(String containerName)
 	{
@@ -224,15 +242,21 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	 */
 	public void onMessage(String source, String target, String message)
 	{
-		if(message.indexOf("::mobility") > -1)
-		{
-			System.out.println("Mobility message is on the platform");
-		}
-		
 		String currentTarget = (target.indexOf("/") > 0) ? target.substring(0, target.indexOf("/")) : target;
 		mAgents.get(currentTarget).onMessage(source, target, message);
 	}
 	
+	public void onMobilityPackReceived(String content){
+		mAgentsbuffer.get(0).addNewMessage(content);
+		if(mAgentsbuffer.get(0).allMessagereceived()){
+			//System.out.println("All messages received?!?!?!?!?!?!");
+			
+			byte[] x = mAgentsbuffer.get(0).returnObj();
+		}
+		else{
+			//System.out.println("All messages not received yet?!?!?!?!?!?!");
+		}
+	}
 	/**
 	 * Method called from inside the agents, when agents are loaded on the platform.
 	 * 

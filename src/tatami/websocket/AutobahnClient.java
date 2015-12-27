@@ -29,6 +29,7 @@ public class AutobahnClient extends WebSocketClient
 	 * The map between the agent names and their corresponding server references
 	 */
 	HashMap<String, WebSocketMessagingPlatform> pltformRouting;
+	HashMap<String, WebSocketMessagingPlatform> nodeMapping;
 	
 	
 	/**
@@ -44,6 +45,7 @@ public class AutobahnClient extends WebSocketClient
 	{
 		super(uriAddress, d);
 		pltformRouting = new HashMap<String, WebSocketMessagingPlatform>();
+		nodeMapping = new HashMap<String, WebSocketMessagingPlatform>();
 	}
 	
 	/**
@@ -66,6 +68,13 @@ public class AutobahnClient extends WebSocketClient
 	public void registerPlatform(WebSocketMessagingPlatform platform, String agentName)
 	{
 		pltformRouting.put(agentName, platform);
+		String nodeName = platform.getIP();
+		
+		
+		if(!nodeMapping.containsKey(nodeName)){
+			System.out.println("!!!!!!!!!!!!!!!!! IP: " + nodeName);
+			nodeMapping.put(nodeName, platform);
+		}
 	}
 	
 	/**
@@ -81,7 +90,7 @@ public class AutobahnClient extends WebSocketClient
 	}
 	
 	public void mobilityPackage(String pack){
-		String message = "::" + "mobility" + "::" + "127.0.0.1" + "::" + pack;
+		String message = "::" + "mobility" + "::" + "192.168.147.1" + "::" + pack;
 		send(message);
 	}
 	
@@ -96,7 +105,11 @@ public class AutobahnClient extends WebSocketClient
 
 			String destination = message.substring(12, message.lastIndexOf("::"));
 			
-			System.out.println("Mobility message received, detination: " + destination);
+//			/System.out.println("Mobility message received, detination: " + destination);
+			
+			String content = message.substring(message.lastIndexOf("::") + 2);
+			
+			nodeMapping.get(destination).onMobilityPackReceived(content);
 			return;
 		}
 		/* Forward the message to the platform */

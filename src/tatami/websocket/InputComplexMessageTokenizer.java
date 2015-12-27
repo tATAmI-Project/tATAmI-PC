@@ -21,20 +21,21 @@ public class InputComplexMessageTokenizer{
 	public InputComplexMessageTokenizer(byte[] rawObject){
 		String rawString  = getByteArrayAsString(rawObject);
 		packs = new ArrayList<String>();
-		
-		//int index = 0;
+		System.out.println(rawString);
+		System.out.println(rawString.length());
 		
 		while(rawString.length() > 0){
 			//A - source, B - target
 			packs.add(rawString.substring(0, Math.min(BATCH_SIZE, rawString.length())));
-			index ++;
-			
 			if(rawString.length() <= BATCH_SIZE)
 				break;
-			rawString = rawString.substring(BATCH_SIZE+1);
+			rawString = rawString.substring(BATCH_SIZE);
 		}
 		
 		mCount = packs.size();
+		
+		System.out.println("Message splited into " + mCount);
+		
 	}
 	
 	private String getByteAsString(byte x){
@@ -43,9 +44,9 @@ public class InputComplexMessageTokenizer{
 	}
 	
 	private String getByteArrayAsString(byte[] raw){
-		String out = "*";
+		String out = "";
 		for(int i = 0; i < raw.length; ++i){
-			out += getByteAsString(raw[i]) + "*";
+			out += getByteAsString(raw[i]);
 		}
 		return out;
 	}
@@ -58,7 +59,6 @@ public class InputComplexMessageTokenizer{
 	}
 	
 	public boolean hasMorePackages(){
-		System.out.println("Has more packages");
 		return index < mCount;
 	}
 }
