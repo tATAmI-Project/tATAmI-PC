@@ -486,6 +486,10 @@ public abstract class AgentComponent implements Serializable
 		// this class does not do anything here.
 	}
 	
+	protected void atAgentResume(AgentEvent event){
+		
+	}
+	
 	/**
 	 * Setter for the parent of the agent. If an agent instance is already a parent of this component,
 	 * <code>removeParent</code> must be called first.

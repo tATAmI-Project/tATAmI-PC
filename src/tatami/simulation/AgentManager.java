@@ -73,4 +73,6 @@ public interface AgentManager
 	 * @return the name of the agent.
 	 */
 	public String getAgentName();
+	
+	public void resume();
 }

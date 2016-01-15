@@ -161,6 +161,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		}
 		else
 		{ // setup additional GUI configuration
+			System.out.println("Agent name: " + getAgentName() + " " + guiConfig);
 			guiConfig.setWindowName(getAgentName());
 			if(getComponentData().isSet(WINDOW_TYPE_PARAMETER_NAME))
 				guiConfig.setWindowType(getComponentData().get(WINDOW_TYPE_PARAMETER_NAME));
@@ -489,5 +490,14 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 	{
 		super.postAgentEvent(event);
 	}
+	
+	protected void atAgentResume(AgentEvent event) {
+		guiConfig = new AgentGuiConfig();
+		
+		resetVisualization();
+		registerMessageHandlers();
+		mActive = true;
+	}
+	
 	
 }

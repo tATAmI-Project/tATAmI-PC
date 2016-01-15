@@ -113,10 +113,9 @@ public class AutobahnServer extends WebSocketServer
 			return;
 		}
 		
-		if(message.indexOf("::mobility") == 0)
-		{
-			String destination = message.substring(12, message.lastIndexOf("::"));
-			
+		if(message.indexOf("::mobility") == 0){
+			String destination = "127.0.0.1"; //message.substring(12, message.lastIndexOf("::"));
+			System.out.println("REGISTER" + ipRegistry);
 			if(ipRegistry.containsKey(destination)){
 				ipRegistry.get(destination).send(message);
 			}

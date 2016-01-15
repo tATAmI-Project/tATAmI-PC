@@ -232,6 +232,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	@Override
 	public boolean start()
 	{
+		
 		return postAgentEvent(new AgentEvent(AgentEventType.AGENT_START));
 	}
 	
@@ -665,6 +666,18 @@ public class CompositeAgent implements Serializable, AgentManager
 					localLog.setUnitName(super.toString().replace(getClass().getName(), "CompAg") + "#");
 			}
 			localLog.li(message, arguments);
+		}
+	}
+	
+	public void resume(){
+		eventQueue = new LinkedBlockingQueue<AgentEvent>();
+		agentThread = new Thread(new AgentThread());
+		agentThread.start();
+		System.out.println("Composite agent started " + componentOrder.size());
+		for(AgentComponent ac: componentOrder){
+			ac.atAgentResume(new AgentEvent(AgentEventType.AGENT_START));
+			ac.setParent(this);
+			
 		}
 	}
 }

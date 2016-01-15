@@ -31,6 +31,7 @@ import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent.AgentComponentName;
+import tatami.core.agent.CompositeAgent;
 import tatami.simulation.AgentManager;
 import tatami.simulation.BootSettingsManager;
 import tatami.simulation.PlatformLoader;
@@ -264,12 +265,13 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 			AgentManager agent = null;
 			
 			try {
-				System.out.println("a");
 				in = new ObjectInputStream(bis);
-				System.out.println("b");
+
 				Object o = in.readObject();
-				System.out.println("c");
-				agent = (AgentManager)o;
+
+				agent = (AgentManager) o;
+				
+				
 
 				bis.close();
 				in.close();
@@ -281,6 +283,13 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 			
 			if(loadAgent("Container", agent)){
 				System.out.println("Agent loaded successfully" + agent.getAgentName());
+				
+				
+				CompositeAgent tmpAgent = (CompositeAgent) agent;
+				tmpAgent.resume();
+				
+				
+				System.out.println();
 			}
 		}
 		else{

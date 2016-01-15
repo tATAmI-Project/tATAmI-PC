@@ -167,10 +167,9 @@ public class StateAgentTestComponent extends AgentComponent {
 //		mActive = false;
 //	}
 //	
-//	@Override
-//	protected void atAfterAgentMove(AgentEvent event)
-//	{
-//		pingTimer = new Timer();
-//		pingTimer.schedule(new MakeStep(this), PING_INITIAL_DELAY, PING_PERIOD);
-//	}
+
+	protected void atAgentResume(AgentEvent event) {
+		pingTimer = new Timer();
+		pingTimer.schedule(new MakeStep(this), PING_INITIAL_DELAY, PING_PERIOD);
+	}
 }

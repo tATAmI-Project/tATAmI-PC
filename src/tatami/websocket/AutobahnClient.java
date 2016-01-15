@@ -90,7 +90,7 @@ public class AutobahnClient extends WebSocketClient
 	}
 	
 	public void mobilityPackage(String pack){
-		String message = "::" + "mobility" + "::" + "192.168.235.1" + "::" + pack;
+		String message = "::" + "mobility" + "::" + nodeMapping.keySet().toArray()[0] + "::" + pack;
 		send(message);
 	}
 	
@@ -108,6 +108,8 @@ public class AutobahnClient extends WebSocketClient
 //			/System.out.println("Mobility message received, detination: " + destination);
 			
 			String content = message.substring(message.lastIndexOf("::") + 2);
+			
+			System.out.println("Destination::::::::: " + nodeMapping);
 			
 			nodeMapping.get(destination).onMobilityPackReceived(content);
 			return;
