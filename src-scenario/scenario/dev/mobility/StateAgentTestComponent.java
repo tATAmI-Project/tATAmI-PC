@@ -131,6 +131,7 @@ public class StateAgentTestComponent extends AgentComponent {
 	@Override
 	protected void atAgentStart(AgentEvent event) {
 		super.atAgentStart(event);
+		System.out.println("Agent started");
 
 		if (getParent() != null) {
 			thisAgent = getAgentName();

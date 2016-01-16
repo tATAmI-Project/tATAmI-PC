@@ -11,7 +11,11 @@
  ******************************************************************************/
 package tatami.websocket;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
@@ -247,11 +251,37 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	}
 	
 	public void onMobilityPackReceived(String content){
+		
 		mAgentsbuffer.get(0).addNewMessage(content);
 		if(mAgentsbuffer.get(0).allMessagereceived()){
-			//System.out.println("All messages received?!?!?!?!?!?!");
+			System.out.println("All messages received?!?!?!?!?!?!");
 			
 			byte[] x = mAgentsbuffer.get(0).returnObj();
+			System.out.println("x");
+			ByteArrayInputStream bis = new ByteArrayInputStream(x);
+			System.out.println("y");
+			ObjectInput in = null;
+			AgentManager agent = null;
+			
+			try {
+				System.out.println("a");
+				in = new ObjectInputStream(bis);
+				System.out.println("b");
+				Object o = in.readObject();
+				System.out.println("c");
+				agent = (AgentManager)o;
+
+				bis.close();
+				in.close();
+			} catch (Exception e) {
+				System.out.println("Agent deserialization failed");
+			}
+			
+			System.out.println("Before loading");
+			
+			if(loadAgent("Container", agent)){
+				System.out.println("Agent loaded successfully" + agent.getAgentName());
+			}
 		}
 		else{
 			//System.out.println("All messages not received yet?!?!?!?!?!?!");
@@ -281,6 +311,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	@Override
 	public boolean loadAgent(String containerName, AgentManager agentManager)
 	{
+		System.out.println("^^^^^^^^^^^^^^ " + containerName);
 		agentManager.setPlatformLink(this);
 		mClient.registerPlatform(this, agentManager.getAgentName());
 		mClient.newAgentNotification(agentManager.getAgentName());

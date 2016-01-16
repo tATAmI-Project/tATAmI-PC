@@ -59,12 +59,13 @@ public class OutputComplexMessageTokenizer {
 		System.out.println(finalBuffer.length());
 		
 		ArrayList<Byte> bytes = new ArrayList<Byte>();
-		
+		System.out.println("a");
 		while(finalBuffer.length() > 0){
 			int byteSize = Integer.valueOf(finalBuffer.substring(0, 1));
 			
-			byte b = Byte.valueOf(finalBuffer.substring(1, 1 + byteSize));
 			
+			byte b = Byte.valueOf(finalBuffer.substring(1, 1 + byteSize));
+			finalBuffer = finalBuffer.substring(1 + byteSize);
 			bytes.add(b);
 		}
 		
