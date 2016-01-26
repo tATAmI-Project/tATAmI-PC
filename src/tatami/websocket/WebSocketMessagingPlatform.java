@@ -13,7 +13,6 @@ package tatami.websocket;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
@@ -320,10 +319,16 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	@Override
 	public boolean loadAgent(String containerName, AgentManager agentManager)
 	{
+		StackTraceElement[] ste = Thread.currentThread().getStackTrace();
+		for(StackTraceElement st: ste){
+			System.out.println(st);
+		}
+		
+		
 		System.out.println("^^^^^^^^^^^^^^ " + containerName);
 		agentManager.setPlatformLink(this);
 		mClient.registerPlatform(this, agentManager.getAgentName());
-		mClient.newAgentNotification(agentManager.getAgentName());
+		mClient.newAgentNotification(agentManager.getAgentName(), containerName);
 		return true;
 	}
 	

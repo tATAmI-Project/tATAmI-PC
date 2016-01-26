@@ -68,7 +68,7 @@ public class AutobahnClient extends WebSocketClient
 	public void registerPlatform(WebSocketMessagingPlatform platform, String agentName)
 	{
 		pltformRouting.put(agentName, platform);
-		String nodeName = platform.getIP();
+		String nodeName = "172.16.2.67";
 		
 		
 		if(!nodeMapping.containsKey(nodeName)){
@@ -83,14 +83,17 @@ public class AutobahnClient extends WebSocketClient
 	 * @param agentName
 	 *            The agent name that will be registered
 	 */
-	public void newAgentNotification(String agentName)
+	public void newAgentNotification(String agentName, String container)
 	{
 		String message = "::" + "internal" + "::" + agentName;
+		System.out.println(message);
 		send(message);
+		String containerMessage = "::" + "container" + "::" + container;
+		send(containerMessage);
 	}
 	
 	public void mobilityPackage(String pack){
-		String message = "::" + "mobility" + "::" + nodeMapping.keySet().toArray()[0] + "::" + pack;
+		String message = "::" + "mobility" + "::" + "172.16.2.67" + "::" + pack;
 		send(message);
 	}
 	

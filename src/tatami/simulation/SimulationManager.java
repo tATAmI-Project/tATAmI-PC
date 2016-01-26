@@ -432,7 +432,7 @@ public class SimulationManager implements AgentManager
 			if(msg != null)
 			{
 				SimulationLinkAgent agent = new SimulationLinkAgent(SIMULATION_AGENT_NAME_PREFIX + platformName, msg);
-				if(!platform.loadAgent(null, agent))
+				if(!platform.loadAgent("Neutral", agent))
 				{
 					log.error("Loading simulation agent on platform [" + platformName
 							+ "] failed. Simulation cannot start.");
@@ -624,5 +624,11 @@ public class SimulationManager implements AgentManager
 	public String getAgentName()
 	{
 		return null;
+	}
+
+	@Override
+	public void resume() {
+		// TODO Auto-generated method stub
+		
 	}
 }

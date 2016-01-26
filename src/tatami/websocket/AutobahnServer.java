@@ -37,7 +37,7 @@ public class AutobahnServer extends WebSocketServer
 	 */
 	private HashMap<String, WebSocket> registry;
 	
-	private HashMap<String, WebSocket> ipRegistry;
+	private HashMap<String, WebSocket> containersRegistry;
 	
 	/**
 	 * 
@@ -53,7 +53,7 @@ public class AutobahnServer extends WebSocketServer
 	{
 		super(new InetSocketAddress(port), Collections.singletonList(d));
 		registry = new HashMap<String, WebSocket>();
-		ipRegistry = new HashMap<String, WebSocket>();
+		containersRegistry = new HashMap<String, WebSocket>();
 	}
 	
 	/**
@@ -70,7 +70,7 @@ public class AutobahnServer extends WebSocketServer
 	{
 		super(address, Collections.singletonList(d));
 		registry = new HashMap<String, WebSocket>();
-		ipRegistry = new HashMap<String, WebSocket>();
+		containersRegistry = new HashMap<String, WebSocket>();
 	}
 	
 	/**
@@ -103,31 +103,29 @@ public class AutobahnServer extends WebSocketServer
 		{
 			String agentName = message.substring(message.lastIndexOf("::") + 2, message.length());
 			registry.put(agentName, conn);
-			
-			String ipAddr = conn.getRemoteSocketAddress().getAddress().toString().substring(1);
-			
-			if(!ipRegistry.containsKey(ipAddr)){
-				ipRegistry.put(ipAddr, conn);
-				System.out.println(ipAddr + " Registered!!!");
+			return;
+		}
+		if(message.indexOf("::container") == 0){
+			String containerName = message.substring(message.lastIndexOf("::") + 2, message.length());
+			if(!containersRegistry.containsKey(containerName)){
+				containersRegistry.put(containerName, conn);
+				System.out.println("Container " + containerName + " rgistered");
 			}
+			
 			return;
 		}
 		
 		if(message.indexOf("::mobility") == 0){
-			String destination = "127.0.0.1"; //message.substring(12, message.lastIndexOf("::"));
-			System.out.println("REGISTER" + ipRegistry);
-			if(ipRegistry.containsKey(destination)){
-				ipRegistry.get(destination).send(message);
+			String destination = message.substring(12, message.lastIndexOf("::"));
+			System.out.println("Try to send to: " + destination);
+			if(containersRegistry.containsKey(destination)){
+				containersRegistry.get(destination).send(message);
 			}
 			else{
-				//System.out.println("No " + destination + " !!!!!!!!!!!!!!!!!!!");
-				
 				System.out.println("No |" + destination + "| !!!!!!!!!!!!!!!!!!!");
 			}
 			return;
 		}
-		
-		System.out.println(message);
 		
 		String target = message.split("::")[1];
 		String currentTarget = (target.indexOf("/") > 0) ? target.substring(0, target.indexOf("/")) : target;
