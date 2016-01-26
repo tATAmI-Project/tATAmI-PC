@@ -29,7 +29,6 @@ public class AutobahnClient extends WebSocketClient
 	 * The map between the agent names and their corresponding server references
 	 */
 	HashMap<String, WebSocketMessagingPlatform> pltformRouting;
-	HashMap<String, WebSocketMessagingPlatform> nodeMapping;
 	
 	
 	/**
@@ -45,7 +44,6 @@ public class AutobahnClient extends WebSocketClient
 	{
 		super(uriAddress, d);
 		pltformRouting = new HashMap<String, WebSocketMessagingPlatform>();
-		nodeMapping = new HashMap<String, WebSocketMessagingPlatform>();
 	}
 	
 	/**
@@ -68,13 +66,6 @@ public class AutobahnClient extends WebSocketClient
 	public void registerPlatform(WebSocketMessagingPlatform platform, String agentName)
 	{
 		pltformRouting.put(agentName, platform);
-		String nodeName = "172.16.2.67";
-		
-		
-		if(!nodeMapping.containsKey(nodeName)){
-			System.out.println("!!!!!!!!!!!!!!!!! IP: " + nodeName);
-			nodeMapping.put(nodeName, platform);
-		}
 	}
 	
 	/**
@@ -112,9 +103,11 @@ public class AutobahnClient extends WebSocketClient
 			
 			String content = message.substring(message.lastIndexOf("::") + 2);
 			
-			System.out.println("Destination::::::::: " + nodeMapping);
+			for(WebSocketMessagingPlatform platform: pltformRouting.values()){
+				platform.onMobilityPackReceived(content);
+			}
 			
-			nodeMapping.get(destination).onMobilityPackReceived(content);
+			
 			return;
 		}
 		/* Forward the message to the platform */
