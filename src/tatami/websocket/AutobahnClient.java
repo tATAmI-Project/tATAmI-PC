@@ -92,7 +92,7 @@ public class AutobahnClient extends WebSocketClient
 		send(containerMessage);
 	}
 	
-	public void mobilityPackage(String pack){
+	public void mobilityPackage(String destination, String pack){
 		String message = "::" + "mobility" + "::" + "172.16.2.67" + "::" + pack;
 		send(message);
 	}

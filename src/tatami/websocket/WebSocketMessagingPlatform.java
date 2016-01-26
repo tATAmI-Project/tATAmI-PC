@@ -30,7 +30,9 @@ import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent.AgentComponentName;
+import tatami.core.agent.AgentEvent;
 import tatami.core.agent.CompositeAgent;
+import tatami.core.agent.mobility.MobilityComponent;
 import tatami.simulation.AgentManager;
 import tatami.simulation.BootSettingsManager;
 import tatami.simulation.PlatformLoader;
@@ -346,8 +348,9 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	}
 	
 	@Override
-	public void onAgentStateChanged(AgentManager agent)
+	public void onAgentStateChanged(AgentEvent event, AgentManager agent)
 	{
+		//event.getValue(MobilityComponent.DESTINATION_PARAMETER)
 		if(agent.isStopped())
 		{ // TODO and an indication of future movement exists from mobility component (with destination container name)
 			
@@ -363,7 +366,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 				
 				while(tok.hasMorePackages())
 				{
-					mClient.mobilityPackage(tok.getNextPackage());
+					mClient.mobilityPackage(event.getValue(MobilityComponent.DESTINATION_PARAMETER), tok.getNextPackage());
 				}
 				
 				System.out.println("!!!!!!!!!!!!Length: " + yourBytes.length);
@@ -375,6 +378,12 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 				System.out.println("Exception occured");
 			}
 		}
+		
+	}
+
+	@Override
+	public void onAgentStateChanged(AgentManager agent) {
+		// TODO Auto-generated method stub
 		
 	}
 	

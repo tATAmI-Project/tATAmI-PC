@@ -81,7 +81,7 @@ public class StateAgentTestComponent extends AgentComponent {
 			getAgentLog().lf("Incremented ", mSubject);
 			//Time to move
 			if( mSubject == 10){
-				mParent.move("There");
+				mParent.move("OtherContainer");
 			}
 			
 		}

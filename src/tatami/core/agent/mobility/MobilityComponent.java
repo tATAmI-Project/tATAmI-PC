@@ -19,7 +19,7 @@ import tatami.core.agent.CompositeAgent;
 
 public class MobilityComponent extends AgentComponent
 {
-	public final String DESTINATION_PARAMETER = "mobility_destination";
+	public static final String DESTINATION_PARAMETER = "mobility_destination";
 	
 	public MobilityComponent()
 	{

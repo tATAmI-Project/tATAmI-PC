@@ -13,6 +13,7 @@ package tatami.simulation;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import tatami.core.agent.AgentComponent.AgentComponentName;
+import tatami.core.agent.AgentEvent;
 
 /**
  * The platform loader is the interface to the manager of an agent platform. It can load and manage agents. Agents are
@@ -142,7 +143,10 @@ public interface PlatformLoader
 		 * 
 		 * @param agent - the calling {@link AgentManager} instance.
 		 */
+		
 		public void onAgentStateChanged(AgentManager agent);
+		
+		public void onAgentStateChanged(AgentEvent event, AgentManager agent);
 	}
 	
 	/**

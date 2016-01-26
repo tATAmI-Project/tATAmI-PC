@@ -237,4 +237,10 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 	{
 		// nothing to do
 	}
+
+	@Override
+	public void onAgentStateChanged(AgentEvent event, AgentManager agent) {
+		// TODO Auto-generated method stub
+		
+	}
 }

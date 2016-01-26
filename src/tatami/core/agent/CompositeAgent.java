@@ -25,6 +25,7 @@ import net.xqhs.util.logging.UnitComponent;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.AgentEvent.AgentSequenceType;
+import tatami.core.agent.mobility.MobilityComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.simulation.AgentManager;
@@ -145,7 +146,7 @@ public class CompositeAgent implements Serializable, AgentManager
 					}
 					}
 					
-					threadExit = FSMEventOut(event.getType(), event.isSet(TRANSIENT_EVENT_PARAMETER));
+					threadExit = FSMEventOut(event, event.isSet(TRANSIENT_EVENT_PARAMETER));
 				}
 			}
 		}
@@ -425,10 +426,10 @@ public class CompositeAgent implements Serializable, AgentManager
 	 *            - <code>true</code> if the agent should enter / exit from the {@link AgentState#TRANSIENT} state.
 	 * @return <code>true</code> if the agent thread should exit.
 	 */
-	protected boolean FSMEventOut(AgentEventType eventType, boolean toFromTransient)
+	protected boolean FSMEventOut(AgentEvent event, boolean toFromTransient)
 	{
 		boolean stateChanged = false;
-		switch(eventType)
+		switch(event.getType())
 		{
 		case AGENT_START: // the agent has completed starting and all components are up.
 			synchronized(eventQueue)
@@ -460,7 +461,7 @@ public class CompositeAgent implements Serializable, AgentManager
 			// do nothing
 		}
 		if(stateChanged)
-			getPlatformLink().onAgentStateChanged(this);
+			getPlatformLink().onAgentStateChanged(event,this);
 		// if the agent is now stopped (or transient) the agent thread can exit.
 		return isStopped();
 	}
