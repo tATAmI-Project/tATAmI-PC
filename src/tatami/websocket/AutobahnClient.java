@@ -82,7 +82,14 @@ public class AutobahnClient extends WebSocketClient
 	
 	public void newContainerNotification(String container){
 		String containerMessage = "::" + "container" + "::" + container;
-		send(containerMessage);
+		
+		try{
+			send(containerMessage);
+		}
+		catch(Exception e){
+			System.out.println("sssssssssssssssss " + e.getMessage());
+		}
+		
 	}
 	
 	public void mobilityPackage(String destination, String pack){

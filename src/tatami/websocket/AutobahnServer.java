@@ -98,6 +98,10 @@ public class AutobahnServer extends WebSocketServer
 	@Override
 	public void onMessage(WebSocket conn, String message)
 	{
+		if(message.indexOf("::handshake") == 0)
+		{
+			return;
+		}
 		
 		// Now the message needs to be routed
 		if(message.indexOf("::internal") == 0)
@@ -106,6 +110,7 @@ public class AutobahnServer extends WebSocketServer
 			registry.put(agentName, conn);
 			return;
 		}
+	
 		if(message.indexOf("::container") == 0){
 			String containerName = message.substring(message.lastIndexOf("::") + 2, message.length());
 			if(!containersRegistry.containsKey(containerName)){

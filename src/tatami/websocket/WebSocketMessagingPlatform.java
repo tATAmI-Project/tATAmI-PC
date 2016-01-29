@@ -176,32 +176,41 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 			}
 			
 		}
-		// FIXME
-		try
-		{
-			Thread.sleep(1500);
-		} catch(InterruptedException e)
-		{
-			e.printStackTrace();
-		}
 		
+		
+
 		if((componentType & CLIENT) == CLIENT)
 		{
-			
 			Draft d = new Draft_17();
 			String clientname = "tootallnate/websocket";
-			
+
 			String protocol = "ws";
-			
+
 			String serverlocation = protocol + "://" + mClientHost + ":" + mPort;
 			URI uri = null;
 			uri = URI.create(serverlocation + "/agent=" + clientname);
-			
+
 			mClient = new AutobahnClient(d, uri);
 			mClientThread = new Thread(mClient);
 			mClientThread.start();
 			
-			log.info("Communication client started");
+			boolean serverStarted = false;
+			while (!serverStarted) {
+				try {
+
+					
+					mClient.send("::handshake::");
+
+					log.info("Communication client started");
+					serverStarted = true;
+				} catch (Exception e) {
+					try {
+						Thread.sleep(10);
+					} catch (Exception ex) {
+
+					}
+				}
+			}
 		}
 		return true;
 	}
@@ -242,17 +251,6 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 			mContainers = new HashSet<String>();
 		}
 		mContainers.add(containerName);
-		
-		System.out.println("### adding container" + containerName);
-		try
-		{
-			Thread.sleep(50);
-		} catch(InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 		mClient.newContainerNotification(containerName);
 		return true;
 	}
