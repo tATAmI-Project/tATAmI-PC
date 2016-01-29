@@ -243,6 +243,16 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 		}
 		mContainers.add(containerName);
 		
+		System.out.println("### adding container" + containerName);
+		try
+		{
+			Thread.sleep(50);
+		} catch(InterruptedException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		mClient.newContainerNotification(containerName);
 		return true;
 	}
