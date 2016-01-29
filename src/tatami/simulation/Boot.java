@@ -354,6 +354,8 @@ public class Boot
 			if(doCreateContainer && !containerConfig.getNodeIterator("agent").hasNext())
 			{
 				String platformName = containerConfig.getAttributeValue("platform");
+				if(platformName == null)
+					platformName = defaultPlatform;
 				if((platformName != null) && platforms.containsKey(platformName))
 				{
 					if(!platformContainers.containsKey(platformName))
