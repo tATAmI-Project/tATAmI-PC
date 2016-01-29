@@ -18,7 +18,7 @@ public class MovementComponent extends AgentComponent
 {
 	protected MovementComponent(CompositeAgent parent)
 	{
-		super(parent, AgentComponentName.MOVEMENT_COMPONENT);
+		super(AgentComponentName.MOVEMENT_COMPONENT);
 		// TODO Auto-generated constructor stub
 	}
 	

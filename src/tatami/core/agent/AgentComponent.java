@@ -24,13 +24,11 @@ import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.behavior.BehaviorComponent;
 import tatami.core.agent.claim.ClaimComponent;
-import tatami.core.agent.hierarchical.HierarchicalComponent;
 import tatami.core.agent.kb.CognitiveComponent;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.movement.MovementComponent;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.core.agent.visualization.VisualizableComponent;
-import tatami.core.agent.webServices.WebserviceComponent;
 import tatami.core.util.ParameterSet;
 
 /**
