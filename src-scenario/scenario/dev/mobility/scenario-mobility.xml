@@ -36,5 +36,8 @@
 				<scen:parameter name="name" value="AgentA" />
 			</scen:agent>
 		</scen:container>
+		
+		<scen:container name="OtherContainer">
+		</scen:container>
 	</scen:initial>
 </scen:scenario>

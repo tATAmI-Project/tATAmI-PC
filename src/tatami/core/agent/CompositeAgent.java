@@ -128,7 +128,7 @@ public class CompositeAgent implements Serializable, AgentManager
 				else
 				{
 					AgentEvent event = eventQueue.poll();
-//					log(event.toString());
+					// log(event.toString());
 					switch(event.getType().getSequenceType())
 					{
 					case CONSTRUCTIVE:
@@ -137,15 +137,10 @@ public class CompositeAgent implements Serializable, AgentManager
 							component.signalAgentEvent(event);
 						break;
 					case DESTRUCTIVE:
-					{
 						for(ListIterator<AgentComponent> it = componentOrder.listIterator(componentOrder.size()); it
 								.hasPrevious();)
-						{
 							it.previous().signalAgentEvent(event);
-						}
 					}
-					}
-					
 					threadExit = FSMEventOut(event, event.isSet(TRANSIENT_EVENT_PARAMETER));
 				}
 			}
@@ -342,33 +337,6 @@ public class CompositeAgent implements Serializable, AgentManager
 	}
 	
 	/**
-	 * Checks whether the specified event can be posted in the current agent state.
-	 * <p>
-	 * Basically, there are two checks:
-	 * <ul>
-	 * <li>Any event except {@link AgentEventType#AGENT_START} can be posted only in the {@link AgentState#RUNNING}
-	 * state.
-	 * <li>If the {@link AgentEventType#AGENT_START} is posted while the agent is in the {@link AgentState#TRANSIENT}
-	 * state, it needs to feature a parameter called {@value #TRANSIENT_EVENT_PARAMETER} (with any value).
-	 * <li>The {@link AgentEventType#AGENT_START} event can be posted while the agent is {@link AgentState#STOPPED}.
-	 * 
-	 * @param event
-	 * @return
-	 */
-	protected boolean canPostEvent(AgentEvent event)
-	{
-		switch(event.getType())
-		{
-		case AGENT_START:
-			if(agentState == AgentState.TRANSIENT)
-				return event.isSet(TRANSIENT_EVENT_PARAMETER);
-			return agentState == AgentState.STOPPED;
-		default:
-			return agentState == AgentState.RUNNING;
-		}
-	}
-	
-	/**
 	 * Change the state of the agent (if it is the case) and perform other actions, <i>before</i> an event is added to
 	 * the event queue. It is presumed that the event has already been checked with {@link #canPostEvent(AgentEvent)}
 	 * and that the event can indeed be posted to the queue in the current state.
@@ -461,7 +429,7 @@ public class CompositeAgent implements Serializable, AgentManager
 			// do nothing
 		}
 		if(stateChanged)
-			getPlatformLink().onAgentStateChanged(event,this);
+			getPlatformLink().onAgentStateChanged(event, this);
 		// if the agent is now stopped (or transient) the agent thread can exit.
 		return isStopped();
 	}
@@ -602,7 +570,12 @@ public class CompositeAgent implements Serializable, AgentManager
 	@Override
 	public boolean isRunning()
 	{
-		return agentState == AgentState.RUNNING;
+		if(eventQueue == null)
+			return false;
+		synchronized(eventQueue)
+		{
+			return agentState == AgentState.RUNNING;
+		}
 	}
 	
 	/**
@@ -613,7 +586,12 @@ public class CompositeAgent implements Serializable, AgentManager
 	@Override
 	public boolean isStopped()
 	{
-		return agentState == AgentState.STOPPED || agentState == AgentState.TRANSIENT;
+		if(eventQueue == null)
+			return agentState == AgentState.STOPPED || agentState == AgentState.TRANSIENT;
+		synchronized(eventQueue)
+		{
+			return agentState == AgentState.STOPPED || agentState == AgentState.TRANSIENT;
+		}
 	}
 	
 	/**
@@ -623,7 +601,12 @@ public class CompositeAgent implements Serializable, AgentManager
 	 */
 	public boolean isTransient()
 	{
-		return agentState == AgentState.TRANSIENT;
+		if(eventQueue == null)
+			return agentState == AgentState.TRANSIENT;
+		synchronized(eventQueue)
+		{
+			return agentState == AgentState.TRANSIENT;
+		}
 	}
 	
 	/**
@@ -634,7 +617,52 @@ public class CompositeAgent implements Serializable, AgentManager
 	 */
 	public boolean canAddComponents()
 	{
-		return (agentState == AgentState.STOPPED) || (agentState == AgentState.RUNNING);
+		if(eventQueue == null)
+			return true;
+		synchronized(eventQueue)
+		{
+			return (agentState == AgentState.STOPPED) || (agentState == AgentState.RUNNING);
+		}
+	}
+	
+	/**
+	 * Checks whether the specified event can be posted in the current agent state.
+	 * <p>
+	 * Basically, there are two checks:
+	 * <ul>
+	 * <li>Any event except {@link AgentEventType#AGENT_START} can be posted only in the {@link AgentState#RUNNING}
+	 * state.
+	 * <li>If the {@link AgentEventType#AGENT_START} is posted while the agent is in the {@link AgentState#TRANSIENT}
+	 * state, it needs to feature a parameter called {@value #TRANSIENT_EVENT_PARAMETER} (with any value).
+	 * <li>The {@link AgentEventType#AGENT_START} event can be posted while the agent is {@link AgentState#STOPPED}.
+	 * 
+	 * @param event
+	 * @return
+	 */
+	protected boolean canPostEvent(AgentEvent event)
+	{
+		if(eventQueue == null)
+			switch(event.getType())
+			{
+			case AGENT_START:
+				if(agentState == AgentState.TRANSIENT)
+					return event.isSet(TRANSIENT_EVENT_PARAMETER);
+				return agentState == AgentState.STOPPED;
+			default:
+				return agentState == AgentState.RUNNING;
+			}
+		synchronized(eventQueue)
+		{
+			switch(event.getType())
+			{
+			case AGENT_START:
+				if(agentState == AgentState.TRANSIENT)
+					return event.isSet(TRANSIENT_EVENT_PARAMETER);
+				return agentState == AgentState.STOPPED;
+			default:
+				return agentState == AgentState.RUNNING;
+			}
+		}
 	}
 	
 	/**
@@ -670,12 +698,14 @@ public class CompositeAgent implements Serializable, AgentManager
 		}
 	}
 	
-	public void resume(){
+	public void resume()
+	{
 		eventQueue = new LinkedBlockingQueue<AgentEvent>();
 		agentThread = new Thread(new AgentThread());
 		agentThread.start();
 		System.out.println("Composite agent started " + componentOrder.size());
-		for(AgentComponent ac: componentOrder){
+		for(AgentComponent ac : componentOrder)
+		{
 			ac.atAgentResume(new AgentEvent(AgentEventType.AGENT_START));
 			ac.setParent(this);
 			

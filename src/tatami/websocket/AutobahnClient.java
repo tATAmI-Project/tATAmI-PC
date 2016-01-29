@@ -12,18 +12,22 @@
 package tatami.websocket;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import main.java.org.java_websocket.client.WebSocketClient;
 import main.java.org.java_websocket.drafts.Draft;
 import main.java.org.java_websocket.handshake.ServerHandshake;
+import net.xqhs.util.logging.UnitComponentExt;
 
 /**
  * The AutobahnClient class is the interface with the client part of the java websocket project
  */
 public class AutobahnClient extends WebSocketClient
 {
+	/**
+	 * The log.
+	 */
+	UnitComponentExt log = new UnitComponentExt();
 	
 	/**
 	 * The map between the agent names and their corresponding server references
@@ -87,7 +91,7 @@ public class AutobahnClient extends WebSocketClient
 			send(containerMessage);
 		}
 		catch(Exception e){
-			System.out.println("sssssssssssssssss " + e.getMessage());
+			log.error("Unable to register container", e.getMessage());
 		}
 		
 	}
@@ -105,18 +109,11 @@ public class AutobahnClient extends WebSocketClient
 	{
 		
 		if(message.indexOf("::mobility") > -1){
-
-			String destination = message.substring(12, message.lastIndexOf("::"));
-			
-//			/System.out.println("Mobility message received, detination: " + destination);
-			
 			String content = message.substring(message.lastIndexOf("::") + 2);
 			
 			for(WebSocketMessagingPlatform platform: pltformRouting.values()){
 				platform.onMobilityPackReceived(content);
 			}
-			
-			
 			return;
 		}
 		/* Forward the message to the platform */

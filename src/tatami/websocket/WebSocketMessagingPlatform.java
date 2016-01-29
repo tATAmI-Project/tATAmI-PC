@@ -380,7 +380,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 				out.writeObject(agent);
 				byte[] yourBytes = bos.toByteArray();
 				
-				InputComplexMessageTokenizer tok = new InputComplexMessageTokenizer(yourBytes);
+				InputComplexMessageTokenizer tok = new InputComplexMessageTokenizer(yourBytes, log);
 				
 				while(tok.hasMorePackages())
 				{

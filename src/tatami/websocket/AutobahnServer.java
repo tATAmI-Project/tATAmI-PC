@@ -13,7 +13,6 @@ package tatami.websocket;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -51,9 +50,7 @@ public class AutobahnServer extends WebSocketServer
 	 */
 	public AutobahnServer(int port, Draft d) throws UnknownHostException
 	{
-		super(new InetSocketAddress(port), Collections.singletonList(d));
-		registry = new HashMap<String, WebSocket>();
-		containersRegistry = new HashMap<String, WebSocket>();
+		this(new InetSocketAddress(port), d);
 	}
 	
 	/**
@@ -115,7 +112,7 @@ public class AutobahnServer extends WebSocketServer
 			String containerName = message.substring(message.lastIndexOf("::") + 2, message.length());
 			if(!containersRegistry.containsKey(containerName)){
 				containersRegistry.put(containerName, conn);
-				System.out.println("Container " + containerName + " rgistered");
+				System.out.println("Container " + containerName + " registered");
 			}
 			
 			return;
