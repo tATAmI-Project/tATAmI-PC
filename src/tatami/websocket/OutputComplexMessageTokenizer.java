@@ -29,11 +29,12 @@ public class OutputComplexMessageTokenizer {
 				buffer.add("");
 			}
 		}
+		if(index >222)
+		System.out.println("=====================================" + segment.length() + " " + size + "  " + index);
 		
 		buffer.set(index, segment);
 		mSize = size;
-		
-		mReceivedCount++;
+		mReceivedCount = index + 1;
 	}
 	
 	public byte fromString(String x){
@@ -50,9 +51,10 @@ public class OutputComplexMessageTokenizer {
 	
 	public byte[] returnObj(){
 		String finalBuffer = new String();
-		
+		int sum = 0;
 		for(int i = 0; i < buffer.size(); ++i){
 			finalBuffer += buffer.get(i);
+			sum += buffer.get(i).length();
 		}
 		
 		System.out.println(finalBuffer);
@@ -77,8 +79,18 @@ public class OutputComplexMessageTokenizer {
 			result[i] = bytes.get(i);
 		}
 		
+		System.out.println("Result::: " + sum);
+		
 		
 		return result;
 		
+	}
+	
+	public void clear(){
+		if(buffer != null){
+			buffer.clear();
+			mReceivedCount = 0;
+			mSize = 0;
+		}
 	}
 }

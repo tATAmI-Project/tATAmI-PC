@@ -232,18 +232,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 			return false;
 		}
 	}
-	
-	public String getIP() {
-		String ip = "";
 
-		try {
-			ip = InetAddress.getLocalHost().getHostAddress();
-		} catch (Exception e) {
-
-		}
-		return ip;
-	}
-	
 	@Override
 	public boolean addContainer(String containerName)
 	{
@@ -274,7 +263,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 		
 		mAgentsbuffer.get(0).addNewMessage(content);
 		if(mAgentsbuffer.get(0).allMessagereceived()){
-			System.out.println("All messages received?!?!?!?!?!?!");
+			System.out.println(" ?!?!?!?!?!?!");
 			
 			byte[] x = mAgentsbuffer.get(0).returnObj();
 			System.out.println("x");
@@ -339,10 +328,10 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	@Override
 	public boolean loadAgent(String containerName, AgentManager agentManager)
 	{
-		StackTraceElement[] ste = Thread.currentThread().getStackTrace();
-		for(StackTraceElement st: ste){
-			System.out.println(st);
-		}
+		//StackTraceElement[] ste = Thread.currentThread().getStackTrace();
+		//for(StackTraceElement st: ste){
+		//	System.out.println(st);
+		//}
 		
 		
 		System.out.println("^^^^^^^^^^^^^^ " + containerName);
@@ -387,7 +376,9 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 					mClient.mobilityPackage(event.getValue(MobilityComponent.DESTINATION_PARAMETER), tok.getNextPackage());
 				}
 				
+				
 				System.out.println("!!!!!!!!!!!!Length: " + yourBytes.length);
+				tok.clear();
 				
 			} catch(Exception e)
 			{

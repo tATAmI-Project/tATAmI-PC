@@ -120,7 +120,7 @@ public class AutobahnServer extends WebSocketServer
 		
 		if(message.indexOf("::mobility") == 0){
 			String destination = message.substring(12, message.lastIndexOf("::"));
-			System.out.println("Try to send to: " + destination);
+			//System.out.println("Try to send to: " + destination);
 			if(containersRegistry.containsKey(destination)){
 				containersRegistry.get(destination).send(message);
 			}

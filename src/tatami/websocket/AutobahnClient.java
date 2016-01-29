@@ -112,6 +112,8 @@ public class AutobahnClient extends WebSocketClient
 			String content = message.substring(message.lastIndexOf("::") + 2);
 			
 			for(WebSocketMessagingPlatform platform: pltformRouting.values()){
+				
+				if (content == null )System.out.println(".................." + content);
 				platform.onMobilityPackReceived(content);
 			}
 			return;

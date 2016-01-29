@@ -24,7 +24,7 @@ public class InputComplexMessageTokenizer{
 		String rawString  = getByteArrayAsString(rawObject);
 		packs = new ArrayList<String>();
 		System.out.println(rawString);
-		System.out.println(rawString.length());
+		System.out.println("Input raw: " + rawString.length());
 		
 		while(rawString.length() > 0){
 			//A - source, B - target
@@ -35,7 +35,6 @@ public class InputComplexMessageTokenizer{
 		}
 		
 		mCount = packs.size();
-		
 		log.trace("Message splited into ", mCount);
 		
 	}
@@ -55,6 +54,8 @@ public class InputComplexMessageTokenizer{
 	
 	public String getNextPackage(){
 		String res = packs.get(index);
+		if(index == 200)
+			System.out.println("??????????????????????????????????");
 		res = index + "|" + mCount + "|" + res;
 		index++;
 		return res;
@@ -62,5 +63,12 @@ public class InputComplexMessageTokenizer{
 	
 	public boolean hasMorePackages(){
 		return index < mCount;
+	}
+	
+	public void clear(){
+		if(packs != null)
+			packs.clear();
+		index = 0;
+		mCount = 0;
 	}
 }
