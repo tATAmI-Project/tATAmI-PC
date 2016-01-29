@@ -34,6 +34,8 @@ import net.xqhs.graphs.matcher.GraphMatcherQuick;
 import net.xqhs.graphs.matcher.GraphMatchingProcess;
 import net.xqhs.graphs.matcher.Match;
 import net.xqhs.graphs.matcher.MonitorPack;
+import net.xqhs.graphs.matchingPlatform.TrackingGraph;
+import net.xqhs.graphs.matchingPlatform.TrackingGraph.ChangeNotificationReceiver;
 import net.xqhs.graphs.pattern.GraphPattern;
 import net.xqhs.graphs.representation.text.TextGraphRepresentation;
 import net.xqhs.graphs.util.ContentHolder;
@@ -63,7 +65,8 @@ public class ContextComponent extends CognitiveComponent { // TODO extend Cognit
 		MonitorPack monitor = new MonitorPack();
 		continuousMatching = new CCMImplementation(ticker, monitor);
 		
-		knowledgeGraph = new ContextGraph((CCMImplementation) continuousMatching);
+		knowledgeGraph = new ContextGraph();
+		((TrackingGraph) knowledgeGraph).registerChangeNotificationReceiver((ChangeNotificationReceiver) continuousMatching);
 		continuousMatching.setContextGraph((ContextGraph) knowledgeGraph);
 		continuousMatching.startContinuousMatching();
 	}
