@@ -22,6 +22,8 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import main.java.org.java_websocket.WebSocketImpl;
 import main.java.org.java_websocket.drafts.Draft;
@@ -99,6 +101,8 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	
 	
 	ArrayList<OutputComplexMessageTokenizer> mAgentsbuffer;
+	
+	Set<String> mContainers = null;
 													
 	/**
 	 * Name of the unit for logging purposes
@@ -234,6 +238,12 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	@Override
 	public boolean addContainer(String containerName)
 	{
+		if(mContainers == null){
+			mContainers = new HashSet<String>();
+		}
+		mContainers.add(containerName);
+		
+		mClient.newContainerNotification(containerName);
 		return true;
 	}
 	
@@ -330,7 +340,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 		System.out.println("^^^^^^^^^^^^^^ " + containerName);
 		agentManager.setPlatformLink(this);
 		mClient.registerPlatform(this, agentManager.getAgentName());
-		mClient.newAgentNotification(agentManager.getAgentName(), containerName);
+		mClient.newAgentNotification(agentManager.getAgentName());
 		return true;
 	}
 	

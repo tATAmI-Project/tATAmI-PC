@@ -74,11 +74,13 @@ public class AutobahnClient extends WebSocketClient
 	 * @param agentName
 	 *            The agent name that will be registered
 	 */
-	public void newAgentNotification(String agentName, String container)
+	public void newAgentNotification(String agentName)
 	{
 		String message = "::" + "internal" + "::" + agentName;
-		System.out.println(message);
 		send(message);
+	}
+	
+	public void newContainerNotification(String container){
 		String containerMessage = "::" + "container" + "::" + container;
 		send(containerMessage);
 	}

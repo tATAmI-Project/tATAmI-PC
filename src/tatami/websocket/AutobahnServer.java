@@ -79,6 +79,7 @@ public class AutobahnServer extends WebSocketServer
 	@Override
 	public void onOpen(WebSocket conn, ClientHandshake handshake)
 	{
+		System.out.println("Client is tring to connect");
 		mCounter++;
 	}
 	
