@@ -17,6 +17,8 @@ import net.xqhs.graphs.graph.Edge;
 import net.xqhs.graphs.graph.SimpleEdge;
 import net.xqhs.graphs.graph.SimpleNode;
 import net.xqhs.graphs.matchingPlatform.TrackingGraph;
+import net.xqhs.graphs.matchingPlatform.Transaction;
+import net.xqhs.graphs.matchingPlatform.Transaction.Operation;
 import net.xqhs.graphs.pattern.EdgeP;
 import net.xqhs.graphs.pattern.GraphPattern;
 import net.xqhs.graphs.pattern.NodeP;
@@ -55,8 +57,8 @@ public class GraphVisualizationComponent extends AgentComponent implements Input
 				for(net.xqhs.graphs.graph.Node node : trackingGraph.getNodes())
 				{
 					SimpleNode newNode = new SimpleNode("node" + count++);
-					trackingGraph.addNode(newNode);
-					trackingGraph.addEdge(new SimpleEdge(node, newNode, "label"));
+					trackingGraph.applyTransaction(new Transaction().putR(newNode, Operation.ADD)
+							.putR(new SimpleEdge(node, newNode, "label"), Operation.ADD));
 					break;
 				}
 			}
