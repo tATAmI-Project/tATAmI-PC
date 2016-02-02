@@ -63,7 +63,7 @@ public class ContextComponent extends CognitiveComponent { // TODO extend Cognit
 		MonitorPack monitor = new MonitorPack();
 		continuousMatching = new CCMImplementation(ticker, monitor);
 		
-		knowledgeGraph = new ContextGraph((CCMImplementation) continuousMatching);
+		knowledgeGraph = new ContextGraph();
 		continuousMatching.setContextGraph((ContextGraph) knowledgeGraph);
 		continuousMatching.startContinuousMatching();
 	}
@@ -183,6 +183,11 @@ public class ContextComponent extends CognitiveComponent { // TODO extend Cognit
 	public void registerMatchNotificationTarget(ContextPattern pattern, MatchNotificationReceiver receiver) 
 	{
 		continuousMatching.addMatchNotificationTarget(pattern, receiver);
+	}
+	
+	public void registerMatchNotificationTarget(int thresholdK, MatchNotificationReceiver receiver)
+	{
+		continuousMatching.addMatchNotificationTarget(thresholdK, receiver);
 	}
 	
 	/** TODO 
