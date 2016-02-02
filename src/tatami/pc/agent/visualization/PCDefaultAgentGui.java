@@ -165,6 +165,7 @@ public class PCDefaultAgentGui implements AgentGui
 		window.add(ta, c);
 		ta.setMinimumSize(new Dimension(100, 100));
 		addComponent(DefaultComponent.AGENT_LOG.toString(), ta);
+
 	}
 	
 	/**

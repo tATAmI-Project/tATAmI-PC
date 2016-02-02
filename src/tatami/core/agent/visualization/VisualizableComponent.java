@@ -281,6 +281,7 @@ public class VisualizableComponent extends AgentComponent implements ReportingEn
 		} catch(Exception e)
 		{
 			getLog().error("Load GUI failed: []", PlatformUtils.printException(e));
+			e.printStackTrace();
 		}
 		
 		if(gui != null)
