@@ -38,7 +38,6 @@ import net.xqhs.graphs.pattern.GraphPattern;
 import net.xqhs.graphs.representation.text.TextGraphRepresentation;
 import net.xqhs.graphs.util.ContentHolder;
 
-@SuppressWarnings("javadoc")
 public class ContextComponent extends CognitiveComponent { // TODO extend Cognitive Component
 
 	/**
@@ -188,6 +187,11 @@ public class ContextComponent extends CognitiveComponent { // TODO extend Cognit
 	public void registerMatchNotificationTarget(int thresholdK, MatchNotificationReceiver receiver)
 	{
 		continuousMatching.addMatchNotificationTarget(thresholdK, receiver);
+	}
+	
+	public void registerMatchNotificationTarget(MatchNotificationReceiver receiver)
+	{
+		continuousMatching.addMatchNotificationTarget(receiver);
 	}
 	
 	/** TODO 

@@ -21,7 +21,7 @@
 		<scen:parameter name="name" value="websocket" />
 	</scen:platform>
 	
-	<scen:agentPackage>scenario.examples.graphviz_tatami2</scen:agentPackage>
+	<scen:agentPackage>scenario.dev.graphviz</scen:agentPackage>
 	<scen:agentPackage>scenario.examples.sclaim_tatami2.simpleScenarioE</scen:agentPackage>
 
 	<scen:initial>
@@ -38,7 +38,7 @@
 					<scen:parameter name="java-code" value="ChatFunctions" />
 					<scen:parameter name="otherAgent" value="agentB" />
 				</scen:component>
-				<scen:component name="testing" classpath="scenario.examples.graphviz_tatami2.PC.GraphVisualizationComponent">
+				<scen:component name="testing" classpath="scenario.dev.graphviz.PC.GraphVisualizationComponent">
 				</scen:component>
 
 				<scen:parameter name="loader" value="composite" /> 

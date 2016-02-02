@@ -29,7 +29,7 @@ public class BootDefaultArguments
 	/**
 	 * The scenario file.
 	 */
-	static final String scenarioFileName = BootSettingsManager.SCENARIO_DIRECTORY + "scenario/examples/graphviz_tatami2/scenarioE-tATAmI2.xml";
+	static final String scenarioFileName = BootSettingsManager.SCENARIO_DIRECTORY + "scenario/dev/graphviz/scenario-viz.xml";
 //	static final String scenarioFileName = BootSettingsManager.SCENARIO_DIRECTORY + "scenario/examples/sclaim_tatami2/simpleScenarioE/scenarioE-tATAmI2-plus.xml";
 	/**
 	 * Main (Jade) host.

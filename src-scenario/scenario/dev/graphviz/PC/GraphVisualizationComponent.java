@@ -1,4 +1,4 @@
-package scenario.examples.graphviz_tatami2.PC;
+package scenario.dev.graphviz.PC;
 
 import java.awt.BorderLayout;
 import java.util.Observable;
@@ -77,7 +77,7 @@ public class GraphVisualizationComponent extends AgentComponent implements Input
 		CMPViewer matchViewer = new CMPViewer();
 		
 		// TODO: How to choose threshold here?
-		component.registerMatchNotificationTarget(0, matchViewer);
+		component.registerMatchNotificationTarget(matchViewer);
 		
 		JungGraph graph = new JungGraphMirror(trackingGraph);
 		final JungGraphViewer editor = new AnimatedJungGraphViewer(graph);
