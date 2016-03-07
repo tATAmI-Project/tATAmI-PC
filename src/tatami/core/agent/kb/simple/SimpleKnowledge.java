@@ -16,6 +16,7 @@ import jade.util.leap.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.xqhs.graphs.matcher.Match;
 import tatami.core.agent.kb.KnowledgeBase.KnowledgeDescription;
 
 
@@ -78,6 +79,13 @@ public class SimpleKnowledge implements KnowledgeDescription, Serializable
 		this.knowledgeParts.addAll(kl.knowledgeParts);
 	}
 	
+	public SimpleKnowledge(Match match) {
+		this.knowledgeType = "match";
+		this.knowledgeParts.add("" + match.getK());
+		this.knowledgeParts.add(match.getMatchedGraph().toString());
+		this.knowledgeParts.add(match.getPattern().toString());
+	}
+
 	/** Verifies if another knowledge record matches this one
 	 * @param kl - simple knowledge record
 	 * @return - true if the knowledge records are equal, false otherwise

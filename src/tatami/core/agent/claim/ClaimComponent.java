@@ -230,7 +230,12 @@ public class ClaimComponent extends AgentComponent implements AgentEventHandler
 	 */
 	protected KnowledgeBase getKBase()
 	{
-		return getCognitive().getKB();
+		CognitiveComponent component = getCognitive();
+		if (!(component instanceof KnowledgeBase)) {
+			// TODO: this should be enforced with better typing, not runtime exceptions.
+			throw new IllegalStateException("The cognitive component doesn't implement the KnowledgeBase interface.");
+		}
+		return (KnowledgeBase) component;
 	}
 	
 	/**

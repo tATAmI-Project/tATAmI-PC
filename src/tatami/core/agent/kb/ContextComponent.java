@@ -11,12 +11,18 @@
  ******************************************************************************/
 package tatami.core.agent.kb;
 
+import java.nio.channels.ReadPendingException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.collections.Transformer;
+
+import tatami.core.agent.kb.simple.SimpleKnowledge;
 import net.xqhs.graphs.context.CCMImplementation;
 import net.xqhs.graphs.context.ContextGraph;
 import net.xqhs.graphs.context.ContextPattern;
@@ -38,7 +44,7 @@ import net.xqhs.graphs.pattern.GraphPattern;
 import net.xqhs.graphs.representation.text.TextGraphRepresentation;
 import net.xqhs.graphs.util.ContentHolder;
 
-public class ContextComponent extends CognitiveComponent { // TODO extend Cognitive Component
+public class ContextComponent extends CognitiveComponent implements KnowledgeBase { // TODO extend Cognitive Component
 
 	/**
 	 * The serial UID.
@@ -230,5 +236,88 @@ public class ContextComponent extends CognitiveComponent { // TODO extend Cognit
 			for(TickReceiver rcv : receivers)
 				rcv.tick(this, new Instant(now));
 		}
+	}
+	
+	private void initFromDescription(SimpleGraph graph, KnowledgeDescription description) {
+		TextGraphRepresentation textRepr = new TextGraphRepresentation(graph);
+		textRepr.readRepresentation(description.getTextRepresentation());
+	}
+
+	@Override
+	public boolean add(KnowledgeDescription piece) {
+		SimpleGraph graph = new SimpleGraph();
+		initFromDescription(graph, piece);
+		
+		add(graph);
+		return true;
+	}
+
+	@Override
+	public boolean addAll(Collection<? extends KnowledgeDescription> piece) {
+		for (KnowledgeDescription description : piece) {
+			add(description);
+		}
+		return true;
+	}
+
+	@Override
+	public KnowledgeDescription getFirst(KnowledgeDescription pattern) {
+		GraphPattern graphPattern = new GraphPattern();
+		initFromDescription(graphPattern, pattern);
+		
+		Match match = read(graphPattern);
+		return new SimpleKnowledge(match);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Collection<KnowledgeDescription> getAll(KnowledgeDescription pattern) {
+		GraphPattern graphPattern = new GraphPattern();
+		initFromDescription(graphPattern, pattern);
+		List<Match> matches = readAll(graphPattern);
+		
+		return ListUtils.transformedList(matches, new Transformer() {
+			@Override
+			public Object transform(Object obj) {
+				Match match = (Match) obj;
+				return new SimpleKnowledge(match);
+			}
+		});
+	}
+
+	@Override
+	public boolean remove(KnowledgeDescription pattern) {
+		GraphPattern graphPattern = new GraphPattern();
+		initFromDescription(graphPattern, pattern);
+		
+		Match match = read(graphPattern);
+		if (match == null) {
+			return false;
+		}
+		
+		for (GraphComponent component : match.getMatchedGraph().getComponents()) {
+			knowledgeGraph.remove(component);
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean removeAll(KnowledgeDescription pattern) {
+		GraphPattern graphPattern = new GraphPattern();
+		initFromDescription(graphPattern, pattern);
+		
+		List<Match> matches = readAll(graphPattern);
+		if (matches.size() == 0) {
+			return false;
+		}
+		
+		for (Match match : matches) {
+			for (GraphComponent component : match.getMatchedGraph().getComponents()) {
+				knowledgeGraph.remove(component);
+			}
+		}
+		
+		return true;
 	}
 }
