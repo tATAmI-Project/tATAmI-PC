@@ -239,8 +239,18 @@ public class ContextComponent extends CognitiveComponent implements KnowledgeBas
 	}
 	
 	private void initFromDescription(SimpleGraph graph, KnowledgeDescription description) {
+		// append all elements together and hope it looks like a graph.
+		if (!(description instanceof SimpleKnowledge)) {
+			// TODO(catalinb): This should be enforced with proper argument typing.
+			throw new IllegalArgumentException("Unsupported knowledge description.");
+		}
+		SimpleKnowledge knowledge = (SimpleKnowledge) description;
+		String knowledgeText = "";
+		for (String component : knowledge.getSimpleKnowledge()) {
+			knowledgeText  = knowledgeText + component;
+		}
 		TextGraphRepresentation textRepr = new TextGraphRepresentation(graph);
-		textRepr.readRepresentation(description.getTextRepresentation());
+		textRepr.readRepresentation(knowledgeText);
 	}
 
 	@Override
