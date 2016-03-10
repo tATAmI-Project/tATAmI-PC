@@ -18,7 +18,7 @@
 		localHost="127.0.0.1" localPort="9002" />
 	
     <scen:platform>
-		<scen:parameter name="name" value="websocket" />
+		<scen:parameter name="name" value="local" />
 	</scen:platform>
 	
 	<scen:agentPackage>scenario.examples.sclaim_tatami2.simpleScenarioE</scen:agentPackage>
