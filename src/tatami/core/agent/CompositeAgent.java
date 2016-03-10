@@ -27,6 +27,7 @@ import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.AgentEvent.AgentSequenceType;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
+import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.AgentManager;
 import tatami.simulation.PlatformLoader.PlatformLink;
 
@@ -214,7 +215,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * {@link #log(String, Object...)} method.
 	 */
 	protected UnitComponent								localLog					= (UnitComponent) new UnitComponent()
-			.setLogLevel(Level.INFO);
+			.setLoggerType(PlatformUtils.platformLogType()).setLogLevel(Level.INFO);
 			
 	/**
 	 * This switch activates the use of the {@link #localLog}.
