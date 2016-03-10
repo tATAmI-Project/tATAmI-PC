@@ -1,0 +1,67 @@
+(agent ChatAgent ?otherAgent
+
+(behavior
+	
+	(initial startclock
+		(addK (struct knowledge sequence 0))		// sequence will be useful to sort messages
+	>	(addK (struct graph c_sequence -> 0))
+	)
+		
+	(reactive snd
+		(input messageinput ?sendMessage)						// the agent is notified that there is a message to send
+		(readK (struct knowledge sequence ?sequence))				// read the sequence number from the knowledge base
+		
+	>	(readK (struct graph c_sequence -> ?sequence))
+			// pattern: c_sequence -> ?
+			// match cu e.g.: c_sequence -> 0
+			// bind ?sequence : 0
+		
+		(removeK (struct knowledge sequence ?sequence))				// remove the stored sequence
+		
+	>	(removeK (struct graph c_sequence -> ?sequence))				// remove the stored sequence
+			// pattern: c_sequence -> 0
+			// find and remove
+			
+		(addK (struct knoweldge msg sent ?sequence ?sendMessage))	// store the message in the knowledge base, together with the type (received/sent) and the sequence
+		
+	>	(addK (struct graph -- (-isa> message) (-type>sent) (-sequence> ?sequence) -text-> ?sendMessage))
+			// binds: ?sequence : 0; ?sendMessage : hello
+			// graph: -- (-isa> message) (-type>sent) (-sequence>0) -text-> hello
+		
+		(increment ?sequence ?newsequence)							// increment the sequence
+		(addK (struct knowledge sequence ?newsequence))				// store the sequence
+		
+		(send ?otherAgent (struct message newchat ?sendMessage))	// send the message
+		
+		(send this (struct message update))							// send an update indication to itself
+	)
+	
+	(reactive rcv
+		(receive (struct message newchat ?rcvMessage))				// receive a message of type 'newchat', store the content in ?rcvMessage
+		(readK (struct knowledge sequence ?sequence))				// read the sequence number from the knowledge base
+		(removeK (struct knowledge sequence ?sequence))				// remove the stored sequence
+		(addK (struct knoweldge msg rcvd ?sequence ?rcvMessage))	// store the message in the knowledge base, together with the type (received/sent) and the sequence
+		
+		(increment ?sequence ?newsequence)							// increment the sequence
+		(addK (struct knowledge sequence ?newsequence))				// store the sequence
+		
+		(send this (struct message update))							// send an update indication to itself
+	)
+	
+	(reactive update
+		(receive (struct message update))								// activation with the internal message 'update'
+		(initOutput ??output)											// will init output to an empty string
+		(forAllK (struct knowledge msg ??direction ??sequence ??message)	// go through all messages
+		
+	>	(forAllK (struct graph -?- (-isa> message) (-type> ??direction) (-sequence-> ??sequence) -text> ??message)	// go through all messages
+			// pattern: ?#1 (-isa> message) (-type> ?#2) (-sequence-> ?#3) -text> ?#4
+			// matches, e.g.: something (-isa> message) (-type> sent) (-sequence-> 0) -text> hello
+			// binds: ??direction : sent; ??sequence : 0; ??message: hello
+		
+			(assembleOutput ??direction ??sequence ??message ??output)		// put them in the ?output variable; ARTIFICIAL: ?output will be overwritten
+		)
+		(output chatlog ??output 1)										// display
+	)
+		
+)
+)
