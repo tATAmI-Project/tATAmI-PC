@@ -39,6 +39,8 @@ import tatami.core.util.platformUtils.PlatformUtils;
  */
 public class BootSettingsManager extends Config
 {
+    
+    private static BootSettingsManager singleton = null;
 	// /////////////////// scenario
 	/**
 	 * The default directory for scenarios.
@@ -119,6 +121,10 @@ public class BootSettingsManager extends Config
 	 * The window layout indications, for PC platforms.
 	 */
 	protected GridLayoutIndications	layout;
+	
+	private BootSettingsManager(){
+	    makeDefaults();
+	}
 	
 	@Override
 	public BootSettingsManager makeDefaults()
@@ -342,5 +348,11 @@ public class BootSettingsManager extends Config
 	public GridLayoutIndications getLayout()
 	{
 		return layout;
+	}
+	
+	public static BootSettingsManager getInst(){
+	    if(singleton == null)
+	        singleton = new BootSettingsManager();
+	    return singleton;
 	}
 }

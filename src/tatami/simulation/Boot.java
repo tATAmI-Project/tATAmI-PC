@@ -62,12 +62,10 @@ public class Boot
 	{
 		log.trace("Booting World.");
 		
-		// load settings & scenario
-		BootSettingsManager settings = new BootSettingsManager();
 		XMLTree scenarioTree;
 		try
 		{
-			scenarioTree = settings.load(args, true);
+			scenarioTree = BootSettingsManager.getInst().load(args, true);
 			if(scenarioTree == null)
 				return;
 		} catch(ConfigLockedException e)
@@ -77,7 +75,7 @@ public class Boot
 		}
 		
 		// create window layout
-		WindowLayout.staticLayout = new GridWindowLayout(settings.getLayout());
+		WindowLayout.staticLayout = new GridWindowLayout(BootSettingsManager.getInst().getLayout());
 		
 		// build agent creation data
 		
@@ -107,7 +105,7 @@ public class Boot
 		
 		// iterate over platform entries in the scenario
 		defaultPlatform = loadPlatforms(
-				scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_PLATFORM.toString()), settings,
+				scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_PLATFORM.toString()), BootSettingsManager.getInst(),
 				platforms, defaultPlatform);
 		
 		// iterate over agent loader entries in the scenario
