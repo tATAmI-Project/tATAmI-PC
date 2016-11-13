@@ -29,8 +29,8 @@ public class OutputComplexMessageTokenizer {
 				buffer.add("");
 			}
 		}
-		if(index >222)
-		System.out.println("=====================================" + segment.length() + " " + size + "  " + index);
+		//if(index >222)
+		//System.out.println("=====================================" + segment.length() + " " + size + "  " + index);
 		
 		buffer.set(index, segment);
 		mSize = size;

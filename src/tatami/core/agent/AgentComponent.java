@@ -167,6 +167,8 @@ public abstract class AgentComponent implements Serializable
 		 */
 		AMILAB_COMPONENT("tatami.amilab.AmILabComponent"),
 		
+		DUMMY_COMPONENT,
+		
 		/**
 		 * TEMPORARY type for testing. TODO: remove this type.
 		 */

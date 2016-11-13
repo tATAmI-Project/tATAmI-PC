@@ -285,6 +285,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 				in.close();
 			} catch (Exception e) {
 				System.out.println("Agent deserialization failed");
+				e.printStackTrace();
 			}
 			
 			System.out.println("Before loading");

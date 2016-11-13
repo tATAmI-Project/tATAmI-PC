@@ -169,7 +169,6 @@ public class BootSettingsManager extends Config
 		
 		UnitComponentExt log = (UnitComponentExt) new UnitComponentExt().setUnitName("settings load").setLoggerType(
 				PlatformUtils.platformLogType());
-		
 		switch(programArguments.length)
 		{
 		default:
