@@ -18,10 +18,10 @@ import java.util.Set;
 import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent.AgentEventType;
+import tatami.HMI.src.PC.VisualizableComponent;
+import tatami.HMI.src.PC.VisualizableComponent.Vocabulary;
 import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.messaging.MessagingComponent;
-import tatami.core.agent.visualization.VisualizableComponent;
-import tatami.core.agent.visualization.VisualizableComponent.Vocabulary;
 
 /**
  * In order to be able to communicate with other agents in a platform, the {@link SimulationManager} keeps an agent on

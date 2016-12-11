@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package tatami.core.agent.visualization;
+package tatami.HMI.src.PC;
 
 import java.util.Vector;
 
@@ -20,6 +20,7 @@ import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.ReportingEntity;
 import net.xqhs.util.logging.Unit;
 import net.xqhs.util.logging.UnitComponentExt;
+import tatami.HMI.src.PC.AgentGui.DefaultComponent;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
@@ -30,7 +31,6 @@ import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.mobility.MobilityComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
-import tatami.core.agent.visualization.AgentGui.DefaultComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**

@@ -31,8 +31,8 @@ import javax.swing.SwingWorker;
 
 import net.xqhs.windowLayout.WindowLayout;
 import net.xqhs.windowLayout.WindowParameters;
-import tatami.core.agent.visualization.AgentGui;
-import tatami.core.agent.visualization.AgentGuiConfig;
+import tatami.HMI.src.PC.AgentGui;
+import tatami.HMI.src.PC.AgentGuiConfig;
 
 /**
  * Default agent GUI for the PC platform. It stores components as a map of {@link Component} instances associated with
@@ -56,8 +56,8 @@ import tatami.core.agent.visualization.AgentGuiConfig;
  * <li>As a consequence, at the moment, an input cannot be disconnected from a listener (i.e. revert to the default
  * listener. TODO
  * <li>By default, this implementation includes in the agent GUI the two default components --
- * {@link tatami.core.agent.visualization.AgentGui.DefaultComponent#AGENT_NAME} and
- * {@link tatami.core.agent.visualization.AgentGui.DefaultComponent#AGENT_LOG}.
+ * {@link tatami.HMI.src.PC.AgentGui.DefaultComponent#AGENT_NAME} and
+ * {@link tatami.HMI.src.PC.AgentGui.DefaultComponent#AGENT_LOG}.
  * <li>The window is automatically placed according to the current (static) {@link WindowLayout} instance.
  * <li>Some default functionality is already implemented, as follows:
  * <ul>

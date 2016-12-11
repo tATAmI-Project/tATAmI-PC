@@ -19,6 +19,7 @@ import java.util.Map;
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.DumbLogger;
 import net.xqhs.util.logging.Logger;
+import tatami.HMI.src.PC.VisualizableComponent;
 import tatami.amilab.AmILabComponent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
@@ -29,7 +30,6 @@ import tatami.core.agent.kb.CognitiveComponent;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.mobility.MobilityComponent;
 import tatami.core.agent.parametric.ParametricComponent;
-import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.core.agent.webServices.WebserviceComponent;
 import tatami.core.util.ParameterSet;
 

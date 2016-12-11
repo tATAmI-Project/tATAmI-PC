@@ -19,7 +19,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import tatami.core.agent.visualization.AgentGuiConfig;
+import tatami.HMI.src.PC.AgentGuiConfig;
 import tatami.simulation.SimulationManager;
 import tatami.simulation.SimulationManager.SimulationComponent;
 

@@ -26,14 +26,14 @@ import java.util.Vector;
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.UnitComponentExt;
 import net.xqhs.windowLayout.WindowLayout;
+import tatami.HMI.src.PC.AgentGui;
+import tatami.HMI.src.PC.AgentGuiConfig;
+import tatami.HMI.src.PC.AgentGui.AgentGuiBackgroundTask;
+import tatami.HMI.src.PC.AgentGui.ResultNotificationListener;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.io.AgentActiveIO.InputListener;
 import tatami.core.agent.messaging.MessagingComponent;
-import tatami.core.agent.visualization.AgentGui;
-import tatami.core.agent.visualization.AgentGui.AgentGuiBackgroundTask;
-import tatami.core.agent.visualization.AgentGui.ResultNotificationListener;
-import tatami.core.agent.visualization.AgentGuiConfig;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.PlatformLoader.PlatformLink;
 
@@ -122,7 +122,7 @@ public class SimulationManager implements AgentManager
 	/**
 	 * Name of the node in the scenario file that contains the event timeline to simulate.
 	 */
-	protected static final String		TIMELINE_NODE					= "timeline";
+	public static final String		TIMELINE_NODE					= "timeline";
 	/**
 	 * Delay before calling a System exit in case of a failed start.
 	 */

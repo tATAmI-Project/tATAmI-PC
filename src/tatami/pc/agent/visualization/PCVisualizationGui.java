@@ -15,7 +15,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.TextArea;
 
-import tatami.core.agent.visualization.AgentGuiConfig;
+import tatami.HMI.src.PC.AgentGuiConfig;
 
 public class PCVisualizationGui extends PCDefaultAgentGui
 {

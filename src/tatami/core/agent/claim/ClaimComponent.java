@@ -17,6 +17,7 @@ import java.util.Vector;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.Logger;
+import tatami.HMI.src.PC.VisualizableComponent;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
@@ -26,7 +27,6 @@ import tatami.core.agent.kb.CognitiveComponent;
 import tatami.core.agent.kb.KnowledgeBase;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
-import tatami.core.agent.visualization.VisualizableComponent;
 import tatami.sclaim.constructs.basic.ClaimAgentDefinition;
 import tatami.sclaim.constructs.basic.ClaimBehaviorDefinition;
 import tatami.sclaim.constructs.basic.ClaimValue;
