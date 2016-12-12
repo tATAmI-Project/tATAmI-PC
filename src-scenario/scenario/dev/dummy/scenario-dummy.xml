@@ -14,7 +14,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.example.org/scenarioSchema3 ../../../../../src-schema/scenarioSchema3.xsd ">
 
-	<scen:config mainHost="server client" mainPort="9008"
+	<scen:config mainHost="server" mainPort="9008"
 		localHost="192.168.0.11" localPort="9008" />
 
 	<scen:platform>

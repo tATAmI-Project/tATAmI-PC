@@ -63,48 +63,28 @@ public class Boot
 	{
 		log.trace("Booting World.");
 		
-		// create window layout
-		WindowLayout.staticLayout = new GridWindowLayout(BootSettingsManager.getInst().getLayout());
-		
 		Map<String, PlatformLoader> platforms = builder.getPlatform();
 		
 		Map<String, Set<String>> platformContainers = builder.getPlatformContainers();
 		
-		
 		// agents prepared, time to start platforms and the containers.
 		if(startPlatforms(platforms, platformContainers) > 0)
 		{
-			
-		    Map<String, Boolean> allContainers = builder.getAllContainers();
-		    
-		    Set<AgentCreationData> allAgents = builder.getAllAgents();
-		    
-		    XMLNode timeline = builder.getTimeline();
-		    
-			
+
 			// start simulation
-			if(!new SimulationManager(platforms, allContainers, allAgents, timeline).start())
+			if(!new SimulationManager(builder).start())
 			{
 				log.error("Simulation start failed.");
 				for(PlatformLoader platform : platforms.values())
 					if(!platform.stop())
 						log.error("Stopping platform [" + platform.getName() + "] failed");
-				if(WindowLayout.staticLayout != null)
-					WindowLayout.staticLayout.doexit();
 			}
 		}
 		else
 			log.error("No agent platforms loaded. Simulation will not start.");
 		log.doExit();
 	}
-	
 
-	
-	
-
-	
-
-	
 	/**
 	 * The method starts the platforms specified in the first parameter and adds to each platform the containers
 	 * corresponding to it, as indicated by the second parameter.

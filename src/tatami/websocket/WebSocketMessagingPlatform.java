@@ -240,7 +240,8 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 			mContainers = new HashSet<String>();
 		}
 		mContainers.add(containerName);
-		mClient.newContainerNotification(containerName);
+		if(mClient != null)
+		    mClient.newContainerNotification(containerName);
 		return true;
 	}
 	
@@ -337,8 +338,10 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 		
 		System.out.println("^^^^^^^^^^^^^^ " + containerName);
 		agentManager.setPlatformLink(this);
-		mClient.registerPlatform(this, agentManager.getAgentName());
-		mClient.newAgentNotification(agentManager.getAgentName());
+		if(mClient != null){
+		    mClient.registerPlatform(this, agentManager.getAgentName());
+		    mClient.newAgentNotification(agentManager.getAgentName());
+		}
 		return true;
 	}
 	

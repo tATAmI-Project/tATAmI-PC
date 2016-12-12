@@ -26,16 +26,20 @@ import java.util.Vector;
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.UnitComponentExt;
 import net.xqhs.windowLayout.WindowLayout;
+import tatami.HMI.pub.HMIInterface;
 import tatami.HMI.src.PC.AgentGui;
 import tatami.HMI.src.PC.AgentGuiConfig;
 import tatami.HMI.src.PC.AgentGui.AgentGuiBackgroundTask;
 import tatami.HMI.src.PC.AgentGui.ResultNotificationListener;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent.AgentEventType;
+import tatami.core.agent.io.AgentActiveIO;
 import tatami.core.agent.io.AgentActiveIO.InputListener;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.PlatformLoader.PlatformLink;
+import tatami.simulation.simulation_manager_builders.ISimulationManagerBuilder;
+import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder;
 
 /**
  * Singleton class managing the simulation, visualization and agent control on a machine or on a set of machines
@@ -141,7 +145,7 @@ public class SimulationManager implements AgentManager
 	/**
 	 * The GUI.
 	 */
-	AgentGui							gui								= null;
+	//AgentGui							gui								= null;
 	
 	/**
 	 * Name and {@link PlatformLoader} for all platforms to be started.
@@ -180,6 +184,8 @@ public class SimulationManager implements AgentManager
 	 */
 	Timer								theTime							= null;
 	
+	AgentActiveIO hmi;
+	
 	/**
 	 * Creates a new instance, also starting the GUI, based on the map of platforms and their names, the map of agents
 	 * and their names (agents are managed by {@link AgentManager} wrappers and the timeline.
@@ -193,16 +199,24 @@ public class SimulationManager implements AgentManager
 	 * @param timeline
 	 *            - the timeline of events, as {@link XMLNode} parsed from the scenario file.
 	 */
-	public SimulationManager(Map<String, PlatformLoader> allPlatforms, Map<String, Boolean> allContainers,
-			Set<AgentCreationData> allAgents, XMLNode timeline)
+	/**
+	 * public SimulationManager(Map<String, PlatformLoader> allPlatforms, Map<String, Boolean> allContainers,
+            Set<AgentCreationData> allAgents, XMLNode timeline)
+	 * @param allPlatforms
+	 * @param allContainers
+	 * @param allAgents
+	 * @param timeline
+	 */
+	public SimulationManager(ISimulationManagerBuilder builder)
 	{
 		log = (UnitComponentExt) new UnitComponentExt().setUnitName("simulation").setLoggerType(
 				PlatformUtils.platformLogType());
-		platforms = allPlatforms;
-		containers = allContainers;
-		agents = allAgents;
-		if(timeline != null)
-			events = timeline.getNodes();
+		hmi = HMIInterface.INST.getHMI();
+		platforms = builder.getPlatform();
+		containers = builder.getAllContainers();
+		agents = builder.getAllAgents();
+		if(builder.getTimeline() != null)
+			events = builder.getTimeline().getNodes();
 		else
 			events = Collections.emptyList();
 		// TODO: add agent graph and corresponding representation
@@ -224,7 +238,7 @@ public class SimulationManager implements AgentManager
 		try
 		{
 			AgentGuiConfig config = new AgentGuiConfig().setWindowType(WINDOW_TYPE).setWindowName(WINDOW_NAME);
-			gui = (AgentGui) PlatformUtils.loadClassInstance(this, PlatformUtils.getSimulationGuiClass(), config);
+			//gui = (AgentGui) PlatformUtils.loadClassInstance(this, PlatformUtils.getSimulationGuiClass(), config);
 		} catch(Exception e)
 		{
 			log.error("Unable to create simulation GUI. Simulation stops here." + PlatformUtils.printException(e));
@@ -262,8 +276,8 @@ public class SimulationManager implements AgentManager
 				
 				String display = "___" + (int) (time / 600) + ":" + (int) ((time % 600) / 10) + "." + (time % 10)
 						+ "___";
-				gui.doOutput(SimulationComponent.TIME.toString(),
-						new Vector<Object>(Arrays.asList(new Object[] { display })));
+				//gui.doOutput(SimulationComponent.TIME.toString(),
+				//		new Vector<Object>(Arrays.asList(new Object[] { display })));
 				
 				int nextEvent = (events.isEmpty() ? 0 : Integer.parseInt(events.get(0).getAttributeValue(
 						EVENT_TIME_ATTRIBUTE)));
@@ -285,9 +299,9 @@ public class SimulationManager implements AgentManager
 				else
 				{
 					log.info("no more events");
-					gui.doOutput(SimulationComponent.START.toString(), PlatformUtils.toVector((Object) null));
-					gui.doOutput(SimulationComponent.PAUSE.toString(), PlatformUtils.toVector((Object) null));
-					gui.doOutput(SimulationComponent.TIME.toString(), PlatformUtils.toVector("no more events"));
+					//gui.doOutput(SimulationComponent.START.toString(), PlatformUtils.toVector((Object) null));
+					//gui.doOutput(SimulationComponent.PAUSE.toString(), PlatformUtils.toVector((Object) null));
+					//gui.doOutput(SimulationComponent.TIME.toString(), PlatformUtils.toVector("no more events"));
 					theTime.cancel();
 				}
 			}
@@ -300,7 +314,7 @@ public class SimulationManager implements AgentManager
 	 * @return <code>true</code> if setup is successful.
 	 */
 	protected boolean setupGui()
-	{
+	{/*
 		gui.connectInput(SimulationComponent.EXIT.toString(), new InputListener() {
 			@Override
 			public void receiveInput(String componentName, Vector<Object> arguments)
@@ -322,6 +336,7 @@ public class SimulationManager implements AgentManager
 				});
 			}
 		});
+		
 		
 		if(agents.isEmpty())
 		{
@@ -403,7 +418,7 @@ public class SimulationManager implements AgentManager
 				isPaused = !isPaused;
 			}
 		});
-		
+		*/
 		return true;
 	}
 	
@@ -558,8 +573,8 @@ public class SimulationManager implements AgentManager
 		for(String platformName : platforms.keySet())
 			if(!platforms.get(platformName).stop())
 				log.error("Stopping platform [] failed.", platformName);
-		if(gui != null)
-			gui.close();
+		//if(gui != null)
+		//	gui.close();
 		if(WindowLayout.staticLayout != null)
 			WindowLayout.staticLayout.doexit();
 		if(log != null)
