@@ -11,7 +11,6 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -29,8 +28,6 @@ import net.xqhs.windowLayout.WindowLayout;
 import tatami.HMI.pub.HMIInterface;
 import tatami.HMI.src.PC.AgentGui;
 import tatami.HMI.src.PC.AgentGuiConfig;
-import tatami.HMI.src.PC.AgentGui.AgentGuiBackgroundTask;
-import tatami.HMI.src.PC.AgentGui.ResultNotificationListener;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.io.AgentActiveIO;
@@ -39,7 +36,6 @@ import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.PlatformLoader.PlatformLink;
 import tatami.simulation.simulation_manager_builders.ISimulationManagerBuilder;
-import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder;
 
 /**
  * Singleton class managing the simulation, visualization and agent control on a machine or on a set of machines
@@ -64,7 +60,7 @@ import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder
  * 
  * @author Andrei Olaru
  */
-public class SimulationManager implements AgentManager
+public class SimulationManager implements AgentManager, InputListener
 {
 	
 
@@ -142,10 +138,6 @@ public class SimulationManager implements AgentManager
 	 * The log.
 	 */
 	UnitComponentExt					log								= null;
-	/**
-	 * The GUI.
-	 */
-	//AgentGui							gui								= null;
 	
 	/**
 	 * Name and {@link PlatformLoader} for all platforms to be started.
@@ -212,6 +204,7 @@ public class SimulationManager implements AgentManager
 		log = (UnitComponentExt) new UnitComponentExt().setUnitName("simulation").setLoggerType(
 				PlatformUtils.platformLogType());
 		hmi = HMIInterface.INST.getHMI();
+		hmi.connectInput("Simulation Manager", this);
 		platforms = builder.getPlatform();
 		containers = builder.getAllContainers();
 		agents = builder.getAllAgents();
@@ -646,4 +639,13 @@ public class SimulationManager implements AgentManager
 		// TODO Auto-generated method stub
 		
 	}
+
+	/**
+	 * Input from the interface
+	 */
+    @Override
+    public void receiveInput(String portName, Vector<Object> arguments) {
+        // TODO Auto-generated method stub
+        
+    }
 }

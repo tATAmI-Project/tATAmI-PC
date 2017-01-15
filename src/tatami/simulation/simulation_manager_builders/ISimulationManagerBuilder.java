@@ -11,6 +11,9 @@ import net.xqhs.util.XML.XMLTree.XMLNode;
 import tatami.simulation.AgentCreationData;
 import tatami.simulation.AgentLoader;
 import tatami.simulation.PlatformLoader;
+import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder.AgentLoaderException;
+import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder.PlatformException;
+import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder.SimulationEzception;
 
 public abstract class ISimulationManagerBuilder {
     
@@ -34,9 +37,9 @@ public abstract class ISimulationManagerBuilder {
     
     XMLNode timeline = null;;
     
-    abstract public void buildPlatform();
+    abstract public void buildPlatform() throws SimulationEzception, PlatformException;
     
-    abstract public void buildAgentLoaders();
+    abstract public void buildAgentLoaders() throws AgentLoaderException;
     
     abstract public void buildAgentPackages();
     

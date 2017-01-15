@@ -11,28 +11,17 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.xqhs.util.XML.XMLTree;
-import net.xqhs.util.XML.XMLTree.XMLNode;
-import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponentExt;
 import net.xqhs.util.logging.logging.Logging;
-import net.xqhs.windowLayout.WindowLayout;
-import net.xqhs.windowLayout.grid.GridWindowLayout;
-import tatami.core.agent.parametric.AgentParameterName;
-import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.util.platformUtils.PlatformUtils;
-import tatami.simulation.AgentLoader.StandardAgentLoaderType;
-import tatami.simulation.PlatformLoader.StandardPlatformType;
 import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder;
+import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder.AgentLoaderException;
+import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder.PlatformException;
 
 /**
  * The Boot singleton class manages the startup of the multi-agent system. It manages settings, it loads the scenario,
@@ -49,7 +38,7 @@ public class Boot
 	/**
 	 * The log of the class.
 	 */
-	protected UnitComponentExt	log	= (UnitComponentExt) new UnitComponentExt().setUnitName("boot").setLoggerType(
+	static protected UnitComponentExt	log	= (UnitComponentExt) new UnitComponentExt().setUnitName("boot").setLoggerType(
 											PlatformUtils.platformLogType());
 	
 	/**
@@ -137,12 +126,29 @@ public class Boot
 	{
 		Logging.getMasterLogging().setLogLevel(Level.ALL);
 		
-		SimulationManagerXMLBuilder builder = new SimulationManagerXMLBuilder(args);
-		builder.buildPlatform();
-		builder.buildAgentLoaders();
+		SimulationManagerXMLBuilder builder = null;
+		try{
+		    builder = new SimulationManagerXMLBuilder(args);
+		    builder.buildPlatform();
+		    builder.buildAgentLoaders();
+		}
+		catch(SimulationManagerXMLBuilder.SimulationEzception exception){
+		    log.error(exception.getMessage());
+		    return;
+		}
+		catch(PlatformException exception){
+		    log.warn(exception.getMessage());
+		}
+		catch(AgentLoaderException exception){
+		    log.error(exception.getMessage());
+		    return;
+		}
+		
+		/*
 		builder.buildAgentPackages();
 		builder.buildContainerAgents();
 		builder.buildTimeline();
+		*/
 		
 		new Boot().boot(builder);
 	}

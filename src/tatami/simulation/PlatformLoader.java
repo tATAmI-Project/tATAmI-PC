@@ -48,7 +48,7 @@ public interface PlatformLoader
 		/**
 		 * Agents will be created as new instances. This is the default setting.
 		 */
-		DEFAULT(DefaultPlatform.class.getName()),
+		DEFAULT("defaultplatform"),
 		
 		/**
 		 * 

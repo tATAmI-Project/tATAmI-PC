@@ -11,6 +11,7 @@ import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
+import tatami.core.platforms.PlatformFactory;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.AgentCreationData;
 import tatami.simulation.AgentLoader;
@@ -21,22 +22,43 @@ import tatami.simulation.PlatformLoader;
 import tatami.simulation.PlatformLoader.StandardPlatformType;
 import tatami.simulation.SimulationManager;
 
+
+
+
 public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
     
     protected UnitComponentExt  log = (UnitComponentExt) new UnitComponentExt().setUnitName("XML Builder").setLoggerType(
             PlatformUtils.platformLogType());
     
+    public class SimulationEzception extends Exception{
+        public SimulationEzception(String message){
+            super(message);
+        }
+    }
+    
+    public class PlatformException extends Exception{
+        public PlatformException(String message){
+            super(message);
+        }
+    }
+    
+    public class AgentLoaderException extends Exception {
+        public AgentLoaderException(String message){
+            super(message);
+        }
+    }
+    
     XMLTree scenarioTree;
     
-    public SimulationManagerXMLBuilder(String args[]) {
-        
+    public SimulationManagerXMLBuilder(String args[]) throws SimulationEzception{
         try {
+            /*Load the DOM tree*/
             scenarioTree = BootSettingsManager.getInst().load(args, true);
-            if (scenarioTree == null)
-                return;
+            if (scenarioTree == null){
+                throw new SimulationEzception("The scenario file could not be loaded");
+            }
         } catch (ConfigLockedException e) {
-            log.error("settings were locked (shouldn't ever happen): " + PlatformUtils.printException(e));
-            return;
+            throw new SimulationEzception("settings were locked (shouldn't ever happen): " + PlatformUtils.printException(e));
         }
     }
     
@@ -70,64 +92,50 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
      *            - default platform as suggested by Boot.
      * @return the name of the default platform loader (which will be present in parameter <code>platforms</code>).
      */
-    private String loadPlatforms(Iterator<XMLNode> platformNodes, BootSettingsManager settings)
+    private String loadPlatforms(Iterator<XMLNode> platformNodes, BootSettingsManager settings) throws SimulationEzception, PlatformException
     {
-        while(platformNodes.hasNext())
-        {
+        while (platformNodes.hasNext()) {
             XMLNode platformNode = platformNodes.next();
+
             String platformName = PlatformUtils.getParameterValue(platformNode, PlatformLoader.NAME_ATTRIBUTE);
-            if(platformName == null)
-                log.error("Platform name is null.");
-            else if(platforms.containsKey(platformName))
-                log.error("Platform [" + platformName + "] already defined.");
-            else
-            {
-                String platformClassPath = null;
-                try
-                {
-                    platformClassPath = StandardPlatformType.valueOf(platformName.toUpperCase()).getClassName();
-                } catch(IllegalArgumentException e)
-                { // platform is not standard
-                    platformClassPath = PlatformUtils.getParameterValue(platformNode,
-                            PlatformLoader.CLASSPATH_ATTRIBUTE);
-                    if(platformClassPath == null)
-                        log.error("Class path for platform [" + platformName + "] is not known.");
-                }
-                if(platformClassPath != null)
-                    try
-                {
-                        platforms.put(platformName, ((PlatformLoader) PlatformUtils.loadClassInstance(this,
-                                platformClassPath, new Object[0])).setConfig(platformNode, settings));
-                        log.info("Platform [" + platformName + "] prepared.");
-                } catch(Exception e)
-                {
-                    log.error("Loading platform [" + platformName + "] failed; platform will not be available:"
-                            + PlatformUtils.printException(e));
-                }
+
+            if (platformName == null)
+                throw new SimulationEzception("The platform name is null");
+
+            if (platforms.containsKey(platformName))
+                throw new PlatformException("Platform [" + platformName + "] already defined.");
+
+            try {
+                platforms.put(platformName,
+                        PlatformFactory.getInst().newInst(platformName).setConfig(platformNode, settings));
+                log.info("Platform [" + platformName + "] prepared.");
+            } catch (Exception e) {
+                throw new SimulationEzception("Loading platform [" + platformName
+                        + "] failed; platform will not be available:" + PlatformUtils.printException(e));
             }
         }
         // default platform
         if(platforms.isEmpty())
         {
             // load default platform
-            //StandardPlatformType platform = StandardPlatformType.DEFAULT;
             StandardPlatformType platform = StandardPlatformType.DEFAULT;
             try
             {
-                platforms
-                .put(platform.toString(), ((PlatformLoader) PlatformUtils.loadClassInstance(this,
-                        platform.getClassName(), new Object[0])));
+                platforms.put(platform.toString(), PlatformFactory.getInst().newInst(platform.toString()));
                 log.info("Default platform [" + platform.toString() + "] prepared.");
-            } catch(Exception e)
-            {
-                log.error("Loading platform [" + platform.toString() + "] failed; platform will not be available:"
+            }
+            catch(Exception e){
+                throw new SimulationEzception("Loading platform [" + platform.toString() + "] failed; platform will not be available:"
                         + PlatformUtils.printException(e));
             }
         }
-        if(platforms.size() == 1)
-            defaultPlatform = platforms.values().iterator().next().getName();
+        
+        if(platforms.isEmpty()){
+            throw new SimulationEzception("No Platform could be loaded!");
+        }
+        defaultPlatform = platforms.values().iterator().next().getName();
         log.trace("Default platform is [" + defaultPlatform + "].");
-        return (defaultPlatform != null) ? defaultPlatform : defaultPlatform;
+        return defaultPlatform;
     }
     
     /**
@@ -143,15 +151,16 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
      *            - default agent loader as suggested by Boot.
      * @return the name of the default agent loader (which will be present in parameter <code>agentLoaders</code>).
      */
-    protected String loadAgentLoaders(Iterator<XMLNode> loaderNodes)
+    protected String loadAgentLoaders(Iterator<XMLNode> loaderNodes) throws AgentLoaderException
     {
         while(loaderNodes.hasNext())
         {
             XMLNode loaderNode = loaderNodes.next();
             String loaderName = PlatformUtils.getParameterValue(loaderNode, AgentLoader.NAME_ATTRIBUTE);
             if(loaderName == null)
-                log.error("Agent loader name is null.");
-            else if(agentLoaders.containsKey(loaderName))
+                throw new AgentLoaderException("Agent loader name is null.");
+            
+            if(agentLoaders.containsKey(loaderName))
                 log.error("Agent loader [" + loaderName + "] already defined.");
             else
             {
@@ -373,16 +382,18 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
     }
 
     @Override
-    public void buildPlatform() {
+    public void buildPlatform() throws SimulationEzception, PlatformException{
         // iterate over platform entries in the scenario
         defaultPlatform = loadPlatforms(
                 scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_PLATFORM.toString()),
                 BootSettingsManager.getInst());
+        
+        log.info("Default platform builded");
 
     }
 
     @Override
-    public void buildAgentLoaders() {
+    public void buildAgentLoaders() throws AgentLoaderException {
         // iterate over agent loader entries in the scenario
         defaultAgentLoader = loadAgentLoaders(scenarioTree.getRoot().getNodeIterator(AgentParameterName.AGENT_LOADER.toString()));
         
