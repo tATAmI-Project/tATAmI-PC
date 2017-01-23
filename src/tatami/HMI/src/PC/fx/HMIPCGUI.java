@@ -24,7 +24,7 @@ public class HMIPCGUI extends Application implements AgentActiveIO {
     public void start(Stage primaryStage) {
         menuItemHandlers = new MenuItemsHandlers(core);
         try{
-            ItemsController controller = new ItemsController();
+            ItemsController controller = new ItemsController(this);
             FXMLLoader loader = new FXMLLoader();
             String fxmlDocPath = "tATAmI.fxml";
             FileInputStream fxmlStream = new FileInputStream(fxmlDocPath);

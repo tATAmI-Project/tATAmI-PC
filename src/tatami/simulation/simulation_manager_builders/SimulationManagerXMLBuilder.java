@@ -9,6 +9,7 @@ import net.xqhs.util.XML.XMLTree;
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.UnitComponentExt;
+import tatami.HMI.pub.HMIInterface;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.platforms.PlatformFactory;
@@ -414,6 +415,11 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
         if (scenarioTree.getRoot().getNodeIterator(SimulationManager.TIMELINE_NODE.toString()).hasNext())
             timeline = scenarioTree.getRoot().getNodeIterator(SimulationManager.TIMELINE_NODE.toString()).next();
 
+    }
+
+    @Override
+    public void buildGUI() {
+        graphicalUserInterface = HMIInterface.INST.getHMI();
     }
     
 

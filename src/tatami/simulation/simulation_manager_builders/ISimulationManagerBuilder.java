@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
+import tatami.HMI.pub.HMIInterface;
+import tatami.core.agent.io.AgentActiveIO;
 import tatami.simulation.AgentCreationData;
 import tatami.simulation.AgentLoader;
 import tatami.simulation.PlatformLoader;
@@ -35,6 +37,8 @@ public abstract class ISimulationManagerBuilder {
     // for the agent to be started in the container, on the platform
     Set<AgentCreationData> allAgents = new HashSet<AgentCreationData>();
     
+    AgentActiveIO graphicalUserInterface;
+    
     XMLNode timeline = null;;
     
     abstract public void buildPlatform() throws SimulationEzception, PlatformException;
@@ -46,6 +50,8 @@ public abstract class ISimulationManagerBuilder {
     abstract public void buildContainerAgents();
     
     abstract public void buildTimeline();
+    
+    abstract public void buildGUI();
     
     
     public Map<String, PlatformLoader> getPlatform(){
@@ -70,5 +76,9 @@ public abstract class ISimulationManagerBuilder {
     
     public XMLNode getTimeline(){
         return timeline;
+    }
+    
+    public AgentActiveIO getGUI(){
+        return graphicalUserInterface;
     }
 }

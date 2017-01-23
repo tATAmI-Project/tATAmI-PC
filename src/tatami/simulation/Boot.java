@@ -14,10 +14,12 @@ package tatami.simulation;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponentExt;
 import net.xqhs.util.logging.logging.Logging;
+import tatami.core.agent.io.AgentActiveIO.InputListener;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder;
 import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder.AgentLoaderException;
@@ -33,7 +35,7 @@ import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder
  * @author Andrei Olaru
  * @author Nguyen Thi Thuy Nga
  */
-public class Boot
+public class Boot implements InputListener
 {
 	/**
 	 * The log of the class.
@@ -127,10 +129,12 @@ public class Boot
 		Logging.getMasterLogging().setLogLevel(Level.ALL);
 		
 		SimulationManagerXMLBuilder builder = null;
+		
 		try{
 		    builder = new SimulationManagerXMLBuilder(args);
 		    builder.buildPlatform();
 		    builder.buildAgentLoaders();
+		    builder.buildGUI();
 		}
 		catch(SimulationManagerXMLBuilder.SimulationEzception exception){
 		    log.error(exception.getMessage());
@@ -143,6 +147,8 @@ public class Boot
 		    log.error(exception.getMessage());
 		    return;
 		}
+		Boot boot = new Boot();
+		builder.getGUI().connectInput("CORE", boot);
 		
 		/*
 		builder.buildAgentPackages();
@@ -150,6 +156,11 @@ public class Boot
 		builder.buildTimeline();
 		*/
 		
-		new Boot().boot(builder);
+		boot.boot(builder);
 	}
+
+    @Override
+    public void receiveInput(String portName, Vector<Object> arguments) {
+        System.out.println("Input received");
+    }
 }
