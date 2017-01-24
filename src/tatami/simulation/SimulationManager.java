@@ -13,6 +13,7 @@ package tatami.simulation;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -65,50 +66,16 @@ public class SimulationManager implements AgentManager, InputListener
 	
 
 	/**
-	 * Components of the simulation manager GUI.
+	 * States of the simulation
 	 * 
 	 * @author Andrei Olaru
 	 */
 	public enum SimulationComponent {
-		/**
-		 * Button to create the agents.
-		 */
-		CREATE,
-		
-		/**
-		 * Button to start simulation.
-		 */
-		START,
-		
-		/**
-		 * Field showing the simulation time.
-		 */
-		TIME,
-		
-		/**
-		 * Button to pause simulation.
-		 */
-		PAUSE,
-		
-		/**
-		 * Button to destroy all agents in the simulation.
-		 */
-		CLEAR,
-		
-		/**
-		 * Button to exit all platforms completely and close the application.
-		 */
-		EXIT,
+		STEADY,
+
+		RUNNING,
 	}
 	
-	/**
-	 * Window type for the simulation manager window.
-	 */
-	public static final String			WINDOW_TYPE						= "system";
-	/**
-	 * Window name for the simulation manager window.
-	 */
-	public static final String			WINDOW_NAME						= "simulation";
 	/**
 	 * The name of the attribute indicating the time of the event.
 	 */
@@ -178,6 +145,7 @@ public class SimulationManager implements AgentManager, InputListener
 	
 	AgentActiveIO hmi;
 	
+	ISimulationManagerBuilder mBuilder;
 	/**
 	 * Creates a new instance, also starting the GUI, based on the map of platforms and their names, the map of agents
 	 * and their names (agents are managed by {@link AgentManager} wrappers and the timeline.
@@ -203,17 +171,63 @@ public class SimulationManager implements AgentManager, InputListener
 	{
 		log = (UnitComponentExt) new UnitComponentExt().setUnitName("simulation").setLoggerType(
 				PlatformUtils.platformLogType());
+		mBuilder = builder;
 		hmi = HMIInterface.INST.getHMI();
 		hmi.connectInput("Simulation Manager", this);
 		platforms = builder.getPlatform();
 		containers = builder.getAllContainers();
 		agents = builder.getAllAgents();
+		/*
 		if(builder.getTimeline() != null)
 			events = builder.getTimeline().getNodes();
 		else
 			events = Collections.emptyList();
+			*/
 		// TODO: add agent graph and corresponding representation
 	}
+	
+	/**
+     * The method starts the platforms specified in the first parameter and adds to each platform the containers
+     * corresponding to it, as indicated by the second parameter.
+     * 
+     * @param platforms
+     *            - the {@link Map} of platform names and respective {@link PlatformLoader} instances.
+     * @param platformContainers
+     *            - the {@link Map} containing platform name &rarr; {@link Set} of the names of the containers to add to
+     *            the platform.
+     * @return the number of platforms successfully started.
+     */
+    protected int startPlatforms(Map<String, PlatformLoader> platforms, Map<String, Set<String>> platformContainers)
+    {
+        int platformsOK = 0;
+        for(Iterator<PlatformLoader> itP = platforms.values().iterator(); itP.hasNext();)
+        {
+            PlatformLoader platform = itP.next();
+            String platformName = platform.getName();
+            if(!platform.start())
+            {
+                log.error("Platform [" + platformName + "] failed to start.");
+                itP.remove();
+                continue;
+            }
+            log.info("Platform [" + platformName + "] started.");
+            platformsOK++;
+            if(platformContainers.containsKey(platformName))
+                for(Iterator<String> itC = platformContainers.get(platformName).iterator(); itC.hasNext();)
+                {
+                    String containerName = itC.next();
+                    if(!platform.addContainer(containerName))
+                    {
+                        log.error("Adding container [" + containerName + "] to [" + platformName + "] has failed.");
+                        itC.remove();
+                    }
+                    else
+                        log.info("Container [" + containerName + "] added to [" + platformName + "].");
+                }
+        }
+        return platformsOK;
+    }
+    
 	
 	@Override
 	public boolean start()
@@ -228,22 +242,16 @@ public class SimulationManager implements AgentManager, InputListener
 	 */
 	public boolean startSystem()
 	{
-		try
-		{
-			AgentGuiConfig config = new AgentGuiConfig().setWindowType(WINDOW_TYPE).setWindowName(WINDOW_NAME);
-			//gui = (AgentGui) PlatformUtils.loadClassInstance(this, PlatformUtils.getSimulationGuiClass(), config);
-		} catch(Exception e)
-		{
-			log.error("Unable to create simulation GUI. Simulation stops here." + PlatformUtils.printException(e));
-			return false;
-		}
 		log.info("Simulation Manager started.");
+		Map<String, Set<String>> platformContainers = mBuilder.getPlatformContainers();
 		
-		if(!setupGui())
-		{
-			fullstop();
-			return false;
+		if (startPlatforms(platforms, platformContainers) <= 0) {
+		    log.error("Simulation start failed.");
+            for (PlatformLoader platform : platforms.values())
+                if (!platform.stop())
+                    log.error("Stopping platform [" + platform.getName() + "] failed");
 		}
+		
 		
 		// starts an agent on each platform
 		if(!startSimulationAgents())
@@ -269,8 +277,6 @@ public class SimulationManager implements AgentManager, InputListener
 				
 				String display = "___" + (int) (time / 600) + ":" + (int) ((time % 600) / 10) + "." + (time % 10)
 						+ "___";
-				//gui.doOutput(SimulationComponent.TIME.toString(),
-				//		new Vector<Object>(Arrays.asList(new Object[] { display })));
 				
 				int nextEvent = (events.isEmpty() ? 0 : Integer.parseInt(events.get(0).getAttributeValue(
 						EVENT_TIME_ATTRIBUTE)));
@@ -300,120 +306,8 @@ public class SimulationManager implements AgentManager, InputListener
 			}
 		}, 0, 100);
 	}
-	
-	/**
-	 * Sets up the functions of the buttons together with functionality related to simulation time.
-	 * 
-	 * @return <code>true</code> if setup is successful.
-	 */
-	protected boolean setupGui()
-	{/*
-		gui.connectInput(SimulationComponent.EXIT.toString(), new InputListener() {
-			@Override
-			public void receiveInput(String componentName, Vector<Object> arguments)
-			{
-				gui.background(new AgentGuiBackgroundTask() {
-					@Override
-					public void execute(Object arg, ResultNotificationListener resultListener)
-					{
-						stop();
-						resultListener.receiveResult(null);
-					}
-				}, null, new ResultNotificationListener() {
-					@Override
-					public void receiveResult(Object result)
-					{
-						if(FORCE_SYSTEM_EXIT)
-							PlatformUtils.systemExit(0);
-					}
-				});
-			}
-		});
-		
-		
-		if(agents.isEmpty())
-		{
-			gui.doOutput(SimulationComponent.CREATE.toString(), PlatformUtils.toVector((Object) null));
-			gui.doOutput(SimulationComponent.CLEAR.toString(), PlatformUtils.toVector((Object) null));
-		}
-		else
-		{
-			gui.connectInput(SimulationComponent.CREATE.toString(), new InputListener() {
-				@Override
-				public void receiveInput(String componentName, Vector<Object> arguments)
-				{
-					createAgents();
-				}
-			});
-			gui.connectInput(SimulationComponent.CLEAR.toString(), new InputListener() {
-				@Override
-				public void receiveInput(String componentName, Vector<Object> arguments)
-				{
-					signalAllAgents(AgentEventType.AGENT_STOP);
-				}
-			});
-			
-		}
-		
-		gui.connectInput(SimulationComponent.START.toString(), new InputListener() {
-			@Override
-			public void receiveInput(String componentName, Vector<Object> arguments)
-			{
-				gui.background(new AgentGuiBackgroundTask() {
-					@Override
-					public void execute(Object arg, ResultNotificationListener resultListener)
-					{
-						if(!agentsCreated)
-							createAgents();
-						signalAllAgents(AgentEventType.SIMULATION_START);
-						resultListener.receiveResult(null);
-					}
-				}, null, new ResultNotificationListener() {
-					@Override
-					public void receiveResult(Object result)
-					{
-						if(!events.isEmpty())
-						{
-							log.info("starting simulation. next event at "
-									+ (Integer.parseInt(events.get(0).getAttributeValue("time"))));
-							startTimers();
-						}
-					}
-				});
-			}
-		});
-		
-		gui.connectInput(SimulationComponent.PAUSE.toString(), new InputListener() {
-			@Override
-			public void receiveInput(String componentName, Vector<Object> arguments)
-			{
-				if(events.isEmpty())
-				{
-					gui.doOutput(SimulationComponent.TIME.toString(), PlatformUtils.toVector("no more events"));
-					
-					if(!isPaused)
-					{
-						theTime.cancel();
-					}
-				}
-				else if(isPaused)
-				{
-					log.info("simulation restarting, next event in "
-							+ (Integer.parseInt(events.get(0).getAttributeValue("time")) - time * 100));
-					startTimers();
-				}
-				else
-				{
-					theTime.cancel();
-					log.info("simulation stopped at " + time * 100 + ", next event was in "
-							+ (Integer.parseInt(events.get(0).getAttributeValue("time")) - time * 100));
-				}
-				isPaused = !isPaused;
-			}
-		});
-		*/
-		return true;
-	}
+
+
 	
 	/**
 	 * Starts the {@link SimulationLinkAgent} instances for all platforms.
@@ -645,7 +539,6 @@ public class SimulationManager implements AgentManager, InputListener
 	 */
     @Override
     public void receiveInput(String portName, Vector<Object> arguments) {
-        // TODO Auto-generated method stub
-        
+        System.out.println("Button pressed");
     }
 }

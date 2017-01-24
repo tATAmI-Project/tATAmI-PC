@@ -107,21 +107,6 @@ public class BootSettingsManager extends Config
 	 */
 	protected String				localContainerName	= null;
 	
-	// /////////////////// visualization layout
-	/**
-	 * The width of the application layout. This is meant for PC platforms, but may be used in other situations as well.
-	 */
-	protected int					applicationLayoutWidth;
-	/**
-	 * The height of the application layout. This is meant for PC platforms, but may be used in other situations as
-	 * well.
-	 */
-	protected int					applicationLayoutHeight;
-	/**
-	 * The window layout indications, for PC platforms.
-	 */
-	protected GridLayoutIndications	layout;
-	
 	private BootSettingsManager(){
 	    makeDefaults();
 	}
@@ -137,10 +122,6 @@ public class BootSettingsManager extends Config
 		localPort = BootDefaultArguments.localPort;
 		
 		localContainerName = BootDefaultArguments.localContainerName;
-		
-		applicationLayoutWidth = BootDefaultArguments.applicationLayoutWidth;
-		applicationLayoutHeight = BootDefaultArguments.applicationLayoutHeight;
-		layout = BootDefaultArguments.layout;
 		
 		return (BootSettingsManager) super.makeDefaults();
 	}
@@ -183,15 +164,6 @@ public class BootSettingsManager extends Config
 		case 8:
 			if(!"null".equals(programArguments[7]))
 				localContainerName = programArguments[7];
-			//$FALL-THROUGH$
-		case 7:
-			applicationLayoutHeight = Integer.parseInt(programArguments[6]);
-			//$FALL-THROUGH$
-		case 6:
-			if(programArguments.length == 6)
-				log.warn("incorrect number of arguments");
-			applicationLayoutWidth = Integer.parseInt(programArguments[5]);
-			//$FALL-THROUGH$
 		case 5:
 			try
 			{
@@ -267,12 +239,6 @@ public class BootSettingsManager extends Config
 				localPort == null ? "<null>" : localPort);
 		log.info("local container: []", localContainerName == null ? "<null>" : localContainerName);
 		
-		if(applicationLayoutWidth > 0)
-			layout.indicateW(applicationLayoutWidth);
-		if(applicationLayoutHeight > 0)
-			layout.indicateH(applicationLayoutHeight);
-		log.info("screen setup: []", applicationLayoutWidth + "x" + applicationLayoutHeight);
-		
 		log.doExit();
 		lock();
 		return scenarioTree;
@@ -326,29 +292,6 @@ public class BootSettingsManager extends Config
 		return localContainerName;
 	}
 	
-	/**
-	 * @return the applicationLayoutWidth
-	 */
-	public int getApplicationLayoutWidth()
-	{
-		return applicationLayoutWidth;
-	}
-	
-	/**
-	 * @return the applicationLayoutHeight
-	 */
-	public int getApplicationLayoutHeight()
-	{
-		return applicationLayoutHeight;
-	}
-	
-	/**
-	 * @return the layout
-	 */
-	public GridLayoutIndications getLayout()
-	{
-		return layout;
-	}
 	
 	public static BootSettingsManager getInst(){
 	    if(singleton == null)

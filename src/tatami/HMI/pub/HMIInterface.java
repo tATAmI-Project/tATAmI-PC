@@ -1,10 +1,8 @@
 package tatami.HMI.pub;
 
-import javafx.application.Application;
-import net.xqhs.util.logging.UnitComponentExt;
 import tatami.HMI.src.PC.fx.HMIPCGUI;
+import tatami.HMI.src.PC.fx.PCGUIThread;
 import tatami.core.agent.io.AgentActiveIO;
-import tatami.core.util.platformUtils.PlatformUtils;
 
 public enum HMIInterface {
     INST;
@@ -19,7 +17,17 @@ public enum HMIInterface {
         if(hmi == null){
             switch(HMI_TYPE){
             case PC:
-                Application.launch(HMIPCGUI.class);
+                try {
+                    PCGUIThread guiThread = new PCGUIThread();
+                    guiThread.start();
+                    while(HMIPCGUI.self == null){
+                        
+                    }
+                    hmi = HMIPCGUI.self;
+                    System.out.println("Reach here");
+                } catch (Exception e) {
+                    System.out.println("There was an issue starting the PC interface");
+                }
                 break;
             case ANDROID:
                 break;

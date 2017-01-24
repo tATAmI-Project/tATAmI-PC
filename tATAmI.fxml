@@ -5,7 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane fx:id="mainPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="mainPane" prefHeight="716.0" prefWidth="1066.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <BorderPane fx:id="borderPane" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
@@ -13,7 +13,7 @@
               <items>
                 <AnchorPane fx:id="underSplitPaneAnchor" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                      <children>
-                        <TreeTableView fx:id="elementsTreeTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <TreeTableView fx:id="mainTreeTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                           <columns>
                             <TreeTableColumn fx:id="firstColumnTreeTable" prefWidth="75.0" text="C1" />
                             <TreeTableColumn fx:id="secondColumnTreeTable" prefWidth="75.0" text="C2" />
@@ -29,7 +29,9 @@
               <menus>
                 <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
                   <items>
+                        <MenuItem fx:id="loadScenarioMenuItem" mnemonicParsing="false" onAction="#onLoadScenarioMenuItem" text="Load Scenario" />
                         <MenuItem fx:id="startSimulationMenuItem" mnemonicParsing="false" onAction="#onStartSimulationMenuItemPressed" text="Start Simulation" />
+                        <MenuItem fx:id="stopSimulationMenuItem" mnemonicParsing="false" onAction="#onStopSimulationMenuItemPressed" text="Stop Simulation" />
                     <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close" />
                   </items>
                 </Menu>

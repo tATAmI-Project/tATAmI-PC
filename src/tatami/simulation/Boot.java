@@ -43,6 +43,10 @@ public class Boot implements InputListener
 	static protected UnitComponentExt	log	= (UnitComponentExt) new UnitComponentExt().setUnitName("boot").setLoggerType(
 											PlatformUtils.platformLogType());
 	
+	private SimulationManager simulation = null;
+	
+	private static Boot boot = null;
+	
 	/**
 	 * The method handling main functionality of {@link Boot}.
 	 * <p>
@@ -50,73 +54,41 @@ public class Boot implements InputListener
 	 * @param args
 	 *            - the arguments received by the program.
 	 */
-	public void boot(SimulationManagerXMLBuilder builder)
-	{
-		log.trace("Booting World.");
-		
-		Map<String, PlatformLoader> platforms = builder.getPlatform();
-		
-		Map<String, Set<String>> platformContainers = builder.getPlatformContainers();
-		
-		// agents prepared, time to start platforms and the containers.
-		if(startPlatforms(platforms, platformContainers) > 0)
-		{
+    public void boot(SimulationManagerXMLBuilder builder) {
+        log.trace("Booting World.");
 
-			// start simulation
-			if(!new SimulationManager(builder).start())
-			{
-				log.error("Simulation start failed.");
-				for(PlatformLoader platform : platforms.values())
-					if(!platform.stop())
-						log.error("Stopping platform [" + platform.getName() + "] failed");
-			}
-		}
-		else
-			log.error("No agent platforms loaded. Simulation will not start.");
-		log.doExit();
-	}
+        simulation = new SimulationManager(builder);
+/*
+        if (!simulation.start()) {
 
-	/**
-	 * The method starts the platforms specified in the first parameter and adds to each platform the containers
-	 * corresponding to it, as indicated by the second parameter.
-	 * 
-	 * @param platforms
-	 *            - the {@link Map} of platform names and respective {@link PlatformLoader} instances.
-	 * @param platformContainers
-	 *            - the {@link Map} containing platform name &rarr; {@link Set} of the names of the containers to add to
-	 *            the platform.
-	 * @return the number of platforms successfully started.
-	 */
-	protected int startPlatforms(Map<String, PlatformLoader> platforms, Map<String, Set<String>> platformContainers)
-	{
-		int platformsOK = 0;
-		for(Iterator<PlatformLoader> itP = platforms.values().iterator(); itP.hasNext();)
-		{
-			PlatformLoader platform = itP.next();
-			String platformName = platform.getName();
-			if(!platform.start())
-			{
-				log.error("Platform [" + platformName + "] failed to start.");
-				itP.remove();
-				continue;
-			}
-			log.info("Platform [" + platformName + "] started.");
-			platformsOK++;
-			if(platformContainers.containsKey(platformName))
-				for(Iterator<String> itC = platformContainers.get(platformName).iterator(); itC.hasNext();)
-				{
-					String containerName = itC.next();
-					if(!platform.addContainer(containerName))
-					{
-						log.error("Adding container [" + containerName + "] to [" + platformName + "] has failed.");
-						itC.remove();
-					}
-					else
-						log.info("Container [" + containerName + "] added to [" + platformName + "].");
-				}
-		}
-		return platformsOK;
-	}
+        } else {
+            log.error("No agent platforms loaded. Simulation will not start.");
+        }
+        */
+    }
+    
+    public static SimulationManagerXMLBuilder makeBuilder(String[] args) {
+        SimulationManagerXMLBuilder builder = null;
+
+        try {
+            builder = new SimulationManagerXMLBuilder(args);
+            builder.buildPlatform();
+            builder.buildAgentLoaders();
+            builder.buildGUI();
+        } catch (SimulationManagerXMLBuilder.SimulationEzception exception) {
+            log.error(exception.getMessage());
+            return null;
+        } catch (PlatformException exception) {
+            log.warn(exception.getMessage());
+        } catch (AgentLoaderException exception) {
+            log.error(exception.getMessage());
+            return null;
+        }
+        
+        return builder;
+    }
+
+	
 	
 	/**
 	 * Main method. It calls {@link Boot#boot(String[])} with the arguments received by the program.
@@ -127,40 +99,28 @@ public class Boot implements InputListener
 	public static void main(String[] args)
 	{
 		Logging.getMasterLogging().setLogLevel(Level.ALL);
-		
-		SimulationManagerXMLBuilder builder = null;
-		
-		try{
-		    builder = new SimulationManagerXMLBuilder(args);
-		    builder.buildPlatform();
-		    builder.buildAgentLoaders();
-		    builder.buildGUI();
-		}
-		catch(SimulationManagerXMLBuilder.SimulationEzception exception){
-		    log.error(exception.getMessage());
-		    return;
-		}
-		catch(PlatformException exception){
-		    log.warn(exception.getMessage());
-		}
-		catch(AgentLoaderException exception){
-		    log.error(exception.getMessage());
-		    return;
-		}
-		Boot boot = new Boot();
-		builder.getGUI().connectInput("CORE", boot);
-		
-		/*
-		builder.buildAgentPackages();
-		builder.buildContainerAgents();
-		builder.buildTimeline();
-		*/
-		
-		boot.boot(builder);
+		boot = new Boot();
+		loadInitialData(args);
+	}
+	
+	public static void loadInitialData(String[] args){
+	    
+        SimulationManagerXMLBuilder builder = makeBuilder(args);
+        builder.getGUI().connectInput("BOOT", boot);
+        boot.boot(builder);
 	}
 
     @Override
     public void receiveInput(String portName, Vector<Object> arguments) {
-        System.out.println("Input received");
+        if(portName.equals("GUI")){
+            if(arguments.get(0).equals("LOAD SCENARIO")){
+                
+                System.out.println("Load scenario");
+                String[] args = new String[1];
+                args[0] = arguments.get(0).toString();
+                loadInitialData(args);
+            }
+        }
+        
     }
 }

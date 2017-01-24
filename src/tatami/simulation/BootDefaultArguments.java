@@ -60,43 +60,6 @@ public class BootDefaultArguments
 	/**
 	 * Main container name.
 	 */
-	static final String				localContainerName		= null;
-															
-	/**
-	 * The width of the application space.
-	 */
-	static final int				applicationLayoutWidth	= 1200;
-															
-	/**
-	 * The height of the application space.
-	 */
-	static final int				applicationLayoutHeight	= 600;
-															
-	/**
-	 * The layout indications for the PC application.
-	 */
-	static GridLayoutIndications	layout					= (GridLayoutIndications) new GridLayoutIndications(15, 10)
-															
-			// .indicateBar(BarPosition.LEFT, 0, 0) // otherwise
-			
-			.indicateWindow(AgentGuiConfig.DEFAULT_WINDOW_TYPE, 5, 3)
-																	
-																	.indicateWindow(SimulationManager.WINDOW_TYPE, 10,
-																			4)
-																			
-																	.indicateWindowPosition(
-																			SimulationManager.WINDOW_NAME, 0, 0)
-																			
-																	.indicateWindow(AmILabGui.WINDOW_TYPE, 10, 6)
-																	
-																	.indicateBar(BarPosition.LEFT, 100, 0)
-																	
-																	.indicatePositionY(100)
-																	
-																	.indicateW(applicationLayoutWidth)
-																	
-																	.indicateH(applicationLayoutHeight)
-																	
-																;
+	static final String				localContainerName		= null;												
 																
 }
