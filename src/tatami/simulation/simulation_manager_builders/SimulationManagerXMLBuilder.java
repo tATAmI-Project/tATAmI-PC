@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 import net.xqhs.util.XML.XMLTree;
 import net.xqhs.util.XML.XMLTree.XMLNode;
@@ -18,6 +19,7 @@ import tatami.simulation.AgentCreationData;
 import tatami.simulation.AgentLoader;
 import tatami.simulation.AgentLoader.StandardAgentLoaderType;
 import tatami.simulation.AgentManager;
+import tatami.simulation.BootDefaultArguments;
 import tatami.simulation.BootSettingsManager;
 import tatami.simulation.PlatformLoader;
 import tatami.simulation.PlatformLoader.StandardPlatformType;
@@ -52,6 +54,10 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
     XMLTree scenarioTree;
     
     public SimulationManagerXMLBuilder(String args[]) throws SimulationEzception{
+        
+        if(graphicalUserInterface == null)
+            graphicalUserInterface = HMIInterface.INST.getHMI();
+        
         try {
             /*Load the DOM tree*/
             scenarioTree = BootSettingsManager.getInst().load(args, true);
@@ -61,6 +67,12 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
         } catch (ConfigLockedException e) {
             throw new SimulationEzception("settings were locked (shouldn't ever happen): " + PlatformUtils.printException(e));
         }
+        
+        
+        Vector<Object> components = new Vector<Object>();
+        components.addElement(BootDefaultArguments.scenarioFileName);
+        components.addElement(BootDefaultArguments.scenarioFileName.substring(BootDefaultArguments.scenarioFileName.lastIndexOf("/")+1, BootDefaultArguments.scenarioFileName.length()));
+        getGUI().doOutput("CORE", components);
     }
     
     /**
@@ -133,6 +145,11 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
         
         if(platforms.isEmpty()){
             throw new SimulationEzception("No Platform could be loaded!");
+        }
+        for(String platformName: platforms.keySet()){
+            Vector<Object> args = new Vector<Object>();
+            args.addElement(platformName);
+            graphicalUserInterface.doOutput("CORE-NEW-PLATFORM", args);
         }
         defaultPlatform = platforms.values().iterator().next().getName();
         log.trace("Default platform is [" + defaultPlatform + "].");
@@ -419,8 +436,6 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
 
     @Override
     public void buildGUI() {
-        graphicalUserInterface = HMIInterface.INST.getHMI();
+        
     }
-    
-
 }

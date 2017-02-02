@@ -14,28 +14,29 @@ public enum HMIInterface {
     AgentActiveIO hmi;
     
     public AgentActiveIO getHMI(){
-        if(hmi == null){
-            switch(HMI_TYPE){
-            case PC:
-                try {
-                    PCGUIThread guiThread = new PCGUIThread();
-                    guiThread.start();
-                    while(HMIPCGUI.self == null){
-                        
-                    }
-                    hmi = HMIPCGUI.self;
-                    System.out.println("Reach here");
-                } catch (Exception e) {
-                    System.out.println("There was an issue starting the PC interface");
-                }
-                break;
-            case ANDROID:
-                break;
-            case CLI:
-                break;
-            default:
-                break;
+        if(hmi != null)
+            return hmi;
+        switch (HMI_TYPE) {
+        case PC:
+            try {
+                PCGUIThread guiThread = new PCGUIThread();
+                guiThread.start();
+                while (HMIPCGUI.self == null)
+                    ;
+                while (!HMIPCGUI.self.isStarted())
+                    ;
+                hmi = HMIPCGUI.self;
+                System.out.println("Reach here");
+            } catch (Exception e) {
+                System.out.println("There was an issue starting the PC interface");
             }
+            break;
+        case ANDROID:
+            break;
+        case CLI:
+            break;
+        default:
+            break;
         }
         return hmi;
     }

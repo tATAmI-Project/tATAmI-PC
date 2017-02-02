@@ -29,7 +29,7 @@ public class BootDefaultArguments
 	/**
 	 * The scenario file.
 	 */
-	static final String				scenarioFileName		= "src-scenario/scenario/dev/dummy/scenario-dummy.xml";
+	public static final String				scenarioFileName		= "src-scenario/scenario/dev/dummy/scenario-dummy.xml";
 	// static final String scenarioFileName = "src-scenario/scenario/amilab/app_demo/scenario-distributed-client.xml";
 	// static final String scenarioFileName = "src-scenario/scenario/amilab/app_demo/scenario-distributed-server.xml";
 	// static final String scenarioFileName = "src-scenario/scenario/amilab/scenario-consumer-A.xml";

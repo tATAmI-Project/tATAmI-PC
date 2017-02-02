@@ -72,9 +72,10 @@ public class Boot implements InputListener
 
         try {
             builder = new SimulationManagerXMLBuilder(args);
+            builder.getGUI().connectInput("CORE", boot);
+            builder.buildGUI();
             builder.buildPlatform();
             builder.buildAgentLoaders();
-            builder.buildGUI();
         } catch (SimulationManagerXMLBuilder.SimulationEzception exception) {
             log.error(exception.getMessage());
             return null;
@@ -106,7 +107,6 @@ public class Boot implements InputListener
 	public static void loadInitialData(String[] args){
 	    
         SimulationManagerXMLBuilder builder = makeBuilder(args);
-        builder.getGUI().connectInput("BOOT", boot);
         boot.boot(builder);
 	}
 
@@ -121,6 +121,5 @@ public class Boot implements InputListener
                 loadInitialData(args);
             }
         }
-        
     }
 }

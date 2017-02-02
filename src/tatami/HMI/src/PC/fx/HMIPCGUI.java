@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import tatami.core.agent.io.AgentActiveIO;
-import tatami.core.agent.io.AgentActiveIO.InputListener;
 
 public class HMIPCGUI extends Application implements AgentActiveIO {
     
@@ -20,6 +20,10 @@ public class HMIPCGUI extends Application implements AgentActiveIO {
     volatile public static HMIPCGUI self = null;
 
     HashMap<String, InputListener> mListeners;
+    
+    MenuItemsController mController;
+    
+    boolean mStarted = false;
     
     public HMIPCGUI() {
         self = this;
@@ -32,11 +36,11 @@ public class HMIPCGUI extends Application implements AgentActiveIO {
     public void start(Stage primaryStage) {
         stage = primaryStage;
         try{
-            MenuItemsController controller = new MenuItemsController(this);
+            mController = new MenuItemsController(this);
             FXMLLoader loader = new FXMLLoader();
             String fxmlDocPath = "tATAmI.fxml";
             FileInputStream fxmlStream = new FileInputStream(fxmlDocPath);
-            loader.setController(controller);
+            loader.setController(mController);
 
             Parent root = (Parent) loader.load(fxmlStream);
 
@@ -44,6 +48,7 @@ public class HMIPCGUI extends Application implements AgentActiveIO {
             Scene scene = new Scene(root, SCREEN_WIDTH, SCREEN_HEIGHT);
             primaryStage.setScene(scene);
             primaryStage.show();
+            mStarted = true;
         } 
         catch (Exception e) {
             System.out.println("HMIPCGUI error " + e.getMessage());
@@ -59,13 +64,16 @@ public class HMIPCGUI extends Application implements AgentActiveIO {
                 mListeners.get(key).receiveInput(portName, arguments);
             }
         }
+        if (portName.equals("CORE-NEW-PLATFORM")) {
+            mController.newPlatformDescription(arguments.get(0).toString());
+        }
         if(portName.equals("CORE")){
             incomingMessage(portName, arguments);
         }
     }
     
-    private void incomingMessage(String portName, Vector<Object> arguments){
-        
+    private void incomingMessage(String portName, Vector<Object> arguments) {
+        mController.newProjectDescription(arguments.elementAt(0).toString(), arguments.elementAt(1).toString());
     }
 
     @Override
@@ -82,6 +90,10 @@ public class HMIPCGUI extends Application implements AgentActiveIO {
 
     @Override
     public void setDefaultListener(InputListener listener) {
+    }
+    
+    synchronized public boolean isStarted(){
+        return mStarted;
     }
     
     public Stage getStage(){
