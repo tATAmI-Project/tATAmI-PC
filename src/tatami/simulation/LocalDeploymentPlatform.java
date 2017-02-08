@@ -215,7 +215,7 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 	@Override
 	public boolean loadAgent(String containerName, AgentManager agentManager)
 	{
-		return agentManager.setPlatformLink(this) && super.loadAgent(containerName, agentManager);
+		return super.loadAgent(containerName, agentManager);
 	}
 	
 	@Override

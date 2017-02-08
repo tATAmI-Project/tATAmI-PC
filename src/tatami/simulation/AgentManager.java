@@ -65,7 +65,7 @@ public interface AgentManager
 	 *            - the link to the platform.
 	 * @return <code>true</code> if the operation was successful. <code>false</code> otherwise.
 	 */
-	public boolean setPlatformLink(PlatformLink link);
+	//public boolean setPlatformLink(PlatformLink link);
 	
 	/**
 	 * Retrieves the name of the agent managed by this instance.
@@ -73,6 +73,4 @@ public interface AgentManager
 	 * @return the name of the agent.
 	 */
 	public String getAgentName();
-	
-	public void resume();
 }

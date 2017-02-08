@@ -9,22 +9,29 @@ import java.util.Vector;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
 import tatami.HMI.src.PC.fx.Tree.ITreeNode;
 import tatami.HMI.src.PC.fx.Tree.TreeElementsFactory;
+import tatami.HMI.src.PC.fx.data.AgentDescription;
+import tatami.HMI.src.PC.fx.data.ContainerDescription;
 import tatami.HMI.src.PC.fx.data.PlatformDescription;
-import tatami.HMI.src.PC.fx.data.ProjectDescription;
+import tatami.HMI.src.PC.fx.data.ProjectDetails;
 
 public class MenuItemsController implements Initializable{
     
@@ -43,13 +50,18 @@ public class MenuItemsController implements Initializable{
     @FXML
     private TreeTableColumn<ITreeNode, String> mainColumnTableView;
     
+    @FXML
+    private ImageView startSimulationTooblarIcon;
+    
+    ContextMenu platformDescriptionContextMenu;
+    
     HashMap<String, EventHandler<ActionEvent> > eventHandlers = null;
     
     private HMIPCGUI mParent;
     
     final FileChooser fileChooser = new FileChooser();
     
-    ProjectDescription mProjectDescription;
+    ProjectDetails mProjectDescription;
     
     public MenuItemsController(HMIPCGUI parent) {
         mParent = parent;
@@ -57,7 +69,23 @@ public class MenuItemsController implements Initializable{
 
     @Override
     public void initialize(URL url, ResourceBundle resource) {
+        startSimulationTooblarIcon.setImage(new Image(new File("res/icons/caret-right-2x.png").toURI().toString()));
+        platformDescriptionContextMenu = new ContextMenu();
+        platformDescriptionContextMenu.addEventFilter(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    System.out.println("consuming right release button in cm filter");
+                    event.consume();
+                }
+            }
+        });
         
+        MenuItem menuItem1 = new MenuItem("line 1");
+        MenuItem menuItem2 = new MenuItem("line 2");
+        MenuItem menuItem3 = new MenuItem("line 3");
+
+        platformDescriptionContextMenu.getItems().addAll(menuItem1, menuItem2, menuItem3);
     }
     
     @FXML
@@ -87,6 +115,12 @@ public class MenuItemsController implements Initializable{
         }
     }
     
+    @FXML
+    private void onStartSimulationTooblarButton(ActionEvent event){
+        Vector<Object> args = new Vector<Object>();
+        mParent.doOutput("GUI-START-SIMULATION", args);
+    }
+    
     public void newProjectDescription(String path, String name){
         MenuItemsController controller = this;
         Platform.runLater(new Runnable() {
@@ -100,14 +134,26 @@ public class MenuItemsController implements Initializable{
                     }
                 });
                 
-                mainColumnTableView.setCellFactory(ttc -> new TreeElementsFactory());
+                mainColumnTableView.setCellFactory(new Callback<TreeTableColumn<ITreeNode, String>, TreeTableCell<ITreeNode, String> >(){
+
+                    @Override
+                    public TreeTableCell<ITreeNode, String> call(TreeTableColumn<ITreeNode, String> param) {
+                        return new TreeElementsFactory(MenuItemsController.this);
+                    }
+                    
+                });
+                        
+                        //ttc -> new TreeElementsFactory(this));
                 
-                mProjectDescription = new ProjectDescription(controller, path, name);
+                mProjectDescription = new ProjectDetails(controller, path, name);
                 TreeItem<ITreeNode> projectNode = new TreeItem<>(mProjectDescription.getProjectData());
                 mainTreeTable.setRoot(projectNode);
                 
                 TreeItem<ITreeNode> allPlatformsNode = new TreeItem<>(new PlatformDescription.AllPlatformsDescription());
                 projectNode.getChildren().add(allPlatformsNode);
+                
+                TreeItem<ITreeNode> allContainersNode = new TreeItem<>(new ContainerDescription.AllContainersDescription());
+                projectNode.getChildren().add(allContainersNode);
             }
         });
     }
@@ -118,11 +164,45 @@ public class MenuItemsController implements Initializable{
             public void run() {
                 TreeItem<ITreeNode> treeItem = mainTreeTable.getRoot().getChildren().get(0);
                 mProjectDescription.addPlatformName(platformName);
-                for(int i = 0; i < mProjectDescription.platformsCount(); ++i){
-                    TreeItem platformDescriptionItem = new TreeItem<>(mProjectDescription.getPlatformDescription(i));
-                    treeItem.getChildren().add(platformDescriptionItem);
+
+                TreeItem platformDescriptionItem = new TreeItem<>(mProjectDescription.getPlatformDescription(mProjectDescription.platformsCount()-1));
+                
+                treeItem.getChildren().add(platformDescriptionItem);
+            }
+        });
+    }
+    
+    public void newContainerDescription(String containerName){
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                TreeItem<ITreeNode> treeItem = mainTreeTable.getRoot().getChildren().get(1);
+                mProjectDescription.addContainerDescription(containerName);
+
+                TreeItem containerDescriptionItem = new TreeItem<>(mProjectDescription.getContainerDescription(mProjectDescription.containersCount()-1));
+                treeItem.getChildren().add(containerDescriptionItem);
+            }
+        });
+    }
+    
+    public void newAgentDescritpion(String container, String agentName){
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                TreeItem<ITreeNode> containers =  mainTreeTable.getRoot().getChildren().get(1);
+                for(int i = 0; i < containers.getChildren().size(); ++i){
+                    if(containers.getChildren().get(i).getValue().toString().equals(container)){
+                        TreeItem containerDescriptionItem = new TreeItem<>(new AgentDescription(agentName));
+                        containers.getChildren().get(i).getChildren().add(containerDescriptionItem);
+                    }
                 }
             }
         });
+    }
+    
+    public void onStartPlatform(String name){
+        Vector<Object> args = new Vector<Object>();
+        args.addElement(name);
+        mParent.doOutput("GUI-START-PLATFORM", args);
     }
 }

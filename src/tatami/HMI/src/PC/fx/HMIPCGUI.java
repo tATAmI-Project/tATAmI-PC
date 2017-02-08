@@ -59,13 +59,19 @@ public class HMIPCGUI extends Application implements AgentActiveIO {
 
     @Override
     public void doOutput(String portName, Vector<Object> arguments) {
-        if (portName.equals("GUI")) {
+        if (portName.startsWith("GUI")) {
             for (String key : mListeners.keySet()) {
                 mListeners.get(key).receiveInput(portName, arguments);
             }
         }
         if (portName.equals("CORE-NEW-PLATFORM")) {
             mController.newPlatformDescription(arguments.get(0).toString());
+        }
+        if (portName.equals("CORE-NEW-CONTAINER")) {
+            mController.newContainerDescription(arguments.get(0).toString());
+        }
+        if (portName.equals("CORE-NEW-AGENT")) {
+            mController.newAgentDescritpion(arguments.get(0).toString(), arguments.get(1).toString());
         }
         if(portName.equals("CORE")){
             incomingMessage(portName, arguments);
@@ -84,7 +90,7 @@ public class HMIPCGUI extends Application implements AgentActiveIO {
 
     @Override
     public void connectInput(String componentName, InputListener listener) {
-        System.out.println("Input connected");
+        System.out.println("Input connected " + componentName);
         mListeners.put(componentName, listener);
     }
 

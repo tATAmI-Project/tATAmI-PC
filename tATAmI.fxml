@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.image.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -24,28 +25,41 @@
             </SplitPane>
          </center>
          <top>
-            <MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
-              <menus>
-                <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
-                  <items>
-                        <MenuItem fx:id="loadScenarioMenuItem" mnemonicParsing="false" onAction="#onLoadScenarioMenuItem" text="Load Scenario" />
-                        <MenuItem fx:id="startSimulationMenuItem" mnemonicParsing="false" onAction="#onStartSimulationMenuItemPressed" text="Start Simulation" />
-                        <MenuItem fx:id="stopSimulationMenuItem" mnemonicParsing="false" onAction="#onStopSimulationMenuItemPressed" text="Stop Simulation" />
-                    <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close" />
-                  </items>
-                </Menu>
-                <Menu fx:id="editMenu" mnemonicParsing="false" text="Edit">
-                  <items>
-                    <MenuItem fx:id="deleteMenuItem" mnemonicParsing="false" text="Delete" />
-                  </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Help">
-                  <items>
-                    <MenuItem mnemonicParsing="false" text="About" />
-                  </items>
-                </Menu>
-              </menus>
-            </MenuBar>
+            <VBox>
+               <children>
+                  <MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
+                    <menus>
+                      <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
+                        <items>
+                              <MenuItem fx:id="loadScenarioMenuItem" mnemonicParsing="false" onAction="#onLoadScenarioMenuItem" text="Load Scenario" />
+                              <MenuItem fx:id="startSimulationMenuItem" mnemonicParsing="false" onAction="#onStartSimulationMenuItemPressed" text="Start Simulation" />
+                              <MenuItem fx:id="stopSimulationMenuItem" mnemonicParsing="false" onAction="#onStopSimulationMenuItemPressed" text="Stop Simulation" />
+                          <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close" />
+                        </items>
+                      </Menu>
+                      <Menu fx:id="editMenu" mnemonicParsing="false" text="Edit">
+                        <items>
+                          <MenuItem fx:id="deleteMenuItem" mnemonicParsing="false" text="Delete" />
+                        </items>
+                      </Menu>
+                      <Menu mnemonicParsing="false" text="Help">
+                        <items>
+                          <MenuItem mnemonicParsing="false" text="About" />
+                        </items>
+                      </Menu>
+                    </menus>
+                  </MenuBar>
+                  <ToolBar prefHeight="40.0" prefWidth="200.0">
+                    <items>
+                      <Button fx:id="startSimulationTooblarButton" mnemonicParsing="false" onAction="#onStartSimulationTooblarButton">
+                           <graphic>
+                              <ImageView fx:id="startSimulationTooblarIcon" pickOnBounds="true" preserveRatio="true" />
+                           </graphic>
+                        </Button>
+                    </items>
+                  </ToolBar>
+               </children>
+            </VBox>
          </top>
          <bottom>
             <Label fx:id="statusBarLabel" text="Label" BorderPane.alignment="CENTER">

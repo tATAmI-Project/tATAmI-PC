@@ -44,11 +44,7 @@ public class AgentCreationData
 	 * The set of packages where the loader and the components may look for data.
 	 */
 	List<String>		packages;
-	/**
-	 * <code>true</code> if the agent should be created on the local machine, <code>false</code> if it should be created
-	 * on a different machine.
-	 */
-	boolean			isRemote;
+
 	/**
 	 * The name of the container in which the agent should be created. It cannot be <code>null</code>.
 	 */
@@ -90,7 +86,7 @@ public class AgentCreationData
 	 *            - the {@link XMLNode} instance corresponding to the agent, as resulted from parsing the scenario file.
 	 */
 	public AgentCreationData(String name, AgentParameters agentParameters, List<String> agentPackages,
-			String destination, boolean remote, String agentPlatform, AgentLoader agentLoader, XMLNode scenarioNode)
+			String destination, String agentPlatform, AgentLoader agentLoader, XMLNode scenarioNode)
 	{
 		if(name == null)
 			throw new NullPointerException("Agent name cannot be null");
@@ -107,7 +103,6 @@ public class AgentCreationData
 		parameters = agentParameters;
 		packages = (agentPackages != null) ? agentPackages : new ArrayList<String>();
 		destinationContainer = destination;
-		isRemote = remote;
 		platform = agentPlatform;
 		loader = agentLoader;
 		node = scenarioNode;
@@ -135,15 +130,6 @@ public class AgentCreationData
 	public List<String> getPackages()
 	{
 		return packages;
-	}
-	
-	/**
-	 * @return <code>true</code> if the agent should be created on the local machine, <code>false</code> if it should be
-	 *         created on a different machine.
-	 */
-	public boolean isRemote()
-	{
-		return isRemote;
 	}
 	
 	/**

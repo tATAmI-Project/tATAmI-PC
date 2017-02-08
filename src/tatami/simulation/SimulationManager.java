@@ -61,7 +61,7 @@ import tatami.simulation.simulation_manager_builders.ISimulationManagerBuilder;
  * 
  * @author Andrei Olaru
  */
-public class SimulationManager implements AgentManager, InputListener
+public class SimulationManager implements InputListener
 {
 	
 
@@ -229,7 +229,6 @@ public class SimulationManager implements AgentManager, InputListener
     }
     
 	
-	@Override
 	public boolean start()
 	{
 		return startSystem();
@@ -245,12 +244,14 @@ public class SimulationManager implements AgentManager, InputListener
 		log.info("Simulation Manager started.");
 		Map<String, Set<String>> platformContainers = mBuilder.getPlatformContainers();
 		
+		/*
 		if (startPlatforms(platforms, platformContainers) <= 0) {
 		    log.error("Simulation start failed.");
             for (PlatformLoader platform : platforms.values())
                 if (!platform.stop())
                     log.error("Stopping platform [" + platform.getName() + "] failed");
 		}
+		*/
 		
 		
 		// starts an agent on each platform
@@ -316,6 +317,7 @@ public class SimulationManager implements AgentManager, InputListener
 	 */
 	protected boolean startSimulationAgents()
 	{
+	    /*
 		for(PlatformLoader platform : platforms.values())
 		{
 			String platformName = platform.getName();
@@ -351,6 +353,7 @@ public class SimulationManager implements AgentManager, InputListener
 				simulationAgents.put(platformName, agent);
 			}
 		}
+		*/
 		return true;
 	}
 	
@@ -366,26 +369,24 @@ public class SimulationManager implements AgentManager, InputListener
 		for(AgentCreationData agentData : agents)
 		{
 			String agentName = agentData.getAgentName();
+			/*
 			if(!platforms.containsKey(agentData.getPlatform()))
 			{
 				log.error("Platform [" + agentData.getPlatform() + "] for agent [" + agentName + "] not found.");
 				continue;
 			}
+			*/
 			PlatformLoader platform = platforms.get(agentData.getPlatform());
-			String containerName = agentData.getDestinationContainer();
-			boolean localContainer = !agentData.isRemote();
-			if(localContainer)
-			{
-				AgentLoader loader = agentData.getAgentLoader();
-				AgentManager manager = loader.load(agentData);
-				if(manager != null)
-					if(platform.loadAgent(containerName, manager))
-						agentManagers.put(agentName, manager);
-					else
-						log.error("agent [" + agentName + "] failed to load on platform [" + platform.getName() + "]");
-				else
-					log.error("agent [" + agentName + "] failed to load");
-			}
+            String containerName = agentData.getDestinationContainer();
+            AgentLoader loader = agentData.getAgentLoader();
+            AgentManager manager = loader.load(agentData);
+            if (manager != null)
+                //if (platform.loadAgent(containerName, manager))
+                    agentManagers.put(agentName, manager);
+                //else
+                 //   log.error("agent [" + agentName + "] failed to load on platform [" + platform.getName() + "]");
+            else
+                log.error("agent [" + agentName + "] failed to load");
 			// TODO else: agents in remote containers
 		}
 		for(Entry<String, AgentManager> agent : agentManagers.entrySet())
@@ -439,7 +440,6 @@ public class SimulationManager implements AgentManager, InputListener
 				simulationAgents.get(platformName).broadcast(event);
 	}
 	
-	@Override
 	public boolean stop()
 	{
 		return stopSystem();
@@ -495,43 +495,27 @@ public class SimulationManager implements AgentManager, InputListener
 	 * As this class implements {@link AgentManager} only for convenience (abusing), it is not expected to be linked to
 	 * a platform "above" it, therefore the method will have no effect and always fail.
 	 */
+	/*
 	@Override
 	public boolean setPlatformLink(PlatformLink link)
 	{
 		return false;
-	}
+	}*/
 	
 	/**
 	 * As this class implements {@link AgentManager} only for convenience (abusing), one can consider it is always
 	 * running.
 	 */
-	@Override
 	public boolean isRunning()
 	{
 		// TODO check if this makes sense
 		return true;
 	}
 	
-	@Override
 	public boolean isStopped()
 	{
 		// TODO check if this makes sense
 		return false;
-	}
-	
-	/**
-	 * As this class implements {@link AgentManager} only for convenience (abusing), it does not have an agent name.
-	 */
-	@Override
-	public String getAgentName()
-	{
-		return null;
-	}
-
-	@Override
-	public void resume() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	/**
@@ -539,6 +523,14 @@ public class SimulationManager implements AgentManager, InputListener
 	 */
     @Override
     public void receiveInput(String portName, Vector<Object> arguments) {
-        System.out.println("Button pressed");
+        if(portName.equals("GUI-START-PLATFORM")){
+            if(platforms.containsKey(arguments.get(0).toString())){
+                platforms.get(arguments.get(0).toString()).start();
+            }
+        }
+        
+        if(portName.equals("GUI-START-SIMULATION")){
+            startSystem();
+        }
     }
 }

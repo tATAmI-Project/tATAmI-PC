@@ -285,6 +285,7 @@ public class CompositeAgent implements Serializable, AgentManager
 		return FSMToggleTransient();
 	}
 	
+	/*
 	@Override
 	public boolean setPlatformLink(PlatformLink link)
 	{
@@ -292,7 +293,7 @@ public class CompositeAgent implements Serializable, AgentManager
 			return false;
 		platformLink = link;
 		return true;
-	}
+	}*/
 	
 	/**
 	 * The method should be called by an agent component (relayed through {@link AgentComponent}) to disseminate a an

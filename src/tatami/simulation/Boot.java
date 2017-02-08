@@ -76,6 +76,9 @@ public class Boot implements InputListener
             builder.buildGUI();
             builder.buildPlatform();
             builder.buildAgentLoaders();
+            builder.buildContainerAgents();
+            
+            //builder.buildAgentPackages();
         } catch (SimulationManagerXMLBuilder.SimulationEzception exception) {
             log.error(exception.getMessage());
             return null;

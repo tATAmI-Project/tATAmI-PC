@@ -27,11 +27,7 @@
 				<scen:component name="parametric" />
 				<scen:component name="mobility" />
 				<scen:component name="messaging" />
-				<scen:component name="visualizable" />
-				<scen:component name="testing"
-					classpath="DummyComponent">
 					<scen:parameter name="other agent" value="AgentB" />
-				</scen:component>
 				<scen:parameter name="loader" value="composite" />
 				<scen:parameter name="name" value="AgentA" />
 			</scen:agent>

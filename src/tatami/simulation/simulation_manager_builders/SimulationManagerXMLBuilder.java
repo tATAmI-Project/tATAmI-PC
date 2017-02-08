@@ -1,6 +1,5 @@
 package tatami.simulation.simulation_manager_builders;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +10,7 @@ import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.config.Config.ConfigLockedException;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.HMI.pub.HMIInterface;
+import tatami.core.agent.agent_type.AgentLoaderFactory;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.platforms.PlatformFactory;
@@ -182,6 +182,7 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
                 log.error("Agent loader [" + loaderName + "] already defined.");
             else
             {
+                /*
                 String loaderClassPath = null;
                 try
                 {
@@ -203,11 +204,12 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
                         log.error("Loading agent loader [" + loaderName + "] failed; loader will not be available: "
                                 + PlatformUtils.printException(e));
                     }
+                    */
             }
         }
         
         // add standard agent loaders (except if they have already been specified and configured explicitly.
-        
+        /*
         for(StandardAgentLoaderType loader : StandardAgentLoaderType.values())
             if(!agentLoaders.containsKey(loader.toString()) && (loader.getClassName() != null))
                 try
@@ -220,6 +222,19 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
                     log.error("Loading agent loader [" + loader.toString() + "] failed; loader will not be available: "
                             + PlatformUtils.printException(e));
                 }
+        */
+        
+        for(StandardAgentLoaderType loader : StandardAgentLoaderType.values()){
+            if(agentLoaders.containsKey(loader.toString()))
+                continue;
+            AgentLoader specificLoader = AgentLoaderFactory.getInst().newInst(loader.toString());
+            if(specificLoader == null){
+                log.error("Loading agent loader [" + loader.toString() + "] failed; loader will not be available: ");
+                continue;
+            }
+            agentLoaders.put(loader.toString(), specificLoader);
+        }
+        
         String defaultLoader = null;
         if(agentLoaders.size() == 1)
             defaultLoader = agentLoaders.values().iterator().next().getName();
@@ -252,8 +267,7 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
      * @return an {@link AgentManager} instance that can be used to control the lifecycle of the just loaded agent, if
      *         the loading was successful; <code>null</code> otherwise.
      */
-    protected AgentCreationData preloadAgent(XMLNode agentNode, String agentName, String containerName,
-            boolean doCreateContainer, PlatformLoader platform)
+    protected AgentCreationData preloadAgent(XMLNode agentNode, String agentName, String containerName, PlatformLoader platform)
     {
         // loader
         String agentLoaderName = PlatformUtils.getParameterValue(agentNode, AgentParameterName.AGENT_LOADER.toString());
@@ -282,7 +296,7 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
             parameters.add(AgentParameterName.AGENT_PACKAGE, pack);
         
         AgentCreationData agentCreationData = new AgentCreationData(agentName, parameters, agentPackages,
-                containerName, !doCreateContainer, platform.getName(), loader, agentNode);
+                containerName, platform.getName(), loader, agentNode);
         if(!loader.preload(agentCreationData, platform, log))
         {
             log.error("Agent [" + agentName + "] cannot be loaded.");
@@ -325,12 +339,16 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
             
             // container information
             String containerName = containerConfig.getAttributeValue("name");
-            boolean doCreateContainer = (containerConfig.getAttributeValue("create") == null)
-                    || containerConfig.getAttributeValue("create").equals(new Boolean(true));
-            allContainers.put(containerName, new Boolean(doCreateContainer));
+            allContainers.put(containerName, true);
             
+            
+            Vector<Object> args = new Vector<Object>();
+            args.add(containerName);
+            graphicalUserInterface.doOutput("CORE-NEW-CONTAINER", args);
+            
+            /*
             // container has no agents, but should be created in said platform
-            if(doCreateContainer && !containerConfig.getNodeIterator("agent").hasNext())
+            if(!containerConfig.getNodeIterator("agenlt").hasNext())
             {
                 String platformName = containerConfig.getAttributeValue("platform");
                 if(platformName == null)
@@ -342,10 +360,12 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
                     platformContainers.get(platformName).add(containerName);
                 }
             }
+            */
             
             // set up creation for all agents in the container
             for(Iterator<XMLNode> agentNodes = containerConfig.getNodeIterator("agent"); agentNodes.hasNext();)
             {
+                System.out.println("Gets here?????????");
                 XMLNode agentNode = agentNodes.next();
                 // agent name
                 String agentName = PlatformUtils.getParameterValue(agentNode, AgentParameterName.AGENT_NAME.toString());
@@ -366,24 +386,22 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
                 }
                 
                 // load agent
-                AgentCreationData agentCreationData = preloadAgent(agentNode, agentName, containerName,
-                        doCreateContainer, platforms.get(platformName));
+                AgentCreationData agentCreationData = preloadAgent(agentNode, agentName, containerName, platforms.get(platformName));
                 if(agentCreationData == null)
                     continue;
                 allAgents.add(agentCreationData);
                 
-                // associate container with the platform
-                if(doCreateContainer)
-                {
-                    if(!platformContainers.containsKey(platformName))
-                        platformContainers.put(platformName, new HashSet<String>());
-                    platformContainers.get(platformName).add(containerName);
-                    log.trace("Agent [" + agentName + "] will be run on platform [" + platformName
-                            + "], in local container [" + containerName + "]");
-                }
-                else
-                    log.trace("Agent [" + agentName + "] will be run on platform [" + platformName
-                            + "], in remote container [" + containerName + "]");
+                Vector<Object> agentArgs = new Vector<Object>();
+                agentArgs.add(containerName);
+                agentArgs.add(agentName);
+                graphicalUserInterface.doOutput("CORE-NEW-AGENT", agentArgs);
+                /*
+                if (!platformContainers.containsKey(platformName))
+                    platformContainers.put(platformName, new HashSet<String>());
+                platformContainers.get(platformName).add(containerName);
+                */
+                log.trace("Agent [" + agentName + "] will be run on platform [" + platformName
+                        + "], in local container [" + containerName + "]");
             }
         }
     }

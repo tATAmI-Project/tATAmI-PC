@@ -125,26 +125,25 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	@Override
 	public WebSocketMessagingPlatform setConfig(XMLNode configuration, BootSettingsManager settings)
 	{
+	    log = (UnitComponentExt) new UnitComponentExt().setUnitName(COMMUNICATION_UNIT).setLogLevel(Level.ALL);
+	    
 		mAgentsbuffer = new ArrayList<OutputComplexMessageTokenizer>();
-		mAgentsbuffer.add(new OutputComplexMessageTokenizer());
 		
-		log = (UnitComponentExt) new UnitComponentExt().setUnitName(COMMUNICATION_UNIT).setLogLevel(Level.ALL);
+		mAgentsbuffer.add(new OutputComplexMessageTokenizer());
 		
 		mAgents = new HashMap<String, WebSocketMessagingComponent>();
 		
-		String tmpComponentType = settings.getMainHost();
+		String strMainHost = settings.getMainHost();
 		
 		String tmpPort = settings.getLocalPort();
 		
 		mClientHost = settings.getLocalHost();
 		
-		if(tmpComponentType.toLowerCase().indexOf("server") > -1)
-		{
+		if(strMainHost.toLowerCase().contains("server")){
 			componentType |= SERVER;
 		}
 		
-		if(tmpComponentType.toLowerCase().indexOf("client") > -1)
-		{
+		if(strMainHost.toLowerCase().contains("client")){
 			componentType |= CLIENT;
 		}
 		
@@ -155,63 +154,62 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	@Override
 	public boolean start()
 	{
-		if(componentType == NONE)
-		{
+		if(componentType == NONE){
 			return false;
 		}
-		
-		if((componentType & SERVER) == SERVER)
-		{
-			WebSocketImpl.DEBUG = false;
-			try
-			{
-				mServer = new AutobahnServer(mPort, new Draft_17());
-				mServer.start();
-				log.info("Communication server started");
-			} catch(UnknownHostException e)
-			{
-				log.error("Communication server could not be started");
-				e.printStackTrace();
-			}
-			
+		if((componentType & CLIENT) == CLIENT){
+		    startClient();
+		}
+
+		if((componentType & SERVER) == SERVER){
+		    startServer();
 		}
 		
-		
-
-		if((componentType & CLIENT) == CLIENT)
-		{
-			Draft d = new Draft_17();
-			String clientname = "tootallnate/websocket";
-
-			String protocol = "ws";
-
-			String serverlocation = protocol + "://" + mClientHost + ":" + mPort;
-			URI uri = null;
-			uri = URI.create(serverlocation + "/agent=" + clientname);
-
-			mClient = new AutobahnClient(d, uri);
-			mClientThread = new Thread(mClient);
-			mClientThread.start();
-			
-			boolean serverStarted = false;
-			while (!serverStarted) {
-				try {
-
-					
-					mClient.send("::handshake::");
-
-					log.info("Communication client started");
-					serverStarted = true;
-				} catch (Exception e) {
-					try {
-						Thread.sleep(10);
-					} catch (Exception ex) {
-
-					}
-				}
-			}
-		}
 		return true;
+	}
+	
+    private void startServer() {
+        WebSocketImpl.DEBUG = false;
+        try {
+            mServer = new AutobahnServer(mPort, new Draft_17());
+            mServer.start();
+            log.info("Websocket server started");
+        } catch (UnknownHostException e) {
+            log.error("Communication server could not be started");
+            e.printStackTrace();
+        }
+    }
+	
+	private void startClient(){
+	    
+        Draft d = new Draft_17();
+        String clientname = "tootallnate/websocket";
+
+        String protocol = "ws";
+
+        String serverlocation = protocol + "://" + mClientHost + ":" + mPort;
+        URI uri = null;
+        uri = URI.create(serverlocation + "/agent=" + clientname);
+
+        mClient = new AutobahnClient(d, uri);
+        mClientThread = new Thread(mClient);
+        mClientThread.start();
+
+        boolean serverStarted = false;
+        while (!serverStarted) {
+            try {
+                mClient.send("::handshake::");
+
+                log.info("Communication client started");
+                serverStarted = true;
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(10);
+                } catch (Exception ex) {
+
+                }
+            }
+        }
 	}
 	
 	@Override
@@ -336,7 +334,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 		
 		
 		System.out.println("^^^^^^^^^^^^^^ " + containerName);
-		agentManager.setPlatformLink(this);
+		//agentManager.setPlatformLink(this);
 		if(mClient != null){
 		    mClient.registerPlatform(this, agentManager.getAgentName());
 		    mClient.newAgentNotification(agentManager.getAgentName());
