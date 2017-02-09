@@ -25,11 +25,9 @@ import net.xqhs.util.logging.UnitComponent;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.AgentEvent.AgentSequenceType;
-import tatami.core.agent.mobility.MobilityComponent;
 import tatami.core.agent.parametric.AgentParameterName;
 import tatami.core.agent.parametric.ParametricComponent;
 import tatami.simulation.AgentManager;
-import tatami.simulation.PlatformLoader.PlatformLink;
 
 /**
  * This class reunites the components of an agent in order for components to be able to call each other and for events
@@ -168,7 +166,7 @@ public class CompositeAgent implements Serializable, AgentManager
 	/**
 	 * This can be used by platform-specific components to contact the platform.
 	 */
-	transient protected PlatformLink					platformLink				= null;
+	//transient protected PlatformLink					platformLink				= null;
 																					
 	/**
 	 * The {@link Map} that links component names (functionalities) to standard component instances.
@@ -429,8 +427,8 @@ public class CompositeAgent implements Serializable, AgentManager
 		default:
 			// do nothing
 		}
-		if(stateChanged)
-			getPlatformLink().onAgentStateChanged(event, this);
+		//if(stateChanged)
+		//	getPlatformLink().onAgentStateChanged(event, this);
 		// if the agent is now stopped (or transient) the agent thread can exit.
 		return isStopped();
 	}
@@ -541,10 +539,10 @@ public class CompositeAgent implements Serializable, AgentManager
 	 * 
 	 * @return the platform link.
 	 */
-	protected PlatformLink getPlatformLink()
-	{
-		return platformLink;
-	}
+	//protected PlatformLink getPlatformLink()
+	//{
+	//	return platformLink;
+	//}
 	
 	/**
 	 * Returns the name of the agent. It is the name that has been set through the <code>AGENT_NAME</code> parameter.

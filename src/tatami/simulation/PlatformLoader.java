@@ -11,9 +11,10 @@
  ******************************************************************************/
 package tatami.simulation;
 
+import java.util.HashMap;
+
 import net.xqhs.util.XML.XMLTree.XMLNode;
-import tatami.core.agent.AgentComponent.AgentComponentName;
-import tatami.core.agent.AgentEvent;
+import tatami.core.platforms.PlatformDescriptor;
 
 /**
  * The platform loader is the interface to the manager of an agent platform. It can load and manage agents. Agents are
@@ -24,14 +25,14 @@ import tatami.core.agent.AgentEvent;
  * 
  * @author Andrei Olaru
  */
-public interface PlatformLoader
+public abstract class PlatformLoader
 {
 	/**
 	 * Standard types of platforms. The name of the platform is used in the agent description in the scenario file.
 	 * 
 	 * @author Andrei Olaru
 	 */
-	enum StandardPlatformType {
+	public enum StandardPlatformType {
 		
 		/**
 		 * Agents will be loaded as Jade agents.
@@ -54,17 +55,12 @@ public interface PlatformLoader
 		 * 
 		 */
 		WEBSOCKET("tatami.websocket.WebSocketMessagingPlatform"),
-		
 		;
 		
 		/**
 		 * The name of the platform.
 		 */
 		private String	name	= null;
-		/**
-		 * The fully qualified name of the class to instantiate when starting the platform.
-		 */
-		private String	classN	= null;
 								
 		/**
 		 * Creates a new platform type, giving it a name that is the lower case version of the enumeration value, and
@@ -74,7 +70,6 @@ public interface PlatformLoader
 		private StandardPlatformType()
 		{
 			name = super.toString().toLowerCase();
-			classN = "tatami." + name + "." + name.substring(0, 1).toUpperCase() + name.substring(1) + "PlatformLoader";
 		}
 		
 		/**
@@ -87,7 +82,6 @@ public interface PlatformLoader
 		private StandardPlatformType(String className)
 		{
 			name = super.toString().toLowerCase();
-			classN = className;
 		}
 		
 		/**
@@ -102,15 +96,6 @@ public interface PlatformLoader
 		private StandardPlatformType(String platformName, String className)
 		{
 			name = platformName;
-			classN = className;
-		}
-		
-		/**
-		 * @return the name of the class to instantiate in order to create this platform loader.
-		 */
-		public String getClassName()
-		{
-			return classN;
 		}
 		
 		/**
@@ -123,31 +108,11 @@ public interface PlatformLoader
 		}
 	}
 	
-	/**
-	 * This interface should be implemented by classes facilitating the link between an agent and a platform (e.g. for
-	 * using specific platform functionalities).
-	 * <p>
-	 * Instances of this interface will be passed to {@link AgentManager}s to be used for calls to the platform.
-	 * <p>
-	 * The implementing instance may be one per platform or there may be a specific instance for each agent.
-	 * <p>
-	 * It is advised that the platform link is used by the agent by means of compatible agent components.
-	 * 
-	 * @author Andrei Olaru
-	 */
-	public static interface PlatformLink
-	{
-		/**
-		 * The method should be called by an agent when a relevant change in the agent's state occurs, with respect to
-		 * the platform. This is especially meant to signal changes in the agent's running/stopped status.
-		 * 
-		 * @param agent - the calling {@link AgentManager} instance.
-		 */
-		
-		public void onAgentStateChanged(AgentManager agent);
-		
-		public void onAgentStateChanged(AgentEvent event, AgentManager agent);
-	}
+    
+    public abstract void onStartAgent(String path);
+    
+    public abstract void onStopAgent(String path);
+    
 	
 	/**
 	 * The default platform to use, if no other is specified.
@@ -157,16 +122,19 @@ public interface PlatformLoader
 	/**
 	 * The name of the attribute containing the platform name in the XML file.
 	 */
-	static final String					NAME_ATTRIBUTE		= "name";
-	/**
-	 * The name of the attribute containing the class path of the {@link PlatformLoader} class, in the XML file.
-	 */
-	static final String					CLASSPATH_ATTRIBUTE	= "classpath";
+	public static final String					NAME_ATTRIBUTE		= "name";
+	
+	HashMap<String, String> platformConfig;
+	
+	String mName;
+	
 															
 	/**
 	 * @return the name of the platform loader, as used in the scenario file.
 	 */
-	public String getName();
+	public String getName(){
+	    return mName;
+	}
 	
 	/**
 	 * Configures the platform by passing the XML node in the scenario. The platform can extract the necessary settings.
@@ -180,60 +148,20 @@ public interface PlatformLoader
 	 *            - general application settings specified in the scenario file, program argumetns, etc.
 	 * @return the instance itself.
 	 */
-	public PlatformLoader setConfig(XMLNode configuration, BootSettingsManager settings);
+	public abstract PlatformLoader setConfig(PlatformDescriptor platformDescriptor);
 	
 	/**
 	 * Starts the agent platform.
 	 * 
 	 * @return <code>true</code> if the platform was started successfully; <code>false</code> otherwise.
 	 */
-	public boolean start();
+	public abstract boolean start();
 	
 	/**
 	 * Stops the agent platform.
 	 * 
 	 * @return <code>true</code> if the platform was stopped successfully; <code>false</code> otherwise.
 	 */
-	public boolean stop();
-	
-	/**
-	 * Creates a new container, on this platform, on this machine.
-	 * 
-	 * @param containerName
-	 *            - the name of the container to create.
-	 * @return <code>true</code> if the container was created successfully.
-	 */
-	public boolean addContainer(String containerName);
-	
-	/**
-	 * Loads the agent onto the platform. It also calls the method {@link AgentManager#setPlatformLink(PlatformLink)} to
-	 * create a link from the agent to the platform. The platform link may be the platform itself or an agent wrapper,
-	 * depending on the specific platform.
-	 * <p>
-	 * The method must guarantee that when it returns, the agent can be started immediately.
-	 * 
-	 * @param containerName
-	 *            - the name of the container in which to create the agent.
-	 * @param agentManager
-	 *            - the {@link AgentManager} handling the agent's lifecycle.
-	 * @return <code>true</code> if the operation is successful (meaning a subsequent call to
-	 *         {@link AgentManager#start()} should be able to start the agent.
-	 */
-	public boolean loadAgent(String containerName, AgentManager agentManager);
-	
-	/**
-	 * Retrieves the name of the class for a component implementation that is recommended by the platform, for the
-	 * specified component name, if any. If no such recommendation exists, <code>null</code> will be returned.
-	 * <p>
-	 * This is especially appropriate for components that depend strongly on the platform, such as messaging and
-	 * mobility. Using this method, agents can be easily implemented by adding the recommended components of the
-	 * platform.
-	 * <p>
-	 * TODO: use this, if any, for the agent components, instead of the component-specified implementation.
-	 * 
-	 * @param componentName
-	 *            - the type/name of the component to be recommended.
-	 * @return the name of the class of the recommended implementation.
-	 */
-	public String getRecommendedComponentClass(AgentComponentName componentName);
+	public abstract boolean stop();
+
 }

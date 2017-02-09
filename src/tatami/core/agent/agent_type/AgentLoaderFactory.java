@@ -18,8 +18,10 @@ public class AgentLoaderFactory {
     
     public AgentLoader newInst(String loaderName){
         if(loaderName.equals("composite")){
-            System.out.println("//////////////// composite");
             return new CompositeAgentLoader();
+        }
+        if(loaderName.equals("eventbased")){
+            return new EventBasedAgent();
         }
         return null;
     }

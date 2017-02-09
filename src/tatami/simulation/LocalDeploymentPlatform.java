@@ -22,14 +22,13 @@ import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.agent.messaging.NameBasedMessagingComponent;
-import tatami.simulation.PlatformLoader.PlatformLink;
 
 /**
  * Simple platform that allows agents to send messages locally (inside the same JVM) based simply on agent name.
  * 
  * @author Andrei Olaru
  */
-public class LocalDeploymentPlatform extends DefaultPlatform implements PlatformLink
+public class LocalDeploymentPlatform extends DefaultPlatform
 {
 	/**
 	 * Simple implementation of {@link MessagingComponent}, that uses agents' names as their addresses.
@@ -46,8 +45,7 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 		@Override
 		public boolean sendMessage(String target, String source, String content)
 		{
-			if(!(getPlatformLink() instanceof LocalDeploymentPlatform))
-				throw new IllegalStateException("Platform Link is not of expected type");
+/*
 			LocalDeploymentPlatform p = ((LocalDeploymentPlatform) getPlatformLink());
 			String[] targetElements = target.split(ADDRESS_SEPARATOR, 2);
 			SimpleLocalMessaging targetComponent = p.registry.get(targetElements[0]);
@@ -85,6 +83,7 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 				{
 					// nothing
 				}
+				*/
 			return true;
 		}
 		
@@ -92,6 +91,7 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 		protected void atAgentStart(AgentEvent event)
 		{
 			super.atAgentStart(event);
+			/*
 			if(!(getPlatformLink() instanceof LocalDeploymentPlatform))
 				throw new IllegalStateException("Platform Link is not of expected type");
 			try
@@ -102,6 +102,7 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 				// nothing
 			}
 			((LocalDeploymentPlatform) getPlatformLink()).registry.put(getAgentName(), this);
+			*/
 		}
 		
 		@Override
@@ -213,34 +214,9 @@ public class LocalDeploymentPlatform extends DefaultPlatform implements Platform
 	}
 	
 	@Override
-	public boolean loadAgent(String containerName, AgentManager agentManager)
-	{
-		return super.loadAgent(containerName, agentManager);
-	}
-	
-	@Override
-	public String getRecommendedComponentClass(AgentComponentName componentName)
-	{
-		if(componentName == AgentComponentName.MESSAGING_COMPONENT)
-			return SimpleLocalMessaging.class.getName();
-		return super.getRecommendedComponentClass(componentName);
-	}
-	
-	@Override
 	public String getName()
 	{
 		return StandardPlatformType.LOCAL.toString();
 	}
 
-	@Override
-	public void onAgentStateChanged(AgentManager agent)
-	{
-		// nothing to do
-	}
-
-	@Override
-	public void onAgentStateChanged(AgentEvent event, AgentManager agent) {
-		// TODO Auto-generated method stub
-		
-	}
 }

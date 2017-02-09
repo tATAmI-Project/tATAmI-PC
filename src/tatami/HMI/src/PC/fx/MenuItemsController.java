@@ -107,9 +107,8 @@ public class MenuItemsController implements Initializable{
         File file = fileChooser.showOpenDialog(mParent.getStage());
         if (file != null) {
             Vector<Object> args = new Vector<Object>();
-            args.addElement("LOAD SCENARIO");
             args.addElement(file);
-            mParent.doOutput("GUI", args);
+            mParent.doOutput("GUI-LOAD_SCENARIO", args);
             String path = file.toString();
             
         }
@@ -142,8 +141,6 @@ public class MenuItemsController implements Initializable{
                     }
                     
                 });
-                        
-                        //ttc -> new TreeElementsFactory(this));
                 
                 mProjectDescription = new ProjectDetails(controller, path, name);
                 TreeItem<ITreeNode> projectNode = new TreeItem<>(mProjectDescription.getProjectData());

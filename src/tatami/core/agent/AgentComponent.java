@@ -394,7 +394,7 @@ public abstract class AgentComponent implements Serializable
 	 *            - the {@link Logger} in which to output any potential problems (as warnings or errors).
 	 * @return <code>true</code> if no fatal issues were found; <code>false</code> otherwise.
 	 */
-	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode, List<String> agentPackages,
+	protected boolean preload(ComponentCreationData parameters, XMLNode scenarioNode,
 			Logger log)
 	{
 		if(parameters != null)
@@ -578,11 +578,12 @@ public abstract class AgentComponent implements Serializable
 	 * 
 	 * @return the platform link.
 	 */
+	/*
 	protected Object getPlatformLink()
 	{
 		return parentAgent.getPlatformLink();
 	}
-	
+	*/
 	/**
 	 * Relay for calls to the method {@link CompositeAgent#getComponent(AgentComponentName)}.
 	 * 

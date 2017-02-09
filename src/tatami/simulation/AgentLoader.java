@@ -11,8 +11,7 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import net.xqhs.util.XML.XMLTree.XMLNode;
-import net.xqhs.util.logging.Logger;
+import tatami.core.agent.AgentComponent.ComponentCreationData;
 import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.CompositeAgentLoader;
 
@@ -43,6 +42,8 @@ public interface AgentLoader
 		 * The agent is a {@link CompositeAgent} that is made up of various components.
 		 */
 		COMPOSITE(CompositeAgentLoader.class.getName()),
+		
+		EVENTBASED("eventbased"),
 		
 		/**
 		 * The agent is described by means of traditional Java code. Currently unimplemented.
@@ -124,17 +125,7 @@ public interface AgentLoader
 	 */
 	public String getName();
 	
-	/**
-	 * Configures the loader by passing the XML node in the scenario. The loader can extract the necessary settings.
-	 * <p>
-	 * The method should not perform any initializations that can fail. These should be done in the
-	 * {@link #load(AgentCreationData)} method.
-	 * 
-	 * @param configuration
-	 *            the XML node containing the configuration of the loader.
-	 * @return the instance itself.
-	 */
-	public AgentLoader setConfig(XMLNode configuration);
+	public void buildComponents(ComponentCreationData creationData);
 	
 	/**
 	 * The method checks potential problems that could appear in the creation of an agent, as specified by the
@@ -158,7 +149,7 @@ public interface AgentLoader
 	 *            - the {@link Logger} in which to output any potential problems (as warnings or errors).
 	 * @return <code>true</code> if no fatal issues were found; <code>false</code> otherwise.
 	 */
-	public boolean preload(AgentCreationData agentCreationData, PlatformLoader plaformLoader, Logger log);
+	//public boolean preload(AgentCreationData agentCreationData, PlatformLoader plaformLoader, Logger log);
 	
 	/**
 	 * The method loads all the information necessary for the creation of an agent and returns an {@link AgentManager}
@@ -172,5 +163,5 @@ public interface AgentLoader
 	 *            - the {@link AgentCreationData}, as loaded by {@link Boot} from the scenario file.
 	 * @return an {@link AgentManager} for the loaded agent.
 	 */
-	public AgentManager load(AgentCreationData agentCreationData);
+	//public AgentManager load(AgentCreationData agentCreationData);
 }

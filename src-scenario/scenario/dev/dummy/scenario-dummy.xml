@@ -19,16 +19,18 @@
 
 	<scen:platform>
 		<scen:parameter name="name" value="websocket" />
+		<scen:parameter name="server" value="true" />
+		<scen:parameter name="client" value="true" />
+		<scen:parameter name="server ip" value="192.168.0.11" />
+		<scen:parameter name="server port" value="9008" />
+		<scen:parameter name="client port" value="9008" />
 	</scen:platform>
 
 	<scen:initial>
 		<scen:container name="OtherContainer">
-		    <scen:agent>
+		    <scen:agent type="eventbased">
 				<scen:component name="parametric" />
 				<scen:component name="mobility" />
-				<scen:component name="messaging" />
-					<scen:parameter name="other agent" value="AgentB" />
-				<scen:parameter name="loader" value="composite" />
 				<scen:parameter name="name" value="AgentA" />
 			</scen:agent>
 		</scen:container>

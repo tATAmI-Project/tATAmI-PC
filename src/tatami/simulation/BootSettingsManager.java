@@ -11,14 +11,15 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import java.io.File;
+import java.util.HashMap;
+import java.util.Set;
 
 import net.xqhs.util.XML.XMLParser;
 import net.xqhs.util.XML.XMLTree;
 import net.xqhs.util.XML.XMLTree.XMLNode;
+import net.xqhs.util.XML.XMLTree.XMLNode.XMLAttribute;
 import net.xqhs.util.config.Config;
 import net.xqhs.util.logging.UnitComponentExt;
-import net.xqhs.windowLayout.grid.GridLayoutIndications;
 import tatami.core.util.platformUtils.PlatformUtils;
 
 /**
@@ -52,52 +53,10 @@ public class BootSettingsManager extends Config
 	protected String				SCENARIO_SCHEMA		= "src-schema/scenarioSchema3.xsd";
 	
 	/**
-	 * The name of the attribute in the config node of the scenario file.
-	 */
-	protected final String CONFIG_MAIN_HOST = "mainHost";
-	/**
-	 * The name of the attribute in the config node of the scenario file.
-	 */
-	protected final String CONFIG_MAIN_PORT = "mainPort";
-	/**
-	 * The name of the attribute in the config node of the scenario file.
-	 */
-	protected final String CONFIG_LOCAL_HOST = "localHost";
-	/**
-	 * The name of the attribute in the config node of the scenario file.
-	 */
-	protected final String CONFIG_LOCAL_PORT = "localPort";
-	
-	/**
 	 * The name of the XML scenario file that contains the settings for the current simulation.
 	 */
 	protected String				scenarioFileName;
 	
-	// /////////////////// network configuration
-	/**
-	 * The main host of the current simulation. This may be a URL or an IP.
-	 * <p>
-	 * For Jade-based setups, it is the IP of the main container.
-	 */
-	protected String				mainHost;
-	/**
-	 * The port on the main host, at which the main elements of the simulation are available.
-	 * <p>
-	 * For Jade-based setups, it is the port of the main container.
-	 */
-	protected String				mainPort;
-	/**
-	 * An indication of the local host.
-	 * <p>
-	 * For Jade-based setups, it is the IP of the local container.
-	 */
-	protected String				localHost;
-	/**
-	 * The local port at which the local elements of the simulation are available.
-	 * <p>
-	 * For Jade-based setups, it is the port of the local container.
-	 */
-	protected String				localPort;
 	/**
 	 * The name of the local agent container. If the main container will be created on this machine, this will be the
 	 * name of the main container.
@@ -107,7 +66,13 @@ public class BootSettingsManager extends Config
 	 */
 	protected String				localContainerName	= null;
 	
+	HashMap<String, String> configSettings;
+	
+	UnitComponentExt log = (UnitComponentExt) new UnitComponentExt().setUnitName("settings load").setLoggerType(
+            PlatformUtils.platformLogType());
+	
 	private BootSettingsManager(){
+	    configSettings = new HashMap<String, String>();
 	    makeDefaults();
 	}
 	
@@ -115,11 +80,6 @@ public class BootSettingsManager extends Config
 	public BootSettingsManager makeDefaults()
 	{
 		scenarioFileName = BootDefaultArguments.scenarioFileName;
-		
-		mainHost = BootDefaultArguments.mainHost;
-		mainPort = BootDefaultArguments.mainPort;
-		localHost = BootDefaultArguments.localHost;
-		localPort = BootDefaultArguments.localPort;
 		
 		localContainerName = BootDefaultArguments.localContainerName;
 		
@@ -154,8 +114,8 @@ public class BootSettingsManager extends Config
 	{
 		locked();
 		
-		UnitComponentExt log = (UnitComponentExt) new UnitComponentExt().setUnitName("settings load").setLoggerType(
-				PlatformUtils.platformLogType());
+		
+		/*
 		switch(programArguments.length)
 		{
 		default:
@@ -200,6 +160,7 @@ public class BootSettingsManager extends Config
 			//$FALL-THROUGH$
 		case 0:
 		}
+		*/
 		
 		XMLTree scenarioTree = null;
 		if(parseScenarioFile)
@@ -219,24 +180,25 @@ public class BootSettingsManager extends Config
 			// TODO: make this jade-independent
 			XMLNode configNode = (scenarioTree.getRoot().getNodeIterator("config").hasNext() ? scenarioTree.getRoot()
 					.getNodeIterator("config").next() : null);
+			
+			
+			
 			if(configNode != null)
 			{
-				if(configNode.getAttributeValue(CONFIG_MAIN_HOST) != null)
-					mainHost = configNode.getAttributeValue(CONFIG_MAIN_HOST);
-				if(configNode.getAttributeValue(CONFIG_MAIN_PORT) != null)
-					mainPort = configNode.getAttributeValue(CONFIG_MAIN_PORT);
-				if(configNode.getAttributeValue(CONFIG_LOCAL_HOST) != null)
-					localHost = configNode.getAttributeValue(CONFIG_LOCAL_HOST);
-				if(configNode.getAttributeValue(CONFIG_LOCAL_PORT) != null)
-					localPort = configNode.getAttributeValue(CONFIG_LOCAL_PORT);
+			    String logAttributes = "";
+			    for(XMLAttribute attribute : configNode.getAttributes()){
+			        configSettings.put(attribute.getName(), attribute.getValue());
+			        logAttributes += "(" + attribute.getName() + ", " + attribute.getValue() + "); ";
+			    }
+			    
+			    log.info(logAttributes);
+			    
 				if(configNode.getAttributeValue("mainContainerName") != null)
 					localContainerName = configNode.getAttributeValue("mainContainerName");
 			}
 		}
 		
-		log.info("network config: Main:[]:[] Local:[]:[]", mainHost == null ? "<null>" : mainHost,
-				mainPort == null ? "<null>" : mainPort, localHost == null ? "<null>" : localHost,
-				localPort == null ? "<null>" : localPort);
+		
 		log.info("local container: []", localContainerName == null ? "<null>" : localContainerName);
 		
 		log.doExit();
@@ -244,44 +206,43 @@ public class BootSettingsManager extends Config
 		return scenarioTree;
 	}
 	
+    public XMLTree load(String path) {
+        XMLTree scenarioTree = null;
+        
+        log.info("loading scenario [" + path + "]");
+        scenarioTree = XMLParser.validateParse(SCENARIO_SCHEMA, path);
+
+        if (scenarioTree == null) {
+            log.error("scenario parsing result is null.");
+            return scenarioTree;
+        }
+
+        log.info("scenario: " + scenarioTree.toString());
+        
+        XMLNode configNode = (scenarioTree.getRoot().getNodeIterator("config").hasNext()
+                ? scenarioTree.getRoot().getNodeIterator("config").next() : null);
+        if (configNode != null) {
+            String logAttributes = "";
+            for(XMLAttribute attribute : configNode.getAttributes()){
+                configSettings.put(attribute.getName(), attribute.getValue());
+                logAttributes += "(" + attribute.getName() + ", " + attribute.getValue() + "); ";
+            }
+            
+            log.info(logAttributes);
+            
+            if (configNode.getAttributeValue("mainContainerName") != null)
+                localContainerName = configNode.getAttributeValue("mainContainerName");
+        }
+        return scenarioTree;
+    }
+	
+	
 	/**
 	 * @return the scenarioFileName
 	 */
 	public String getScenarioFileName()
 	{
 		return scenarioFileName;
-	}
-	
-	/**
-	 * @return the mainHost
-	 */
-	public String getMainHost()
-	{
-		return mainHost;
-	}
-	
-	/**
-	 * @return the mainPort
-	 */
-	public String getMainPort()
-	{
-		return mainPort;
-	}
-	
-	/**
-	 * @return the localHost
-	 */
-	public String getLocalHost()
-	{
-		return localHost;
-	}
-	
-	/**
-	 * @return the localPort
-	 */
-	public String getLocalPort()
-	{
-		return localPort;
 	}
 	
 	/**

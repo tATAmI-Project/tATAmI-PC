@@ -12,68 +12,56 @@
 package tatami.websocket;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import main.java.org.java_websocket.WebSocketImpl;
 import main.java.org.java_websocket.drafts.Draft;
 import main.java.org.java_websocket.drafts.Draft_17;
-import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponentExt;
-import tatami.core.agent.AgentComponent.AgentComponentName;
-import tatami.core.agent.AgentEvent;
-import tatami.core.agent.CompositeAgent;
-import tatami.core.agent.mobility.MobilityComponent;
+import tatami.core.platforms.PlatformDescriptor;
 import tatami.simulation.AgentManager;
-import tatami.simulation.BootSettingsManager;
 import tatami.simulation.PlatformLoader;
-import tatami.simulation.PlatformLoader.PlatformLink;
 
 /**
  * Implements a {@link PlatformLoader} instance that allows centralized communication via WebSockets.
  */
-public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
+public class WebSocketMessagingPlatform extends PlatformLoader
 {
 	
 	/**
 	 * When the componentType is NONE, this class is neither server or client
 	 */
-	public static final int							NONE				= 0x0;
+	static final int							NONE				= 0x0;
 																		
 	/**
 	 * When the SERVER bit is configured, this class is initialized as a server
 	 */
-	public static final int							SERVER				= 0x1;
+	static final int							SERVER				= 0x1;
 																		
 	/**
 	 * When the CLIENT bit is configured, this class is initialized as a client
 	 */
-	public static final int							CLIENT				= 0x2;
+	static final int							CLIENT				= 0x2;
 																		
 	/**
 	 * In this parameter will be stored the info about the class profile: client, server or both
 	 */
-	public int										componentType		= NONE;
+	int										componentType		= NONE;
 																		
 	/**
 	 * The port on which the server will be started or on which the client will connect to the server
 	 */
-	public int										mPort				= 9002;
+	int										mPort				= 9002;
 																		
 	/**
 	 * The object representing the server if this platform will have the server role
 	 */
-	public AutobahnServer							mServer;
+	AutobahnServer							mServer;
 													
 	/**
 	 * The object representing the client if this platform will have the client role
@@ -90,29 +78,17 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	 */
 	String											mClientHost;
 													
-	/**
-	 * The register where all agents and their connections are registered
-	 */
-	HashMap<String, WebSocketMessagingComponent>	mAgents;
-													
 	/** the logger */
 	UnitComponentExt								log;
 	
 	
 	ArrayList<OutputComplexMessageTokenizer> mAgentsbuffer;
-	
-	Set<String> mContainers = null;
 													
 	/**
 	 * Name of the unit for logging purposes
 	 */
 	protected final static String					COMMUNICATION_UNIT	= "websock";
 																		
-	@Override
-	public String getName()
-	{
-		return StandardPlatformType.WEBSOCKET.toString();
-	}
 	
 	/**
 	 * Configure the current platform
@@ -123,7 +99,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	 *            The settings provided by the boot component
 	 */
 	@Override
-	public WebSocketMessagingPlatform setConfig(XMLNode configuration, BootSettingsManager settings)
+	public WebSocketMessagingPlatform setConfig(PlatformDescriptor platformDescriptor)
 	{
 	    log = (UnitComponentExt) new UnitComponentExt().setUnitName(COMMUNICATION_UNIT).setLogLevel(Level.ALL);
 	    
@@ -131,23 +107,19 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 		
 		mAgentsbuffer.add(new OutputComplexMessageTokenizer());
 		
-		mAgents = new HashMap<String, WebSocketMessagingComponent>();
-		
-		String strMainHost = settings.getMainHost();
-		
-		String tmpPort = settings.getLocalPort();
-		
-		mClientHost = settings.getLocalHost();
-		
-		if(strMainHost.toLowerCase().contains("server")){
-			componentType |= SERVER;
+		if(platformDescriptor.getValue("server").equals("true")){
+		    componentType |= SERVER;
 		}
 		
-		if(strMainHost.toLowerCase().contains("client")){
-			componentType |= CLIENT;
-		}
+		mPort = Integer.parseInt(platformDescriptor.getValue("server port"));
 		
-		mPort = Integer.parseInt(tmpPort);
+		if(platformDescriptor.getValue("client").equals("true")){
+            componentType |= CLIENT;
+        }
+		
+		mClientHost = platformDescriptor.getValue("server ip");
+		
+		
 		return this;
 	}
 	
@@ -171,9 +143,9 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
     private void startServer() {
         WebSocketImpl.DEBUG = false;
         try {
-            mServer = new AutobahnServer(mPort, new Draft_17());
+            mServer = new AutobahnServer(mPort, new SpecificDraft());
             mServer.start();
-            log.info("Websocket server started");
+            log.info("Websocket server started on port " + mPort);
         } catch (UnknownHostException e) {
             log.error("Communication server could not be started");
             e.printStackTrace();
@@ -206,7 +178,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
                 try {
                     Thread.sleep(10);
                 } catch (Exception ex) {
-
+                    log.error("Thread sleep failed");
                 }
             }
         }
@@ -229,7 +201,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 			return false;
 		}
 	}
-
+/*
 	@Override
 	public boolean addContainer(String containerName)
 	{
@@ -241,7 +213,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 		    mClient.newContainerNotification(containerName);
 		return true;
 	}
-	
+	*/
 	/**
 	 * 
 	 * @param target
@@ -254,7 +226,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	public void onMessage(String source, String target, String message)
 	{
 		String currentTarget = (target.indexOf("/") > 0) ? target.substring(0, target.indexOf("/")) : target;
-		mAgents.get(currentTarget).onMessage(source, target, message);
+		//mAgents.get(currentTarget).onMessage(source, target, message);
 	}
 	
 	public void onMobilityPackReceived(String content){
@@ -287,7 +259,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 			}
 			
 			System.out.println("Before loading");
-			
+			/*
 			if(loadAgent("Container", agent)){
 				System.out.println("Agent loaded successfully" + agent.getAgentName());
 				
@@ -298,6 +270,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 				
 				System.out.println();
 			}
+			*/
 		}
 		else{
 			//System.out.println("All messages not received yet?!?!?!?!?!?!");
@@ -311,10 +284,24 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	 * @param messagingComponent
 	 *            The component to call when messages are received.
 	 */
+	/*
 	public void register(String agentName, WebSocketMessagingComponent messagingComponent)
 	{
-		mAgents.put(agentName, messagingComponent);
+		//mAgents.put(agentName, messagingComponent);
 	}
+	*/
+
+    @Override
+    public void onStartAgent(String path) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void onStopAgent(String path) {
+        // TODO Auto-generated method stub
+        
+    }
 	
 	/**
 	 * Method called to load an agent.
@@ -324,6 +311,7 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 	 * @param agentManager
 	 *            The agent, represented by means of the {@link AgentManager} interface.
 	 */
+	/*
 	@Override
 	public boolean loadAgent(String containerName, AgentManager agentManager)
 	{
@@ -341,7 +329,8 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 		}
 		return true;
 	}
-	
+	*/
+	/*
 	@Override
 	public String getRecommendedComponentClass(AgentComponentName componentName)
 	{
@@ -354,7 +343,8 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 		}
 		return null;
 	}
-	
+	*/
+	/*
 	@Override
 	public void onAgentStateChanged(AgentEvent event, AgentManager agent)
 	{
@@ -390,11 +380,12 @@ public class WebSocketMessagingPlatform implements PlatformLoader, PlatformLink
 		}
 		
 	}
-
+*/
+	/*
 	@Override
 	public void onAgentStateChanged(AgentManager agent) {
 		// TODO Auto-generated method stub
 		
 	}
-	
+	*/
 }

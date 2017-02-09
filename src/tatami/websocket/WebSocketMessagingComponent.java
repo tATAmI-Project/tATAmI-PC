@@ -36,23 +36,25 @@ public class WebSocketMessagingComponent extends NameBasedMessagingComponent
 	protected void atAgentStart(AgentEvent event)
 	{
 		super.atAgentStart(event);
-		
+		/*
 		if(!(getPlatformLink() instanceof WebSocketMessagingPlatform))
 			throw new IllegalStateException("Platform Link is not of expected type");
 		platform = (WebSocketMessagingPlatform) getPlatformLink();
 		platform.register(getAgentName(), this);
 		mActive = true;
+		*/
 	}
 	
 	/**
 	 * Obtain a link to the platform
 	 */
+	/*
 	@Override
 	protected Object getPlatformLink()
 	{
 		return super.getPlatformLink();
 	}
-	
+	*/
 	/**
 	 * Pass the message to the implementation in {@link MessagingComponent}, via {@link AgentComponent}.
 	 * 

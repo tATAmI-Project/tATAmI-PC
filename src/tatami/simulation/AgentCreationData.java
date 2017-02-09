@@ -35,34 +35,19 @@ public class AgentCreationData
 	/**
 	 * The name of the agent. It cannot be <code>null</code>.
 	 */
-	String			agentName;
+	String agentName;
 	/**
 	 * The parameters to pass to the agent. The reference cannot be <code>null</code>.
 	 */
 	AgentParameters	parameters;
-	/**
-	 * The set of packages where the loader and the components may look for data.
-	 */
-	List<String>		packages;
 
 	/**
 	 * The name of the container in which the agent should be created. It cannot be <code>null</code>.
 	 */
-	String			destinationContainer	= null;
-	/**
-	 * The name of the platform on which the agent should be loaded. It cannot be <code>null</code>.
-	 */
-	String			platform				= null;
-	/**
-	 * The {@link AgentLoader} instance that will be used to load the agent using this {@link AgentCreationData}
-	 * instance. It cannot be <code>null</code>.
-	 */
-	AgentLoader		loader					= null;
+	String destinationContainer	= null;
 	
-	/**
-	 * A reference to the actual node resulted from parsing the scenario file. It cannot be <code>null</code>.
-	 */
-	XMLNode			node;
+	String mAgentType = null;
+	
 	
 	/**
 	 * Creates a new instance of information for the creation of an agent.
@@ -85,27 +70,18 @@ public class AgentCreationData
 	 * @param scenarioNode
 	 *            - the {@link XMLNode} instance corresponding to the agent, as resulted from parsing the scenario file.
 	 */
-	public AgentCreationData(String name, AgentParameters agentParameters, List<String> agentPackages,
-			String destination, String agentPlatform, AgentLoader agentLoader, XMLNode scenarioNode)
+	public AgentCreationData(String name, AgentParameters agentParameters,
+			String destination, String agentType)
 	{
 		if(name == null)
 			throw new NullPointerException("Agent name cannot be null");
 		if(agentParameters == null)
 			throw new NullPointerException("Agent parameters cannot be null");
-		if(agentPlatform == null)
-			throw new NullPointerException("Agent platform cannot be null");
-		if(agentLoader == null)
-			throw new NullPointerException("Agent loader cannot be null");
-		if(scenarioNode == null)
-			throw new NullPointerException("XML node cannot be null");
 		
 		agentName = name;
 		parameters = agentParameters;
-		packages = (agentPackages != null) ? agentPackages : new ArrayList<String>();
 		destinationContainer = destination;
-		platform = agentPlatform;
-		loader = agentLoader;
-		node = scenarioNode;
+		mAgentType = agentType;
 	}
 	
 	/**
@@ -125,14 +101,6 @@ public class AgentCreationData
 	}
 	
 	/**
-	 * @return the list packages where the agent may look for files.
-	 */
-	public List<String> getPackages()
-	{
-		return packages;
-	}
-	
-	/**
 	 * @return the name of the container in which the agent should be created.
 	 */
 	public String getDestinationContainer()
@@ -140,27 +108,8 @@ public class AgentCreationData
 		return destinationContainer;
 	}
 	
-	/**
-	 * @return the name of the platform that this agent will execute on.
-	 */
-	public String getPlatform()
-	{
-		return platform;
+	public String getType(){
+	    return mAgentType;
 	}
 	
-	/**
-	 * @return the {@link AgentLoader} instance to be used for loading this agent.
-	 */
-	public AgentLoader getAgentLoader()
-	{
-		return loader;
-	}
-	
-	/**
-	 * @return a reference to the actual node resulted from parsing the scenario file.
-	 */
-	public XMLNode getNode()
-	{
-		return node;
-	}
 }

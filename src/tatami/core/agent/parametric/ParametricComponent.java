@@ -64,12 +64,12 @@ public class ParametricComponent extends AgentComponent
 	 * It is expected that the first arguments contains a parameter with the name {@value #COMPONENT_PARAMETER_NAME},
 	 * indicating agent parameters.
 	 */
-	@Override
+	//@Override
 	protected boolean preload(ComponentCreationData componentParameters, XMLNode scenarioNode,
 			List<String> agentPackages, Logger log)
 	{
-		if(!super.preload(componentParameters, scenarioNode, agentPackages, log))
-			return false;
+		//if(!super.preload(componentParameters, scenarioNode, agentPackages, log))
+		//	return false;
 		parameters = (AgentParameters) getComponentData().getObject(COMPONENT_PARAMETER_NAME);
 		if(parameters == null)
 		{

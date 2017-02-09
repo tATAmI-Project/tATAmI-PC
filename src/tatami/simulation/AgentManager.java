@@ -11,8 +11,6 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import tatami.simulation.PlatformLoader.PlatformLink;
-
 /**
  * An instance implementing this interface is a wrapper to an actual agent instance (that may be not yet created). It
  * offers methods for managing the lifecycle of an agent, for instance starting and stopping.

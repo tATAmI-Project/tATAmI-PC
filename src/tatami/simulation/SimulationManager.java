@@ -11,7 +11,6 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -28,14 +27,12 @@ import net.xqhs.util.logging.UnitComponentExt;
 import net.xqhs.windowLayout.WindowLayout;
 import tatami.HMI.pub.HMIInterface;
 import tatami.HMI.src.PC.AgentGui;
-import tatami.HMI.src.PC.AgentGuiConfig;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.io.AgentActiveIO;
 import tatami.core.agent.io.AgentActiveIO.InputListener;
 import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
-import tatami.simulation.PlatformLoader.PlatformLink;
 import tatami.simulation.simulation_manager_builders.ISimulationManagerBuilder;
 
 /**
@@ -212,18 +209,6 @@ public class SimulationManager implements InputListener
             }
             log.info("Platform [" + platformName + "] started.");
             platformsOK++;
-            if(platformContainers.containsKey(platformName))
-                for(Iterator<String> itC = platformContainers.get(platformName).iterator(); itC.hasNext();)
-                {
-                    String containerName = itC.next();
-                    if(!platform.addContainer(containerName))
-                    {
-                        log.error("Adding container [" + containerName + "] to [" + platformName + "] has failed.");
-                        itC.remove();
-                    }
-                    else
-                        log.info("Container [" + containerName + "] added to [" + platformName + "].");
-                }
         }
         return platformsOK;
     }
@@ -318,8 +303,8 @@ public class SimulationManager implements InputListener
 	protected boolean startSimulationAgents()
 	{
 	    /*
-		for(PlatformLoader platform : platforms.values())
-		{
+	    
+		for(PlatformLoader platform : platforms.values()){
 			String platformName = platform.getName();
 			MessagingComponent msg = null;
 			try
@@ -328,23 +313,20 @@ public class SimulationManager implements InputListener
 				if(msgrClass == null)
 					msgrClass = AgentComponentName.MESSAGING_COMPONENT.getClassName();
 				msg = (MessagingComponent) PlatformUtils.loadClassInstance(this, msgrClass, new Object[0]);
-			} catch(Exception e)
-			{
+			}
+			catch(Exception e){
 				log.error("Failed to create a messaging component for the simulation agent on platform []: []",
 						platformName, PlatformUtils.printException(e));
 			}
-			if(msg != null)
-			{
+			if(msg != null){
 				SimulationLinkAgent agent = new SimulationLinkAgent(SIMULATION_AGENT_NAME_PREFIX + platformName, msg);
-				if(!platform.loadAgent("Neutral", agent))
-				{
+				if(!platform.loadAgent("Neutral", agent)){
 					log.error("Loading simulation agent on platform [" + platformName
 							+ "] failed. Simulation cannot start.");
 					agent.stop();
 					return false;
 				}
-				if(!agent.start())
-				{
+				if(!agent.start()){
 					log.error("Starting simulation agent on platform [" + platformName
 							+ "] failed. Simulation cannot start.");
 					agent.stop();
@@ -352,8 +334,8 @@ public class SimulationManager implements InputListener
 				}
 				simulationAgents.put(platformName, agent);
 			}
-		}
-		*/
+		}*/
+		
 		return true;
 	}
 	
@@ -362,6 +344,7 @@ public class SimulationManager implements InputListener
 	 */
 	protected void createAgents()
 	{
+	    /*
 		agentsCreated = true;
 		
 		// load agents on their respective platforms
@@ -369,13 +352,13 @@ public class SimulationManager implements InputListener
 		for(AgentCreationData agentData : agents)
 		{
 			String agentName = agentData.getAgentName();
-			/*
+			
 			if(!platforms.containsKey(agentData.getPlatform()))
 			{
 				log.error("Platform [" + agentData.getPlatform() + "] for agent [" + agentName + "] not found.");
 				continue;
 			}
-			*/
+			
 			PlatformLoader platform = platforms.get(agentData.getPlatform());
             String containerName = agentData.getDestinationContainer();
             AgentLoader loader = agentData.getAgentLoader();
@@ -425,6 +408,7 @@ public class SimulationManager implements InputListener
 					if(agentData.getPlatform().equals(platformName))
 						simAgent.enrol(agentData);
 		}
+		*/
 	}
 	
 	/**

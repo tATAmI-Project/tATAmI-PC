@@ -11,14 +11,13 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import net.xqhs.util.logging.LoggerSimple.Level;
 import net.xqhs.util.logging.UnitComponentExt;
 import net.xqhs.util.logging.logging.Logging;
+import tatami.HMI.pub.HMIInterface;
+import tatami.core.agent.io.AgentActiveIO;
 import tatami.core.agent.io.AgentActiveIO.InputListener;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder;
@@ -47,6 +46,8 @@ public class Boot implements InputListener
 	
 	private static Boot boot = null;
 	
+	private static AgentActiveIO userInterface;
+	
 	/**
 	 * The method handling main functionality of {@link Boot}.
 	 * <p>
@@ -54,28 +55,36 @@ public class Boot implements InputListener
 	 * @param args
 	 *            - the arguments received by the program.
 	 */
-    public void boot(SimulationManagerXMLBuilder builder) {
+	/*
+    public void build(SimulationManagerXMLBuilder builder) {
         log.trace("Booting World.");
 
         simulation = new SimulationManager(builder);
-/*
+
         if (!simulation.start()) {
 
         } else {
             log.error("No agent platforms loaded. Simulation will not start.");
         }
-        */
+        
     }
+    */
     
-    public static SimulationManagerXMLBuilder makeBuilder(String[] args) {
+    public SimulationManagerXMLBuilder makeBuilder(String scenarioPath) {
         SimulationManagerXMLBuilder builder = null;
+        if(scenarioPath == null){
+            scenarioPath = BootDefaultArguments.scenarioFileName;
+        }
+        
+        log.info("Loading scenario: " + scenarioPath);
 
         try {
-            builder = new SimulationManagerXMLBuilder(args);
-            builder.getGUI().connectInput("CORE", boot);
-            builder.buildGUI();
+            builder = new SimulationManagerXMLBuilder();
+            builder.setGUI(userInterface);
+            userInterface.connectInput("BOOT", this);
+            builder.loadXML(scenarioPath);
             builder.buildPlatform();
-            builder.buildAgentLoaders();
+            //builder.buildAgentLoaders();
             builder.buildContainerAgents();
             
             //builder.buildAgentPackages();
@@ -84,9 +93,9 @@ public class Boot implements InputListener
             return null;
         } catch (PlatformException exception) {
             log.warn(exception.getMessage());
-        } catch (AgentLoaderException exception) {
-            log.error(exception.getMessage());
-            return null;
+        //} catch (AgentLoaderException exception) {
+        //    log.error(exception.getMessage());
+         //   return null;
         }
         
         return builder;
@@ -103,26 +112,21 @@ public class Boot implements InputListener
 	public static void main(String[] args)
 	{
 		Logging.getMasterLogging().setLogLevel(Level.ALL);
+		
+		userInterface = HMIInterface.INST.getHMI();
+		
 		boot = new Boot();
-		loadInitialData(args);
+		
+		SimulationManagerXMLBuilder builder = boot.makeBuilder(BootDefaultArguments.scenarioFileName);
+		
+		//boot.build(builder);
 	}
 	
-	public static void loadInitialData(String[] args){
-	    
-        SimulationManagerXMLBuilder builder = makeBuilder(args);
-        boot.boot(builder);
-	}
-
     @Override
     public void receiveInput(String portName, Vector<Object> arguments) {
-        if(portName.equals("GUI")){
-            if(arguments.get(0).equals("LOAD SCENARIO")){
-                
-                System.out.println("Load scenario");
-                String[] args = new String[1];
-                args[0] = arguments.get(0).toString();
-                loadInitialData(args);
-            }
+        log.info("Receive input");
+        if (portName.equals("GUI-LOAD_SCENARIO")) {
+            SimulationManagerXMLBuilder builder = boot.makeBuilder(arguments.get(0).toString());
         }
     }
 }
