@@ -14,6 +14,7 @@ import tatami.core.agent.AgentComponent;
 import tatami.core.agent.agent_type.AgentLoaderFactory;
 import tatami.core.agent.artefacts.ArtefactCreationData;
 import tatami.core.agent.artefacts.ArtefactInterface;
+import tatami.core.agent.artefacts.ArtefactsFactory;
 import tatami.core.agent.components.ComponentCreationData;
 import tatami.core.agent.io.AgentActiveIO;
 import tatami.core.platforms.PlatformDescriptor;
@@ -366,8 +367,7 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
             ArtefactCreationData artefactCreationData = new ArtefactCreationData();
             artefactCreationData.put("name", platformNode.getAttributeValue("name"));
             artefactCreationData.put("id", platformNode.getAttributeValue("id"));
-            
-            allArtefacts.put(artefactCreationData.getName(), );
+            allArtefacts.put(artefactCreationData.getName(), ArtefactsFactory.getInst().newInst(artefactCreationData));
         }
     }
 }
