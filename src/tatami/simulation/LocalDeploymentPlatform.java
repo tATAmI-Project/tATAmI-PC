@@ -11,17 +11,13 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent;
-import tatami.core.agent.messaging.MessagingComponent;
-import tatami.core.agent.messaging.NameBasedMessagingComponent;
 
 /**
  * Simple platform that allows agents to send messages locally (inside the same JVM) based simply on agent name.
@@ -35,14 +31,14 @@ public class LocalDeploymentPlatform extends DefaultPlatform
 	 * 
 	 * @author Andrei Olaru
 	 */
-	public static class SimpleLocalMessaging extends NameBasedMessagingComponent
+	public static class SimpleLocalMessaging //extends NameBasedMessagingComponent
 	{
 		/**
 		 * The serial UID.
 		 */
 		private static final long serialVersionUID = 1L;
 		
-		@Override
+		//@Override
 		public boolean sendMessage(String target, String source, String content)
 		{
 /*
@@ -87,10 +83,10 @@ public class LocalDeploymentPlatform extends DefaultPlatform
 			return true;
 		}
 		
-		@Override
+		//@Override
 		protected void atAgentStart(AgentEvent event)
 		{
-			super.atAgentStart(event);
+			//super.atAgentStart(event);
 			/*
 			if(!(getPlatformLink() instanceof LocalDeploymentPlatform))
 				throw new IllegalStateException("Platform Link is not of expected type");
@@ -105,10 +101,10 @@ public class LocalDeploymentPlatform extends DefaultPlatform
 			*/
 		}
 		
-		@Override
+		//@Override
 		protected void receiveMessage(String source, String destination, String content)
 		{
-			super.receiveMessage(source, destination, content);
+			//super.receiveMessage(source, destination, content);
 		}
 	}
 	

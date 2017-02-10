@@ -1,12 +1,19 @@
 package tatami.core.agent.components;
 
-import tatami.core.agent.AgentComponent.ComponentCreationData;
+import tatami.core.agent.artefacts.ArtefactListener;
 import tatami.core.agent.messages.AgentMessage;
+import tatami.simulation.AgentLoader;
 
-public abstract class ComponentInterface {
-    public abstract void onEvent(AgentMessage event);
+public abstract class ComponentInterface implements ArtefactListener{
     
-    public void buildCOmponenet(ComponentCreationData parameters){
-        
+    String mName;
+    
+    protected AgentLoader mParent;
+    
+    public abstract void onInput(AgentMessage event);
+    
+    public String getName(){
+        return mName;
     }
+    
 }

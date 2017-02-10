@@ -7,26 +7,26 @@ public abstract class AgentMessage<T extends Serializable> implements Serializab
 
     private static final long serialVersionUID = -8969819199236815656L;
     
-    AgentPath mSource;
+    EntityPath mSource;
     
-    ArrayList<AgentPath> mDestinations;
+    ArrayList<EntityPath> mDestinations;
     
     String mTag;
     
     T mContent;
     
     public AgentMessage(String source, String destination, String tag, T content){
-        mSource = new AgentPath(source);
-        mDestinations = new ArrayList<AgentPath>();
-        mDestinations.add(new AgentPath(destination));
+        mSource = new EntityPath(source);
+        mDestinations = new ArrayList<EntityPath>();
+        mDestinations.add(new EntityPath(destination));
         mContent = content;
         mTag = tag;
     }
     
     public AgentMessage(String source, ArrayList<String> destinations, String tag, T content){
-        mSource = new AgentPath(source);
+        mSource = new EntityPath(source);
         for(String destination: destinations){
-            mDestinations.add(new AgentPath(destination));
+            mDestinations.add(new EntityPath(destination));
         }
         mContent = content;
         mTag = tag;
@@ -37,7 +37,7 @@ public abstract class AgentMessage<T extends Serializable> implements Serializab
         return mSource.toString();
     }
     
-    public ArrayList<AgentPath> getDestinations(){
+    public ArrayList<EntityPath> getDestinations(){
         return mDestinations;
     }
     

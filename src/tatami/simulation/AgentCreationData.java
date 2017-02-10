@@ -12,10 +12,10 @@
 package tatami.simulation;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
-import tatami.core.agent.parametric.AgentParameters;
+import tatami.core.agent.components.ComponentCreationData;
 
 /**
  * Class containing the data for the creation of an agent. This information is all the information needed by (and
@@ -30,23 +30,10 @@ import tatami.core.agent.parametric.AgentParameters;
  * @author Andrei Olaru
  * 
  */
-public class AgentCreationData
+public class AgentCreationData extends HashMap<String, String>
 {
-	/**
-	 * The name of the agent. It cannot be <code>null</code>.
-	 */
-	String agentName;
-	/**
-	 * The parameters to pass to the agent. The reference cannot be <code>null</code>.
-	 */
-	AgentParameters	parameters;
-
-	/**
-	 * The name of the container in which the agent should be created. It cannot be <code>null</code>.
-	 */
-	String destinationContainer	= null;
 	
-	String mAgentType = null;
+	ArrayList<ComponentCreationData> mComponentsData;
 	
 	
 	/**
@@ -70,18 +57,15 @@ public class AgentCreationData
 	 * @param scenarioNode
 	 *            - the {@link XMLNode} instance corresponding to the agent, as resulted from parsing the scenario file.
 	 */
-	public AgentCreationData(String name, AgentParameters agentParameters,
-			String destination, String agentType)
+	public AgentCreationData(String name, String destination, String agentType, ArrayList<ComponentCreationData> componentsData)
 	{
 		if(name == null)
 			throw new NullPointerException("Agent name cannot be null");
-		if(agentParameters == null)
-			throw new NullPointerException("Agent parameters cannot be null");
 		
-		agentName = name;
-		parameters = agentParameters;
-		destinationContainer = destination;
-		mAgentType = agentType;
+		put("name", name);
+		put("container", destination);
+		put("type", agentType);
+		mComponentsData = componentsData;
 	}
 	
 	/**
@@ -89,15 +73,7 @@ public class AgentCreationData
 	 */
 	public String getAgentName()
 	{
-		return agentName;
-	}
-	
-	/**
-	 * @return the parameters to pass to the agent.
-	 */
-	public AgentParameters getParameters()
-	{
-		return parameters;
+		return get("name");
 	}
 	
 	/**
@@ -105,11 +81,15 @@ public class AgentCreationData
 	 */
 	public String getDestinationContainer()
 	{
-		return destinationContainer;
+		return get("container");
 	}
 	
 	public String getType(){
-	    return mAgentType;
+	    return get("type");
+	}
+	
+	public ArrayList<ComponentCreationData> getComponentsData(){
+	    return mComponentsData;
 	}
 	
 }

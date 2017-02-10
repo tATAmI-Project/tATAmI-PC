@@ -11,7 +11,6 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import tatami.core.agent.AgentComponent.ComponentCreationData;
 import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.CompositeAgentLoader;
 
@@ -124,8 +123,6 @@ public interface AgentLoader
 	 * @return the the name of the agent loader, as used in the scenario file.
 	 */
 	public String getName();
-	
-	public void buildComponents(ComponentCreationData creationData);
 	
 	/**
 	 * The method checks potential problems that could appear in the creation of an agent, as specified by the

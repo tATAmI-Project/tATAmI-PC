@@ -2,12 +2,12 @@ package tatami.core.agent.messages;
 
 import java.util.ArrayList;
 
-public class AgentPath {
+public class EntityPath {
     String[] mLocations = null;
     
     String mRaw;
     
-    public AgentPath(String path){
+    public EntityPath(String path){
         mLocations = path.split("/");
         mRaw = path;
     }

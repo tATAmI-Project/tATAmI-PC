@@ -14,9 +14,6 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.example.org/scenarioSchema3 ../../../../../src-schema/scenarioSchema3.xsd ">
 
-	<scen:config mainHost="server" mainPort="9008"
-		localHost="192.168.0.11" localPort="9008" />
-
 	<scen:platform>
 		<scen:parameter name="name" value="websocket" />
 		<scen:parameter name="server" value="true" />
@@ -29,8 +26,7 @@
 	<scen:initial>
 		<scen:container name="OtherContainer">
 		    <scen:agent type="eventbased">
-				<scen:component name="parametric" />
-				<scen:component name="mobility" />
+				<scen:component name="test_messaging_component" />
 				<scen:parameter name="name" value="AgentA" />
 			</scen:agent>
 		</scen:container>

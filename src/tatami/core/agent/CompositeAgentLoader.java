@@ -11,19 +11,10 @@
  ******************************************************************************/
 package tatami.core.agent;
 
-import java.util.Iterator;
-
-import net.xqhs.util.XML.XMLTree.XMLNode;
-import net.xqhs.util.logging.Logger;
 import tatami.core.agent.AgentComponent.AgentComponentName;
-import tatami.core.agent.AgentComponent.ComponentCreationData;
-import tatami.core.agent.parametric.AgentParameters;
-import tatami.core.agent.parametric.ParametricComponent;
-import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.AgentCreationData;
 import tatami.simulation.AgentLoader;
 import tatami.simulation.AgentManager;
-import tatami.simulation.PlatformLoader;
 
 /**
  * Agent loader for agents based on {@link CompositeAgent}.
@@ -81,15 +72,9 @@ public class CompositeAgentLoader implements AgentLoader
 	public AgentManager load(AgentCreationData agentCreationData)
 	{
 		CompositeAgent agent = new CompositeAgent();
-		for(Object componentObj : agentCreationData.getParameters().getObjects(COMPONENT_PARAMETER_NAME))
-			agent.addComponent((AgentComponent) componentObj);
+		//for(Object componentObj : agentCreationData.getParameters().getObjects(COMPONENT_PARAMETER_NAME))
+		//	agent.addComponent((AgentComponent) componentObj);
 		return agent;
 	}
-
-    @Override
-    public void buildComponents(ComponentCreationData creationData) {
-        // TODO Auto-generated method stub
-        
-    }
 
 }

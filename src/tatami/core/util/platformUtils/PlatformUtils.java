@@ -20,7 +20,6 @@ import java.util.Vector;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.logging.LogWrapper.LoggerType;
-import tatami.jade.JadeInterface;
 
 /**
  * Platform-related functionality. All functions should be static.

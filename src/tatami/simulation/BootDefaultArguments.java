@@ -11,11 +11,6 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import net.xqhs.windowLayout.LayoutIndications.BarPosition;
-import net.xqhs.windowLayout.grid.GridLayoutIndications;
-import scenario.application.amilab_follow_me_v1.PC.AmILabGui;
-import tatami.HMI.src.PC.AgentGuiConfig;
-
 /**
  * This class traditionally contains settings for simulations, in order to decouple it from Boot (making it easy to
  * ignore changes in BootSettings when committing).

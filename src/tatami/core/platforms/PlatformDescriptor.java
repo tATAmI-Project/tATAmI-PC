@@ -8,6 +8,7 @@ import tatami.core.util.platformUtils.PlatformUtils;
 
 public class PlatformDescriptor {
     HashMap<String, String> mConfig;
+    
     public PlatformDescriptor(XMLNode platformNode){
         mConfig = new HashMap<String, String>();
         Iterator<XMLNode> paramsIt = platformNode.getNodeIterator("parameter");

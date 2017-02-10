@@ -11,12 +11,10 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,14 +22,9 @@ import java.util.Vector;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.UnitComponentExt;
-import net.xqhs.windowLayout.WindowLayout;
 import tatami.HMI.pub.HMIInterface;
-import tatami.HMI.src.PC.AgentGui;
-import tatami.core.agent.AgentComponent.AgentComponentName;
-import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.io.AgentActiveIO;
 import tatami.core.agent.io.AgentActiveIO.InputListener;
-import tatami.core.agent.messaging.MessagingComponent;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.simulation_manager_builders.ISimulationManagerBuilder;
 
@@ -115,10 +108,6 @@ public class SimulationManager implements InputListener
 	 * {@link AgentCreationData} instances for all agents to be started.
 	 */
 	Set<AgentCreationData>				agents;
-	/**
-	 * A map that holds for each platform (identified by name) a simulation agent.
-	 */
-	Map<String, SimulationLinkAgent>	simulationAgents				= new HashMap<String, SimulationLinkAgent>();
 	/**
 	 * The list of events in the simulation, as specified by the scenario file.
 	 */
@@ -411,45 +400,10 @@ public class SimulationManager implements InputListener
 		*/
 	}
 	
-	/**
-	 * Broadcasts the specified event to all agents, via the simulation agents in the respective platforms.
-	 * 
-	 * @param event
-	 *            - the event to broadcast.
-	 */
-	protected void signalAllAgents(AgentEventType event)
-	{
-		for(String platformName : platforms.keySet())
-			if(simulationAgents.containsKey(platformName))
-				simulationAgents.get(platformName).broadcast(event);
-	}
+
 	
 	public boolean stop()
 	{
-		return stopSystem();
-	}
-	
-	/**
-	 * Stops the entire system.
-	 * 
-	 * @return <code>true</code> in case of success.
-	 */
-	public boolean stopSystem()
-	{
-		if(theTime != null)
-			theTime.cancel();
-		for(SimulationLinkAgent simAgent : simulationAgents.values())
-			if(!simAgent.stop())
-				log.error("Stopping agent [] failed.", simAgent.getAgentName());
-		for(String platformName : platforms.keySet())
-			if(!platforms.get(platformName).stop())
-				log.error("Stopping platform [] failed.", platformName);
-		//if(gui != null)
-		//	gui.close();
-		if(WindowLayout.staticLayout != null)
-			WindowLayout.staticLayout.doexit();
-		if(log != null)
-			log.doExit();
 		return true;
 	}
 	

@@ -6,15 +6,18 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.xqhs.util.logging.UnitComponentExt;
-import tatami.core.agent.AgentComponent.ComponentCreationData;
 import tatami.core.agent.AgentEvent.AgentSequenceType;
+import tatami.core.agent.artefacts.ArtefactListener;
+import tatami.core.agent.components.ComponentCreationData;
+import tatami.core.agent.components.ComponentFactory;
 import tatami.core.agent.components.ComponentInterface;
 import tatami.core.agent.messages.AgentMessage;
-import tatami.core.agent.messages.AgentPath;
+import tatami.core.agent.messages.EntityPath;
 import tatami.core.util.platformUtils.PlatformUtils;
+import tatami.simulation.AgentCreationData;
 import tatami.simulation.AgentLoader;
 
-public class EventBasedAgent implements Runnable, AgentLoader {
+public class EventBasedAgent implements Runnable, AgentLoader{
     
     UnitComponentExt log = (UnitComponentExt) new UnitComponentExt().setUnitName("EventBasedAgent").setLoggerType(
             PlatformUtils.platformLogType());
@@ -34,32 +37,46 @@ public class EventBasedAgent implements Runnable, AgentLoader {
      */
     protected HashMap<String, ComponentInterface> mComponents = new HashMap<String, ComponentInterface>();
     
+    HashMap<String, Object> sharedMemory;
+
     String mContainerPath;
     
     String mName;
 
-    public EventBasedAgent() {
+    public EventBasedAgent(AgentCreationData agentCreationData) {
         log.trace("Event based agent creation started...");
-    }
-    
-    public void buildComponents(ComponentCreationData agentData){
-        
+        mName = agentCreationData.getAgentName();
+        sharedMemory = new HashMap<String, Object>();
+        for(ComponentCreationData componentInfo: agentCreationData.getComponentsData()){
+            mComponents.put(componentInfo.get("name"), ComponentFactory.getInst().newInst(componentInfo.get("name"), this));
+        }
     }
 
     @Override
     public void run() {
         while (mRunningFlag) {
-           
             try {
                 AgentMessage message = mEventQueue.take();
-                ArrayList<AgentPath> allDestinations = message.getDestinations();
-                for(AgentPath destination: allDestinations){
-                    mComponents.get(destination.getComponenet()).onEvent(message);
+                ArrayList<EntityPath> allDestinations = message.getDestinations();
+                for(EntityPath destination: allDestinations){
+                    mComponents.get(destination.getComponenet()).onInput(message);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+    }
+    
+    public void insertData(String key, Object data){
+        sharedMemory.put(key, data);
+    }
+    
+    public Object getData(String key){
+        return sharedMemory.get(key);
+    }
+    
+    public void remove(String key){
+        sharedMemory.remove(key);
     }
     
     synchronized public void event(AgentMessage agentEvent){

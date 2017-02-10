@@ -25,9 +25,8 @@ import net.xqhs.util.logging.UnitComponent;
 import tatami.core.agent.AgentComponent.AgentComponentName;
 import tatami.core.agent.AgentEvent.AgentEventType;
 import tatami.core.agent.AgentEvent.AgentSequenceType;
-import tatami.core.agent.parametric.AgentParameterName;
-import tatami.core.agent.parametric.ParametricComponent;
 import tatami.simulation.AgentManager;
+import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder.AgentParameterName;
 
 /**
  * This class reunites the components of an agent in order for components to be able to call each other and for events
@@ -553,9 +552,9 @@ public class CompositeAgent implements Serializable, AgentManager
 	public String getAgentName()
 	{ // TODO name should be cached
 		String agentName = null;
-		if(hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
-			agentName = ((ParametricComponent) getComponent(AgentComponentName.PARAMETRIC_COMPONENT))
-					.parVal(AgentParameterName.AGENT_NAME);
+		//if(hasComponent(AgentComponentName.PARAMETRIC_COMPONENT))
+		//	agentName = ((ParametricComponent) getComponent(AgentComponentName.PARAMETRIC_COMPONENT))
+		//			.parVal(AgentParameterName.AGENT_NAME);
 		return agentName;
 	}
 	

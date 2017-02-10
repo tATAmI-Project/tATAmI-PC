@@ -1,5 +1,6 @@
 package tatami.simulation.simulation_manager_builders;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -9,17 +10,14 @@ import net.xqhs.util.XML.XMLTree;
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent;
-import tatami.core.agent.AgentComponent.ComponentCreationData;
 import tatami.core.agent.agent_type.AgentLoaderFactory;
+import tatami.core.agent.components.ComponentCreationData;
 import tatami.core.agent.io.AgentActiveIO;
-import tatami.core.agent.parametric.AgentParameterName;
-import tatami.core.agent.parametric.AgentParameters;
 import tatami.core.platforms.PlatformDescriptor;
 import tatami.core.platforms.PlatformFactory;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.AgentCreationData;
 import tatami.simulation.AgentLoader;
-import tatami.simulation.AgentLoader.StandardAgentLoaderType;
 import tatami.simulation.AgentManager;
 import tatami.simulation.BootSettingsManager;
 import tatami.simulation.PlatformLoader;
@@ -30,6 +28,60 @@ import tatami.simulation.SimulationManager;
 
 
 public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
+    
+    public enum AgentParameterName {
+        
+        // ///////// Simulation/Boot
+        /**
+         * The class of the agent implementation, in case the loader needs it.
+         * 
+         * Used by {@link Boot}.
+         */
+        AGENT_CLASS("classpath"),
+        
+        /**
+         * The {@link AgentLoader} to use for this agent.
+         */
+        AGENT_LOADER("loader"),
+        
+        /**
+         * The {@link PlatformLoader} to use for this agent.
+         */
+        AGENT_PLATFORM("platform"),
+        
+        /**
+         * Agent packages with classes that are relevant to this agent (GUIs, java functions, etc).
+         * 
+         * Used by VisualizableAgent (for the GUI) and ClaimAgent (for java function classes).
+         */
+        AGENT_PACKAGE("agentPackage"),
+        
+        // ///////// basic functionality
+        /**
+         * The name of the agent.
+         */
+        AGENT_NAME("name");
+        
+        /**
+         * The name of the parameter, as appearing in the scenario file.
+         */
+        String  name    = null;
+        
+        /**
+         * @param parName
+         *            - the name of the parameter as will appear in the scenario file.
+         */
+        private AgentParameterName(String parName)
+        {
+            name = parName;
+        }
+        
+        @Override
+        public String toString()
+        {
+            return name;
+        }
+    }
     
     protected UnitComponentExt  log = (UnitComponentExt) new UnitComponentExt().setUnitName("XML Builder").setLoggerType(
             PlatformUtils.platformLogType());
@@ -159,34 +211,28 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
         }
     }
     
-    protected void loadComponenets(Iterator<XMLNode> componenetsNodes){
+    protected ArrayList<ComponentCreationData> loadComponenets(Iterator<XMLNode> componenetsNodes){
+        ArrayList<ComponentCreationData> componenetsCreationData = new ArrayList<ComponentCreationData>();
         while(componenetsNodes.hasNext())
         {
             XMLNode componentNode = componenetsNodes.next();
             String componentName = componentNode.getAttributeValue(COMPONENT_NAME_ATTRIBUTE);
-            
             AgentComponent component = null;
             
             // load component arguments
             ComponentCreationData componentData = new ComponentCreationData();
             Iterator<XMLNode> paramsIt = componentNode.getNodeIterator(PARAMETER_NODE_NAME);
+            componentData.put(COMPONENT_NAME_ATTRIBUTE, componentNode.getAttributeValue(COMPONENT_NAME_ATTRIBUTE));
+            
             while(paramsIt.hasNext())
             {
                 XMLNode param = paramsIt.next();
-                componentData.add(param.getAttributeValue(PARAMETER_NAME), param.getAttributeValue(PARAMETER_VALUE));
+                componentData.put(param.getAttributeValue(PARAMETER_NAME), param.getAttributeValue(PARAMETER_VALUE));
             }
-            
-            //agentLoader.buildComponents(componentData);
-            /*
-            if(component.preload(componentData, componentNode, log))
-            {
-                agentCreationData.getParameters().addObject(COMPONENT_PARAMETER_NAME, component);
-                log.trace("component [] pre-loaded for agent []", componentClass, agentCreationData.getAgentName());
-            }
-            else
-                log.error("Component [] failed pre-loading step; it will not be available for agent [].",
-                        componentClass, agentCreationData.getAgentName());*/
+            componenetsCreationData.add(componentData);
         }
+        
+        return componenetsCreationData;
     }
     
     /**
@@ -216,25 +262,16 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
      */
     protected AgentCreationData buildAgent(XMLNode agentNode, String agentName, String containerName, String agentType)
     {
+        ArrayList<ComponentCreationData> components = loadComponenets(agentNode.getNodeIterator(COMPONENT_NODE_NAME));
+        AgentCreationData agentCreationData = new AgentCreationData(agentName, containerName, agentType, components);
         
         // get all parameters and put them into an AgentParameters instance.
-        AgentParameters parameters = new AgentParameters();
-        for(Iterator<XMLNode> paramIt = agentNode.getNodeIterator("parameter"); paramIt.hasNext();)
-        {
+        for(Iterator<XMLNode> paramIt = agentNode.getNodeIterator("parameter"); paramIt.hasNext();){
             XMLNode param = paramIt.next();
-            AgentParameterName parName = AgentParameterName.getName(param.getAttributeValue("name"));
-            if(parName != null)
-                parameters.add(parName, param.getAttributeValue("value"));
-            else
-            {
-                log.trace("adding unregistered parameter [" + param.getAttributeValue("name") + "].");
-                parameters.add(param.getAttributeValue("name"), param.getAttributeValue("value"));
-            }
+            agentCreationData.put(param.getAttributeValue("name"), param.getAttributeValue("value"));
+
         }
-        
-        AgentCreationData agentCreationData = new AgentCreationData(agentName, parameters, containerName, agentType );
-        
-        //loadComponenets(agentLoaders.get(defaultAgentLoader), agentNode.getNodeIterator(COMPONENT_NODE_NAME));
+
         return agentCreationData;
     }
     
@@ -282,7 +319,6 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
             // set up creation for all agents in the container
             for(Iterator<XMLNode> agentNodes = containerConfig.getNodeIterator("agent"); agentNodes.hasNext();)
             {
-                
                 XMLNode agentNode = agentNodes.next();
                 loadAgent(agentNode, containerName);
             }
@@ -303,7 +339,7 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
         if(agentCreationData == null)
             return;
         allAgentDetails.add(agentCreationData);
-        allAgents.put(agentName, AgentLoaderFactory.getInst().newInst(agentType));
+        allAgents.put(agentName, AgentLoaderFactory.getInst().newInst(agentCreationData));
         
         Vector<Object> agentArgs = new Vector<Object>();
         agentArgs.add(containerName);

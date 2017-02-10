@@ -13,25 +13,14 @@ package tatami.core.agent;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
-import net.xqhs.util.logging.DumbLogger;
 import net.xqhs.util.logging.Logger;
-import tatami.HMI.src.PC.VisualizableComponent;
-import tatami.amilab.AmILabComponent;
 import tatami.core.agent.AgentEvent.AgentEventHandler;
 import tatami.core.agent.AgentEvent.AgentEventType;
-import tatami.core.agent.behavior.BehaviorComponent;
-import tatami.core.agent.claim.ClaimComponent;
-import tatami.core.agent.hierarchical.HierarchicalComponent;
-import tatami.core.agent.kb.CognitiveComponent;
-import tatami.core.agent.messaging.MessagingComponent;
+import tatami.core.agent.components.ComponentCreationData;
 import tatami.core.agent.mobility.MobilityComponent;
-import tatami.core.agent.parametric.ParametricComponent;
-import tatami.core.agent.webServices.WebserviceComponent;
-import tatami.core.util.ParameterSet;
 
 /**
  * This class serves as base for agent components. A component is characterized by its functionality, denominated by
@@ -92,18 +81,7 @@ public abstract class AgentComponent implements Serializable
 	 */
 	private static final long serialVersionUID = -8282262747231347473L;
 	
-	/**
-	 * Alias of {@link ParameterSet}.
-	 * 
-	 * @author Andrei Olaru
-	 */
-	public static class ComponentCreationData extends ParameterSet
-	{
-		/**
-		 * The serial UID.
-		 */
-		private static final long serialVersionUID = 5069937206709568881L;
-	}
+	
 	
 	/**
 	 * Enumeration of available component names / functionalities. These are the standard types of components. Other
@@ -303,7 +281,7 @@ public abstract class AgentComponent implements Serializable
 		
 		// dummy component data, in case no other is preloaded
 		componentData = new ComponentCreationData();
-		componentData.ensureLocked();
+		//componentData.ensureLocked();
 		
 		// register
 		eventHandlers = new HashMap<AgentEventType, AgentEventHandler>();
@@ -399,7 +377,7 @@ public abstract class AgentComponent implements Serializable
 	{
 		if(parameters != null)
 		{
-			parameters.ensureLocked();
+			//parameters.ensureLocked();
 			componentData = parameters;
 		}
 		return true;
@@ -618,7 +596,6 @@ public abstract class AgentComponent implements Serializable
 		if(eventHandlers.containsKey(event))
 		{
 			oldHandler = eventHandlers.get(event);
-			getAgentLog().warn("Handler for event [] overwritten with []; was []", event, handler, oldHandler);
 		}
 		eventHandlers.put(event, handler);
 		return oldHandler;
@@ -635,21 +612,7 @@ public abstract class AgentComponent implements Serializable
 		if(parentAgent != null)
 			parentAgent.postAgentEvent(event);
 	}
-	
-	/**
-	 * @return the log of the agent, or an instance of {@link DumbLogger}, if one is not present or cannot be obtained.
-	 *         <code>null</code> should never be returned.
-	 */
-	protected Logger getAgentLog()
-	{
-		try
-		{
-			return ((VisualizableComponent) getAgentComponent(AgentComponentName.VISUALIZABLE_COMPONENT)).getLog();
-		} catch(NullPointerException e)
-		{
-			return DumbLogger.get();
-		}
-	}
+
 	
 	/**
 	 * Handles the registration of an event handler for messages to a target (inside the agent) with the specified
@@ -695,15 +658,7 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected String getComponentEndpoint(String... pathElements)
 	{
-		try
-		{
-			return ((MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT))
-					.makeLocalPath(pathElements);
-		} catch(NullPointerException e)
-		{
-			// messaging component not available
-			return null;
-		}
+		return null;
 	}
 	
 	/**
@@ -725,9 +680,7 @@ public abstract class AgentComponent implements Serializable
 	protected boolean sendMessage(String content, String sourceEndpoint, String targetAgent,
 			String... targetPathElements)
 	{
-		MessagingComponent msgr = (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
-		if(msgr != null)
-			return msgr.sendMessage(msgr.makePath(targetAgent, targetPathElements), sourceEndpoint, content);
+		
 		return false;
 	}
 	
@@ -759,9 +712,7 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected boolean sendMessageToEndpoint(String content, String sourceEndpoint, String targetEndpoint)
 	{
-		MessagingComponent msgr = (MessagingComponent) parentAgent.getComponent(AgentComponentName.MESSAGING_COMPONENT);
-		if(msgr != null)
-			return msgr.sendMessage(targetEndpoint, sourceEndpoint, content);
+		
 		return false;
 	}
 	
@@ -778,7 +729,6 @@ public abstract class AgentComponent implements Serializable
 	 */
 	protected boolean sendReply(String content, AgentEvent replyTo)
 	{
-		return sendMessageToEndpoint(content, replyTo.get(MessagingComponent.DESTINATION_PARAMETER),
-				replyTo.get(MessagingComponent.SOURCE_PARAMETER));
+		return false;
 	}
 }

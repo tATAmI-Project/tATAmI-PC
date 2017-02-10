@@ -40,7 +40,6 @@ public class MobilityComponent extends AgentComponent
 	
 	public boolean move(String nodeName)
 	{
-		getAgentLog().lf("===============================" + getAgentName());
 		// TODO notify platform (in an extension of this class) that this agent is going to move to nodeName
 		postAgentEvent((AgentEvent) new AgentEvent(AgentEventType.AGENT_STOP)
 				.add(CompositeAgent.TRANSIENT_EVENT_PARAMETER, null).add(DESTINATION_PARAMETER, nodeName));

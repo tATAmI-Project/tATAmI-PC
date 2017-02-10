@@ -13,14 +13,12 @@ package tatami.websocket;
 
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.AgentEvent;
-import tatami.core.agent.messaging.MessagingComponent;
-import tatami.core.agent.messaging.NameBasedMessagingComponent;
 
 /**
  * Agent component that allows communication via WebSockets, using the services provided by
  * {@link WebSocketMessagingPlatform}.
  */
-public class WebSocketMessagingComponent extends NameBasedMessagingComponent
+public class WebSocketMessagingComponent //extends NameBasedMessagingComponent
 {
 	/**
 	 * the serial UID.
@@ -32,10 +30,10 @@ public class WebSocketMessagingComponent extends NameBasedMessagingComponent
 	 */
 	transient WebSocketMessagingPlatform platform;
 	
-	@Override
+	//@Override
 	protected void atAgentStart(AgentEvent event)
 	{
-		super.atAgentStart(event);
+		//super.atAgentStart(event);
 		/*
 		if(!(getPlatformLink() instanceof WebSocketMessagingPlatform))
 			throw new IllegalStateException("Platform Link is not of expected type");
@@ -67,19 +65,19 @@ public class WebSocketMessagingComponent extends NameBasedMessagingComponent
 	 */
 	public void onMessage(String source, String target, String message)
 	{
-		receiveMessage(source, target, message);
+		//receiveMessage(source, target, message);
 	}
 	
 	/**
 	 * Method called from the agent when it needs to send a message.
 	 */
-	@Override
+	//@Override
 	public boolean sendMessage(String target, String source, String content)
 	{
 		try
 		{
-			getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
-					"Seding message: " + source + "::" + target + "::" + content);
+			//getAgentLog().dbg(MessagingDebug.DEBUG_MESSAGING,
+			//		"Seding message: " + source + "::" + target + "::" + content);
 			platform.mClient.send(source + "::" + target + "::" + content);
 			return true;
 		} catch(Exception e)
@@ -91,10 +89,10 @@ public class WebSocketMessagingComponent extends NameBasedMessagingComponent
 	}
 	
 	
-	@Override
+	//@Override
 	protected void atAgentStop(AgentEvent event) {
 		//AgentEvent event = new AgentEvent(AgentEventType.BEFORE_MOVE);
-		super.atAgentStop(event);
+		//super.atAgentStop(event);
 
 	}
 }
