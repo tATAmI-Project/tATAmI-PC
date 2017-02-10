@@ -1,31 +1,23 @@
 package tatami.simulation.simulation_manager_builders;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
-import tatami.HMI.pub.HMIInterface;
+import tatami.core.agent.artefacts.ArtefactInterface;
 import tatami.core.agent.components.ComponentInterface;
 import tatami.core.agent.io.AgentActiveIO;
+import tatami.simulation.Agent;
 import tatami.simulation.AgentCreationData;
-import tatami.simulation.AgentLoader;
 import tatami.simulation.PlatformLoader;
-import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder.AgentLoaderException;
 import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder.PlatformException;
 import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder.SimulationEzception;
 
 public abstract class ISimulationManagerBuilder {
     
- // the name of the default platform
-    //String defaultPlatform = PlatformLoader.DEFAULT_PLATFORM.toString();
-    // the name of the default agent loader
-    String defaultAgentLoader = AgentLoader.DEFAULT_LOADER.toString();
-    
-    Map<String, AgentLoader> allAgents = new HashMap<String, AgentLoader>();
+    Map<String, Agent> allAgents = new HashMap<String, Agent>();
     // platform name -> platform loader
     Map<String, PlatformLoader> platforms = new HashMap<String, PlatformLoader>();
     // container name -> do create (true for local containers, false for remote)
@@ -38,9 +30,9 @@ public abstract class ISimulationManagerBuilder {
     
     Map<String, ComponentInterface> allComponenets;
     
-    AgentActiveIO userInterface;
+    Map<String, ArtefactInterface> allArtefacts;
     
-    XMLNode timeline = null;;
+    AgentActiveIO userInterface;
     
     abstract public void buildPlatform() throws SimulationEzception, PlatformException;
     
@@ -48,17 +40,13 @@ public abstract class ISimulationManagerBuilder {
     
     abstract public void loadXML(String path);
     
-    abstract public void buildTimeline();
-    
     abstract public void setGUI(AgentActiveIO uInterface);
+    
+    abstract public void buildArtefacts();
     
     
     public Map<String, PlatformLoader> getPlatform(){
         return platforms;
-    }
-    
-    public String getAgentLoaders(){
-        return defaultAgentLoader;
     }
     
     public Map<String, Set<String>> getPlatformContainers(){
@@ -71,10 +59,6 @@ public abstract class ISimulationManagerBuilder {
     
     public Set<AgentCreationData> getAllAgents(){
         return allAgentDetails;
-    }
-    
-    public XMLNode getTimeline(){
-        return timeline;
     }
     
     public AgentActiveIO getGUI(){

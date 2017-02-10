@@ -7,17 +7,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentEvent.AgentSequenceType;
-import tatami.core.agent.artefacts.ArtefactListener;
 import tatami.core.agent.components.ComponentCreationData;
 import tatami.core.agent.components.ComponentFactory;
 import tatami.core.agent.components.ComponentInterface;
 import tatami.core.agent.messages.AgentMessage;
+import tatami.core.agent.messages.Command;
 import tatami.core.agent.messages.EntityPath;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.AgentCreationData;
-import tatami.simulation.AgentLoader;
+import tatami.simulation.Agent;
 
-public class EventBasedAgent implements Runnable, AgentLoader{
+public class EventBasedAgent implements Runnable, Agent{
     
     UnitComponentExt log = (UnitComponentExt) new UnitComponentExt().setUnitName("EventBasedAgent").setLoggerType(
             PlatformUtils.platformLogType());
@@ -50,6 +50,7 @@ public class EventBasedAgent implements Runnable, AgentLoader{
         for(ComponentCreationData componentInfo: agentCreationData.getComponentsData()){
             mComponents.put(componentInfo.get("name"), ComponentFactory.getInst().newInst(componentInfo.get("name"), this));
         }
+        log.trace("Event based agent creation finished...");
     }
 
     @Override
@@ -75,12 +76,16 @@ public class EventBasedAgent implements Runnable, AgentLoader{
         return sharedMemory.get(key);
     }
     
-    public void remove(String key){
+    public void removeData(String key){
         sharedMemory.remove(key);
     }
     
-    synchronized public void event(AgentMessage agentEvent){
+    synchronized public void doEvent(AgentMessage agentEvent){
         mEventQueue.add(agentEvent);
+    }
+    
+    public void internalCommand(Command command){
+        
     }
 
     @Override

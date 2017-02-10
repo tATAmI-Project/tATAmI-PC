@@ -21,7 +21,6 @@ import tatami.core.agent.io.AgentActiveIO;
 import tatami.core.agent.io.AgentActiveIO.InputListener;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder;
-import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder.AgentLoaderException;
 import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder.PlatformException;
 
 /**
@@ -66,7 +65,6 @@ public class Boot implements InputListener
         } else {
             log.error("No agent platforms loaded. Simulation will not start.");
         }
-        
     }
     */
     
@@ -84,18 +82,14 @@ public class Boot implements InputListener
             userInterface.connectInput("BOOT", this);
             builder.loadXML(scenarioPath);
             builder.buildPlatform();
-            //builder.buildAgentLoaders();
+            builder.buildArtefacts();
             builder.buildContainerAgents();
-            
-            //builder.buildAgentPackages();
+
         } catch (SimulationManagerXMLBuilder.SimulationEzception exception) {
             log.error(exception.getMessage());
             return null;
         } catch (PlatformException exception) {
             log.warn(exception.getMessage());
-        //} catch (AgentLoaderException exception) {
-        //    log.error(exception.getMessage());
-         //   return null;
         }
         
         return builder;

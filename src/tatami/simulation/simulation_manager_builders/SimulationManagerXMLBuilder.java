@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import net.xqhs.util.XML.XMLTree;
@@ -11,13 +12,15 @@ import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent;
 import tatami.core.agent.agent_type.AgentLoaderFactory;
+import tatami.core.agent.artefacts.ArtefactCreationData;
+import tatami.core.agent.artefacts.ArtefactInterface;
 import tatami.core.agent.components.ComponentCreationData;
 import tatami.core.agent.io.AgentActiveIO;
 import tatami.core.platforms.PlatformDescriptor;
 import tatami.core.platforms.PlatformFactory;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.AgentCreationData;
-import tatami.simulation.AgentLoader;
+import tatami.simulation.Agent;
 import tatami.simulation.AgentManager;
 import tatami.simulation.BootSettingsManager;
 import tatami.simulation.PlatformLoader;
@@ -48,15 +51,6 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
          * The {@link PlatformLoader} to use for this agent.
          */
         AGENT_PLATFORM("platform"),
-        
-        /**
-         * Agent packages with classes that are relevant to this agent (GUIs, java functions, etc).
-         * 
-         * Used by VisualizableAgent (for the GUI) and ClaimAgent (for java function classes).
-         */
-        AGENT_PACKAGE("agentPackage"),
-        
-        // ///////// basic functionality
         /**
          * The name of the agent.
          */
@@ -71,14 +65,12 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
          * @param parName
          *            - the name of the parameter as will appear in the scenario file.
          */
-        private AgentParameterName(String parName)
-        {
+        private AgentParameterName(String parName){
             name = parName;
         }
         
         @Override
-        public String toString()
-        {
+        public String toString(){
             return name;
         }
     }
@@ -97,12 +89,7 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
             super(message);
         }
     }
-    
-    public class AgentLoaderException extends Exception {
-        public AgentLoaderException(String message){
-            super(message);
-        }
-    }
+
     
     XMLTree scenarioTree;
     
@@ -129,6 +116,7 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
     private static final String PARAMETER_VALUE             = "value";
     
     public SimulationManagerXMLBuilder() throws SimulationEzception{
+        
     }
     
     public void loadXML(String path) {
@@ -236,10 +224,10 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
     }
     
     /**
-     * Loads agent information from the scenario file and pre-loads the agent using the appropriate {@link AgentLoader}.
+     * Loads agent information from the scenario file and pre-loads the agent using the appropriate {@link Agent}.
      * <p>
      * If successful, the method returns an {@link AgentCreationData} instance that can be subsequently be used in a
-     * call to {@link AgentLoader#load(AgentCreationData)} to obtain an {@link AgentManager} instance.
+     * call to {@link Agent#load(AgentCreationData)} to obtain an {@link AgentManager} instance.
      * 
      * @param agentNode
      *            - the {@link XMLNode} containing the information about the agent.
@@ -254,7 +242,7 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
      * @param defaultAgentLoader
      *            - the name of the default agent loader.
      * @param agentLoaders
-     *            - the {@link Map} of agent loader names and respective {@link AgentLoader} instances.
+     *            - the {@link Map} of agent loader names and respective {@link Agent} instances.
      * @param agentPackages
      *            - the {@link Set} of packages containing agent code.
      * @return an {@link AgentManager} instance that can be used to control the lifecycle of the just loaded agent, if
@@ -288,7 +276,7 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
      * @param defaultAgentLoader
      *            - the name of the default agent loader.
      * @param agentLoaders
-     *            - the {@link Map} of platform names and respective {@link AgentLoader} instances.
+     *            - the {@link Map} of platform names and respective {@link Agent} instances.
      * @param agentPackages
      *            - the {@link Set} of package names where agent code may be located.
      * @param allContainers
@@ -370,11 +358,16 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
     }
 
     @Override
-    public void buildTimeline() {
-        // load timeline (if any)
-
-        if (scenarioTree.getRoot().getNodeIterator(SimulationManager.TIMELINE_NODE.toString()).hasNext())
-            timeline = scenarioTree.getRoot().getNodeIterator(SimulationManager.TIMELINE_NODE.toString()).next();
-
+    public void buildArtefacts() {
+        allArtefacts = new TreeMap<String, ArtefactInterface>();
+        Iterator<XMLNode> artefactNodes = scenarioTree.getRoot().getNodeIterator("artefact");
+        while(artefactNodes.hasNext()){
+            XMLNode platformNode = artefactNodes.next();
+            ArtefactCreationData artefactCreationData = new ArtefactCreationData();
+            artefactCreationData.put("name", platformNode.getAttributeValue("name"));
+            artefactCreationData.put("id", platformNode.getAttributeValue("id"));
+            
+            allArtefacts.put(artefactCreationData.getName(), );
+        }
     }
 }

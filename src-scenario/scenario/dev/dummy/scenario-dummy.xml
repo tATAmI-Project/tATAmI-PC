@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy Nga, Amal El Fallah Seghrouchni, Cedric Herpson.
-  
-  This file is part of tATAmI-PC.
-  
-  tATAmI-PC is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
-  
-  tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-  
-  You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
--->
+<!-- Copyright (C) 2013 Andrei Olaru, Marius-Tudor Benea, Nguyen Thi Thuy 
+	Nga, Amal El Fallah Seghrouchni, Cedric Herpson. This file is part of tATAmI-PC. 
+	tATAmI-PC is free software: you can redistribute it and/or modify it under 
+	the terms of the GNU Lesser General Public License as published by the Free 
+	Software Foundation, either version 3 of the License, or any later version. 
+	tATAmI-PC is distributed in the hope that it will be useful, but WITHOUT 
+	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+	FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more 
+	details. You should have received a copy of the GNU Lesser General Public 
+	License along with tATAmI-PC. If not, see <http://www.gnu.org/licenses/>. -->
 <scen:scenario xmlns:scen="http://www.example.org/scenarioSchema3"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.example.org/scenarioSchema3 ../../../../../src-schema/scenarioSchema3.xsd ">
@@ -22,10 +21,11 @@
 		<scen:parameter name="server port" value="9008" />
 		<scen:parameter name="client port" value="9008" />
 	</scen:platform>
-
+	<scen:artefact name="user-input" id="1">
+	</scen:artefact>
 	<scen:initial>
 		<scen:container name="OtherContainer">
-		    <scen:agent type="eventbased">
+			<scen:agent type="eventbased">
 				<scen:component name="test_messaging_component" />
 				<scen:parameter name="name" value="AgentA" />
 			</scen:agent>

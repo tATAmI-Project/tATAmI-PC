@@ -3,7 +3,7 @@ package tatami.core.agent.agent_type;
 import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.CompositeAgentLoader;
 import tatami.simulation.AgentCreationData;
-import tatami.simulation.AgentLoader;
+import tatami.simulation.Agent;
 import tatami.simulation.DefaultPlatform;
 
 public class AgentLoaderFactory {
@@ -17,7 +17,7 @@ public class AgentLoaderFactory {
         return singleton;
     }
     
-    public AgentLoader newInst(AgentCreationData agentCreationData){
+    public Agent newInst(AgentCreationData agentCreationData){
         //if(loaderName.equals("composite")){
         //    return new CompositeAgentLoader();
         //}

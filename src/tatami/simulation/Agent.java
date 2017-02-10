@@ -20,7 +20,7 @@ import tatami.core.agent.CompositeAgentLoader;
  * 
  * @author Andrei Olaru
  */
-public interface AgentLoader
+public interface Agent
 {
 	/**
 	 * Standard types of loaders for agents. The name of the loader is used in the agent description in the scenario
@@ -67,7 +67,7 @@ public interface AgentLoader
 		 *            - the name of the loader.
 		 * @param className
 		 *            - the fully qualified name of the class to instantiate when starting the platform. The class
-		 *            should implement {@link AgentLoader}.
+		 *            should implement {@link Agent}.
 		 */
 		private StandardAgentLoaderType(String loaderName, String className)
 		{
@@ -80,7 +80,7 @@ public interface AgentLoader
 		 * 
 		 * @param className
 		 *            - the fully qualified name of the class to instantiate when starting the platform. The class
-		 *            should implement {@link AgentLoader}.
+		 *            should implement {@link Agent}.
 		 */
 		private StandardAgentLoaderType(String className)
 		{
@@ -111,7 +111,7 @@ public interface AgentLoader
 	 */
 	static final String	NAME_ATTRIBUTE		= "name";
 	/**
-	 * The name of the attribute containing the class path of the {@link AgentLoader} class, in the XML file.
+	 * The name of the attribute containing the class path of the {@link Agent} class, in the XML file.
 	 */
 	static final String	CLASSPATH_ATTRIBUTE	= "classpath";
 	/**
@@ -123,42 +123,4 @@ public interface AgentLoader
 	 * @return the the name of the agent loader, as used in the scenario file.
 	 */
 	public String getName();
-	
-	/**
-	 * The method checks potential problems that could appear in the creation of an agent, as specified by the
-	 * information in the argument. Potential problems relate, for example, to inexistent classes.
-	 * <p>
-	 * The method may also add information to the agent creation data, in order to speed up the loading process.
-	 * <p>
-	 * WARNING: Calling this method before {@link #load(AgentCreationData)} may not be optional. This method may affect
-	 * the {@link AgentCreationData} instance.
-	 * <p>
-	 * This method may contact the platform loader for details on the platform.
-	 * <p>
-	 * If the agent will surely not be able to load, <code>false</code> will be returned. For any non-fatal issues, the
-	 * method should return <code>true</code> and output warnings in the specified log.
-	 * 
-	 * @param agentCreationData
-	 *            - the {@link AgentCreationData}, as loaded by {@link Boot} from the scenario file.
-	 * @param plaformLoader
-	 *            - the {@link PlatformLoader} that will be used to load the agent.
-	 * @param log
-	 *            - the {@link Logger} in which to output any potential problems (as warnings or errors).
-	 * @return <code>true</code> if no fatal issues were found; <code>false</code> otherwise.
-	 */
-	//public boolean preload(AgentCreationData agentCreationData, PlatformLoader plaformLoader, Logger log);
-	
-	/**
-	 * The method loads all the information necessary for the creation of an agent and returns an {@link AgentManager}
-	 * instance used to manage the lifecycle of the loaded agent.
-	 * <p>
-	 * WARNING: It is important to pre-load additional agent creation data using
-	 * {@link #preload(AgentCreationData, PlatformLoader, Logger)}. Lacking this operation, the agent may not laod
-	 * correctly.
-	 * 
-	 * @param agentCreationData
-	 *            - the {@link AgentCreationData}, as loaded by {@link Boot} from the scenario file.
-	 * @return an {@link AgentManager} for the loaded agent.
-	 */
-	//public AgentManager load(AgentCreationData agentCreationData);
 }
