@@ -21,8 +21,7 @@
 		<scen:parameter name="server port" value="9008" />
 		<scen:parameter name="client port" value="9008" />
 	</scen:platform>
-	<scen:artefact name="user-input" id="1">
-	</scen:artefact>
+	<scen:artefact name="user-input" id="1" />
 	<scen:initial>
 		<scen:container name="OtherContainer">
 			<scen:agent type="eventbased">

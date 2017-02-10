@@ -15,9 +15,8 @@ import tatami.core.agent.messages.Command;
 import tatami.core.agent.messages.EntityPath;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.AgentCreationData;
-import tatami.simulation.Agent;
 
-public class EventBasedAgent implements Runnable, Agent{
+public class EventBasedAgent implements TatamiAgent{
     
     UnitComponentExt log = (UnitComponentExt) new UnitComponentExt().setUnitName("EventBasedAgent").setLoggerType(
             PlatformUtils.platformLogType());

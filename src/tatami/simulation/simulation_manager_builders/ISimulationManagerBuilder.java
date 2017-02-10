@@ -5,11 +5,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import net.xqhs.util.XML.XMLTree.XMLNode;
+import tatami.core.agent.agent_type.TatamiAgent;
 import tatami.core.agent.artefacts.ArtefactInterface;
 import tatami.core.agent.components.ComponentInterface;
 import tatami.core.agent.io.AgentActiveIO;
-import tatami.simulation.Agent;
 import tatami.simulation.AgentCreationData;
 import tatami.simulation.PlatformLoader;
 import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder.PlatformException;
@@ -17,16 +16,13 @@ import tatami.simulation.simulation_manager_builders.SimulationManagerXMLBuilder
 
 public abstract class ISimulationManagerBuilder {
     
-    Map<String, Agent> allAgents = new HashMap<String, Agent>();
+    Map<String, TatamiAgent> allAgents = new HashMap<String, TatamiAgent>();
     // platform name -> platform loader
     Map<String, PlatformLoader> platforms = new HashMap<String, PlatformLoader>();
     // container name -> do create (true for local containers, false for remote)
     Map<String, Boolean> allContainers = new HashMap<String, Boolean>();
     // platform name -> names of containers to be present in the platform
     Map<String, Set<String>> platformContainers = new HashMap<String, Set<String>>();
-    // platform name -> container name -> agent name -> agent manager
-    // for the agent to be started in the container, on the platform
-    Set<AgentCreationData> allAgentDetails = new HashSet<AgentCreationData>();
     
     Map<String, ComponentInterface> allComponenets;
     
@@ -57,11 +53,15 @@ public abstract class ISimulationManagerBuilder {
         return allContainers;
     }
     
-    public Set<AgentCreationData> getAllAgents(){
-        return allAgentDetails;
+    public Map<String, TatamiAgent> getAllAgents(){
+        return allAgents;
     }
     
     public AgentActiveIO getGUI(){
         return userInterface;
+    }
+    
+    public Map<String, ArtefactInterface> getArtefacts(){
+        return allArtefacts;
     }
 }

@@ -11,7 +11,7 @@
  ******************************************************************************/
 package tatami.simulation;
 
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +23,8 @@ import java.util.Vector;
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.HMI.pub.HMIInterface;
+import tatami.core.agent.agent_type.TatamiAgent;
+import tatami.core.agent.artefacts.ArtefactInterface;
 import tatami.core.agent.io.AgentActiveIO;
 import tatami.core.agent.io.AgentActiveIO.InputListener;
 import tatami.core.util.platformUtils.PlatformUtils;
@@ -103,11 +105,10 @@ public class SimulationManager implements InputListener
 	/**
 	 * Name and locality indication (container is created locally or remotely) for all containers.
 	 */
+	
+	Map<String, ArtefactInterface> mArtefacts = null;
+	
 	protected Map<String, Boolean>		containers						= null;
-	/**
-	 * {@link AgentCreationData} instances for all agents to be started.
-	 */
-	Set<AgentCreationData>				agents;
 	/**
 	 * The list of events in the simulation, as specified by the scenario file.
 	 */
@@ -130,6 +131,8 @@ public class SimulationManager implements InputListener
 	Timer								theTime							= null;
 	
 	AgentActiveIO hmi;
+	
+	Map<String, TatamiAgent> allAgents = new HashMap<String, TatamiAgent>();
 	
 	ISimulationManagerBuilder mBuilder;
 	/**
@@ -162,14 +165,9 @@ public class SimulationManager implements InputListener
 		hmi.connectInput("Simulation Manager", this);
 		platforms = builder.getPlatform();
 		containers = builder.getAllContainers();
-		agents = builder.getAllAgents();
-		/*
-		if(builder.getTimeline() != null)
-			events = builder.getTimeline().getNodes();
-		else
-			events = Collections.emptyList();
-			*/
-		// TODO: add agent graph and corresponding representation
+		allAgents = builder.getAllAgents();
+		mArtefacts = builder.getArtefacts();
+		log.info("Simulation initialized");
 	}
 	
 	/**
@@ -183,30 +181,38 @@ public class SimulationManager implements InputListener
      *            the platform.
      * @return the number of platforms successfully started.
      */
-    protected int startPlatforms(Map<String, PlatformLoader> platforms, Map<String, Set<String>> platformContainers)
-    {
-        int platformsOK = 0;
-        for(Iterator<PlatformLoader> itP = platforms.values().iterator(); itP.hasNext();)
-        {
-            PlatformLoader platform = itP.next();
-            String platformName = platform.getName();
-            if(!platform.start())
-            {
+    protected void startPlatforms(){
+        for(PlatformLoader currentPlatform: platforms.values()){
+            String platformName = currentPlatform.getName();
+            if (!currentPlatform.start()) {
                 log.error("Platform [" + platformName + "] failed to start.");
-                itP.remove();
-                continue;
             }
             log.info("Platform [" + platformName + "] started.");
-            platformsOK++;
         }
-        return platformsOK;
+    }
+    
+    
+    private void startArtefacts(){
+        for(ArtefactInterface artefact: mArtefacts.values()){
+            artefact.start();
+            log.info("Artefact [" + artefact.getName() + "] started.");
+        }
+    }
+    
+    private void startAgents(){
+        for(TatamiAgent agent: allAgents.values()){
+            agent.run();
+        }
     }
     
 	
 	public boolean start()
 	{
-		return startSystem();
-	}
+	    startPlatforms();
+	    //startArtefacts();
+	    //startAgents();
+		return true;
+	}  
 	
 	/**
 	 * Starts the whole agent system.
@@ -216,17 +222,6 @@ public class SimulationManager implements InputListener
 	public boolean startSystem()
 	{
 		log.info("Simulation Manager started.");
-		Map<String, Set<String>> platformContainers = mBuilder.getPlatformContainers();
-		
-		/*
-		if (startPlatforms(platforms, platformContainers) <= 0) {
-		    log.error("Simulation start failed.");
-            for (PlatformLoader platform : platforms.values())
-                if (!platform.stop())
-                    log.error("Stopping platform [" + platform.getName() + "] failed");
-		}
-		*/
-		
 		
 		// starts an agent on each platform
 		if(!startSimulationAgents())
@@ -238,49 +233,6 @@ public class SimulationManager implements InputListener
 		return true;
 	}
 	
-	/**
-	 * Starts the timers associated with the displayed time and the time to the next event.
-	 */
-	protected void startTimers()
-	{
-		theTime = new Timer();
-		theTime.schedule(new TimerTask() {
-			@Override
-			public void run()
-			{
-				time++;
-				
-				String display = "___" + (int) (time / 600) + ":" + (int) ((time % 600) / 10) + "." + (time % 10)
-						+ "___";
-				
-				int nextEvent = (events.isEmpty() ? 0 : Integer.parseInt(events.get(0).getAttributeValue(
-						EVENT_TIME_ATTRIBUTE)));
-				while(!events.isEmpty() && (nextEvent <= time * 100))
-				{ // there is an event to do
-					XMLNode event = events.remove(0);
-					log.trace("processing new event");
-					
-					for(XMLNode task : event.getNodes())
-					{
-						log.info("task: " + task.getName());
-					}
-					
-					nextEvent = (events.isEmpty() ? 0 : Integer.parseInt(events.get(0).getAttributeValue(
-							EVENT_TIME_ATTRIBUTE)));
-				}
-				if(!events.isEmpty())
-					log.info("next event at " + nextEvent);
-				else
-				{
-					log.info("no more events");
-					//gui.doOutput(SimulationComponent.START.toString(), PlatformUtils.toVector((Object) null));
-					//gui.doOutput(SimulationComponent.PAUSE.toString(), PlatformUtils.toVector((Object) null));
-					//gui.doOutput(SimulationComponent.TIME.toString(), PlatformUtils.toVector("no more events"));
-					theTime.cancel();
-				}
-			}
-		}, 0, 100);
-	}
 
 
 	
@@ -461,6 +413,8 @@ public class SimulationManager implements InputListener
 	 */
     @Override
     public void receiveInput(String portName, Vector<Object> arguments) {
+        System.out.println(portName);
+        
         if(portName.equals("GUI-START-PLATFORM")){
             if(platforms.containsKey(arguments.get(0).toString())){
                 platforms.get(arguments.get(0).toString()).start();
@@ -468,7 +422,7 @@ public class SimulationManager implements InputListener
         }
         
         if(portName.equals("GUI-START-SIMULATION")){
-            startSystem();
+            start();
         }
     }
 }

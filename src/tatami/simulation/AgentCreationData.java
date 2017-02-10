@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.xqhs.util.XML.XMLTree.XMLNode;
+import tatami.core.agent.agent_type.TatamiAgent;
 import tatami.core.agent.components.ComponentCreationData;
 
 /**
@@ -53,7 +54,7 @@ public class AgentCreationData extends HashMap<String, String>
 	 * @param agentPlatform
 	 *            - the platform on which the agent will execute.
 	 * @param agentLoader
-	 *            - the {@link Agent} instance to use for loading the agent.
+	 *            - the {@link TatamiAgent} instance to use for loading the agent.
 	 * @param scenarioNode
 	 *            - the {@link XMLNode} instance corresponding to the agent, as resulted from parsing the scenario file.
 	 */

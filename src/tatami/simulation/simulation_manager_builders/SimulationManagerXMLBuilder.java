@@ -11,6 +11,7 @@ import net.xqhs.util.XML.XMLTree;
 import net.xqhs.util.XML.XMLTree.XMLNode;
 import net.xqhs.util.logging.UnitComponentExt;
 import tatami.core.agent.AgentComponent;
+import tatami.core.agent.agent_type.TatamiAgent;
 import tatami.core.agent.agent_type.AgentLoaderFactory;
 import tatami.core.agent.artefacts.ArtefactCreationData;
 import tatami.core.agent.artefacts.ArtefactInterface;
@@ -21,7 +22,6 @@ import tatami.core.platforms.PlatformDescriptor;
 import tatami.core.platforms.PlatformFactory;
 import tatami.core.util.platformUtils.PlatformUtils;
 import tatami.simulation.AgentCreationData;
-import tatami.simulation.Agent;
 import tatami.simulation.AgentManager;
 import tatami.simulation.BootSettingsManager;
 import tatami.simulation.PlatformLoader;
@@ -225,10 +225,10 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
     }
     
     /**
-     * Loads agent information from the scenario file and pre-loads the agent using the appropriate {@link Agent}.
+     * Loads agent information from the scenario file and pre-loads the agent using the appropriate {@link TatamiAgent}.
      * <p>
      * If successful, the method returns an {@link AgentCreationData} instance that can be subsequently be used in a
-     * call to {@link Agent#load(AgentCreationData)} to obtain an {@link AgentManager} instance.
+     * call to {@link TatamiAgent#load(AgentCreationData)} to obtain an {@link AgentManager} instance.
      * 
      * @param agentNode
      *            - the {@link XMLNode} containing the information about the agent.
@@ -243,7 +243,7 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
      * @param defaultAgentLoader
      *            - the name of the default agent loader.
      * @param agentLoaders
-     *            - the {@link Map} of agent loader names and respective {@link Agent} instances.
+     *            - the {@link Map} of agent loader names and respective {@link TatamiAgent} instances.
      * @param agentPackages
      *            - the {@link Set} of packages containing agent code.
      * @return an {@link AgentManager} instance that can be used to control the lifecycle of the just loaded agent, if
@@ -277,7 +277,7 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
      * @param defaultAgentLoader
      *            - the name of the default agent loader.
      * @param agentLoaders
-     *            - the {@link Map} of platform names and respective {@link Agent} instances.
+     *            - the {@link Map} of platform names and respective {@link TatamiAgent} instances.
      * @param agentPackages
      *            - the {@link Set} of package names where agent code may be located.
      * @param allContainers
@@ -318,16 +318,12 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
     public void loadAgent(XMLNode agentNode, String containerName){
      // agent name
         String agentName = PlatformUtils.getParameterValue(agentNode, AgentParameterName.AGENT_NAME.toString());
-
-        String platformName = PlatformUtils.getParameterValue(agentNode,
-                AgentParameterName.AGENT_PLATFORM.toString());
         
         String agentType = agentNode.getAttributeValue("type");
         // load agent
         AgentCreationData agentCreationData = buildAgent(agentNode, agentName, containerName, agentType);
         if(agentCreationData == null)
             return;
-        allAgentDetails.add(agentCreationData);
         allAgents.put(agentName, AgentLoaderFactory.getInst().newInst(agentCreationData));
         
         Vector<Object> agentArgs = new Vector<Object>();

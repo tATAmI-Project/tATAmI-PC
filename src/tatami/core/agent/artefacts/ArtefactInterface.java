@@ -30,4 +30,8 @@ public abstract class ArtefactInterface {
     public String getName(){
         return mName;
     }
+    
+    public void start(){}
+    
+    public void stop(){}
 }

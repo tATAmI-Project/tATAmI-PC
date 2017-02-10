@@ -12,8 +12,8 @@
 package tatami.core.agent;
 
 import tatami.core.agent.AgentComponent.AgentComponentName;
+import tatami.core.agent.agent_type.TatamiAgent;
 import tatami.simulation.AgentCreationData;
-import tatami.simulation.Agent;
 import tatami.simulation.AgentManager;
 
 /**
@@ -21,7 +21,7 @@ import tatami.simulation.AgentManager;
  * 
  * @author Andrei Olaru
  */
-public class CompositeAgentLoader implements Agent
+public class CompositeAgentLoader implements TatamiAgent
 {
 	/**
 	 * Name of XML nodes in the scenario representing components.
@@ -76,5 +76,11 @@ public class CompositeAgentLoader implements Agent
 		//	agent.addComponent((AgentComponent) componentObj);
 		return agent;
 	}
+
+    @Override
+    public void run() {
+        // TODO Auto-generated method stub
+        
+    }
 
 }

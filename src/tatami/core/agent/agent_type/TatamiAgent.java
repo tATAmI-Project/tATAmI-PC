@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License along with tATAmI-PC.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package tatami.simulation;
+package tatami.core.agent.agent_type;
 
 import tatami.core.agent.CompositeAgent;
 import tatami.core.agent.CompositeAgentLoader;
@@ -20,7 +20,7 @@ import tatami.core.agent.CompositeAgentLoader;
  * 
  * @author Andrei Olaru
  */
-public interface Agent
+public interface TatamiAgent extends Runnable
 {
 	/**
 	 * Standard types of loaders for agents. The name of the loader is used in the agent description in the scenario
@@ -67,7 +67,7 @@ public interface Agent
 		 *            - the name of the loader.
 		 * @param className
 		 *            - the fully qualified name of the class to instantiate when starting the platform. The class
-		 *            should implement {@link Agent}.
+		 *            should implement {@link TatamiAgent}.
 		 */
 		private StandardAgentLoaderType(String loaderName, String className)
 		{
@@ -80,7 +80,7 @@ public interface Agent
 		 * 
 		 * @param className
 		 *            - the fully qualified name of the class to instantiate when starting the platform. The class
-		 *            should implement {@link Agent}.
+		 *            should implement {@link TatamiAgent}.
 		 */
 		private StandardAgentLoaderType(String className)
 		{
@@ -111,7 +111,7 @@ public interface Agent
 	 */
 	static final String	NAME_ATTRIBUTE		= "name";
 	/**
-	 * The name of the attribute containing the class path of the {@link Agent} class, in the XML file.
+	 * The name of the attribute containing the class path of the {@link TatamiAgent} class, in the XML file.
 	 */
 	static final String	CLASSPATH_ATTRIBUTE	= "classpath";
 	/**

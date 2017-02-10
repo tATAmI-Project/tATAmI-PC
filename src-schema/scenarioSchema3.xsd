@@ -62,6 +62,7 @@
 									<sequence>
 										<element name="agent" maxOccurs="unbounded" minOccurs="0">
 											<complexType>
+												<attribute name="type" type="string" use="required" />
 												<sequence>
 													<element name="component" minOccurs="0" maxOccurs="unbounded">
 														<complexType>

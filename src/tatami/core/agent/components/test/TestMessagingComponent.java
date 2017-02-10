@@ -1,13 +1,13 @@
 package tatami.core.agent.components.test;
 
+import tatami.core.agent.agent_type.TatamiAgent;
 import tatami.core.agent.components.ComponentInterface;
 import tatami.core.agent.messages.AgentMessage;
 import tatami.core.agent.messages.Command;
-import tatami.simulation.Agent;
 
 public class TestMessagingComponent extends ComponentInterface {
     
-    public TestMessagingComponent(Agent parent){
+    public TestMessagingComponent(TatamiAgent parent){
         mParent = parent;
         log.trace("Test Messaging Component created successfully");
     }

@@ -124,23 +124,25 @@ public class WebSocketMessagingPlatform extends PlatformLoader
 	}
 	
 	@Override
-	public boolean start()
-	{
+	public boolean start(){
 		if(componentType == NONE){
 			return false;
 		}
-		if((componentType & CLIENT) == CLIENT){
-		    startClient();
-		}
+		
 
 		if((componentType & SERVER) == SERVER){
 		    startServer();
 		}
 		
+		if((componentType & CLIENT) == CLIENT){
+            startClient();
+        }
+		
 		return true;
 	}
 	
     private void startServer() {
+        log.info("Starting websocket server");
         WebSocketImpl.DEBUG = false;
         try {
             mServer = new AutobahnServer(mPort, new SpecificDraft());
@@ -153,7 +155,7 @@ public class WebSocketMessagingPlatform extends PlatformLoader
     }
 	
 	private void startClient(){
-	    
+	    log.info("Starting websocket client");
         Draft d = new Draft_17();
         String clientname = "tootallnate/websocket";
 

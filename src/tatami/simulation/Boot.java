@@ -54,19 +54,21 @@ public class Boot implements InputListener
 	 * @param args
 	 *            - the arguments received by the program.
 	 */
-	/*
-    public void build(SimulationManagerXMLBuilder builder) {
+	
+    public void initSimulation(SimulationManagerXMLBuilder builder) {
         log.trace("Booting World.");
-
+        
         simulation = new SimulationManager(builder);
-
+        
+/*
         if (!simulation.start()) {
 
         } else {
             log.error("No agent platforms loaded. Simulation will not start.");
         }
+        */
     }
-    */
+    
     
     public SimulationManagerXMLBuilder makeBuilder(String scenarioPath) {
         SimulationManagerXMLBuilder builder = null;
@@ -113,6 +115,8 @@ public class Boot implements InputListener
 		
 		SimulationManagerXMLBuilder builder = boot.makeBuilder(BootDefaultArguments.scenarioFileName);
 		
+		boot.initSimulation(builder);
+		
 		//boot.build(builder);
 	}
 	
@@ -121,6 +125,7 @@ public class Boot implements InputListener
         log.info("Receive input");
         if (portName.equals("GUI-LOAD_SCENARIO")) {
             SimulationManagerXMLBuilder builder = boot.makeBuilder(arguments.get(0).toString());
+            boot.initSimulation(builder);
         }
     }
 }
