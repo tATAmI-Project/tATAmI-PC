@@ -12,6 +12,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import tatami.HMI.src.PC.fx.MenuItemsController;
 import tatami.HMI.src.PC.fx.data.AgentDescription;
+import tatami.HMI.src.PC.fx.data.ArtefactDescription;
 import tatami.HMI.src.PC.fx.data.ContainerDescription;
 import tatami.HMI.src.PC.fx.data.PlatformDescription;
 import tatami.HMI.src.PC.fx.data.ProjectDescription;
@@ -24,6 +25,8 @@ public class TreeElementsFactory extends TreeTableCell<ITreeNode, String> {
     private static final ImageView CONTAINER_ICON = new ImageView(new File("res/icons/container-icon.png").toURI().toString());
     private static final ImageView ALL_CONTAINERS_ICON = new ImageView(new File("res/icons/all-containers-icon.png").toURI().toString());
     private static final ImageView AGENT_ICON = new ImageView(new File("res/icons/person-2x.png").toURI().toString());
+    private static final ImageView ALL_ARTEFACTS_ICON = new ImageView(new File("res/icons/all-artefacts-icon.png").toURI().toString());
+    private static final ImageView ARTEFACT_ICON = new ImageView(new File("res/icons/artefact-icon.png").toURI().toString());
     
     MenuItemsController mParent;
     
@@ -31,7 +34,7 @@ public class TreeElementsFactory extends TreeTableCell<ITreeNode, String> {
     
     private static HashMap<NodeType, ImageView> mIcons;
     
-    public enum NodeType{PROJECT_NODE, ALL_PLATFORMS_NODE, PLATFORM_NODE, CONTAINER_NODE, ALL_CONTAINERS_NODE, AGENT_NODE, EMPTY_NODE}
+    public enum NodeType{PROJECT_NODE, ALL_PLATFORMS_NODE, PLATFORM_NODE, CONTAINER_NODE, ALL_CONTAINERS_NODE, AGENT_NODE, EMPTY_NODE, ALL_ARTEFACTS_NODE, ARTEFACT_NODE}
     
     public TreeElementsFactory(MenuItemsController parent) {
         mParent = parent;
@@ -46,6 +49,8 @@ public class TreeElementsFactory extends TreeTableCell<ITreeNode, String> {
             mIcons.put(NodeType.CONTAINER_NODE, CONTAINER_ICON);
             mIcons.put(NodeType.ALL_CONTAINERS_NODE, ALL_CONTAINERS_ICON);
             mIcons.put(NodeType.AGENT_NODE, AGENT_ICON);
+            mIcons.put(NodeType.ALL_ARTEFACTS_NODE, ALL_ARTEFACTS_ICON);
+            mIcons.put(NodeType.ARTEFACT_NODE, ARTEFACT_ICON);
         }
     }
     
@@ -82,6 +87,12 @@ public class TreeElementsFactory extends TreeTableCell<ITreeNode, String> {
             return NodeType.ALL_CONTAINERS_NODE;
         if(node instanceof AgentDescription)
             return NodeType.AGENT_NODE;
+        if(node instanceof ArtefactDescription.AllArtefactDescription){
+            return NodeType.ALL_ARTEFACTS_NODE;
+        }
+        if(node instanceof ArtefactDescription){
+            return NodeType.ARTEFACT_NODE;
+        }
         
         return NodeType.EMPTY_NODE;
     }

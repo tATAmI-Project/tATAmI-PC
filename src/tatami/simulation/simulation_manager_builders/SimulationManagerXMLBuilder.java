@@ -364,6 +364,11 @@ public class SimulationManagerXMLBuilder extends ISimulationManagerBuilder{
             artefactCreationData.put("name", platformNode.getAttributeValue("name"));
             artefactCreationData.put("id", platformNode.getAttributeValue("id"));
             allArtefacts.put(artefactCreationData.getName(), ArtefactsFactory.getInst().newInst(artefactCreationData));
+            
+            Vector<Object> agentArgs = new Vector<Object>();
+            agentArgs.add(artefactCreationData.getName());
+            userInterface.doOutput("CORE-NEW-ARTEFACT", agentArgs);
+            
         }
     }
 }

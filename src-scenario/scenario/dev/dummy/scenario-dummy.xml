@@ -16,10 +16,10 @@
 	<scen:platform>
 		<scen:parameter name="name" value="websocket" />
 		<scen:parameter name="server" value="true" />
-		<scen:parameter name="client" value="true" />
-		<scen:parameter name="server ip" value="192.168.0.11" />
-		<scen:parameter name="server port" value="9008" />
-		<scen:parameter name="client port" value="9008" />
+		<scen:parameter name="client" value="false" />
+		<scen:parameter name="server ip" value="127.0.0.1" />
+		<scen:parameter name="server port" value="9009" />
+		<scen:parameter name="client port" value="9009" />
 	</scen:platform>
 	<scen:artefact name="user-input" id="1" />
 	<scen:initial>

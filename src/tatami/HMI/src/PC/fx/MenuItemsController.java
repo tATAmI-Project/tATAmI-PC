@@ -9,7 +9,6 @@ import java.util.Vector;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -29,6 +28,7 @@ import javafx.util.Callback;
 import tatami.HMI.src.PC.fx.Tree.ITreeNode;
 import tatami.HMI.src.PC.fx.Tree.TreeElementsFactory;
 import tatami.HMI.src.PC.fx.data.AgentDescription;
+import tatami.HMI.src.PC.fx.data.ArtefactDescription;
 import tatami.HMI.src.PC.fx.data.ContainerDescription;
 import tatami.HMI.src.PC.fx.data.PlatformDescription;
 import tatami.HMI.src.PC.fx.data.ProjectDetails;
@@ -53,6 +53,9 @@ public class MenuItemsController implements Initializable{
     @FXML
     private ImageView startSimulationTooblarIcon;
     
+    @FXML
+    private ImageView stopSimulationTooblarIcon;
+    
     ContextMenu platformDescriptionContextMenu;
     
     HashMap<String, EventHandler<ActionEvent> > eventHandlers = null;
@@ -70,6 +73,7 @@ public class MenuItemsController implements Initializable{
     @Override
     public void initialize(URL url, ResourceBundle resource) {
         startSimulationTooblarIcon.setImage(new Image(new File("res/icons/caret-right-2x.png").toURI().toString()));
+        stopSimulationTooblarIcon.setImage(new Image(new File("res/icons/circle-x-2x.png").toURI().toString()));
         platformDescriptionContextMenu = new ContextMenu();
         platformDescriptionContextMenu.addEventFilter(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
             @Override
@@ -119,6 +123,10 @@ public class MenuItemsController implements Initializable{
         Vector<Object> args = new Vector<Object>();
         mParent.doOutput("GUI-START-SIMULATION", args);
     }
+    @FXML
+    private void onStopSimulationTooblarButton(ActionEvent event){
+        
+    }
     
     public void newProjectDescription(String path, String name){
         MenuItemsController controller = this;
@@ -151,6 +159,9 @@ public class MenuItemsController implements Initializable{
                 
                 TreeItem<ITreeNode> allContainersNode = new TreeItem<>(new ContainerDescription.AllContainersDescription());
                 projectNode.getChildren().add(allContainersNode);
+                
+                TreeItem<ITreeNode> allArtefactsNode = new TreeItem<ITreeNode>(new ArtefactDescription.AllArtefactDescription());
+                projectNode.getChildren().add(allArtefactsNode);
             }
         });
     }
@@ -193,6 +204,17 @@ public class MenuItemsController implements Initializable{
                         containers.getChildren().get(i).getChildren().add(containerDescriptionItem);
                     }
                 }
+            }
+        });
+    }
+    
+    public void newArtefactDescription(String artefactName) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                TreeItem<ITreeNode> artefacts = mainTreeTable.getRoot().getChildren().get(2);
+                TreeItem artefactDescriptionItem = new TreeItem<>(new ArtefactDescription(artefactName));
+                artefacts.getChildren().add(artefactDescriptionItem);
             }
         });
     }

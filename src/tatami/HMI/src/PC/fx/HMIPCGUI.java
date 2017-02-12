@@ -77,6 +77,9 @@ public class HMIPCGUI extends Application implements AgentActiveIO {
         if(portName.equals("CORE-NEW_PROJECT")){
             mController.newProjectDescription(arguments.elementAt(0).toString(), arguments.elementAt(1).toString());
         }
+        if(portName.equals("CORE-NEW-ARTEFACT")){
+            mController.newArtefactDescription(arguments.elementAt(0).toString());
+        }
     }
 
     @Override

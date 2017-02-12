@@ -134,6 +134,7 @@ public class WebSocketMessagingPlatform extends PlatformLoader
 		    startServer();
 		}
 		
+		
 		if((componentType & CLIENT) == CLIENT){
             startClient();
         }
@@ -172,6 +173,7 @@ public class WebSocketMessagingPlatform extends PlatformLoader
         boolean serverStarted = false;
         while (!serverStarted) {
             try {
+                
                 mClient.send("::handshake::");
 
                 log.info("Communication client started");
