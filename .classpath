@@ -9,7 +9,11 @@
 	<classpathentry kind="lib" path="libs/Graphs.jar"/>
 	<classpathentry kind="lib" path="libs/JADE-doc-4.1.zip"/>
 	<classpathentry kind="lib" path="libs/JADE-src-4.1.zip"/>
-	<classpathentry kind="lib" path="libs/jade.jar"/>
+	<classpathentry kind="lib" path="libs/jade.jar" sourcepath="libs/JADE-src-4.1.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/tATAmI-PC/libs/JADE-doc-4.1.zip!/jade/doc/api"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="libs/java_websocket.jar"/>
 	<classpathentry kind="lib" path="libs/log4j-1.2.16.jar"/>
 	<classpathentry kind="lib" path="libs/Logging.jar"/>
